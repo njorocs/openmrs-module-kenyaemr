@@ -21,15 +21,15 @@ import java.util.Date;
  * Covid cohort definition
  */
 @Caching(strategy = ConfigurationPropertyCachingStrategy.class)
-@Localized("reporting.PatientsEnrolledOnCovidCohortDefinition")
-public class PatientsEnrolledOnCovidCohortDefinition extends BaseCohortDefinition {
+@Localized("reporting.PatientsEverDischargedFromQuarantineCohortDefinition")
+public class PatientsEverDischargedFromQuarantineCohortDefinition extends BaseCohortDefinition {
     @ConfigurationProperty
     private Date startDate;
 
     @ConfigurationProperty
     private Date endDate;
 
-    public PatientsEnrolledOnCovidCohortDefinition() {
+    public PatientsEverDischargedFromQuarantineCohortDefinition() {
     }
 
     public Date getStartDate() {

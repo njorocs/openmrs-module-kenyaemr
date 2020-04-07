@@ -16,18 +16,12 @@ import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyacore.report.builder.AbstractHybridReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
-import org.openmrs.module.kenyacore.report.data.patient.definition.CalculationDataDefinition;
-import org.openmrs.module.kenyaemr.calculation.library.covid.PersonAddressCountyCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.covid.PersonAddressSubCountyCalculation;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculationResultConverter;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsEnrolledOnCovidCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsCurrentlyEnrolledOnCovidCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.IdentifierConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.covid.*;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
-import org.openmrs.module.reporting.common.SortCriteria;
 import org.openmrs.module.reporting.data.DataDefinition;
 import org.openmrs.module.reporting.data.converter.BirthdateConverter;
 import org.openmrs.module.reporting.data.converter.DataConverter;
@@ -47,8 +41,8 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-@Builds({"kenyaemr.covid.report.covidLineList"})
-public class PatientsEnrolledOnCovidReportBuilder extends AbstractHybridReportBuilder {
+@Builds({"kenyaemr.covid.report.currentlyEnrolledOnCovidLineList"})
+public class PatientsCurrentlyEnrolledOnCovidReportBuilder extends AbstractHybridReportBuilder {
     public static final String DATE_FORMAT = "dd/MM/yyyy";
 
     @Override
@@ -57,7 +51,7 @@ public class PatientsEnrolledOnCovidReportBuilder extends AbstractHybridReportBu
     }
 
     protected Mapped<CohortDefinition> covidPatientsCohort() {
-        CohortDefinition cd = new PatientsEnrolledOnCovidCohortDefinition();
+        CohortDefinition cd = new PatientsCurrentlyEnrolledOnCovidCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.setName("CovidPatients");
@@ -135,7 +129,7 @@ public class PatientsEnrolledOnCovidReportBuilder extends AbstractHybridReportBu
         dsd.addColumn("Hospitalized",new HospitalizedDataDefinition(), "");
         dsd.addColumn("Date of admission",new DateOfAdmissionDataDefinition(), "");
         dsd.addColumn("Sample Collected",new SampleCollectedDataDefinition(), "");
-        dsd.addColumn("Date of sample collected",new DateSampleCollectedDataDefinition(), "");
+        dsd.addColumn("Date of sample collection",new DateSampleCollectedDataDefinition(), "");
         dsd.addColumn("Lab result",new LabResultDataDefinition(), "");
         dsd.addColumn("Lab results confirmation date",new LabResultConfirmationDateDataDefinition(), "");
         dsd.addColumn("Outcome",new OutcomeDataDefinition(), "");

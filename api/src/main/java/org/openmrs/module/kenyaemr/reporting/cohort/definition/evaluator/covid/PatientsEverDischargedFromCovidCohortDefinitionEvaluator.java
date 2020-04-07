@@ -13,13 +13,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.OTZRegisterCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsEnrolledOnCovidCohortDefinition;
-import org.openmrs.module.kenyaemr.util.EmrUtils;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsEverDischargedFromCovidCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
-import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
@@ -31,10 +28,10 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Evaluator for Covid
+ * Evaluator for Ever enrolled on Covid-19
  */
-@Handler(supports = {PatientsEnrolledOnCovidCohortDefinition.class})
-public class PatientsEnrolledOnCovidCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
+@Handler(supports = {PatientsEverDischargedFromCovidCohortDefinition.class})
+public class PatientsEverDischargedFromCovidCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
 
     private final Log log = LogFactory.getLog(this.getClass());
     @Autowired
@@ -43,30 +40,19 @@ public class PatientsEnrolledOnCovidCohortDefinitionEvaluator implements CohortD
     @Override
     public EvaluatedCohort evaluate(CohortDefinition cohortDefinition, EvaluationContext context) throws EvaluationException {
 
-        PatientsEnrolledOnCovidCohortDefinition definition = (PatientsEnrolledOnCovidCohortDefinition) cohortDefinition;
+        PatientsEverDischargedFromCovidCohortDefinition definition = (PatientsEverDischargedFromCovidCohortDefinition) cohortDefinition;
 
         if (definition == null)
             return null;
 
         Cohort newCohort = new Cohort();
 
-        context = ObjectUtil.nvl(context, new EvaluationContext());
-
-        String qry = "";
         SqlQueryBuilder builder = new SqlQueryBuilder();
 
-        qry = "Select e.patient_id from kenyaemr_etl.etl_covid_19_enrolment e\n" +
-                "group by e.patient_id having date(max(e.visit_date)) between date(:startDate) and date(:endDate);";
+        String qry = "select e.patient_id from kenyaemr_etl.etl_covid_19_enrolment e inner join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+                "    where d.program_name ='COVID-19 Outcome'\n" +
+                "and d.discontinuation_reason !=160034;";
 
-        /*if (EmrUtils.getUserCounty() != null) {
-            qry = "Select e.patient_id from kenyaemr_etl.etl_covid_19_enrolment e where e.county=:userCounty\n" +
-                    "group by e.patient_id having date(max(e.visit_date)) between date(:startDate) and date(:endDate);";
-            builder.addParameter("userCounty", EmrUtils.getUserCounty().trim());
-
-        } else {
-            qry = "Select e.patient_id from kenyaemr_etl.etl_covid_19_enrolment e\n" +
-                    "group by e.patient_id having date(max(e.visit_date)) between date(:startDate) and date(:endDate);";
-        }*/
         builder.append(qry);
         Date startDate = (Date) context.getParameterValue("startDate");
         Date endDate = (Date) context.getParameterValue("endDate");

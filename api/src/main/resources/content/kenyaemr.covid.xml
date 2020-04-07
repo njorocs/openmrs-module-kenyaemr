@@ -28,7 +28,10 @@
 	
 		<property name="reports">
 			<set>
-				<ref bean="kenyaemr.covid.report.covidLineList" />
+				<ref bean="kenyaemr.covid.report.everEnrolledOnCovidLineList" />
+				<ref bean="kenyaemr.covid.report.currentlyEnrolledOnCovidLineList" />
+				<ref bean="kenyaemr.covid.report.everDischargedFromCovidLineList" />
+				<ref bean="kenyaemr.covid.report.everDischargedFromQuarantineLineList" />
 			</set>
 		</property>
 		<property name="fragments">
@@ -148,20 +151,44 @@
 		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
 	</bean>
 
+	<bean id="kenyaemr.covid.report.currentlyEnrolledOnCovidLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="0ed7fde5-0517-436c-b23a-5ee24fee87d1" />
+		<property name="name" value="Current Covid-19 Line List" />
+		<property name="description" value="Currently Enrolled on Covid-19 Line List" />
+		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+		<property name="template" value="kenyaemr:covid/covid_line_list.xls" />
+		<property name="repeatingSection" value="sheet:1,row:2,dataset:CovidLinelist" />
+	</bean>
+
+	<bean id="kenyaemr.covid.report.everEnrolledOnCovidLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="df9426fc-acf0-4e21-93fb-9cb1a875997b" />
+		<property name="name" value="Ever enrolled on Covid-19 Line List" />
+		<property name="description" value="Ever enrolled on Covid-19 Line List" />
+		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+		<property name="template" value="kenyaemr:covid/covid_line_list.xls" />
+		<property name="repeatingSection" value="sheet:1,row:2,dataset:CovidLinelist" />
+	</bean>
+
+	<bean id="kenyaemr.covid.report.everDischargedFromCovidLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="e30c7156-1a63-45f9-8420-88fcd63e772e" />
+		<property name="name" value="Ever Discharged from Covid-19 Line List" />
+		<property name="description" value="Ever Discharged from Covid-19 Line List" />
+		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+	</bean>
+	<bean id="kenyaemr.covid.report.everDischargedFromQuarantineLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="57ee3e26-2192-4fa5-8bbb-502f8748e74d" />
+		<property name="name" value="Ever Discharged from Quarantine Line List" />
+		<property name="description" value="Ever Discharged from Quarantine Line List" />
+		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+		<property name="template" value="kenyaemr:covid/covid_line_list.xls" />
+		<property name="repeatingSection" value="sheet:1,row:2,dataset:CovidLinelist" />
+	</bean>
+
 	<bean id="kenyaemr.covid.report.discontinuedOnCovid" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
 		<property name="targetUuid" value="1b2555e4-a608-4dc2-ac43-6ccbaa2849ee" />
 		<property name="name" value="Discharged Covid Patients" />
 		<property name="description" value="Discontinued Patients" />
 		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
-	</bean>
-
-	<bean id="kenyaemr.covid.report.covidLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
-		<property name="targetUuid" value="a3625ff5-579d-4e13-8ebb-5d08c7cc1dd5" />
-		<property name="name" value="Covid-19 Line List" />
-		<property name="description" value="Covid-19 Line List" />
-		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
-		<property name="template" value="kenyaemr:covid/covid_line_list.xls" />
-		<property name="repeatingSection" value="sheet:1,row:2,dataset:CovidLinelist" />
 	</bean>
 
 	<bean id="kenyaemr.covid.report.quarantineLineList" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
