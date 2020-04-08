@@ -18,6 +18,7 @@ import org.openmrs.module.kenyacore.report.builder.AbstractHybridReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsCurrentlyEnrolledOnCovidCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsEverDischargedFromQuarantineCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.IdentifierConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.covid.*;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
@@ -51,7 +52,7 @@ public class PatientsEverDischargedFromQuarantineReportBuilder extends AbstractH
     }
 
     protected Mapped<CohortDefinition> covidPatientsCohort() {
-        CohortDefinition cd = new PatientsCurrentlyEnrolledOnCovidCohortDefinition();
+        CohortDefinition cd = new PatientsEverDischargedFromQuarantineCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.setName("EverDischargedQuarantinePatients");

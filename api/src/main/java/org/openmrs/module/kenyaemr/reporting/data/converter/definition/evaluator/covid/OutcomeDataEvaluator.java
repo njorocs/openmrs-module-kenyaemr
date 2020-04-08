@@ -36,7 +36,7 @@ public class OutcomeDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select e.patient_id, mid(max(concat(d.visit_date,d.discontinuation_reason)),11) as outcome from kenyaemr_etl.etl_covid_19_enrolment e left join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
-                "where d.program_name='COVID' group by e.patient_id;";
+                "where d.program_name='COVID-19 Outcome' group by e.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");

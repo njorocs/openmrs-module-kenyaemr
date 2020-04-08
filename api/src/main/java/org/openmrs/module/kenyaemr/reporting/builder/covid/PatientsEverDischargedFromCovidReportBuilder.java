@@ -17,7 +17,7 @@ import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyacore.report.builder.AbstractHybridReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsCurrentlyEnrolledOnCovidCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.covid.PatientsEverDischargedFromCovidCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.IdentifierConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.covid.*;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
@@ -51,7 +51,7 @@ public class PatientsEverDischargedFromCovidReportBuilder extends AbstractHybrid
     }
 
     protected Mapped<CohortDefinition> covidPatientsCohort() {
-        CohortDefinition cd = new PatientsCurrentlyEnrolledOnCovidCohortDefinition();
+        CohortDefinition cd = new PatientsEverDischargedFromCovidCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.setName("EverDischargedCovidPatients");
@@ -132,8 +132,8 @@ public class PatientsEverDischargedFromCovidReportBuilder extends AbstractHybrid
         dsd.addColumn("Date of sample collected",new DateSampleCollectedDataDefinition(), "");
         dsd.addColumn("Lab result",new LabResultDataDefinition(), "");
         dsd.addColumn("Lab results confirmation date",new LabResultConfirmationDateDataDefinition(), "");
-        dsd.addColumn("Outcome",new OutcomeDataDefinition(), "");
-        dsd.addColumn("Outcome date",new OutcomeDateDataDefinition(), "");
+        dsd.addColumn("Outcome",new OutcomeForQuarantineDataDefinition(), "");
+        dsd.addColumn("Outcome date",new OutcomeDateForQuarantineDataDefinition(), "");
 
         return dsd;
     }
