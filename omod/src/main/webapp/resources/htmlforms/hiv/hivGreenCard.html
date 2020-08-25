@@ -82,6 +82,7 @@ Green Card follow-up visit form
 //Global variables
         var bmi = null;
         var SELF = 978;
+        var REFILL_DOCUMENTATION = 159802;
         var TS = 161642;
         var GREENCARD_VELOCITY = "<lookup expression="kenyaemr.GreenCardVelocityCalculation()" />";
         var PATIENT_ON_IPT = GREENCARD_VELOCITY.split(",")[0].split(":")[1];
@@ -164,6 +165,7 @@ Green Card follow-up visit form
             jq("#tb-screening-result").hide();
             //Sexual and reproductive setion
             // jq('#fp-details').show();
+            jq(".refill-facility").hide();
             jq('#lmp-details').hide();
             var age = parseInt('<lookup expression="patient.age"/>');
             if (age &lt; 11) {
@@ -980,6 +982,9 @@ function onPersonPresentChange() {
         knownAllergiesSelected();
         chronicIllnessesSelected();
         adverseReactionSelected();
+        if(getValue('person-present.value') == REFILL_DOCUMENTATION){
+            jq('.refill-facility').show();
+        }
         jq(".on-art").hide();
         jq('#dlgAdherenceScreening').hide();
         //jq("#tbl-phdp").hide();
@@ -1026,7 +1031,7 @@ function onPersonPresentChange() {
 function onVisitScheduledChange() {
     var personPresent = getValue('person-present.value');
     var visitScheduled = getValue('visit-scheduled.value');
-    if (visitScheduled != null &amp;&amp; personPresent == TS) {
+    if (visitScheduled != null &amp;&amp; (personPresent == TS || personPresent == REFILL_DOCUMENTATION)) {
         jq('.patient-details :input').prop('disabled', true);
         jq('#greencard').smartWizard('goToStep', 4);
         jq('#greencard').smartWizard('enableFinish', true);
@@ -2171,6 +2176,7 @@ clearHiddenSections = function(parentObj) {
     var personPresent =getValue('person-present.value');
     var tca_date = getValue('returnVisitDate.value');
     var tca_reason = getValue('returnVisitReason.value');
+    var refillFacility = getValue('refill-facility-name.value');
     var encounterDate = getValue('encounter-date.value');
     var fastTrackCareError = getValue('fast-track.value');
     var standardCareError = getValue('standard.value');
@@ -2270,6 +2276,12 @@ clearHiddenSections = function(parentObj) {
     }else{
         getField('returnVisitReason.error').html('Please specify reason for return visit.').hide();
     }
+        if (refillFacility == "" &amp;&amp; personPresent == REFILL_DOCUMENTATION) {
+            getField('refill-facility-name.error').html('Please specify refill facility visited.').show();
+            return false;
+        }else{
+            getField('refill-facility-name.error').html('Please specify refill facility visited.').hide();
+        }
     return true;
 });
     </script>
@@ -2378,6 +2390,7 @@ clearHiddenSections = function(parentObj) {
                             //Stability assessment
                             var stabilityStatus = getValue('stability.value');
                             var tca_reason = getField('returnVisitReason.value').val();
+
                             if (stabilityStatus == "false" || stabilityStatus == 1066){
                                 jq("#tbl-standard").show();
                                 jq("#tbl-fast-track").hide();
@@ -2543,8 +2556,8 @@ clearHiddenSections = function(parentObj) {
                                 <obs
                                         id="person-present"
                                         conceptId="161643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                                        answerConceptIds="978AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,161642AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                                        answerLabels="Self (SF),Treatment supporter (TS),Other (give name)"
+                                        answerConceptIds="978AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,161642AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159802AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                        answerLabels="Self (SF),Treatment supporter (TS),Refill visit documentation,Other (give name)"
                                         style="radio"
                                         answerSeparator="&lt;br /&gt;"
                                 />
@@ -3392,7 +3405,7 @@ clearHiddenSections = function(parentObj) {
                             <tr>
                                 <td style="text-align: left">ANC/PNC Profile</td>
                                 <td>
-                                    <obs id="anc-profile" conceptId="159423AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabels="Yes,No" style="radio" />
+                                    <obs id="anc-profile" conceptId="1719AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabels="Yes,No" style="radio" />
                                 </td>
                             </tr>
                             <tr>
@@ -4060,6 +4073,17 @@ clearHiddenSections = function(parentObj) {
                                 </table>
                             </td>
                        </tr>
+                    </table>
+                </fieldset>
+                <fieldset class="refill-facility">
+                    <legend>Refill facility</legend>
+                    <table>
+                        <tr>
+                            <td>Refill facility visited:</td>
+                            <td><obs conceptId="162724AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="refill-facility-name"/>
+                           <span style="color:red;"><strong>*</strong></span></td>
+                          <td>&#160;&#160;&#160;&#160;</td>
+                        </tr><tr></tr>
                     </table>
                 </fieldset>
                 <fieldset class="tca-part">
