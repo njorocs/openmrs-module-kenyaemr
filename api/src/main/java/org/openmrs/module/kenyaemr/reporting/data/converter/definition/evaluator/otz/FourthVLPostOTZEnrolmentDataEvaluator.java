@@ -37,7 +37,7 @@ public class FourthVLPostOTZEnrolmentDataEvaluator implements PersonDataEvaluato
 
         String qry = "select f.patient_id, f.Vl_post_enr from\n" +
                 "(select n.patient_id, concat_ws('\\r\\n',n.test_result,n.visit_date)as Vl_post_enr,n.visit_date from kenyaemr_etl.etl_otz_enrollment e  join\n" +
-                "                                                                                         (select t.patient_id,t.test_result,t.visit_date\n" +
+                "                                                                                         (select t.patient_id,if(mid(max(concat(t.visit_date,t.lab_test)),11) = 856, mid(max(concat(t.visit_date,t.test_result)),11),if((mid(max(concat(t.visit_date,t.lab_test)),11)=1305 and mid(max(concat(t.visit_date,t.test_result)),11) = 1302), \"LDL\",\"\")) as test_result,t.visit_date\n" +
                 "                                                                                          from (select t.*,\n" +
                 "                                                                                                       (@rn := if(@v = patient_id, @rn + 1,\n" +
                 "                                                                                                                  if(@v := patient_id, 1, 1)\n" +
