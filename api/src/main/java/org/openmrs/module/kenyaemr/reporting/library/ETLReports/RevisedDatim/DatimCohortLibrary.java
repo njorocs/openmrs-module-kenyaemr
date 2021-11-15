@@ -4363,6 +4363,28 @@ public CohortDefinition txMLLTFUonDrugsOver3Months() {
         return cd;
 
     }
+
+    /**
+     * Number of KPs who were newly enrolled on oral antiretroviral pre-exposure prophylaxis (PrEP) to prevent HIV infection in the reporting period
+     * PrEP_NEWLY_ENROLLED indicator
+     * @return
+     */
+    public CohortDefinition newlyEnrolledInPrEPKP(KPTypeDataDefinition kpType) {
+
+        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "        left join(select d.patient_id,max(date(d.visit_date)) last_disc_date from kenyaemr_etl.etl_prep_discontinuation d ) d on d.patient_id = e.patient_id\n" +
+                "where kp_type = "+kpType.getKpTypeConcept()+" group by e.patient_id\n" +
+                "        having max(date(e.visit_date)) between date_sub(:endDate , interval 3 MONTH) and :endDate;";
+
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        cd.setName("PrEP_NEWLY_ENROLLED_KP");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Newly enrolled on PrEP");
+        return cd;
+
+    }
     /**
      * Newly eonrolled to prep with a recent HIV Positive results within 3 months into enrolment
      * PrEP_NEWLY_ENROLLED indicator

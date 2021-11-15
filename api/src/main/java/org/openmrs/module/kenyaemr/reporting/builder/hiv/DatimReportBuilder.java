@@ -42,6 +42,8 @@ public class DatimReportBuilder extends AbstractReportBuilder {
     static final int MSM_CONCEPT = 160578;
     static final int PWID_CONCEPT = 105;
     static final int TG_CONCEPT = 165100;
+    static final int PRISONERS_CLOSED_SETTINGS_CONCEPT = 162277;
+    static final int MSW_CONCEPT = 165084;
 
     @Autowired
     private CommonDimensionLibrary commonDimensions;
@@ -212,6 +214,13 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //Prevention Indicators
         // Number of people newly enrolled on Prep
         EmrReportingUtils.addRow(cohortDsd, "PrEP_NEWLY_ENROLLED", "Number of people newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"));
+
+        // Number of KPs newly enrolled on Prep
+        cohortDsd.addColumn( "PrEP_NEWLY_ENROLLED_PWID", "Number of PWIDs newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPKP(mapKPType("PWID", PWID_CONCEPT)), indParams),"");
+        cohortDsd.addColumn( "PrEP_NEWLY_ENROLLED_MSM", "Number of MSMs newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPKP(mapKPType("MSM", MSM_CONCEPT)), indParams), "");
+        cohortDsd.addColumn("PrEP_NEWLY_ENROLLED_TG", "Number of Transgenders newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPKP(mapKPType("TG", TG_CONCEPT)), indParams),"");
+        cohortDsd.addColumn("PrEP_NEWLY_ENROLLED_FSW", "Number of FSWs newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPKP(mapKPType("FSW", FSW_CONCEPT)), indParams),"");
+        cohortDsd.addColumn("PrEP_NEWLY_ENROLLED_PRISONS_CLOSED_SETTINGS", "Number of prisoners and people in closed settings newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPKP(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
 
         //Newly eonrolled to prep with a recent HIV positive results within 3 months into enrolment
         cohortDsd.addColumn("PrEP_NEWLY_ENROLLED_HIVPOS", "Newly eonrolled to prep with a recent HIV positive results within 3 months into enrolment", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPHIVPos(), indParams), "");
@@ -700,10 +709,7 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //Tested Positive Other
         EmrReportingUtils.addRow(cohortDsd, "HTS_TST_Other_Positive", "Tested Positive Other", ReportUtils.map(datimIndicators.testedPositiveOther(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
-        // Number of people newly enrolled on Prep
-        EmrReportingUtils.addRow(cohortDsd, "PrEP_NEWLY_ENROLLED", "Number of people newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        // Number of people currently enrolled on Prep
+            // Number of people currently enrolled on Prep
         EmrReportingUtils.addRow(cohortDsd, "PrEP_CURR_ENROLLED", "Number of people currently enrolled on Prep", ReportUtils.map(datimIndicators.currentlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
         // Proportion of ART patients who started on a standard course of TB Preventive Treatment (TPT) in the previous reporting period who completed therapy
