@@ -43,7 +43,6 @@ public class DatimReportBuilder extends AbstractReportBuilder {
     static final int PWID_CONCEPT = 105;
     static final int TG_CONCEPT = 165100;
     static final int PRISONERS_CLOSED_SETTINGS_CONCEPT = 162277;
-    static final int MSW_CONCEPT = 165084;
 
     @Autowired
     private CommonDimensionLibrary commonDimensions;
@@ -212,6 +211,35 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         String endDateParams = "endDate=${endDate}";
 
         //Prevention Indicators
+        //PrEP_CT
+        EmrReportingUtils.addRow(cohortDsd, "PrEP_CT", "People who returned for PrEP follow-up or re-initiation", ReportUtils.map(datimIndicators.prepCT(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"));
+
+        //Returned for PrEP and tested HIV Positive
+        cohortDsd.addColumn("PrEP_CT_HIV_POS", "Returned for PrEP and tested HIV positive", ReportUtils.map(datimIndicators.prepCTByHIVStatus("\"Positive\""), indParams), "");
+
+        //Returned for PrEP and tested HIV Negative
+        cohortDsd.addColumn("PrEP_CT_HIV_NEG", "Returned for PrEP and tested HIV Negative", ReportUtils.map(datimIndicators.prepCTByHIVStatus("\"Negative\""), indParams), "");
+
+        //Returned for PrEP and have incloncusive/unknown HIV test result
+        cohortDsd.addColumn("PrEP_CT_HIV_OTHER", "Returned for PrEP with unknown test result", ReportUtils.map(datimIndicators.prepCTByHIVStatus("\"Inconclusive\""), indParams), "");
+
+        //PWID KPs who Returned for PrEP
+        cohortDsd.addColumn("PrEP_CT_PWID", "PWID KPs who Returned for PrEP", ReportUtils.map(datimIndicators.prepCTKP(mapKPType("PWID", PWID_CONCEPT)), indParams), "");
+        //MSM KPs who Returned for PrEP
+        cohortDsd.addColumn("PrEP_CT_MSM", "MSM KPs who Returned for PrEP", ReportUtils.map(datimIndicators.prepCTKP(mapKPType("MSM", MSM_CONCEPT)), indParams), "");
+        //Transgender KPs who Returned for PrEP
+        cohortDsd.addColumn("PrEP_CT_TG", "TG KPs who Returned for PrEP", ReportUtils.map(datimIndicators.prepCTKP(mapKPType("TG", TG_CONCEPT)), indParams), "");
+        //FSW KPs who Returned for PrEP
+        cohortDsd.addColumn("PrEP_CT_FSW", "FSW KPs who Returned for PrEP", ReportUtils.map(datimIndicators.prepCTKP(mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+        //FSW KPs who Returned for PrEP
+        cohortDsd.addColumn("PrEP_CT_PRISONS_CLOSED_SETTINGS", "Prisoners and closed settings KPs who Returned for PrEP", ReportUtils.map(datimIndicators.prepCTKP(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
+
+        //Returned for PrEP and pregnant
+        cohortDsd.addColumn("PrEP_CT_PREG", "Returned for PrEP and pregnant", ReportUtils.map(datimIndicators.prepCTPregnant(), indParams), "");
+
+        //Returned for PrEP and breastfeeding
+        cohortDsd.addColumn("PrEP_CT_BF", "Returned for PrEP while breastfeeding", ReportUtils.map(datimIndicators.prepCTBreastfeeding(), indParams), "");
+
         // Number of people newly enrolled on Prep
         EmrReportingUtils.addRow(cohortDsd, "PrEP_NEWLY_ENROLLED", "Number of people newly enrolled on Prep", ReportUtils.map(datimIndicators.newlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"));
 
@@ -441,6 +469,21 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //Newly Started ART While BreastFeeding
         cohortDsd.addColumn("TX_New_BF", "Newly Started ART While Breastfeeding", ReportUtils.map(datimIndicators.newlyStartedARTWhileBF(), indParams), "");
 
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - PWID
+        cohortDsd.addColumn("TX_NEW_PWID", "PWID with HIV new on ART", ReportUtils.map(datimIndicators.kpNewlyStartedART(mapKPType("PWID", PWID_CONCEPT)), indParams), "");
+
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - MSM
+        cohortDsd.addColumn("TX_NEW_MSM", "MSM with HIV new on ART", ReportUtils.map(datimIndicators.kpNewlyStartedART(mapKPType("MSM", MSM_CONCEPT)), indParams), "");
+
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - TG
+        cohortDsd.addColumn("TX_NEW_TG", "Transgenders with HIV new on ART", ReportUtils.map(datimIndicators.kpNewlyStartedART(mapKPType("TG", TG_CONCEPT)), indParams), "");
+
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - FSW
+        cohortDsd.addColumn("TX_NEW_FSW", "FSW with HIV new on ART", ReportUtils.map(datimIndicators.kpNewlyStartedART(mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - TX_NEW_PRISONS_CLOSED_SETTINGS
+        cohortDsd.addColumn("TX_NEW_PRISONS_CLOSED_SETTINGS", "Prisoners and Closed settings with HIV new on ART", ReportUtils.map(datimIndicators.kpNewlyStartedART(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
+
         //TX_CURR
 
         //Number of Adults and Children with HIV infection receiving ART By Age/Sex Disagreggation
@@ -452,38 +495,30 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //Number of Breastfeeding mothers with HIV infection receiving antiretroviral therapy (ART)
         cohortDsd.addColumn("TX_CURR_BF", "Breast Feeding mothers with HIV receiving ART", ReportUtils.map(datimIndicators.bfMothersCurrentlyOnART(), indParams), "");
 
-        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - FSW
-        cohortDsd.addColumn("TX_CURR_FSW", "FSW with HIV receiving ART", ReportUtils.map(datimIndicators.fswCurrentlyOnART(mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - PWID
+        cohortDsd.addColumn("TX_CURR_PWID", "PWID with HIV receiving ART", ReportUtils.map(datimIndicators.kpCurrentlyOnART(mapKPType("PWID", PWID_CONCEPT)), indParams), "");
 
         //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - MSM
-        cohortDsd.addColumn("TX_CURR_MSM", "MSM with HIV receiving ART", ReportUtils.map(datimIndicators.msmCurrentlyOnART(mapKPType("MSM", MSM_CONCEPT)), indParams), "");
+        cohortDsd.addColumn("TX_CURR_MSM", "MSM with HIV receiving ART", ReportUtils.map(datimIndicators.kpCurrentlyOnART(mapKPType("MSM", MSM_CONCEPT)), indParams), "");
 
-        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - PWID
-        cohortDsd.addColumn("TX_CURR_PWID", "PWID with HIV receiving ART", ReportUtils.map(datimIndicators.pwidCurrentlyOnART(mapKPType("PWID", PWID_CONCEPT)), indParams), "");
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - TG
+        cohortDsd.addColumn("TX_CURR_TG", "Transgenders with HIV receiving ART", ReportUtils.map(datimIndicators.kpCurrentlyOnART(mapKPType("TG", TG_CONCEPT)), indParams), "");
 
-        //Number of Adults with HIV infection receiving ART By Number of Months drugs dispensed Disagreggation
-        cohortDsd.addColumn("TX_CURR_BF", "Breast Feeding mothers with HIV receiving ART", ReportUtils.map(datimIndicators.bfMothersCurrentlyOnART(), indParams), "");
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - FSW
+        cohortDsd.addColumn("TX_CURR_FSW", "FSW with HIV receiving ART", ReportUtils.map(datimIndicators.kpCurrentlyOnART(mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+
+        //Number of Adults with HIV infection receiving ART By KP Type Disagreggation - TX_CURR_PRISONS_CLOSED_SETTINGS
+        cohortDsd.addColumn("TX_CURR_PRISONS_CLOSED_SETTINGS", "Prisoners and Closed settings with HIV receiving ART", ReportUtils.map(datimIndicators.kpCurrentlyOnART(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
 
         //One month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_ONE_MONTH_DRUGS", "One month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTOneMonthDrugsDispensed(durationMapper("1 Month", "<= 30")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_MMD_BELOW_3_MONTHS", "Less than 3 months drugs", ReportUtils.map(datimIndicators.currentlyOnARTMMD(durationMapper("Under 3 Months", "< 3")), indParams), datimTXTBOnART, Arrays.asList("01", "02", "03", "04", "05"));
 
         //two month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_TWO_MONTHS_DRUGS", "Two month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTTwoMonthsDrugsDispensed(durationMapper("2 Month", "between 31 and 60")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_MMD_3TO5_MONTHS", "3-5 months drugs", ReportUtils.map(datimIndicators.currentlyOnARTMMD(durationMapper("3-5 Months", "between 3 and 5")), indParams), datimTXTBOnART, Arrays.asList("01", "02", "03", "04", "05"));
 
         //three month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_THREE_MONTHS_DRUGS", "Three month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTThreeMonthsDrugsDispensed(durationMapper("3 Month", "between 61 and 90")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_MMD_6+_MONTHS", "Over 6 months drugs", ReportUtils.map(datimIndicators.currentlyOnARTMMD(durationMapper("6+ Months", ">= 6")), indParams), datimTXTBOnART, Arrays.asList("01", "02", "03", "04", "05"));
 
-        //four month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_FOUR_MONTHS_DRUGS", "Four month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTFourMonthsDrugsDispensed(durationMapper("4 Month", "between 91 and 120")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        //five month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_FIVE_MONTHS_DRUGS", "Five month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTFiveMonthsDrugsDispensed(durationMapper("5 Month", "between 121 and 150")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        //six month before next appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_SIX_MONTHS_DRUGS", "Six month before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTSixMonthsDrugsDispensed(durationMapper("6 Month", "between 151 and 180")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        //Over 6 months appointment
-        EmrReportingUtils.addRow(cohortDsd, "TX_CURR_OVER_SIX_MONTHS_DRUGS", "Over Six months before next appointment", ReportUtils.map(datimIndicators.currentlyOnARTOverSixMonthsDrugsDispensed(durationMapper("6 Month", "> 180")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 //PMTCT_ART
 
         //Mothers new on ART during current pregnancy
@@ -554,40 +589,7 @@ public class DatimReportBuilder extends AbstractReportBuilder {
 
         //90-90-90 Viral Suppression
         //TX_PVLS Number of patients on ART with Routine VL results within the past 12 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_DENOMINATOR_ROUTINE", "On ART with current VL results", ReportUtils.map(datimIndicators.onARTAndVLLast12MonthsbyAgeSex("(\"ROUTINE\")"), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        //TX_PVLS Number of patients on ART with Targeted VL results in the past 12 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_DENOMINATOR_TARGETED", "On ART with current VL results", ReportUtils.map(datimIndicators.onARTAndVLLast12MonthsbyAgeSex("(\"STAT\")"), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
-        //TX_PVLS Number of Pregnant or breastfeeding patients on ART with routine VL results within the past 12 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_DENOMINATOR_PG/BF_ROUTINE", "Pregnant or Breastfeeding on ART with current VL results", ReportUtils.map(datimIndicators.breastfeedingOnARTVLLast12Months("(\"ROUTINE\")"), indParams), datimPMTCTANCAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"));
-
-        //TX_PVLS Number of Pregnant or breastfeeding patients on ART with targeted VL results within the past 12 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_DENOMINATOR_PG/BF_TARGETED", "Pregnant or Breastfeeding on ART with current VL results", ReportUtils.map(datimIndicators.breastfeedingOnARTVLLast12Months("(\"STAT\")"), indParams), datimPMTCTANCAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"));
-
-        //TX_PVLS Number of PWID KPs on ART with Routine VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_PWID_ROUTINE", "PWID on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"ROUTINE\")",mapKPType("PWID", PWID_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of MSMS KPs on ART with Routine VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_MSM_ROUTINE", "MSM on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"ROUTINE\")",mapKPType("MSM", MSM_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of TG KPs on ART with Routine VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_TG_ROUTINE", "Transgender on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"ROUTINE\")",mapKPType("TG", TG_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of FSW KPs on ART with Routine VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_FSW_ROUTINE", "FSW on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"ROUTINE\")",mapKPType("FSW", FSW_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of PWID KPs on ART with Targeted VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_PWID_TARGETED", "PWID on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"STAT\")",mapKPType("PWID", PWID_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of MSM KPs on ART with Targeted VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_MSM_TARGETED", "MSM on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"STAT\")",mapKPType("MSM", MSM_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of TG KPs on ART with VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_TG_TARGETED", "Transgender on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"STAT\")",mapKPType("TG", TG_CONCEPT)), indParams), "");
-
-        //TX_PVLS Number of FSW KPs on ART with Targeted VL results within the past 12 months
-        cohortDsd.addColumn("TX_PVLS_DENOMINATOR_KP_FSW_TARGETED", "FSW on ART with current VL results", ReportUtils.map(datimIndicators.kpWithVLLast12Months("(\"STAT\")",mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+        EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_DENOMINATOR", "On ART with current VL results", ReportUtils.map(datimIndicators.onARTWithVLLast12Months(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
         //TX_PVLS Number of adults and pediatric patients on ART with suppressed routine viral load results (<1,000 copies/ml) within the past 12 months disaggregated by Age/Sex
         EmrReportingUtils.addRow(cohortDsd, "TX_PVLS_SUPP_ROUTINE", "On ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.onARTSuppVLAgeSex("(\"ROUTINE\")"), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
@@ -613,6 +615,9 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //TX_PVLS Number of FSW KPs on ART with suppressed routine viral load results (<1,000 copies/ml) within the past 12 months
         cohortDsd.addColumn("TX_PVLS_SUPP_KP_FSW_ROUTINE", "FSW on ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.kpOnARTSuppVLLast12Months("(\"ROUTINE\")",mapKPType("FSW", FSW_CONCEPT)), indParams), "");
 
+        //TX_PVLS Number of prisoners and people in closed settings KPs on ART with suppressed routine viral load results (<1,000 copies/ml) within the past 12 months
+        cohortDsd.addColumn("TX_PVLS_SUPP_KP_PRISONS_CLOSED_SETTINGS_ROUTINE", "Prisoners and People in closed settings on ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.kpOnARTSuppVLLast12Months("(\"ROUTINE\")",mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
+
         //TX_PVLS Number of PWID KPs on ART with suppressed targeted viral load results (<1,000 copies/ml) within the past 12 months
         cohortDsd.addColumn("TX_PVLS_SUPP_KP_PWID_TARGETED", "PWID on ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.kpOnARTSuppVLLast12Months("(\"STAT\")",mapKPType("PWID", PWID_CONCEPT)), indParams), "");
 
@@ -624,6 +629,9 @@ public class DatimReportBuilder extends AbstractReportBuilder {
 
         //TX_PVLS Number of FSW KPs on ART with targeted suppressed VL results (<1,000 copies/ml) within the past 12 months
         cohortDsd.addColumn("TX_PVLS_SUPP_KP_FSW_TARGETED", "FSW on ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.kpOnARTSuppVLLast12Months("(\"STAT\")",mapKPType("FSW", FSW_CONCEPT)), indParams), "");
+
+        //TX_PVLS Number of prisoners and people in closed settings KPs on ART with suppressed routine viral load results (<1,000 copies/ml) within the past 12 months
+        cohortDsd.addColumn("TX_PVLS_SUPP_KP_PRISONS_CLOSED_SETTINGS_TARGETED", "Prisoners and People in closed settings on ART with current suppressed VL results (<1,000 copies/ml)", ReportUtils.map(datimIndicators.kpOnARTSuppVLLast12Months("(\"STAT\")",mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT)), indParams), "");
 
         //HTS_INDEX_OFFERED Index services
         EmrReportingUtils.addRow(cohortDsd, "HTS_INDEX_OFFERED", "Indexes offered Index testing services", ReportUtils.map(datimIndicators.offeredIndexServices(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
@@ -709,34 +717,20 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //Tested Positive Other
         EmrReportingUtils.addRow(cohortDsd, "HTS_TST_Other_Positive", "Tested Positive Other", ReportUtils.map(datimIndicators.testedPositiveOther(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
-            // Number of people currently enrolled on Prep
-        EmrReportingUtils.addRow(cohortDsd, "PrEP_CURR_ENROLLED", "Number of people currently enrolled on Prep", ReportUtils.map(datimIndicators.currentlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
         // Proportion of ART patients who started on a standard course of TB Preventive Treatment (TPT) in the previous reporting period who completed therapy
         EmrReportingUtils.addRow(cohortDsd, "TB_PREV_ENROLLED_COMPLETED", "Proportion of ART patients who started on a standard course of TB Preventive Treatment (TPT) in the previous reporting period who completed therapy", ReportUtils.map(datimIndicators.previouslyOnIPTCompleted(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
-
+        //cohortDsd.addColumn("HTS_TST_Malnutrition_Negative", "Tested Negative Malnutrition Clinic", ReportUtils.map(datimIndicators.testedNegativeMalnutritionClinic(), indParams), "");
         //3. KP_PREV
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_FSW", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("(\"FSW\")"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_MSM", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("(\"MSM\")"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_MSW", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("(\"MSW\")"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_PWUD", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("(\"PWUD\")"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_PWID", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("(\"PWID\")"), indParams), kpAgeGenderDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_TG_SW", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("TRANSGENDER_SW"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
-        EmrReportingUtils.addRow(cohortDsd, "KP_PREV_TG_NOT_SW", "Received care for the first time this year",
-                ReportUtils.map(datimIndicators.kpPrev("TRANSGENDER_NOT_SW"), indParams), kpAgeDisaggregation,
-                Arrays.asList("01", "02", "03", "04", "05"));
+        cohortDsd.addColumn( "KP_PREV_PWID", "Received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrev("(\"PWID\")"), indParams), "");
+        cohortDsd.addColumn( "KP_PREV_MSM", "Received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrev("(\"MSM\")"), indParams), "");
+        cohortDsd.addColumn("KP_PREV_TG", "Received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrev("(\"Transgender\")"), indParams),"");
+        cohortDsd.addColumn("KP_PREV_FSW", "Received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrev("(\"FSW\")"), indParams), "");
+        cohortDsd.addColumn("KP_PRISONS_CLOSED_SETTINGS", "Received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrev("(\"People in prison and other closed settings\")"), indParams), "");
 
         /*GEND_GBV
         Number of people receiving post-gender-based violence (GBV) clinical care based on the minimum package*/
