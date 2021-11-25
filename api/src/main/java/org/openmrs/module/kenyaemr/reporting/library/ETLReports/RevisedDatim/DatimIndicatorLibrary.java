@@ -19,6 +19,7 @@ import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reporting.data.converter.definition.TreatmentStopReasonDataDefinition;
 
 import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
@@ -70,54 +71,6 @@ public class DatimIndicatorLibrary {
     public CohortIndicator currentlyOnARTMMD(DurationToNextAppointmentDataDefinition duration) {
         return cohortIndicator("Currently on ART one Month Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
     }
-
-   /* *//**
-     * //Two Months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTTwoMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART two Months Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    *//**
-     * //Three Months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTThreeMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART three Months Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    *//**
-     * //Four months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTFourMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART Four Months Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    *//**
-     * //Five months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTFiveMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART Five Months Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    *//**
-     * //Six Months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTSixMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART six Month Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    *//**
-     * //Over Six Months to next appointment
-     * @return the indicator
-     *//*
-    public CohortIndicator currentlyOnARTOverSixMonthsDrugsDispensed(DurationToNextAppointmentDataDefinition duration) {
-        return cohortIndicator("Currently on ART Over six Month Drugs Dispensed", ReportUtils.map(datimCohorts.currentlyOnARTMMD(duration), "startDate=${startDate},endDate=${endDate}"));
-    }*/
 
     /**
      * Number of patients who were started on Art and are pregnant
@@ -788,80 +741,47 @@ public class DatimIndicatorLibrary {
     }
 
     /**
+     * TX_ML KP Stop reason
+     */
+    public CohortIndicator txmlKPStopReason(KPTypeDataDefinition kpType, TreatmentStopReasonDataDefinition stopReason) {
+        return cohortIndicator("TX ml KPs by stop reason", ReportUtils.<CohortDefinition>map(datimCohorts.txmlKPPatientStopReason(kpType,stopReason),
+                "startDate=${startDate},endDate=${endDate}"));
+    }
+
+    /**
+     * TX_ML KP IIT
+     */
+    public CohortIndicator txMLIITKp(KPTypeDataDefinition kpType, DurationToNextAppointmentDataDefinition months) {
+        return cohortIndicator("TX ml KPs by IIT", ReportUtils.<CohortDefinition>map(datimCohorts.txMLIITKp(kpType,months),
+                "startDate=${startDate},endDate=${endDate}"));
+    }
+
+    /**
+     * TX_ML Cause of death
+     */
+    public CohortIndicator txMLCauseOfDeath(TreatmentStopReasonDataDefinition deathReason) {
+        return cohortIndicator("TX ml death reason", ReportUtils.<CohortDefinition>map(datimCohorts.txmlPatientByCauseOfDeath(deathReason),
+                "startDate=${startDate},endDate=${endDate}"));
+    }
+    /**
+     * TX_ML specific Cause of death
+     */
+    public CohortIndicator txMLSpecificCauseOfDeath(TreatmentStopReasonDataDefinition specificDeathReason) {
+        return cohortIndicator("TX ml specific death reason", ReportUtils.<CohortDefinition>map(datimCohorts.txMLSpecificCauseOfDeath(specificDeathReason),
+                "startDate=${startDate},endDate=${endDate}"));
+    }
+    /**
      * TX_ML_DIED Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed)
      */
-    public CohortIndicator txMlDied() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death", ReportUtils.<CohortDefinition>map(datimCohorts.txMlDied(),
+    public CohortIndicator txmlPatientByTXStopReason(TreatmentStopReasonDataDefinition reason) {
+        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death", ReportUtils.<CohortDefinition>map(datimCohorts.txmlPatientByTXStopReason(reason),
                 "startDate=${startDate},endDate=${endDate}"));
     }
     /**
      * TX_ML LTFU ON DRUGS <3 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for less than 3 months
      */
-    public CohortIndicator txMLLTFUonDrugsUnder3Months() {
-        return cohortIndicator("LTFU patients who have been on drugs for less than 3 months", ReportUtils.<CohortDefinition>map(datimCohorts.txMLLTFUonDrugsUnder3Months(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML LTFU ON DRUGS >3 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for more than 3 months
-     */
-    public CohortIndicator txMLLTFUonDrugsOver3Months() {
-        return cohortIndicator("LTFU patients who have been on drugs for more than 3 months", ReportUtils.<CohortDefinition>map(datimCohorts.txMLLTFUonDrugsOver3Months(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-    /**
-     * TX_ML_DIED_TB Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of TB
-     */
-    public CohortIndicator onARTMissedAppointmentDiedTB() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of TB", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedTB(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_CANCER Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of Cancer
-     */
-    public CohortIndicator onARTMissedAppointmentDiedCancer() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of Cancer", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedCancer(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_OTHER_INFECTIOUS_DISEASE Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of other infectious disease
-     */
-    public CohortIndicator onARTMissedAppointmentDiedOtherInfectious() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of other Infectious disease", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedOtherInfectious(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_OTHER_DISEASE Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of other disease/condition
-     */
-    public CohortIndicator onARTMissedAppointmentDiedOtherDisease() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of other Infectious disease", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedOtherDisease(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_NATURAL Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of natural causes
-     */
-    public CohortIndicator onARTMissedAppointmentDiedNatural() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of natural causes", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedNatural(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_NONNATURAL Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of non-natural causes
-     */
-    public CohortIndicator onARTMissedAppointmentDiedNonNatural() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of non-natural causes", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedNonNatural(),
-                "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * TX_ML_DIED_UNKNOWN Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed) as a result of unknown causes
-     */
-    public CohortIndicator onARTMissedAppointmentDiedUnknown() {
-        return cohortIndicator("ART patients with no clinical contact since their last expected contact due to death as a result of unknown causes", ReportUtils.<CohortDefinition>map(datimCohorts.onARTMissedAppointmentDiedUnknown(),
+    public CohortIndicator txMLIIT(DurationToNextAppointmentDataDefinition noOfMonths) {
+        return cohortIndicator("TX_ML IIT", ReportUtils.<CohortDefinition>map(datimCohorts.txMLIIT(noOfMonths),
                 "startDate=${startDate},endDate=${endDate}"));
     }
 
@@ -1014,13 +934,6 @@ public class DatimIndicatorLibrary {
         return cohortIndicator("People who returned for PrEP follow-up or re-initiation", ReportUtils.<CohortDefinition>map(datimCohorts.prepCTBreastfeeding(), "startDate=${startDate},endDate=${endDate}"));
     }
     /**
-     * Number of individuals who were already enrolled on oral antiretroviral pre-exposure prophylaxis (PrEP) to prevent HIV infection
-     */
-
-    public CohortIndicator currentlyEnrolledInPrEP() {
-        return cohortIndicator("People who returned for PrEP follow-up or re-initiation", ReportUtils.<CohortDefinition>map(datimCohorts.currEnrolledInPrEP(), "startDate=${startDate},endDate=${endDate}"));
-    }
-    /**
      * Previously enrolled on IPT and have completed during this reporting period
      */
 
@@ -1056,7 +969,20 @@ public class DatimIndicatorLibrary {
         return cohortIndicator("Number of KPs received prevention services",
                 ReportUtils.map(datimCohorts.kpPrev(kpType), "startDate=${startDate},endDate=${endDate}"));
     }
-
+    /**
+     * Number of KPs Newly tested and received prevention services
+     */
+    public CohortIndicator kpPrevNewlyTested(String kpType) {
+        return cohortIndicator("Number of KPs newly tested and received prevention services",
+                ReportUtils.map(datimCohorts.kpPrevNewlyTested(kpType), "startDate=${startDate},endDate=${endDate}"));
+    }
+    /**
+     * Number of Known positive KPs who received prevention services
+     */
+    public CohortIndicator kpPrevKnownPositive(String kpType) {
+        return cohortIndicator("Number of known positive KPs who received prevention services",
+                ReportUtils.map(datimCohorts.kpPrevKnownPositive(kpType), "startDate=${startDate},endDate=${endDate}"));
+    }
     /**
      * Number of beneficiaries for Sexual violence (post-rape care)
      */
@@ -1077,30 +1003,5 @@ public class DatimIndicatorLibrary {
     public CohortIndicator receivedPEP() {
         return cohortIndicator("Number of beneficiaries for post-exposure prophylaxis (PEP) Services", ReportUtils.<CohortDefinition>map(datimCohorts.receivedPEP(), "startDate=${startDate},endDate=${endDate}"));
     }
-
-    /**
-     * //Number of FSW with HIV infection receiving antiretroviral therapy (ART
-     * @return the indicator
-     */
-    public CohortIndicator fswNewOnART(KPTypeDataDefinition fsw) {
-        return cohortIndicator("FSW Currently on ART", ReportUtils.map(datimCohorts.kpCurrentOnArt(fsw), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * //Number of MSM with HIV infection receiving antiretroviral therapy (ART
-     * @return the indicator
-     */
-    public CohortIndicator msmNewOnART(KPTypeDataDefinition msm) {
-        return cohortIndicator("MSM Currently on ART", ReportUtils.map(datimCohorts.kpCurrentOnArt(msm), "startDate=${startDate},endDate=${endDate}"));
-    }
-
-    /**
-     * //Number PWID with HIV infection receiving antiretroviral therapy (ART
-     * @return the indicator
-     */
-    public CohortIndicator pwidNewOnART(KPTypeDataDefinition pwid) {
-        return cohortIndicator("PWID Currently on ART", ReportUtils.map(datimCohorts.kpCurrentOnArt(pwid), "startDate=${startDate},endDate=${endDate}"));
-    }
-
 
 }

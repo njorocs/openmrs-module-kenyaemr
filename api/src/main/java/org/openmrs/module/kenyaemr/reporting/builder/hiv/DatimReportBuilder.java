@@ -26,6 +26,7 @@ import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reporting.data.converter.definition.TreatmentStopReasonDataDefinition;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -43,6 +44,17 @@ public class DatimReportBuilder extends AbstractReportBuilder {
     static final int PWID_CONCEPT = 105;
     static final int TG_CONCEPT = 165100;
     static final int PRISONERS_CLOSED_SETTINGS_CONCEPT = 162277;
+    static final int DEATH = 160034;
+    static final int TRF_OUT = 5240;
+    static final int STOPPED_TX = 819;
+    static final int HIV_DISEASE_RESULTING_IN_TB = 163324;
+    static final int HIV_DISEASE_RESULTING_IN_CANCER = 116030;
+    static final int  HIV_DISEASE_RESULTING_IN_INFECTIOUS_PARASITIC_DISEASE = 160159;
+    static final int OTHER_HIV_DISEASE = 160158;
+    static final int OTHER_NATURAL_CAUSES = 133478;
+    static final int NON_NATURAL_CAUSES = 123812;
+    static final int UNKNOWN_CAUSE = 142917;
+    static final int COVID_19 = 165609;
 
     @Autowired
     private CommonDimensionLibrary commonDimensions;
@@ -255,9 +267,6 @@ public class DatimReportBuilder extends AbstractReportBuilder {
 
         //Newly eonrolled to prep with a recent HIV negative results within 3 months into enrolment
         cohortDsd.addColumn("PrEP_NEWLY_ENROLLED_HIVNEG", "Newly eonrolled to prep with a recent HIV negative results within 3 months into enrolment", ReportUtils.map(datimIndicators.newlyEnrolledInPrEPHIVNeg(), indParams), "");
-
-        // Number of people currently enrolled on Prep
-        EmrReportingUtils.addRow(cohortDsd, "PrEP_CURR_ENROLLED", "Number of people currently enrolled on Prep", ReportUtils.map(datimIndicators.currentlyEnrolledInPrEP(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"));
 
         // Proportion of ART patients who started on a standard course of TB Preventive Treatment (TPT) in the previous reporting period who completed therapy
         EmrReportingUtils.addRow(cohortDsd, "TB_PREV_ENROLLED_COMPLETED", "Proportion of ART patients who started on a standard course of TB Preventive Treatment (TPT) in the previous reporting period who completed therapy", ReportUtils.map(datimIndicators.previouslyOnIPTCompleted(), indParams), datimPrEPNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
@@ -568,22 +577,76 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         //TX_TB_POSITIVE_RESULT_RETURNED
         cohortDsd.addColumn( "TX_TB_POSITIVE_RESULT_RETURNED", "Positive result returned for bacteriologic diagnosis of active TB", ReportUtils.map(datimIndicators.resultsReturned(), indParams), "");
 
-        //TX_ML
+     //TX_ML
         //TX_ML_DIED Number of ART patients with no clinical contact since their last expected contact due to Death (confirmed)
-        EmrReportingUtils.addRow(cohortDsd, "TX_ML_DIED", "ART patients with missed appointment due to death", ReportUtils.map(datimIndicators.txMlDied(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_DIED", "ART patients with missed appointment due to death", ReportUtils.map(datimIndicators.txmlPatientByTXStopReason(mapTxStopReason("DIED",DEATH)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
-        //TX_ML LTFU ON DRUGS <3 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for less than 3 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_ML_IIT_ONDRUGS_UNDER3MONTHS", "IIT patients who have been on drugs for less than 3 months", ReportUtils.map(datimIndicators.txMLLTFUonDrugsUnder3Months(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        /*   //TX_ML LTFU ON DRUGS <3 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for less than 3 months
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIIT(durationMapper("Under 3 Months", "< 3")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
-        //TX_ML LTFU ON DRUGS >3 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for more than 3 months
-        EmrReportingUtils.addRow(cohortDsd, "TX_ML_IIT_ONDRUGS_OVER3MONTHS", "IIT patients who have been on drugs for more than 3 months", ReportUtils.map(datimIndicators.txMLLTFUonDrugsOver3Months(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        //TX_ML LTFU ON DRUGS 3-5 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for 3-5 months
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIIT(durationMapper("3-5 Months", "between 3 and 5")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+
+        //TX_ML LTFU ON DRUGS >6 MONTHS Number of ART patients with no clinical contact since their last expected contact and have been on drugs for 3-5 months
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIIT(durationMapper("6+ Months", ">= 6")), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
         //TX_ML_PREV_UNDOCUMENTED_TRF Number of ART patients with no clinical contact since their last expected contact due to Previously undocumented transfer
-        EmrReportingUtils.addRow(cohortDsd, "TX_ML_TRF_OUT", "ART patients with missed appointment due to transfer out", ReportUtils.map(datimIndicators.txMLTrfOut(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_TRF_OUT", "ART patients with missed appointment due to transfer out", ReportUtils.map(datimIndicators.txmlPatientByTXStopReason(mapTxStopReason("TRF OUT",TRF_OUT)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
         //TX_ML_STOPPED_TREATMENT Number of ART patients with no clinical contact since their last expected contact because they stopped treatment
-        EmrReportingUtils.addRow(cohortDsd, "TX_ML_STOPPED_TREATMENT", "ART patients with missed appointment because they stopped treatment", ReportUtils.map(datimIndicators.txMLStoppedTreatment(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_STOPPED_TREATMENT", "ART patients with missed appointment because they stopped treatment", ReportUtils.map(datimIndicators.txmlPatientByTXStopReason(mapTxStopReason("STOPPED_TX",STOPPED_TX)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
+        //TX_ML_KPs who died
+        cohortDsd.addColumn( "TX_ML_PWID_DIED", "PWID KPs who died", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PWID", PWID_CONCEPT),mapTxStopReason("DIED",DEATH)), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_DIED", "MSM KPs TXML who died", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("MSM", MSM_CONCEPT),mapTxStopReason("DIED",DEATH)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_DIED", "TG KPs TXML who died", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("TG", TG_CONCEPT),mapTxStopReason("DIED",DEATH)), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_DIED", "FSW KPs TXML who died", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("FSW", FSW_CONCEPT),mapTxStopReason("DIED",DEATH)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_DIED", "Prisoners KPs TXML who died", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),mapTxStopReason("DIED",DEATH)), indParams),"");
+        //TX_ML  KPs IIT < 3 MONTHS
+        cohortDsd.addColumn( "TX_ML_PWID_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PWID", PWID_CONCEPT),durationMapper("Under 3 Months", "< 3")), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("MSM", MSM_CONCEPT),durationMapper("Under 3 Months", "< 3")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("TG", TG_CONCEPT),durationMapper("Under 3 Months", "< 3")), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("FSW", FSW_CONCEPT),durationMapper("Under 3 Months", "< 3")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_IIT_UNDER_3_MONTHS", "IIT After being on Treatment for <3 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),durationMapper("Under 3 Months", "< 3")), indParams),"");
+
+        //TX_ML  KPs IIT 3-5 MONTHS
+        cohortDsd.addColumn( "TX_ML_PWID_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PWID", PWID_CONCEPT),durationMapper("3-5 Months", "between 3 and 5")), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("MSM", MSM_CONCEPT),durationMapper("3-5 Months", "between 3 and 5")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("TG", TG_CONCEPT),durationMapper("3-5 Months", "between 3 and 5")), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("FSW", FSW_CONCEPT),durationMapper("3-5 Months", "between 3 and 5")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_IIT_3_TO_5_MONTHS", "IIT After being on Treatment for 3-5 months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),durationMapper("3-5 Months", "between 3 and 5")), indParams),"");
+
+        //TX_ML  KPs IIT 6+ MONTHS
+        cohortDsd.addColumn( "TX_ML_PWID_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PWID", PWID_CONCEPT),durationMapper("6+ Months", ">= 6")), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("MSM", MSM_CONCEPT),durationMapper("6+ Months", ">= 6")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("TG", TG_CONCEPT),durationMapper("6+ Months", ">= 6")), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("FSW", FSW_CONCEPT),durationMapper("6+ Months", ">= 6")), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_IIT_6_MONTHS_AND_ABOVE", "IIT After being on Treatment for 6+ months", ReportUtils.map(datimIndicators.txMLIITKp(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),durationMapper("6+ Months", ">= 6")), indParams),"");
+
+        //TX_ML  KPs Transferred out
+        cohortDsd.addColumn( "TX_ML_PWID_TOUT", "Transferred Out", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PWID", PWID_CONCEPT),mapTxStopReason("DIED",TRF_OUT)), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_TOUT", "Transferred Out", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("MSM", MSM_CONCEPT),mapTxStopReason("DIED",TRF_OUT)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_TOUT", "Transferred Out", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("TG", TG_CONCEPT),mapTxStopReason("DIED",TRF_OUT)), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_TOUT", "Transferred Out", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("FSW", FSW_CONCEPT),mapTxStopReason("DIED",TRF_OUT)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_TOUT", "Transferred Out", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),mapTxStopReason("DIED",TRF_OUT)), indParams),"");
+
+        //TX_ML KPs Transferred out
+        cohortDsd.addColumn( "TX_ML_PWID_STOPPED_TX", "Refused (Stopped) Treatment", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PWID", PWID_CONCEPT),mapTxStopReason("DIED",STOPPED_TX)), indParams),"");
+        cohortDsd.addColumn("TX_ML_MSM_STOPPED_TX", "Refused (Stopped) Treatment", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("MSM", MSM_CONCEPT),mapTxStopReason("DIED",STOPPED_TX)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_TG_STOPPED_TX", "Refused (Stopped) Treatment", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("TG", TG_CONCEPT),mapTxStopReason("DIED",STOPPED_TX)), indParams), "");
+        cohortDsd.addColumn("TX_ML_FSW_STOPPED_TX", "Refused (Stopped) Treatment", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("FSW", FSW_CONCEPT),mapTxStopReason("DIED",STOPPED_TX)), indParams), "");
+        cohortDsd.addColumn( "TX_ML_PRISONS_CLOSED_SETTINGS_STOPPED_TX", "Refused (Stopped) Treatment", ReportUtils.map(datimIndicators.txmlKPStopReason(mapKPType("PRISONERS_CLOSED_SETTINGS", PRISONERS_CLOSED_SETTINGS_CONCEPT),mapTxStopReason("DIED",STOPPED_TX)), indParams),"");
+
+        //TX_ML Cause of death
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_HIV_TB", "HIV disease resulting in TB", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("HIV DISEASE RESULTING IN TB",HIV_DISEASE_RESULTING_IN_TB)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_HIV_CANCER", "HIV disease resulting in Cancer", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("HIV DISEASE RESULTING IN CANCER",HIV_DISEASE_RESULTING_IN_CANCER)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_HIV_INFECTIOUS_PARASITIC", "HIV disease resulting in other infectious and parasitic disease", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("HIV DISEASE RESULTING IN INFECTIOUS PARASITIC DISEASE",HIV_DISEASE_RESULTING_IN_INFECTIOUS_PARASITIC_DISEASE)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_HIV_OTHER", "Other HIV disease, resulting in other diseases or conditions leading to death", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("OTHER HIV DISEASE",OTHER_HIV_DISEASE)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_OTHER_NATURAL", "Other natural causes", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("OTHER NATURAL CAUSES",OTHER_NATURAL_CAUSES)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_NON_NATURAL", "Non-natural causes", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("NON NATURAL CAUSES",NON_NATURAL_CAUSES)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_UNKNOWN", "Unknown Cause", ReportUtils.map(datimIndicators.txMLCauseOfDeath(mapTxStopReason("UNKNOWN CAUSE",UNKNOWN_CAUSE)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+        EmrReportingUtils.addRow(cohortDsd, "TX_ML_COVID19", "Covid-19", ReportUtils.map(datimIndicators.txMLSpecificCauseOfDeath(mapTxStopReason("COVID-19",COVID_19)), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
+*/
         //TX_RTT Number of ART patients with no clinical contact (or ARV drug pick-up) for greater than 30 days since their last expected contact who restarted ARVs within the reporting period
         EmrReportingUtils.addRow(cohortDsd, "TX_RTT", "Number restarted Treatment during the reporting period", ReportUtils.map(datimIndicators.txRTT(), indParams), datimNewAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));
 
@@ -729,9 +792,32 @@ public class DatimReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(datimIndicators.kpPrev("(\"Transgender\")"), indParams),"");
         cohortDsd.addColumn("KP_PREV_FSW", "Received care for the first time this year",
                 ReportUtils.map(datimIndicators.kpPrev("(\"FSW\")"), indParams), "");
-        cohortDsd.addColumn("KP_PRISONS_CLOSED_SETTINGS", "Received care for the first time this year",
+        cohortDsd.addColumn("KP_PREV_PRISONS_CLOSED_SETTINGS", "Received care for the first time this year",
                 ReportUtils.map(datimIndicators.kpPrev("(\"People in prison and other closed settings\")"), indParams), "");
 
+      //KP_PREV_KNOWN_POSITIVE
+        cohortDsd.addColumn( "KP_PREV_PWID_KNOWN_POSITIVE", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevKnownPositive("(\"PWID\")"), indParams), "");
+        cohortDsd.addColumn( "KP_PREV_MSM_KNOWN_POSITIVE", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevKnownPositive("(\"MSM\")"), indParams), "");
+        cohortDsd.addColumn("KP_PREV_TG_KNOWN_POSITIVE", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevKnownPositive("(\"Transgender\")"), indParams),"");
+        cohortDsd.addColumn("KP_PREV_FSW_KNOWN_POSITIVE", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevKnownPositive("(\"FSW\")"), indParams), "");
+        cohortDsd.addColumn("KP_PREV_PRISONS_CLOSED_SETTINGS_KNOWN_POSITIVE", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevKnownPositive("(\"People in prison and other closed settings\")"), indParams), "");
+
+        //KP_PREV_NEWLY_TESTED
+        cohortDsd.addColumn( "KP_PREV_PWID_NEWLY_TESTED", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevNewlyTested("(\"PWID\")"), indParams), "");
+        cohortDsd.addColumn( "KP_PREV_MSM_NEWLY_TESTED", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevNewlyTested("(\"MSM\")"), indParams), "");
+        cohortDsd.addColumn("KP_PREV_TG_NEWLY_TESTED", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevNewlyTested("(\"Transgender\")"), indParams),"");
+        cohortDsd.addColumn("KP_PREV_FSW_NEWLY_TESTED", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevNewlyTested("(\"FSW\")"), indParams), "");
+        cohortDsd.addColumn("KP_PREV_PRISONS_CLOSED_SETTINGS_NEWLY_TESTED", "Known Positive KPS received care for the first time this year",
+                ReportUtils.map(datimIndicators.kpPrevNewlyTested("(\"People in prison and other closed settings\")"), indParams), "");
         /*GEND_GBV
         Number of people receiving post-gender-based violence (GBV) clinical care based on the minimum package*/
         //1. Sexual violence (post-rape care)
@@ -753,6 +839,10 @@ public class DatimReportBuilder extends AbstractReportBuilder {
     private DurationToNextAppointmentDataDefinition durationMapper(String name, String duration) {
         DurationToNextAppointmentDataDefinition durationTonextVisit = new DurationToNextAppointmentDataDefinition(name, duration);
         return durationTonextVisit;
+    }
+    private TreatmentStopReasonDataDefinition mapTxStopReason(String name, Integer concept) {
+        TreatmentStopReasonDataDefinition txStopReason = new TreatmentStopReasonDataDefinition(name, concept);
+        return txStopReason;
     }
 }
 
