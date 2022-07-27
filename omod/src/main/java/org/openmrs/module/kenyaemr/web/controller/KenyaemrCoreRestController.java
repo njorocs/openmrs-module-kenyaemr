@@ -15,15 +15,14 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.Form;
-import org.openmrs.Patient;
-import org.openmrs.Visit;
+import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.CoreContext;
 import org.openmrs.module.kenyacore.form.FormDescriptor;
 import org.openmrs.module.kenyacore.form.FormManager;
 import org.openmrs.module.kenyacore.program.ProgramDescriptor;
 import org.openmrs.module.kenyacore.program.ProgramManager;
+import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.http.HttpHeaders;
@@ -36,8 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/kenyaemr")
 public class KenyaemrCoreRestController extends BaseRestController {
     protected final Log log = LogFactory.getLog(getClass());
-
+    DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     /**
      * Gets a list of available forms for a patient
      * @param request
@@ -176,15 +177,28 @@ public class KenyaemrCoreRestController extends BaseRestController {
              *   enrollmentFormUuid: string;
              *   discontinuationFormUuid: string;
              *   enrollmentStatus: string;
+             *   enrollmentDate: String;
              * }
              */
             for (ProgramDescriptor descriptor : eligiblePrograms) {
-                    ObjectNode programObj = JsonNodeFactory.instance.objectNode();
+                //Getting enrollment date for active program
+                Encounter lastEnrollmentEnc;
+                String lastEnrollmentDate = null;
+                if(activePrograms.contains(descriptor)) {
+                    EncounterType encType = descriptor.getDefaultEnrollmentForm().getTarget().getEncounterType();
+                    Form form = descriptor.getDefaultEnrollmentForm().getTarget();
+                    lastEnrollmentEnc = EmrUtils.lastEncounter(patient, encType, form);
+
+                    if(lastEnrollmentEnc != null)
+                        lastEnrollmentDate = dateFormatter.format(lastEnrollmentEnc.getEncounterDatetime());
+                }
+                ObjectNode programObj = JsonNodeFactory.instance.objectNode();
                     programObj.put("uuid", descriptor.getTargetUuid());
                     programObj.put("display", descriptor.getTarget().getName());
                     programObj.put("enrollmentFormUuid", descriptor.getDefaultEnrollmentForm().getTargetUuid());
                     programObj.put("discontinuationFormUuid", descriptor.getDefaultCompletionForm().getTargetUuid());
                     programObj.put("enrollmentStatus", activePrograms.contains(descriptor) ? "active" : "eligible");
+                    programObj.put("enrollmentDate", lastEnrollmentDate);
                     programList.add(programObj);
             }
         }
@@ -192,7 +206,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
         return programList.toString();
     }
 
-    /**
+     /**
      * Generate payload for a form descriptor. Required when serving forms to the frontend
      * @param descriptor
      * @return
