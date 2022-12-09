@@ -27,6 +27,7 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -95,7 +96,7 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         cohortDsd.addDimension("contactGender", ReportUtils.map(commonDimensions.contactGender()));
 
         ColumnParameters colTotal = new ColumnParameters(null, "Total", "");
-
+        ArrayList<String> priorityPopulation = new ArrayList<String>(Arrays.asList("Fisher Folk","Truck Driver"));
         /*DatimQ4 Column parameters*/
 
         ColumnParameters all0_to_2m = new ColumnParameters(null, "0-2", "age=0-2");
@@ -334,6 +335,33 @@ public class DatimReportBuilder extends AbstractReportBuilder {
         cohortDsd.addColumn("KP_PREV_FSW_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("FSW"), indParams), "");
         cohortDsd.addColumn("KP_PREV_PWID_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("PWID"), indParams),"");
         cohortDsd.addColumn("KP_PREV_PRISONS_CLOSED_SETTINGS_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("People in prison and other closed settings"), indParams), "");
+
+        /**
+         * PP_PREV
+         */
+        cohortDsd.addColumn("PP_PREV_Fisher_Folk", "Reached with individual and/or small group-level HIV prevention interventions designed for the target population",ReportUtils.map(datimIndicators.kpPrev(priorityPopulation.get(0)), indParams),"");
+        cohortDsd.addColumn("PP_PREV_Mobile_Population", "Reached with individual and/or small group-level HIV prevention interventions designed for the target population",ReportUtils.map(datimIndicators.kpPrev(priorityPopulation.get(1)), indParams), "");
+
+        //PP_PREV by PP type by Testing services
+        //Known Positive
+        cohortDsd.addColumn("PP_PREV_MSM_KNOWN_POSITVE", "Known Positive",ReportUtils.map(datimIndicators.kpPrevKnownPositive("MSM"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_TG_KNOWN_POSITVE", "Known Positive",ReportUtils.map(datimIndicators.kpPrevKnownPositive("Transgender"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_FSW_KNOWN_POSITVE", "Known Positive",ReportUtils.map(datimIndicators.kpPrevKnownPositive("FSW"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_PWID_KNOWN_POSITVE", "Known Positive",ReportUtils.map(datimIndicators.kpPrevKnownPositive("PWID"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_PRISONS_CLOSED_SETTINGS_KNOWN_POSITVE", "Known Positive",ReportUtils.map(datimIndicators.kpPrevKnownPositive("People in prison and other closed settings"), indParams), "");
+
+        //Newly tested and/or referred for HTS
+        cohortDsd.addColumn("PP_PREV_MSM_NEWLY_TESTED_REFERRED", "Newly tested and/or referred for HTS",ReportUtils.map(datimIndicators.kpPrevNewlyTestedOrReferred("MSM"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_TG_NEWLY_TESTED_REFERRED", "Newly tested and/or referred for HTS",ReportUtils.map(datimIndicators.kpPrevNewlyTestedOrReferred("Transgender"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_FSW_NEWLY_TESTED_REFERRED", "Newly tested and/or referred for HTS",ReportUtils.map(datimIndicators.kpPrevNewlyTestedOrReferred("FSW"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_PWID_NEWLY_TESTED_REFERRED", "Newly tested and/or referred for HTS",ReportUtils.map(datimIndicators.kpPrevNewlyTestedOrReferred("PWID"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_PRISONS_CLOSED_SETTINGS_NEWLY_TESTED_REFERRED", "Newly tested and/or referred for HTS",ReportUtils.map(datimIndicators.kpPrevNewlyTestedOrReferred("People in prison and other closed settings"), indParams), "");
+        //Declined testing and/or referral
+        cohortDsd.addColumn("PP_PREV_MSM_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("MSM"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_TG_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("Transgender"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_FSW_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("FSW"), indParams), "");
+        cohortDsd.addColumn("PP_PREV_PWID_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("PWID"), indParams),"");
+        cohortDsd.addColumn("PP_PREV_PRISONS_CLOSED_SETTINGS_DECLINED_HTS", "Declined testing and/or referral",ReportUtils.map(datimIndicators.kpPrevDeclinedTesting("People in prison and other closed settings"), indParams), "");
 
         /*GEND_GBV
         Number of people receiving post-gender-based violence (GBV) clinical care based on the minimum package*/

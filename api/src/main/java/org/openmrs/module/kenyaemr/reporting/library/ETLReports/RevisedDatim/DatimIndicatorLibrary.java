@@ -1354,6 +1354,15 @@ public class DatimIndicatorLibrary {
         return cohortIndicator("Number of KPs received prevention services",
                 ReportUtils.map(datimCohorts.kpPrev(kpType), "startDate=${startDate},endDate=${endDate}"));
     }
+
+    /**
+     * Number of key populations reached with individual and/or small group-level HIV prevention interventions designed for the target population
+     */
+    public CohortIndicator ppPrev(String ppType) {
+        return cohortIndicator("Number of PPs received prevention services",
+                ReportUtils.map(datimCohorts.ppPrev(ppType), "startDate=${startDate},endDate=${endDate}"));
+    }
+
     /**
      * KP_PREV disaggregated by Number of Known Positive KPs received prevention services
      * @param kpType

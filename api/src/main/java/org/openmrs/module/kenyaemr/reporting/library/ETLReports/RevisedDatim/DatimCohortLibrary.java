@@ -5592,7 +5592,7 @@ public class DatimCohortLibrary {
     }
 
     /**
-     * KPs who had a a service within the reporting period and declined HTS and /or referral
+     * KPs who had a service within the reporting period and declined HTS and /or referral
      * @return
      */
     public CohortDefinition kpPrevDeclinedTestingSql() {
@@ -5625,6 +5625,22 @@ public class DatimCohortLibrary {
     }
 
     /**
+     * Returns priority populations by type
+     * @param ppType
+     * @return
+     */
+    public CohortDefinition ppByType(String ppType) {
+        String sqlQuery = "select c.client_id from kenyaemr_etl.etl_contact c where c.visit_date <= date(:endDate) group by c.client_id having mid(max(concat(c.visit_date,c.priority_population_type)),11) = '"+ppType+"';";
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        cd.setName("ppByType");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Priority populations by type");
+        return cd;
+    }
+
+    /**
      * Number of key populations reached with individual and/or small group-level HIV prevention interventions designed for the target population
      * @param kpType
      * @return
@@ -5643,6 +5659,25 @@ public class DatimCohortLibrary {
         return cd;
     }
 
+    /**
+     * PP_PREV
+     * @param ppType
+     * @return
+     */
+    public CohortDefinition ppPrev(String ppType) {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("kpPrevCurrentPeriod",ReportUtils.map(kpPrevCurrentPeriod(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("kpPrevPreviousPeriod",ReportUtils.map(kpPrevPreviousPeriod(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("kpProgramByKpType",ReportUtils.map(ppByType(ppType), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("kpPrevReceivedService",ReportUtils.map(kpPrevReceivedService(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("kpPrevOfferedHTSServices",ReportUtils.map(kpPrevOfferedHTSServices(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("kpPrevKnownPositiveSql",ReportUtils.map(kpPrevKnownPositiveSql(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("(kpPrevCurrentPeriod AND NOT kpPrevPreviousPeriod) AND kpProgramByKpType AND ((kpPrevReceivedService AND kpPrevOfferedHTSServices) OR (kpPrevReceivedService AND kpPrevKnownPositiveSql))");
+        return cd;
+
+    }
     /**
      * KP_PREV by KPs known positive by MSM, TG, FSW, PWID, people in prisons and other closed settings
      * @param kpType
