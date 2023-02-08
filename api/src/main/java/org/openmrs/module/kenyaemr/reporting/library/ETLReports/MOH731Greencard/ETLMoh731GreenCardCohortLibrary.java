@@ -849,7 +849,7 @@ public class ETLMoh731GreenCardCohortLibrary {
         cd.setDescription("In Hiv Program And On Ctx Prophylaxis");
         return cd;
     }
-    protected CohortDefinition hivExposedInfantsWithin2Months() {
+    public CohortDefinition hivExposedInfantsWithin2Months() {
         String sqlQuery = " select  e.patient_id " +
                 "    from kenyaemr_etl.etl_hei_enrollment e " +
                 "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
@@ -863,7 +863,7 @@ public class ETLMoh731GreenCardCohortLibrary {
         return cd;
     }
 
-    protected CohortDefinition hivExposedInfantsWithin2MonthsAndEligibleForCTX() {
+    public CohortDefinition hivExposedInfantsWithin2MonthsAndEligibleForCTX() {
         String sqlQuery = " select  e.patient_id " +
                 "    from kenyaemr_etl.etl_hei_enrollment e " +
                 "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
@@ -987,7 +987,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * Composition for htsNumberTestedAsCouple     *
      * @return
      */
-    protected CohortDefinition htsNumberTestedAsCouple() {
+    public CohortDefinition htsNumberTestedAsCouple() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1002,7 +1002,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * Composition for htsNumberTestedAsCouple     *
      * @return
      */
-    protected CohortDefinition htsAllNumberTestedAsCouple() {
+    public CohortDefinition htsAllNumberTestedAsCouple() {
         String sqlQuery = "select patient_id from kenyaemr_etl.etl_hts_test where test_type =1\n" +
                 " and client_tested_as ='Couple' and visit_date between :startDate and :endDate";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1019,7 +1019,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedKeyPopulation() {
+    public CohortDefinition htsNumberTestedKeyPopulation() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1034,7 +1034,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * Composition for htsNumberTestedKeyPopulation     *
      * @return
      */
-    protected CohortDefinition htsAllNumberTestedKeyPopulation() {
+    public CohortDefinition htsAllNumberTestedKeyPopulation() {
         String sqlQuery = "select patient_id from kenyaemr_etl.etl_hts_test where test_type =1 \n" +
                 " and population_type ='Key Population' and visit_date between :startDate and :endDate";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1051,7 +1051,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedPositive() {
+    public CohortDefinition htsNumberTestedPositive() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1069,7 +1069,7 @@ public class ETLMoh731GreenCardCohortLibrary {
     public CohortDefinition htsAllNumberTestedPositive() {
         String sqlQuery = "select t.patient_id from  kenyaemr_etl.etl_hts_test t\n" +
                 "                                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id=t.patient_id\n" +
-                "                        where t.voided=0 and date(t.visit_date) between date(:startDate) and date(:endDate) and t.test_type=2 and t.final_test_result='Positive'\n" +
+                "                        where t.voided=0 and date(t.visit_date) between date(:startDate) and date(:endDate) and t.test_type=1 and t.final_test_result='Positive'\n" +
                 "                        group by t.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsNumberTestedPositive");
@@ -1085,7 +1085,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedNegative() {
+    public CohortDefinition htsNumberTestedNegative() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1119,7 +1119,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedDiscordant() {
+    public CohortDefinition htsNumberTestedDiscordant() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1151,7 +1151,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedKeypopPositive() {
+    public CohortDefinition htsNumberTestedKeypopPositive() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1183,7 +1183,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedPositiveAndLinked() {
+    public CohortDefinition htsNumberTestedPositiveAndLinked() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1218,7 +1218,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedPositiveInLastThreeMonths() {
+    public CohortDefinition htsNumberTestedPositiveInLastThreeMonths() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1250,7 +1250,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedNew() {
+    public CohortDefinition htsNumberTestedNew() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1293,7 +1293,7 @@ public class ETLMoh731GreenCardCohortLibrary {
      * excluding pmtct tests        *
      * @return
      */
-    protected CohortDefinition htsNumberTestedRepeat() {
+    public CohortDefinition htsNumberTestedRepeat() {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
