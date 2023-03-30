@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.calculation.library.hiv;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Program;
@@ -56,36 +57,47 @@ public class NeedsSerumCrAgTestCalculation extends AbstractPatientCalculation im
         Set<Integer> pendingCrAgTestResults = CalculationUtils.patientsThatPass(calculate(new PendingCrAgResultCalculation(), cohort, context));
 
         LastCd4CountCalculation lastCD4CountCalculation = new LastCd4CountCalculation();
+        LastQualitativeCd4Calculation lastQualitativeCd4Calculation = new LastQualitativeCd4Calculation();
         LastCrAgCalculation lastCrAgCalculation = new LastCrAgCalculation();
 
         CalculationResultMap cd4Count = lastCD4CountCalculation.evaluate(cohort, null, context);
+        CalculationResultMap cd4Qualitative = lastQualitativeCd4Calculation.evaluate(cohort, null, context);
         CalculationResultMap creatinine = lastCrAgCalculation.evaluate(cohort, null, context);
 
         CalculationResultMap ret = new CalculationResultMap();
         for (Integer ptId : cohort) {
             Patient patient = patientService.getPatient(ptId);
             boolean needsCrAgTest = false;
-            Double lastCD4ResultValue;
-            Date lastCD4ResultDate;
+            Double lastCD4CountResultValue;
+            Concept lastCD4QualitativeResult;
+            Date lastCD4CountResultDate;
+            Date lastQualitativeCD4ResultDate;
             Date lastCrAgResultDate;
 
             CalculationResult lastCD4Count = cd4Count.get(ptId);
             CalculationResult lastCrAg = creatinine.get(ptId);
+            CalculationResult lastCD4Qualitative = cd4Qualitative.get(ptId);
 
-            if (patient.getAge() >= 10 && inHivProgram.contains(ptId) && !pendingCrAgTestResults.contains(ptId) && lastCD4Count != null) {
+            if (patient.getAge() >= 10 && inHivProgram.contains(ptId) && !pendingCrAgTestResults.contains(ptId) && (lastCD4Count != null || lastCD4Qualitative != null)) {
 
                 Obs cd4CountObs = EmrCalculationUtils.obsResultForPatient(cd4Count, ptId);
                 Obs crAgObs = lastCrAg != null ? EmrCalculationUtils.obsResultForPatient(creatinine, ptId) : null;
+                Obs cd4QualitativeObs = lastCD4Qualitative != null ? EmrCalculationUtils.obsResultForPatient(cd4Qualitative, ptId) : null;
 
-                lastCD4ResultValue = cd4CountObs != null ? cd4CountObs.getValueNumeric() : null;
-                lastCD4ResultDate = cd4CountObs != null ? cd4CountObs.getObsDatetime() : null;
+                lastCD4CountResultValue = cd4CountObs != null ? cd4CountObs.getValueNumeric() : null;
+                lastCD4QualitativeResult = cd4QualitativeObs != null ? cd4QualitativeObs.getValueCoded() : null;
+                lastCD4CountResultDate = cd4CountObs != null ? cd4CountObs.getObsDatetime() : null;
+                lastQualitativeCD4ResultDate = cd4QualitativeObs != null ? cd4QualitativeObs.getObsDatetime() : null;
                 lastCrAgResultDate = crAgObs != null ? crAgObs.getObsDatetime() : null;
 
-                if (lastCD4ResultValue != null && lastCD4ResultValue <= 200 && ((lastCD4ResultDate != null && lastCrAgResultDate != null && lastCrAgResultDate.before(lastCD4ResultDate)) || lastCrAgResultDate == null)) {
+                if ((lastCD4CountResultValue != null && lastCD4QualitativeResult != null && ((lastCD4CountResultDate.after(lastQualitativeCD4ResultDate) && lastCD4CountResultValue <= 200 && (lastCrAgResultDate == null || lastCrAgResultDate.before(lastCD4CountResultDate)))
+                        || (lastCD4CountResultDate.before(lastQualitativeCD4ResultDate) && lastCD4QualitativeResult.getConceptId().equals(167717) && (lastCrAgResultDate == null || lastCrAgResultDate.before(lastQualitativeCD4ResultDate)))))
+                        || ((lastCD4CountResultValue != null && lastCD4QualitativeResult == null) && lastCD4CountResultValue <= 200 && (lastCrAgResultDate == null || lastCrAgResultDate.before(lastCD4CountResultDate)))
+                        || ((lastCD4CountResultValue == null && lastCD4QualitativeResult != null) && lastCD4QualitativeResult.getConceptId().equals(167717) && (lastCrAgResultDate == null || lastCrAgResultDate.before(lastQualitativeCD4ResultDate)))) {
 
                     needsCrAgTest = true;
-                }
 
+                }
                 ret.put(ptId, new BooleanResult(needsCrAgTest, this));
             }
         }
