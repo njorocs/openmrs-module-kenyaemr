@@ -38,9 +38,19 @@ import static org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils.daysSi
  * Calculate whether patients are due for a CD4 count. Calculation returns true if if the patient
  * is alive, enrolled in the HIV program, and has not had a CD4 count in the last 180 days
  */
+
+/**
+ * New EMR guidelines criteria:
+ * Eligible population for CD4 testing is
+ * Baseline test for ALL PLHIV
+ * PLHIV ≥5 years of age and who had previously initiated ART and are reinitiating after >3 months)
+ * Individuals who have documented persistent unsuppressed viral load (2 viral load vl >1000 copies within 3-6 months)
+ *
+ * Patients on fluconazole maintenance therapy and those on Dapsone as prophylaxis to determine discontinuation.
+ */
 public class NeedsCd4TestCalculation extends AbstractPatientCalculation {
 
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection,y
 	 *
@@ -60,6 +70,7 @@ public class NeedsCd4TestCalculation extends AbstractPatientCalculation {
 		Set<Integer> ltfu = CalculationUtils.patientsThatPass(calculate(new LostToFollowUpCalculation(), cohort, context));
 		CalculationResultMap startedArt = calculate(new InitialArtStartDateCalculation(), cohort, context);
 		CalculationResultMap medOrdersObss = Calculations.lastObs(Dictionary.getConcept(Dictionary.MEDICATION_ORDERS), cohort, context);
+		CalculationResultMap allVlResults = calculate(new AllVlCountCalculation(), cohort, context);
 
 		CalculationResultMap ret = new CalculationResultMap();
 		for (Integer ptId : cohort) {
