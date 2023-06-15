@@ -41,6 +41,7 @@
     var ANC_CLIENT = 1622;
     var DELIVERY_CLIENT = 164835;
     var PNC_CLIENT = 1623;
+    var HIV_TEST = "159427AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	var PATIENT_IS_ENROLLED_HIV = <lookup expression="kenyaemr.hasHivUniquePatientNumber()" />;
     var PATIENT_IS_REPORTED_HIV = "<lookup expression="fn.earliestObs(159427).getValueCoded()"/>";
 	var ANC_START_DATE =  "<lookup expression="fn.latestObs(163547).getValueDatetime()"/>";
@@ -49,7 +50,8 @@
 	var HTS_DATE =  "<lookup expression="fn.latestObs(159427).getObsDatetime()"/>";
 	var LATEST_LMP_DATE =  "<lookup expression="fn.latestObs(1427).getValueDatetime()"/>";
 	var LATEST_LMP_OBSDATE =  "<lookup expression="fn.latestObs(1427).getObsDatetime()"/>";
-
+   //var LATEST_HTS_BEFORE_ENC_DATE = "<lookup expression="fn.latestObsBeforeDate(159427,encDate).getObsDatetime()"/>";
+   // var LATEST_HTS_BEFORE_ENC_DATE = "<lookup expression="kenyaemr.latestObsBeforeDate(ENC_DATE)" />";
     var GREENCARD_VELOCITY = "<lookup expression="kenyaemr.GreenCardVelocityCalculation()" />";
     var PATIENT_ON_ART = GREENCARD_VELOCITY.split(",")[2].split(":")[1];
     var REGIMEN_NAME = GREENCARD_VELOCITY.split(",")[4].split(":")[1];
@@ -83,7 +85,12 @@
         }
 		var formattedEncounterDate = moment(moment(getValue('encounter-date.value'), 'YYYY-MM-DD').toDate()).format('YYYY-MM-DD');
 		var formattedLatestHTSDate = moment(moment(HTS_DATE, 'DD/MMM/YYYY').toDate()).format("DD-MMM-YYYY");
-
+		//var htsBeforeEncDate = "<lookup expression="kenyaemr.latestObsBeforeDate(getValue('encounter-date.value'),HIV_TEST)" />";
+		var htsBeforeEncDate = "<lookup expression="kenyaemr.latestObsBeforeDate(HIV_TEST)" />";
+		//var previousDate = formattedEncounterDate.subtract(1, 'day');
+		//previousDate = previousDate.setDate(formattedEncounterDate.getDate() - 1);
+		// var previousDateString = previousDate.format('YYYY-MM-DD');
+		console.log("--------------------------: "+previousDateString);
 		if (moment(formattedLatestHTSDate).isBefore(formattedEncounterDate, 'day') || moment(moment(moment(HIV_TEST_DATE, 'DD/MMM/YYYY').toDate()).format("DD-MMM-YYYY")).isBefore(formattedEncounterDate, 'day')) {
 			if (HTS_DATE != "") {
 				getField('patient-hiv-test-date.value').val(formattedLatestHTSDate);

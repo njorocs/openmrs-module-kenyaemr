@@ -316,42 +316,4 @@ public class EmrUtils {
 		return people;
 	}
 
-public static Date getHIVTestBeforeEncounterDate(){
-	for (Integer ptId : cohort) {
-		List<Obs> vlObs = obsService.getObservations(
-				Collections.singletonList(patientService.getPerson(ptId)),
-				null,
-				vlConcepts,
-				null,
-				null,
-				null,
-				null,
-				2,
-				null,
-				null,
-				null,
-				false,
-				null
-		);
-		Obs secondLastVL = null;
-		SimpleObject object = null;
-		if (vlObs != null && vlObs.size() > 0) {
-			if (vlObs.size() > 1) {
-				secondLastVL = vlObs.get(1);
-			} else {
-				secondLastVL = vlObs.get(0);
-			}
-
-			if(secondLastVL.getConcept().equals(Dictionary.getConcept(Dictionary.HIV_VIRAL_LOAD))) {
-				object = SimpleObject.create("vl", secondLastVL.getValueNumeric(), "vlDate", secondLastVL.getObsDatetime());
-			}
-			else {
-				object = SimpleObject.create("vl", "LDL", "vlDate", secondLastVL.getObsDatetime());
-			}
-		}
-		ret.put(ptId, new SimpleResult(object, this, context));
-
-	}
-
-}
 }

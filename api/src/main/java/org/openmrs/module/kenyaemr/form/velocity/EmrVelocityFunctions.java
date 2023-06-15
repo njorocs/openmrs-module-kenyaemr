@@ -44,6 +44,7 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.common.DateUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -263,6 +264,33 @@ public class EmrVelocityFunctions {
 			return new ArrayList<Obs>();
 		else
 			return Context.getObsService().getObservationsByPersonAndConcept(p, getConcept(conceptIdentifier));
+	}
+	public Date latestObsBeforeDate(/*Date date, */String conceptIdentifier) throws Exception {
+		Obs o = new Obs();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		//Date date = dateString != null ? dateFormat.format(dateString) : null;
+		if (session.getPatient() == null)
+			return null;
+
+		Patient p = session.getPatient();
+		if (p == null)
+			return null;
+		else {
+			List<Obs> obsList = allObs(conceptIdentifier);
+			System.out.println("----------------------obsList.size(): "+obsList.size());
+			if(obsList.size() > 0) {
+				for (Obs obs : obsList) {
+					System.out.println("------------------- getObsDatetime: " +obs.getObsDatetime());
+				//	System.out.println("------------------- date param string: " +date);
+				//	System.out.println("------------------- obs.getObsDatetime().before(date): " +obs.getObsDatetime().before(date));
+				/*	if (obs.getObsDatetime().before(date)) {
+					o = obs;
+					}*/
+					break;
+				}
+			}
+			return o.getObsDatetime();
+		}
 	}
 	public String getFacilityType() {
 		AdministrationService administrationService = org.openmrs.api.context.Context.getAdministrationService();
