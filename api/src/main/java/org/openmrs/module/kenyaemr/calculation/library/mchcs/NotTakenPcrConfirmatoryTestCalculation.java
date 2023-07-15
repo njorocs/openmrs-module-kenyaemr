@@ -92,8 +92,8 @@ public class NotTakenPcrConfirmatoryTestCalculation extends AbstractPatientCalcu
 
             if ( inMchcsProgram.contains(ptId) && !pendingDNARapidTestResults.contains(ptId) && hivStatusObs != null && hivStatusObs.getValueCoded().equals(hivExposed)) {
 
-                if (pcrObs != null && pcrObs.getValueCoded().equals(hivPositive) && ((pcrTestConfirmObs == null || !pcrTestConfirmObs.getValueCoded().equals(pcrConfirmatory)) &&
-                        (order == null || (!order.getOrderReason().equals(pcrConfirmatory))))){
+                if (pcrObs != null && pcrObs.getValueCoded().equals(hivPositive) &&
+                        (order == null || (!order.getOrderReason().equals(pcrConfirmatory)))){
                     //get birth date of this patient over 18's are not eligible for antibody tests
                     Person person = Context.getPersonService().getPerson(ptId);
                     if (getAgeInMonths(person.getBirthdate(), context.getNow()) <= 18) {

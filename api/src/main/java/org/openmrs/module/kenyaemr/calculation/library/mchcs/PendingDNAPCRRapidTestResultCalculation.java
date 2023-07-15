@@ -69,9 +69,7 @@ public class PendingDNAPCRRapidTestResultCalculation extends AbstractPatientCalc
         for (Integer ptId : cohort) {
             boolean pendingHIVTestResult = false;
 
-            //In HEI program
-            if (inHEIProgram.contains(ptId)) {
-                //Check whether client has active DNA PCR or Rapid HIV test order
+            //Check whether client has active DNA PCR or Rapid HIV test order
                 OrderType patientLabOrders = orderService.getOrderTypeByUuid(TEST_ORDER_TYPE_UUID);
                 if (patientLabOrders != null) {
                     //Get active lab orders
@@ -128,7 +126,6 @@ public class PendingDNAPCRRapidTestResultCalculation extends AbstractPatientCalc
                     }
 
                 }
-            }
 
             ret.put(ptId, new BooleanResult(pendingHIVTestResult, this));
         }

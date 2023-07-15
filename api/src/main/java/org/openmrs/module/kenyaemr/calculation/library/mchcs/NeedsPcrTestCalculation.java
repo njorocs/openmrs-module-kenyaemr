@@ -65,6 +65,7 @@ public class NeedsPcrTestCalculation extends AbstractPatientCalculation implemen
         CalculationResultMap lastChildHivStatus = Calculations.lastObs(Dictionary.getConcept(Dictionary.CHILDS_CURRENT_HIV_STATUS), cohort, context);
         CalculationResultMap lastPcrTestQualitative = Calculations.lastObs(Dictionary.getConcept(Dictionary.HIV_DNA_POLYMERASE_CHAIN_REACTION_QUALITATIVE), cohort, context);
         Set<Integer> pendingDNARapidTestResults = CalculationUtils.patientsThatPass(calculate(new PendingDNAPCRRapidTestResultCalculation(), cohort, context));
+        Set<Integer> dueForPCRConfirmatoryTest = CalculationUtils.patientsThatPass(calculate(new NotTakenPcrConfirmatoryTestCalculation(), cohort, context));
 
         Concept NEGATIVE = Dictionary.getConcept(Dictionary.NEGATIVE);
         Concept hivExposed = Dictionary.getConcept(Dictionary.EXPOSURE_TO_HIV);
@@ -84,7 +85,7 @@ public class NeedsPcrTestCalculation extends AbstractPatientCalculation implemen
             Person person = Context.getPersonService().getPerson(ptId);
 
             // Check if a patient is alive and is in MCHCS program
-            if (inMchcsProgram.contains(ptId) && !pendingDNARapidTestResults.contains(ptId) && !inHivProgram.contains(ptId) && getAgeInMonths(person.getBirthdate(), context.getNow()) <= 24) {
+            if (inMchcsProgram.contains(ptId) && !dueForPCRConfirmatoryTest.contains(ptId) && !pendingDNARapidTestResults.contains(ptId) && !inHivProgram.contains(ptId) && getAgeInMonths(person.getBirthdate(), context.getNow()) <= 24) {
 
                 Obs hivStatusObs = EmrCalculationUtils.obsResultForPatient(lastChildHivStatus, ptId);
 

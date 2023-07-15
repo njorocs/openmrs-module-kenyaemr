@@ -63,6 +63,7 @@ public class NeedsAntibodyTestCalculation extends AbstractPatientCalculation imp
         // Get whether the child is HIV Exposed
         CalculationResultMap lastChildHivStatus = Calculations.lastObs(Dictionary.getConcept(Dictionary.CHILDS_CURRENT_HIV_STATUS), cohort, context);
         Set<Integer> pendingDNARapidTestResults = CalculationUtils.patientsThatPass(calculate(new PendingDNAPCRRapidTestResultCalculation(), cohort, context));
+        Set<Integer> dueForPCRConfirmatoryTest = CalculationUtils.patientsThatPass(calculate(new NotTakenPcrConfirmatoryTestCalculation(), cohort, context));
         CalculationResultMap lastPcrCWCTest = Calculations.lastObs(Dictionary.getConcept(Dictionary.EID_CWC_TEST), cohort, context);
         CalculationResultMap lastDNATestQualitative = Calculations.lastObs(Dictionary.getConcept(Dictionary.HIV_DNA_POLYMERASE_CHAIN_REACTION_QUALITATIVE), cohort, context);
         CalculationResultMap lastABTest = Calculations.lastObs(Dictionary.getConcept(Dictionary.RAPID_HIV_CONFIRMATORY_TEST), cohort, context);
@@ -93,7 +94,7 @@ public class NeedsAntibodyTestCalculation extends AbstractPatientCalculation imp
             Date obsBFStatusDate = latestBFStatus != null && latestBFStatus.getValueCoded().equals(INFANT_NOT_BREASTFEEDING) ? latestBFStatus.getObsDatetime() : null;
 
             Integer ageInMonths = getAge(person.getBirthdate(), context.getNow());
-            if (inMchcsProgram.contains(ptId) && !pendingDNARapidTestResults.contains(ptId) && !inHivProgram.contains(ptId) && ageInMonths <= 24) {
+            if (inMchcsProgram.contains(ptId) && !dueForPCRConfirmatoryTest.contains(ptId) && !pendingDNARapidTestResults.contains(ptId) && !inHivProgram.contains(ptId) && ageInMonths <= 24) {
 
                 Obs hivStatusObs = EmrCalculationUtils.obsResultForPatient(lastChildHivStatus, ptId);
 
