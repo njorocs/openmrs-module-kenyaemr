@@ -3,7 +3,7 @@
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
  * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
- * <p>
+ *
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
@@ -21,8 +21,7 @@ import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.kenyacore.calculation.*;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
-import org.openmrs.module.kenyaemr.calculation.library.*;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.DateOfLastViralLoadCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.ActiveInMCHProgramCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.LastViralLoadResultCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnArtCalculation;
@@ -42,8 +41,8 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
     protected static final Log log = LogFactory.getLog(StablePatientsCalculation.class);
 
     /**
-     * Needs vl test calculation criteria: New EMR guidelines March 2023
-     * -----------------------------------------------------------------
+     * Calculation to determine whether latest VL was taken within the recommended interval
+     * ---------------------------------------------------------------------------------------
      * Immediately = Pregnant + Breastfeeding mothers On ART
      * After 3 months = All unsuppressed + All Newly on ART (Including Pregnant and Breastfeeding mothers)
      * After 6 months = Children (0-24) with suppressed VL or Pregnant_Breastfeeding with suppressed initial VL after Pregnancy/BF status is recorded
@@ -59,32 +58,20 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
         Set<Integer> alive = Filters.alive(cohort, context);
         Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
         Set<Integer> inMCHProgram = Filters.inProgram(mchProgram, alive, context);
-        //Cohorts to consider
-        //  Pregnant
-        Set<Integer> pregnant = CalculationUtils.patientsThatPass(calculate(new IsPregnantCalculation(), cohort, context));
-        // Breastfeeding
-        Set<Integer> breastFeeding = CalculationUtils.patientsThatPass(calculate(new IsBreastFeedingCalculation(), cohort, context));
+
         // All on ART already
         Set<Integer> allOnArt = CalculationUtils.patientsThatPass(calculate(new OnArtCalculation(), cohort, context));
         Concept mixedFeeding = Dictionary.getConcept(Dictionary.MIXED_FEEDING);
         Concept exclusiveBreastFeeding = Dictionary.getConcept(Dictionary.BREASTFED_EXCLUSIVELY);
 
-        // Patients with pending vl results
-        Set<Integer> pendingVlResults = CalculationUtils.patientsThatPass(calculate(new PendingViralLoadResultCalculation(), cohort, context));
-        //check for last pregnancy start date
-        CalculationResultMap pg = calculate(new PregnancyStartDateCalculation(), cohort, context);
-        //check for last breastfeeding start date
-
-        CalculationResultMap bf = calculate(new BreastFeedingStartDateCalculation(), cohort, context);
         //get the initial art start date
         CalculationResultMap dateInitiatedART = calculate(new InitialArtStartDateCalculation(), cohort, context);
         //check for last vl and date
         SecondLastVLCalculation secondLastVLCalculation = new SecondLastVLCalculation();
         LastViralLoadResultCalculation lastVlResultCalculation = new LastViralLoadResultCalculation();
-        DateOfLastViralLoadCalculation lastVlDateCalculation = new DateOfLastViralLoadCalculation();
         CalculationResultMap secondLastVl = secondLastVLCalculation.evaluate(cohort, null, context);
         CalculationResultMap lastVlResults = lastVlResultCalculation.evaluate(cohort, null, context);
-        CalculationResultMap lastVlDateValue = lastVlDateCalculation.evaluate(cohort, null, context); //CalculationResultMap breastFeedingStarDate = calculate(new BreastFeedingStartDateCalculation(), cohort, context);
+
         //Checks for ltfu
         Set<Integer> ltfu = CalculationUtils.patientsThatPass(calculate(new LostToFollowUpCalculation(), cohort, context));
         //Returns active in MCH clients
@@ -98,8 +85,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
         CalculationResultMap pregStatusMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.PREGNANCY_STATUS), aliveAndFemale, context);
         CalculationResultMap infantFeedingMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.INFANT_FEEDING_METHOD), aliveAndFemale, context);
         CalculationResultMap currentlyBreastFeedingMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.CURRENTLY_BREASTFEEDING), aliveAndFemale, context);
-        //CalculationResultMap excBreastFeedingStatusObs = Calculations.firstObsOnOrAfter(Dictionary.getConcept(Dictionary.BREASTFED_EXCLUSIVELY), dateNineMonthsBefore, aliveAndFemale, context);
-        //CalculationResultMap mixedFeedingStatusObs = Calculations.firstObsOnOrAfter(Dictionary.getConcept(Dictionary.MIXED_FEEDING), dateNineMonthsBefore, aliveAndFemale, context);
         CalculationResultMap enrollmentMap = Calculations.lastEncounter(mchEnrollmentEncType, aliveAndFemale, context);
 
         for (Integer ptId : cohort) {
@@ -107,18 +92,9 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
             if (inHivProgram.contains(ptId) && /*!pendingVlResults.contains(ptId) &&*/ allOnArt.contains(ptId) && !ltfu.contains(ptId)) {
                 Patient patient = patientService.getPatient(ptId);
                 boolean vlDoneWithinInterval = false;
-                String previousVLResult = null;
-                String lastVlResult = null;
-                String previousVLResultLDL = null;
-                String lastVlResultLDL = null;
-                Double previousVLResultValue = null;
-                Double lastVlResultValue = null;
-                Date previousVLOrderDate = null;
-                Date lastVLDate = null;
-                Date activeVLDate = null;
-                Date lastBFStartDate = null;
-                Date lastPregStartDate = null;
-                Date mchEnrollmentDate = null;
+                String previousVLResult = null, lastVlResult = null, previousVLResultLDL = null, lastVlResultLDL = null;
+                Double previousVLResultValue = null, lastVlResultValue = null;
+                Date previousVLOrderDate = null, lastVLDate = null, activeVLDate = null, lastBFStartDate = null, lastPregStartDate = null, mchEnrollmentDate = null;
                 Order lastOrder = null;
                 Date artStartDate = dateInitiatedART != null ? EmrCalculationUtils.datetimeResultForPatient(dateInitiatedART, ptId) : null;
                 System.out.println("*****************Patient_id is : " + ptId);
@@ -158,12 +134,7 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 if (lastBFStartDate != null) {
                     System.out.println("********lastBFStartDate: " + lastBFStartDate);
                 }
-//Get the latest of either Breastfeeding or Pregnant status
-
-
-              /*  if (lastBFObs != null && (lastBFObs.getConcept().equals(Dictionary.getConcept(Dictionary.MIXED_FEEDING)) || lastBFObs.getConcept().equals(Dictionary.getConcept(Dictionary.BREASTFED_EXCLUSIVELY)))){
-                    lastBFStartDate = EmrCalculationUtils.obsResultForPatient(infantFeedingMap, ptId).getObsDatetime();
-                }*/
+                //Get the latest of either Breastfeeding or Pregnant status
 
                 //Date lastMixedFeedingStartDate =EmrCalculationUtils.obsResultForPatient(infantFeedingMap, ptId).getObsDatetime();
                 if (!enrollmentMap.isEmpty()) {
@@ -198,12 +169,8 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                         }
                     }
                     if (allVLOrders.size() > 0) {
-                        //vlOrders.sort(Comparator.reverseOrder());
                         lastOrder = orderService.getOrder(allVLOrders.get(0).getOrderId());
-                        //Order lastOrder1 = orderService.getOrder(vlOrders.get(1));
                         activeVLDate = lastOrder.getDateActivated();
-                        //Date lastVLDate1 = lastOrder1.getDateActivated();
-                        //System.out.println("+++++++++lastVLDate++++++ 0 > " + lastVLDate1);
                     }
                 }
 
@@ -248,13 +215,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 System.out.println("--------previousVLResultLDL--------: " + previousVLResultLDL);
                 System.out.println("--------previousVLResultValue--------: " + previousVLResultValue);
 
-                Obs savedPregnancyStatus = getLatestObs(patient, Dictionary.PREGNANCY_STATUS);
-                Obs savedBFStatus = getLatestObs(patient, Dictionary.CURRENTLY_BREASTFEEDING);
-                Concept YES = Dictionary.getConcept(Dictionary.YES);
-
-                Date obsPregStatusDate = savedPregnancyStatus != null && savedPregnancyStatus.getValueCoded().equals(YES) ? savedPregnancyStatus.getObsDatetime() : null;
-                Date obsBFStatusDate = savedBFStatus != null && savedBFStatus.getValueCoded().equals(YES) ? savedBFStatus.getObsDatetime() : null;
-
                 int daysToMCHSinceARTStart = -1, daysPregObsSinceARTStart = -1, daysBtwLastVlAndBFDate = -1, daysBFObsSinceARTStart = -1, daysBtwLastVlAndMCHDate = -1, daysBtwLastVlAndPregDate = -1, daysBtwLastAndPrevVlDates = 0, daysBetweenARTStartAndLastVL = -1, daysBetweenPregGreenCardAndARTStartDate = -1, daysBetweenBFGreenCardAndARTStartDate = -1;
 
                 if (artStartDate != null && lastVLDate != null) {
@@ -269,18 +229,12 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                     daysPregObsSinceARTStart = daysBetween(artStartDate, lastPregStartDate);
                     System.out.println("-----------------daysPregObsSinceARTStart: " + daysPregObsSinceARTStart);
                 }
-             /*   if (artStartDate != null && obsPregStatusDate != null) {
-                    daysBetweenPregGreenCardAndARTStartDate = daysBetween(artStartDate, obsPregStatusDate);
-                    System.out.println("-----------------daysBetweenPregGreenCardAndARTStartDate: " + daysBetweenPregGreenCardAndARTStartDate);
-                }*/
+
                 if (artStartDate != null && lastBFStartDate != null) {
                     daysBFObsSinceARTStart = daysBetween(artStartDate, lastBFStartDate);
                     System.out.println("-----------------daysBFObsSinceARTStart: " + daysBFObsSinceARTStart);
                 }
-              /*  if (artStartDate != null && obsBFStatusDate != null) {
-                    daysBetweenBFGreenCardAndARTStartDate = daysBetween(artStartDate, obsBFStatusDate);
-                    System.out.println("-----------------daysBetweenBFGreenCardAndARTStartDate: " + daysBetweenBFGreenCardAndARTStartDate);
-                }*/
+
                 // int daysToExcBFObsSinceARTStart = daysBetween(artStartDate, lastExclusiveBFStartDate);
                 if (lastVLDate != null && mchEnrollmentDate != null) {
                     daysBtwLastVlAndMCHDate = daysBetween(mchEnrollmentDate, lastVLDate);
@@ -308,7 +262,7 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
 
                 }
                 //Immediate: Breastfeeding and previously on ART
-                else if (daysBFObsSinceARTStart >= 92 /*&& (lastBFObs != null && (lastBFObs.getValueCoded().equals(mixedFeeding) || lastBFObs.getValueCoded().equals(exclusiveBreastFeeding))*/ && (daysBtwLastVlAndBFDate >= 0 && daysBtwLastVlAndBFDate <= 30)) {
+                else if (daysBFObsSinceARTStart >= 92 && (daysBtwLastVlAndBFDate >= 0 && daysBtwLastVlAndBFDate <= 30)) {
                     System.out.println("---------------Line 235--->" + ptId + "-daysBFObsSinceARTStart:" + daysBFObsSinceARTStart + "-daysBtwLastVlAndBFDate:" + daysBtwLastVlAndBFDate);
                     vlDoneWithinInterval = true;
                 }
