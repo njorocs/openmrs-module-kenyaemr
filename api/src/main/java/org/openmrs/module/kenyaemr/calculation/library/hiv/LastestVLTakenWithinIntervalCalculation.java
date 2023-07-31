@@ -54,10 +54,8 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
         Program mchProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHMS);
         PatientService patientService = Context.getPatientService();
         CalculationResultMap ret = new CalculationResultMap();
-        Map<String, Object> params = new HashMap<String, Object>();
         Set<Integer> alive = Filters.alive(cohort, context);
         Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
-        Set<Integer> inMCHProgram = Filters.inProgram(mchProgram, alive, context);
 
         // All on ART already
         Set<Integer> allOnArt = CalculationUtils.patientsThatPass(calculate(new OnArtCalculation(), cohort, context));
@@ -81,7 +79,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
         EncounterType mchEnrollmentEncType = MetadataUtils.existing(EncounterType.class, MchMetadata._EncounterType.MCHMS_ENROLLMENT);
         Concept yes = Dictionary.getConcept(Dictionary.YES);
         Date dateNineMonthsBefore = DateUtil.adjustDate(context.getNow(), -9, DurationUnit.MONTHS);
-        System.out.println("*********************dateNineMonthsBefore " + dateNineMonthsBefore);
         CalculationResultMap pregStatusMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.PREGNANCY_STATUS), aliveAndFemale, context);
         CalculationResultMap infantFeedingMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.INFANT_FEEDING_METHOD), aliveAndFemale, context);
         CalculationResultMap currentlyBreastFeedingMap = Calculations.lastObs(Dictionary.getConcept(Dictionary.CURRENTLY_BREASTFEEDING), aliveAndFemale, context);
@@ -89,7 +86,7 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
 
         for (Integer ptId : cohort) {
             // Confirm that patient is on hiv and there are no pending vls
-            if (inHivProgram.contains(ptId) && /*!pendingVlResults.contains(ptId) &&*/ allOnArt.contains(ptId) && !ltfu.contains(ptId)) {
+            if (inHivProgram.contains(ptId) && allOnArt.contains(ptId) && !ltfu.contains(ptId)) {
                 Patient patient = patientService.getPatient(ptId);
                 boolean vlDoneWithinInterval = false;
                 String previousVLResult = null, lastVlResult = null, previousVLResultLDL = null, lastVlResultLDL = null;
@@ -97,12 +94,11 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 Date previousVLOrderDate = null, lastVLDate = null, activeVLDate = null, lastBFStartDate = null, lastPregStartDate = null, mchEnrollmentDate = null;
                 Order lastOrder = null;
                 Date artStartDate = dateInitiatedART != null ? EmrCalculationUtils.datetimeResultForPatient(dateInitiatedART, ptId) : null;
-                System.out.println("*****************Patient_id is : " + ptId);
+
                 Obs lastPregStartObs = EmrCalculationUtils.obsResultForPatient(pregStatusMap, ptId);
                 if (lastPregStartObs != null && lastPregStartObs.getValueCoded().equals(yes) && !lastPregStartObs.getObsDatetime().before(dateNineMonthsBefore)) {
-                    System.out.println("********lastPregStartObs.getValueCoded().getConceptId():" + lastPregStartObs.getValueCoded().getConceptId());
                     lastPregStartDate = lastPregStartObs.getObsDatetime();
-                    System.out.println("********lastPregStartDate: " + lastPregStartDate);
+
                 }
 
                 Obs lastBFObs = EmrCalculationUtils.obsResultForPatient(infantFeedingMap, ptId);
@@ -118,7 +114,7 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 if (currentlyBFObs != null) {
                     currentlyBFStatus = currentlyBFObs.getValueCoded();
                 }
-                //   boolean isInfantBreastfeeding = lastBFStatus.equals(exclusiveBreastFeeding) || lastBFStatus.equals(mixedFeeding);
+
                 if (lastBFObs != null && currentlyBFObs != null) {
 
                     if (lastBFObs.getObsDatetime().after(currentlyBFObs.getObsDatetime()) && !lastBFObs.getObsDatetime().before(dateNineMonthsBefore)) {
@@ -131,16 +127,13 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 } else if (currentlyBFObs != null && !currentlyBFObs.getObsDatetime().before(dateNineMonthsBefore)) {
                     lastBFStartDate = currentlyBFStatus.equals(yes) ? currentlyBFObs.getObsDatetime() : null;
                 }
-                if (lastBFStartDate != null) {
-                    System.out.println("********lastBFStartDate: " + lastBFStartDate);
-                }
+
                 //Get the latest of either Breastfeeding or Pregnant status
 
-                //Date lastMixedFeedingStartDate =EmrCalculationUtils.obsResultForPatient(infantFeedingMap, ptId).getObsDatetime();
                 if (!enrollmentMap.isEmpty()) {
                     Encounter mchEncounterResult = EmrCalculationUtils.encounterResultForPatient(enrollmentMap, ptId);
                     mchEnrollmentDate = mchEncounterResult != null ? mchEncounterResult.getEncounterDatetime() : null;
-                    System.out.println("-----------------mchEnrollmentDate------" + mchEnrollmentDate);
+
                 }
                 OrderService orderService = Context.getOrderService();
                 OrderType patientLabOrders = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
@@ -159,7 +152,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                         // only get active vl orders
                         if (order.getConcept().getConceptId() == 856 || order.getConcept().getConceptId() == 1305) {
                             allVLOrders.add(order);
-                            System.out.println("+++++++++Active VL >: Order ID " + order.getOrderId() + "Date:" + order.getDateActivated());
                         }
                     }
                     for (Order order : labOrders) {
@@ -168,7 +160,7 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                             allVLOrders.add(order);
                         }
                     }
-                    if (allVLOrders.size() > 0) {
+                    if (!allVLOrders.isEmpty()) {
                         lastOrder = orderService.getOrder(allVLOrders.get(0).getOrderId());
                         activeVLDate = lastOrder.getDateActivated();
                     }
@@ -188,7 +180,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                     } else {
                         previousVLResultValue = Double.parseDouble(previousVLResult);
                     }
-                    System.out.println("***********previousVLOrderDate**: " + previousVLOrderDate);
                 }
                 if (lastVL != null && lastVL.getValue() != null) {
                     Object lastViralLoad = lastVL.getValue();
@@ -201,111 +192,85 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                     } else {
                         lastVlResultValue = Double.parseDouble(lastVlResult);
                     }
-                    System.out.println("***********Last vl order date**: " + lastVLDate);
                 }
-                if (activeLabOrders.size() > 0) {
+                if (!activeLabOrders.isEmpty()) {
                     previousVLOrderDate = lastVLDate;
                     lastVLDate = activeVLDate;
                     previousVLResultLDL = lastVlResultLDL;
                     previousVLResultValue = lastVlResultValue;
                 }
-                System.out.println("--------activeLabOrders.size()--------: " + activeLabOrders.size());
-                System.out.println("--------lastVLDate--------: " + lastVLDate);
-                System.out.println("--------previousVLOrderDate--------: " + previousVLOrderDate);
-                System.out.println("--------previousVLResultLDL--------: " + previousVLResultLDL);
-                System.out.println("--------previousVLResultValue--------: " + previousVLResultValue);
 
                 int daysToMCHSinceARTStart = -1, daysPregObsSinceARTStart = -1, daysBtwLastVlAndBFDate = -1, daysBFObsSinceARTStart = -1, daysBtwLastVlAndMCHDate = -1, daysBtwLastVlAndPregDate = -1, daysBtwLastAndPrevVlDates = 0, daysBetweenARTStartAndLastVL = -1, daysBetweenPregGreenCardAndARTStartDate = -1, daysBetweenBFGreenCardAndARTStartDate = -1;
 
                 if (artStartDate != null && lastVLDate != null) {
                     daysBetweenARTStartAndLastVL = daysBetween(artStartDate, lastVLDate);
-                    System.out.println("=================daysBetweenARTStartAndLastVL: " + daysBetweenARTStartAndLastVL);
                 }
                 if (mchEnrollmentDate != null && artStartDate != null) {
                     daysToMCHSinceARTStart = daysBetween(artStartDate, mchEnrollmentDate);
-                    System.out.println("-----------------daysToMCHSinceARTStart: " + daysToMCHSinceARTStart);
                 }
                 if (artStartDate != null && lastPregStartDate != null) {
                     daysPregObsSinceARTStart = daysBetween(artStartDate, lastPregStartDate);
-                    System.out.println("-----------------daysPregObsSinceARTStart: " + daysPregObsSinceARTStart);
                 }
 
                 if (artStartDate != null && lastBFStartDate != null) {
                     daysBFObsSinceARTStart = daysBetween(artStartDate, lastBFStartDate);
-                    System.out.println("-----------------daysBFObsSinceARTStart: " + daysBFObsSinceARTStart);
                 }
 
                 // int daysToExcBFObsSinceARTStart = daysBetween(artStartDate, lastExclusiveBFStartDate);
                 if (lastVLDate != null && mchEnrollmentDate != null) {
                     daysBtwLastVlAndMCHDate = daysBetween(mchEnrollmentDate, lastVLDate);
-                    System.out.println("-----------------daysBtwLastVlAndMCHDate: " + daysBtwLastVlAndMCHDate);
                 }
                 if (lastVLDate != null && lastBFStartDate != null) {
                     daysBtwLastVlAndBFDate = daysBetween(lastBFStartDate, lastVLDate);
-                    System.out.println("-----------------daysBtwLastVlAndBFDate: " + daysBtwLastVlAndBFDate);
                 }
                 // int daysBtwLastVlAndMxFeedingDate = lastVLResultDate != null ? daysBetween(lastMixedFeedingStartDate, lastVLResultDate) : null;
                 if (lastVLDate != null && lastPregStartDate != null) {
                     daysBtwLastVlAndPregDate = daysBetween(lastPregStartDate, lastVLDate);
-                    System.out.println("-----------------daysBtwLastVlAndPregDate: " + daysBtwLastVlAndPregDate);
                 }
                 if (lastVLDate != null && previousVLOrderDate != null && lastVLDate != previousVLOrderDate) {
                     daysBtwLastAndPrevVlDates = daysBetween(previousVLOrderDate, lastVLDate);
-                    System.out.println("***********daysBtwLastAndPrevVlDates: " + daysBtwLastAndPrevVlDates);
-                    System.out.println("-----------------daysBtwLastAndPrevVlDates: " + daysBtwLastAndPrevVlDates);
                 }
 
                 //Immediate: Pregnant and previously on ART
-                if (daysPregObsSinceARTStart >= 92 && lastPregStartObs != null && lastPregStartObs.getValueCoded().equals(yes) && daysBtwLastVlAndPregDate >= 0 && daysBtwLastVlAndPregDate <= 30) {
-                    System.out.println("---------------Line 229---->" + ptId + "-daysPregObsSinceARTStart:" + daysPregObsSinceARTStart + "-lastPregStartObs:" + lastPregStartObs + "-lastPregStartObs.getValueCoded().equals(yes):" + lastPregStartObs.getValueCoded().equals(yes) + "-daysBtwLastVlAndPregDate:" + daysBtwLastVlAndPregDate);
+                if (daysPregObsSinceARTStart >= 90 && lastPregStartObs != null && lastPregStartObs.getValueCoded().equals(yes) && daysBtwLastVlAndPregDate >= 0 && daysBtwLastVlAndPregDate <= 30) {
                     vlDoneWithinInterval = true;
 
                 }
                 //Immediate: Breastfeeding and previously on ART
-                else if (daysBFObsSinceARTStart >= 92 && (daysBtwLastVlAndBFDate >= 0 && daysBtwLastVlAndBFDate <= 30)) {
-                    System.out.println("---------------Line 235--->" + ptId + "-daysBFObsSinceARTStart:" + daysBFObsSinceARTStart + "-daysBtwLastVlAndBFDate:" + daysBtwLastVlAndBFDate);
+                else if (daysBFObsSinceARTStart >= 90 && (daysBtwLastVlAndBFDate >= 0 && daysBtwLastVlAndBFDate <= 30)) {
                     vlDoneWithinInterval = true;
                 }
                 //Immediate: in MCH and previously on ART
-                else if (activeInMCH.contains(ptId) && daysToMCHSinceARTStart >= 92 && daysBtwLastVlAndMCHDate >= 0 && daysBtwLastVlAndMCHDate <= 30) {
-                    System.out.println("---------------Line 240--->" + ptId + "-activeInMCH.contains(ptId):" + activeInMCH.contains(ptId) + ":daysToMCHSinceARTStart:" + daysToMCHSinceARTStart + "-daysBtwLastVlAndMCHDate:" + daysBtwLastVlAndMCHDate);
+                else if (activeInMCH.contains(ptId) && daysToMCHSinceARTStart >= 90 && daysBtwLastVlAndMCHDate >= 0 && daysBtwLastVlAndMCHDate <= 30) {
                     vlDoneWithinInterval = true;
                 }
                 //After 3 months: All with unsuppressed VL (>200 cps/ml)
-                else if (previousVLResultValue != null && daysBtwLastAndPrevVlDates > 0 && daysBtwLastAndPrevVlDates <= 92 && (int) previousVLResultValue.doubleValue() > 200) {
-                    System.out.println("---------------Line 245--->" + ptId + "-previousVLResultValue:" + previousVLResultValue + "-daysBtwLastAndPrevVlDates:" + daysBtwLastAndPrevVlDates);
+                else if (previousVLResultValue != null && daysBtwLastAndPrevVlDates > 0 && daysBtwLastAndPrevVlDates <= 90 && (int) previousVLResultValue.doubleValue() > 200) {
                     vlDoneWithinInterval = true;
                 }
                 //After 3 Months: New positives with no previous VL
-                else if (daysBetweenARTStartAndLastVL >= 0 && daysBetweenARTStartAndLastVL <= 92 && allVLOrders.size() == 1) {
-                    System.out.println("---------------Line 251--->" + ptId + "-daysBetweenARTStartAndLastVL:" + daysBetweenARTStartAndLastVL);
-                    //System.out.println("---------------Line 251--->" + ptId + "-daysToMCHSinceARTStart:" + daysToMCHSinceARTStart + "-daysPregObsSinceARTStart:" + daysPregObsSinceARTStart + "-daysBFObsSinceARTStart:" + daysBFObsSinceARTStart + "-daysBtwLastVlAndMCHDate:" + daysBtwLastVlAndMCHDate + "-daysBtwLastVlAndBFDate:" + daysBtwLastVlAndBFDate + "-daysBtwLastVlAndPregDate:" + daysBtwLastVlAndPregDate);
+                else if (daysBetweenARTStartAndLastVL >= 0 && daysBetweenARTStartAndLastVL <= 90 && allVLOrders.size() == 1) {
                     vlDoneWithinInterval = true;
                 }
                 //After 6 months: In MCH program with a suppressed previous VL or BF with a suppressed previous VL or pregnant with a suppressed previous VL or 0-24 years old with a previous suppressed or LDLVL,
                 //1. In MCH program
-                else if (activeInMCH.contains(ptId) && lastVLDate != null && mchEnrollmentDate != null && lastVLDate.after(mchEnrollmentDate) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates < 183 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
-                    System.out.println("---------------Line 257--->" + ptId + "-activeInMCH.contains(ptId):" + activeInMCH.contains(ptId) + "-lastVLDate:" + lastVLDate + "-mchEnrollmentDate:" + mchEnrollmentDate + "-previousVLOrderDate" + previousVLOrderDate + "-daysBtwLastAndPrevVlDates:" + daysBtwLastAndPrevVlDates + "-previousVLResultLDL:" + previousVLResultLDL + "-previousVLResultValue:" + previousVLResultValue);
+                else if (activeInMCH.contains(ptId) && lastVLDate != null && mchEnrollmentDate != null && lastVLDate.after(mchEnrollmentDate) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates <= 180 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
                     vlDoneWithinInterval = true;
                 }
                 //2. BF with a suppressed VL
-                else if ((lastBFObs != null && ((lastBFObs.getValueCoded().equals(mixedFeeding)) || lastBFObs.getValueCoded().equals(exclusiveBreastFeeding)) && lastBFStartDate != null && lastVLDate != null && lastVLDate.after(lastBFStartDate)) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates < 183 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
-                    System.out.println("---------------Line 262--->" + ptId + "-lastBFObs:" + lastBFObs + "-lastBFObs.getValueCoded().equals(mixedFeeding):" + lastBFObs.getValueCoded().equals(mixedFeeding) + "-lastBFObs.getValueCoded().equals(exclusiveBreastFeeding)" + lastBFObs.getValueCoded().equals(exclusiveBreastFeeding) + "-lastBFStartDate:" + lastBFStartDate + "-previousVLOrderDate:" + previousVLOrderDate + "-daysBtwLastAndPrevVlDates" + daysBtwLastAndPrevVlDates + "-previousVLResultLDL:" + previousVLResultLDL + "-previousVLResultValue:" + previousVLResultValue);
+                else if ((lastBFObs != null && ((lastBFObs.getValueCoded().equals(mixedFeeding)) || lastBFObs.getValueCoded().equals(exclusiveBreastFeeding)) && lastBFStartDate != null && lastVLDate != null && lastVLDate.after(lastBFStartDate)) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates <= 180 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
                     vlDoneWithinInterval = true;
                 }
                 //3. Pregnant with a suppressed Previous VL
-                else if (lastPregStartObs != null && lastPregStartObs.getValueCoded().equals(yes) && lastVLDate != null && lastVLDate.after(lastPregStartDate) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates < 183 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
-                    System.out.println("---------------Line 267--->" + ptId + "-lastPregStartObs:" + lastPregStartObs + "-lastPregStartObs.getValueCoded().equals(yes)" + lastPregStartObs.getValueCoded().equals(yes) + "-lastVLDate" + lastVLDate + "-lastVLDate.after(lastPregStartDate):" + lastVLDate.after(lastPregStartDate) + "-previousVLOrderDate:" + previousVLOrderDate + "-daysBtwLastAndPrevVlDates:" + "-daysBtwLastAndPrevVlDates:" + daysBtwLastAndPrevVlDates + "-previousVLResultLDL:" + previousVLResultLDL + "-previousVLResultValue:" + previousVLResultValue);
+                else if (lastPregStartObs != null && lastPregStartObs.getValueCoded().equals(yes) && lastVLDate != null && lastVLDate.after(lastPregStartDate) && (previousVLOrderDate != null && daysBtwLastAndPrevVlDates <= 180 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
                     vlDoneWithinInterval = true;
                 }
                 //4. 0-24 years old with a suppressed or LDL previous VL
-                else if (patient.getAge() <= 24 && (lastVLDate != null && previousVLOrderDate != null && daysBtwLastAndPrevVlDates < 183 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
-                    System.out.println("---------------Line 272--->" + ptId + "-patient.getAge():" + patient.getAge() + "-lastVLDate:" + lastVLDate + "-previousVLOrderDate:" + previousVLOrderDate + "-daysBtwLastAndPrevVlDates:" + daysBtwLastAndPrevVlDates + "-previousVLResultLDL:" + previousVLResultLDL + "-previousVLResultValue" + previousVLResultValue);
+                else if (patient.getAge() <= 24 && (lastVLDate != null && previousVLOrderDate != null && daysBtwLastAndPrevVlDates <= 180 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)))) {
                     vlDoneWithinInterval = true;
                 }
                 //After 12 Months: > 25 years old with suppressed VL or LDL
-                else if (/*lastPregStartObs == null && lastBFObs == null && */!activeInMCH.contains(ptId) && lastVLDate != null && previousVLOrderDate != null && daysBtwLastAndPrevVlDates > 0 && daysBtwLastAndPrevVlDates <= 366 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)) && patient.getAge() >= 25) {
-                    System.out.println("---------------Line 277--->" + ptId + "-!activeInMCH.contains(ptId):" + !activeInMCH.contains(ptId) + "-lastVLDate" + lastVLDate + "-previousVLOrderDate:" + previousVLOrderDate + "-daysBtwLastAndPrevVlDates:" + daysBtwLastAndPrevVlDates + "-previousVLResultLDL:" + previousVLResultLDL + "-previousVLResultValue:" + previousVLResultValue + "-patient.getAge():" + patient.getAge());
+                else if (!activeInMCH.contains(ptId) && lastVLDate != null && previousVLOrderDate != null && daysBtwLastAndPrevVlDates > 0 && daysBtwLastAndPrevVlDates <= 366 && (previousVLResultLDL != null || (previousVLResultValue != null && previousVLResultValue < 200)) && patient.getAge() >= 25) {
                     vlDoneWithinInterval = true;
                 }
                 ret.put(ptId, new BooleanResult(vlDoneWithinInterval, this));
