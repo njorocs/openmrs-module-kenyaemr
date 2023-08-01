@@ -3900,7 +3900,7 @@ public class DatimCohortLibrary {
                 "group by x.patient_id)b\n" +
                 "group by b.patient_id\n" +
                 "having b.latest_visit_date between\n" +
-                "date_sub(:endDate , interval 12 MONTH) and date(:endDate) and b.urgency = '"+testType+"' and (b.vl_result < 1000 or b.vl_result='LDL'))a;";
+                "date_add(date_sub(date(:endDate), interval 12 MONTH), INTERVAL 1 DAY) and date(:endDate) and b.urgency = '"+testType+"' and (b.vl_result < 1000 or b.vl_result='LDL'))a;";
         cd.setName("txpvlsNumByTestType");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -3927,7 +3927,7 @@ public class DatimCohortLibrary {
                 "            group by x.patient_id)b\n" +
                 "      group by b.patient_id\n" +
                 "      having b.latest_visit_date between\n" +
-                "                 date_sub(:endDate, interval 12 MONTH) and date(:endDate)\n" +
+                "                 date_add(date_sub(date(:endDate) , interval 12 MONTH), INTERVAL 1 DAY) and date(:endDate)\n" +
                 "         and order_reason = 1434)a;";
         cd.setName("currentVLTestPregnantOrderReason");
         cd.setQuery(sqlQuery);
@@ -3955,7 +3955,7 @@ public class DatimCohortLibrary {
                 "            group by x.patient_id)b\n" +
                 "      group by b.patient_id\n" +
                 "      having b.latest_visit_date between\n" +
-                "                 date_sub(:endDate, interval 12 MONTH) and date(:endDate)\n" +
+                "                 date_add(date_sub(date(:endDate) , interval 12 MONTH), INTERVAL 1 DAY) and date(:endDate)\n" +
                 "         and order_reason = 159882)a;";
         cd.setName("currentVLTestBreastfeedingOrderReason");
         cd.setQuery(sqlQuery);
@@ -4245,7 +4245,7 @@ public class DatimCohortLibrary {
     public CohortDefinition currentVLResultLast12MonthsByTestType(String testType) {
 
         String sqlQuery = "select patient_id from kenyaemr_etl.etl_laboratory_extract where lab_test in (1305,856) and visit_date between\n" +
-                "                date_sub(:endDate,interval 12 MONTH) and date(:endDate) and urgency = '"+testType+"';";
+                "                date_add(date_sub(date(:endDate) , interval 12 MONTH), INTERVAL 1 DAY) and date(:endDate) and urgency = '"+testType+"';";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("currentVLResultLast12MonthsByTestType");
         cd.setQuery(sqlQuery);
