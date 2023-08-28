@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.threepm;
 
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.kp.KPMoh731PlusCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.kp.KPMonthlyReportCohortLibrary;
 import org.openmrs.module.reporting.indicator.CohortIndicator;
@@ -36,7 +37,14 @@ public class ThreePMIndicatorLibrary {
     private KPMonthlyReportCohortLibrary kpifCohorts;
     @Autowired
     private KPMoh731PlusCohortLibrary kpCohorts;
+    @Autowired
+    private DatimCohortLibrary datimCohhorts;
 
+    public CohortIndicator currentlyOnDTGRegimen() {
+        return cohortIndicator("Number screened",
+                map(threePMCohorts.currentlyOnDTGRegimen(), "startDate=${startDate},endDate=${endDate}")
+        );
+    }
     public CohortIndicator htsScreenedMobile(Integer department) {
         return cohortIndicator("Number screened",
                 map(threePMCohorts.htsScreenedMobile(department), "startDate=${startDate},endDate=${endDate}")
@@ -97,6 +105,28 @@ public class ThreePMIndicatorLibrary {
 
     public CohortIndicator ppCurrentOnARTOnSite() {
         return cohortIndicator("PP: Number of PP current on ART - This PP DICE", map(threePMCohorts.ppCurrentOnARTOnSite(), "startDate=${startDate},endDate=${endDate}"));
+    }
+
+    public CohortIndicator transferredOutAndVerified() {
+        return cohortIndicator("CTV3: Transfer outs", map(datimCohhorts.transferredOutAndVerified(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator txCurrWithHypertension() {
+        return cohortIndicator("CTV3: TxCurr with hypertension", map(threePMCohorts.txCurrWithHypertension(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator txCurrWithControlledHypertension() {
+        return cohortIndicator("CTV3: TxCurr with controlled hypertension", map(threePMCohorts.txCurrWithControlledHypertension(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator txCurrWithControlledDiabetes() {
+        return cohortIndicator("CTV3: TxCurr with controlled diabetes", map(threePMCohorts.txCurrWithControlledDiabetes(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator mmd() {
+        return cohortIndicator("CTV3: TxCurr with mmd", map(threePMCohorts.mmd(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator transferIns() {
+        return cohortIndicator("CTV3: transfer Ins", map(threePMCohorts.transferIns(), "startDate=${startDate},endDate=${endDate}"));
+    }
+    public CohortIndicator died() {
+        return cohortIndicator("CTV3: Died", map(threePMCohorts.died(), "startDate=${startDate},endDate=${endDate}"));
     }
 }
 

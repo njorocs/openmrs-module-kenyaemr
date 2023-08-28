@@ -22,6 +22,7 @@ package org.openmrs.module.kenyaemr.reporting.library.threepm;
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.publicHealthActionReport.PublicHealthActionCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.kp.KPMoh731PlusCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.kp.KPMonthlyReportCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -52,6 +53,9 @@ public class ThreePMCohortLibrary {
     private KPMonthlyReportCohortLibrary kpifCohorts;
     @Autowired
     private ETLMoh731GreenCardCohortLibrary moh731Cohorts;
+
+    @Autowired
+    PublicHealthActionCohortLibrary publicHealthActionCohorts;
     /**
      * Screened for HIV test
      * @return
@@ -237,6 +241,17 @@ public class ThreePMCohortLibrary {
         return cd;
     }
 
+
+    public CohortDefinition currentlyOnDTGRegimen() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("currentlyOnArt",ReportUtils.map(moh731Cohorts.currentlyOnArt(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("ineligibleForDTGRegimen",ReportUtils.map(publicHealthActionCohorts.ineligibleForDTGRegimen(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("patientsOnDTGRegimen",ReportUtils.map(publicHealthActionCohorts.patientsOnDTGRegimen(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("currentlyOnArt AND patientsOnDTGRegimen AND NOT ineligibleForDTGRegimen");
+        return cd;
+    }
     public CohortDefinition kpCurrOnPrEPWithSTI(String kpType) {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -292,5 +307,106 @@ public class ThreePMCohortLibrary {
         cd.setCompositionString("kpType AND currOnARTOffsite");
         return cd;
     }
+    public CohortDefinition hypertensive() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "select i.patient_id\n" +
+                "from kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "where i.chronic_illness = 117399\n" +
+                "group by i.patient_id\n" +
+                "having mid(max(concat(date(i.visit_date), i.chronic_illness)), 11) = 117399;";
+        cd.setName("Hypertensive");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Hypertensive");
+        return cd;
+    }
+    public CohortDefinition controlledHypertension() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "select i.patient_id\n" +
+                "from kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "where i.chronic_illness = 117399\n" +
+                "group by i.patient_id\n" +
+                "having mid(max(concat(date(i.visit_date), i.chronic_illness)), 11) = 117399\n" +
+                "   and mid(max(concat(date(i.visit_date), i.is_chronic_illness_controlled)), 11) = 1065;";
+        cd.setName("Controlled hypertension");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Controlled hypertension");
+        return cd;
+    }
+    public CohortDefinition controlledDiabetes() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "select i.patient_id\n" +
+                "from kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "where i.chronic_illness = 119481\n" +
+                "group by i.patient_id\n" +
+                "having mid(max(concat(date(i.visit_date), i.chronic_illness)), 11) = 119481\n" +
+                "   and mid(max(concat(date(i.visit_date), i.is_chronic_illness_controlled)), 11) = 1065;";
+        cd.setName("Controlled diabetes");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Controlled diabetes");
+        return cd;
+    }
+
+    public CohortDefinition txCurrWithHypertension() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("currentlyOnArt", ReportUtils.map(datimCohorts.currentlyOnArt(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("hypertensive",ReportUtils.map(hypertensive(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("currentlyOnArt AND hypertensive");
+        return cd;
+    }
+
+    public CohortDefinition txCurrWithControlledHypertension() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("currentlyOnArt", ReportUtils.map(datimCohorts.currentlyOnArt(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("controlledHypertension",ReportUtils.map(controlledHypertension(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("currentlyOnArt AND controlledHypertension");
+        return cd;
+    }
+
+    public CohortDefinition txCurrWithControlledDiabetes() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("currentlyOnArt", ReportUtils.map(datimCohorts.currentlyOnArt(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("controlledDiabetes",ReportUtils.map(controlledDiabetes(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("currentlyOnArt AND controlledDiabetes");
+        return cd;
+    }
+
+    public CohortDefinition mmd() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("currentlyOnARTUnder3MonthsMMD", ReportUtils.map(datimCohorts.currentlyOnARTUnder3MonthsMMD(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("currentlyOnART3To5MonthsMMD",ReportUtils.map(datimCohorts.currentlyOnART3To5MonthsMMD(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("currentlyOnART6MonthsAndAboveMMD",ReportUtils.map(datimCohorts.currentlyOnART6MonthsAndAboveMMD(), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("currentlyOnARTUnder3MonthsMMD OR currentlyOnART3To5MonthsMMD OR currentlyOnART6MonthsAndAboveMMD");
+        return cd;
+    }
+
+    public CohortDefinition transferIns() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "select patient_id\n" +
+                "from kenyaemr_etl.etl_hiv_enrollment\n" +
+                "where patient_type = 160563\n" +
+                "  and (date(transfer_in_date) between date(:startDate) and date(:endDate) or\n" +
+                "       date(visit_date) between date(:startDate) and date(:endDate));";
+        cd.setName("Transfer ins");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Transfer ins");
+        return cd;
+    }
+
 }
 

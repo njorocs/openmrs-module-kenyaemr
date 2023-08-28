@@ -16,6 +16,8 @@ import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.reporting.ColumnParameters;
 import org.openmrs.module.kenyaemr.reporting.EmrReportingUtils;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardIndicatorLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimIndicatorLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.publicHealthActionReport.PublicHealthActionIndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonDimensionLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.threepm.ThreePMIndicatorLibrary;
 import org.openmrs.module.kenyaemr.util.HtsConstants;
@@ -47,6 +49,12 @@ public class ThreePMReportBuilder extends AbstractReportBuilder {
 
     @Autowired
     private ETLMoh731GreenCardIndicatorLibrary moh731GreenCardIndicators;
+
+    @Autowired
+    private DatimIndicatorLibrary datimIndicators;
+
+    @Autowired
+    PublicHealthActionIndicatorLibrary publicHealthActionIndicatorLibrary;
 
     //Key Populations
     public static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -179,7 +187,7 @@ public class ThreePMReportBuilder extends AbstractReportBuilder {
               //HTS
                 ReportUtils.map(htsDataset(), "startDate=${startDate},endDate=${endDate}")
                 //VMMC
-               /*   ReportUtils.map(vmmcDataset(), "startDate=${startDate},endDate=${endDate}"),
+              /*    ReportUtils.map(vmmcDataset(), "startDate=${startDate},endDate=${endDate}"),
                 //HCT
                 ReportUtils.map(hctDataset(), "startDate=${startDate},endDate=${endDate}"),
                 //PMTCT
@@ -301,39 +309,37 @@ public class ThreePMReportBuilder extends AbstractReportBuilder {
 
         //Care and Treatment indicators
 
-/*
         EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment", "", ReportUtils.map(moh731GreenCardIndicators.currentlyOnArt(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: On DTG-based regimen", "", ReportUtils.map(threePMIndicators.currentlyOnDTGRegimen(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Stopped treatment", "", ReportUtils.map(threePMIndicators.stoppedTreatment(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Lost (LTFU) (> 30 days)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Hypertension)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Hypertension, well controlled)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Stopped treatment", "", ReportUtils.map(datimIndicators.txmlPatientByTXStopReason(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Lost (LTFU) (> 30 days)", "", ReportUtils.map(publicHealthActionIndicatorLibrary.undocumentedLTFU(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Hypertension)", "", ReportUtils.map(threePMIndicators.txCurrWithHypertension(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Hypertension, well controlled)", "", ReportUtils.map(threePMIndicators.txCurrWithControlledHypertension(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: Eligible for routine vl", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Transfer outs", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Diabetes, well controlled)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Transfer outs", "", ReportUtils.map(datimIndicators.txmlTrfOut(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Diabetes, well controlled)", "", ReportUtils.map(threePMIndicators.txCurrWithControlledDiabetes(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: With viral load results 200 - 999cp/ml", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: On MMS/MMD/DSD", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: New on treatment", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Previously lost but returned to treatment (Tx_RTT)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: On MMS/MMD/DSD", "", ReportUtils.map(threePMIndicators.mmd(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: New on treatment", "", ReportUtils.map(datimIndicators.startedOnArt(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Previously lost but returned to treatment (Tx_RTT)", "", ReportUtils.map(datimIndicators.txRTT(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: With vl results < 400cp/ml (includes LDL)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: Number switched to 3rd line", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: With vl results >= 1000cp/ml", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with NCD well controlled)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: Number switched to 2nd line", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Transfer ins", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Transfer ins", "", ReportUtils.map(threePMIndicators.transferIns(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: Current on treatment - (Number with Diabetes)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-        EmrReportingUtils.addRow(dsd, "CTV3: Died", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
+        EmrReportingUtils.addRow(dsd, "CTV3: Died", "", ReportUtils.map(datimIndicators.txmlPatientDied(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: With viral load results < 200cp/ml (includes LDL)", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
         EmrReportingUtils.addRow(dsd, "CTV3: With vl results 400 - 999cp/ml", "", ReportUtils.map(threePMIndicators.ltfu(), indParams), ctAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08"));
-*/
 
 
         //Check this for and kp types
        // EmrReportingUtils.addRow(dsd, /*"foX53QuynMF",*/ "KPV2_Result: Number of KPs currently active in the DICE/Program","", ReportUtils.map(threePMIndicators.kpCurr(), indParams), sexKPTypeDisaggregation, Arrays.asList("01", "02"));
-        /*dsd.addColumn("foX53QuynMF", "KPV2_Result: Number of KPs currently active in the DICE/Program-FSW", ReportUtils.map(threePMIndicators.kpCurr(FSW), indParams), "");
-        dsd.addColumn("foX53QuynMF", "KPV2_Result: Number of KPs currently active in the DICE/Program-MSM", ReportUtils.map(threePMIndicators.kpCurr(MSM), indParams), "");*/
+        dsd.addColumn("foX53QuynMF", "KPV2_Result: Number of KPs currently active in the DICE/Program-FSW", ReportUtils.map(threePMIndicators.kpCurr(FSW), indParams), "");
+        dsd.addColumn("foX53QuynMF", "KPV2_Result: Number of KPs currently active in the DICE/Program-MSM", ReportUtils.map(threePMIndicators.kpCurr(MSM), indParams), "");
         //--EmrReportingUtils.addRow(dsd, "mFqL1MztVdm", "KPV2_Result: Number of KPs currently active on ART at the DICE-PWID", ReportUtils.map(threePMIndicators.currentlyOnARTOnSite(PWID), indParams), sexDisaggregation, Arrays.asList("01", "02"));
-       /* dsd.addColumn("mFqL1MztVdm", "KPV2_Result: Number of KPs currently active on ART at the DICE-FSW", ReportUtils.map(threePMIndicators.currentlyOnARTOnSite(FSW), indParams), "");
+        dsd.addColumn("mFqL1MztVdm", "KPV2_Result: Number of KPs currently active on ART at the DICE-FSW", ReportUtils.map(threePMIndicators.currentlyOnARTOnSite(FSW), indParams), "");
         dsd.addColumn("mFqL1MztVdm", "KPV2_Result: Number of KPs currently active on ART at the DICE-MSM", ReportUtils.map(threePMIndicators.currentlyOnARTOnSite(MSM), indParams), "");
 
         //--EmrReportingUtils.addRow(dsd, "AMVV35LIVS7", "KPV2_Result: Number of KPs currently on PrEP-PWID", ReportUtils.map(threePMIndicators.kpCurrOnPrEP(PWID), indParams), sexDisaggregation, Arrays.asList("01", "02"));
@@ -347,10 +353,9 @@ public class ThreePMReportBuilder extends AbstractReportBuilder {
         //--EmrReportingUtils.addRow(dsd, "Eh9TBtkpGgP", "KPV2_Result: Number of KPs currently active on ART at other CCC-PWID", ReportUtils.map(threePMIndicators.kpCurrentOnARTOffsite(PWID), indParams), sexDisaggregation, Arrays.asList("01", "02"));
         dsd.addColumn("Eh9TBtkpGgP", "KPV2_Result: Number of KPs currently active on ART at other CCC-FSW", ReportUtils.map(threePMIndicators.kpCurrentOnARTOffsite(FSW), indParams), "");
         dsd.addColumn("Eh9TBtkpGgP", "KPV2_Result: Number of KPs currently active on ART at other CCC-MSM", ReportUtils.map(threePMIndicators.kpCurrentOnARTOffsite(MSM), indParams), "");
-*/
         //EmrReportingUtils.addRow(dsd, /*"jw59Ex21zJ3", */"PP: Number of PP current on ART - Other Facilities", "",ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(), indParams), standardAgeSexCSWPPTypeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         //EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(), indParams), standardAgeSexDisplacedPPTypeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
-       /* EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities-Fishing communities", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(FISHING_COMMUNITIES), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
+        EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities-Fishing communities", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(FISHING_COMMUNITIES), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities-Military and other uniformed services", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(MILITARY_UNIFORMED_SERVICES), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities-Mobile populations", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(MOBILE_POPULATIONS), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         EmrReportingUtils.addRow(dsd, "jw59Ex21zJ3", "PP: Number of PP current on ART - Other Facilities-Non-injecting drug users", ReportUtils.map(threePMIndicators.ppCurrentOnARTOffsite(NON_INJECTING_DRUG_USER), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
@@ -363,7 +368,6 @@ public class ThreePMReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "c1umVKipZDf", "PP: Number of PP current on ART - This PP DICE-Mobile populations", ReportUtils.map(threePMIndicators.ppCurrentOnARTOnSite(MOBILE_POPULATIONS), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         EmrReportingUtils.addRow(dsd, "c1umVKipZDf", "PP: Number of PP current on ART - This PP DICE-Non-injecting drug users", ReportUtils.map(threePMIndicators.ppCurrentOnARTOnSite(NON_INJECTING_DRUG_USER), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         EmrReportingUtils.addRow(dsd, "c1umVKipZDf", "PP: Number of PP current on ART - This PP DICE-Other Priority populations", ReportUtils.map(threePMIndicators.ppCurrentOnARTOnSite(), indParams), standardAgeAndSexDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"));
-*/
         return (dsd);
     }
 
