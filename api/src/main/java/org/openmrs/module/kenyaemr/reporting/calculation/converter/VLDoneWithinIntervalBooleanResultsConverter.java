@@ -34,9 +34,6 @@ public class VLDoneWithinIntervalBooleanResultsConverter implements DataConverte
             return "Y";
         }
 
-        if(value.equalsIgnoreCase("false")) {
-            return "N";
-        }
         return  "N";
 
     }

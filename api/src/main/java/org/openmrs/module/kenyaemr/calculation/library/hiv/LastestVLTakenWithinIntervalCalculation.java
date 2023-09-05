@@ -146,7 +146,6 @@ public class LastestVLTakenWithinIntervalCalculation extends AbstractPatientCalc
                 if (patientLabOrders != null) {
                     labOrders = orderService.getOrders(patient, careSetting, patientLabOrders, true);
                     activeLabOrders = orderService.getActiveOrders(patient, patientLabOrders, careSetting, null);
-                    //     labOrders = orderService.getOrders(patientService.getPatient(ptId), careSetting, patientLabOrders, true);
 
                     for (Order order : activeLabOrders) {
                         // only get active vl orders
