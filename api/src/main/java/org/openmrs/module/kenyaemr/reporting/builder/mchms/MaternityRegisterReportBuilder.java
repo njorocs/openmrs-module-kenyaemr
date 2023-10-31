@@ -332,7 +332,7 @@ public class MaternityRegisterReportBuilder extends AbstractHybridReportBuilder 
 		dsd.addColumn("Counselled on Infant Feeding", maternityCounselledOnInfantFeedingDataDefinition, paramMapping);
 		dsd.addColumn("Delivery Conducted by", maternityDeliveryConductedByDataDefinition, paramMapping);
 		dsd.addColumn("Birth Notification Number", maternityBirthNotificationNumberDataDefinition, paramMapping);
-		dsd.addColumn("Discharged Date", maternityDischargeDateDataDefinition, paramMapping, new DateConverter(DATE_FORMAT));
+		dsd.addColumn("Discharged Date", maternityDischargeDateDataDefinition, paramMapping);
 		dsd.addColumn("Status of Baby at Discharge", maternityStatusOfBabyDataDefinition, paramMapping);
 		dsd.addColumn("Referred From", maternityReferredFromDataDefinition, paramMapping);
 		dsd.addColumn("Referred To", maternityReferredToDataDefinition, paramMapping);
@@ -409,8 +409,8 @@ public class MaternityRegisterReportBuilder extends AbstractHybridReportBuilder 
 		cohortDsd.addColumn("givenTetracycline", "Babies given tetracycline at birth", ReportUtils.map(pmtctMATIndicators.givenTetracycline(), indParams), "");
 		cohortDsd.addColumn("infantsIntiatiedOnBreastfeeding", "Infants intiatied on breastfeeding within 1 hour after birth", ReportUtils.map(pmtctMATIndicators.infantsIntiatiedOnBreastfeeding(), indParams), "");
 		cohortDsd.addColumn("vitaminK", "Vitamin K given ", ReportUtils.map(pmtctMATIndicators.vitaminK(), indParams), "");
-		EmrReportingUtils.addRow(cohortDsd, "HIV Positive adolescents at Maternity", "", ReportUtils.map(pmtctMATIndicators.hivPositiveResultAtPNC(), indParams), maternityAdolescentsAgeDisaggregation, Arrays.asList("01", "02"));
-		EmrReportingUtils.addRow(cohortDsd, "Started HAART (Adolescents)", "", ReportUtils.map(pmtctMATIndicators.startedHAARTPNC(), indParams), maternityAdolescentsAgeDisaggregation, Arrays.asList("01", "02"));
+		cohortDsd.addColumn( "HIV Positive adolescents at Maternity", "", ReportUtils.map(pmtctMATIndicators.adolescentsNewHivPositiveAtMaternity(), indParams), "");
+		EmrReportingUtils.addRow(cohortDsd, "Started HAART (Adolescents)", "", ReportUtils.map(pmtctMATIndicators.startedHAARTMaternity(), indParams), maternityAdolescentsAgeDisaggregation, Arrays.asList("01", "02"));
 
 		return cohortDsd;
 	}

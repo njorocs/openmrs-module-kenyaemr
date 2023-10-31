@@ -37,7 +37,7 @@ public class MaternityAPGARScoreDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select\n" +
                 "       v.patient_id,\n" +
-                "       v.apgar_score_1min\n" +
+                "       v.apgar_score_5min\n" +
                 "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

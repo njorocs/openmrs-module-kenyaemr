@@ -52,9 +52,18 @@ public class MaternityRegisterCohortDefinitionEvaluator implements CohortDefinit
 
         String qry = "SELECT ld.patient_id\n" +
 				"from kenyaemr_etl.etl_mchs_delivery ld\n" +
-				"         inner join kenyaemr_etl.etl_mch_enrollment e\n" +
-				"                    on e.patient_id = ld.patient_id\n" +
-				"where e.visit_date <= ld.visit_date\n" +
+				"         inner join (select e.patient_id, max(e.visit_date) as enr_date, date(d.visit_date) as disc_date\n" +
+				"                     from kenyaemr_etl.etl_mch_enrollment e\n" +
+				"                              left join (select patient_id,\n" +
+				"                                                coalesce(date(effective_discontinuation_date), visit_date) visit_date\n" +
+				"                                         from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"                                         where date(visit_date) <= date(:endDate)\n" +
+				"                                           and program_name = 'MCH Mother'\n" +
+				"                                         group by patient_id) d on e.patient_id = d.patient_id\n" +
+				"                     group by e.patient_id) ed\n" +
+				"                    on ed.patient_id = ld.patient_id\n" +
+				"where enr_date <= ld.visit_date\n" +
+				"  and (disc_date is null or disc_date < enr_date)\n" +
 				"  and coalesce(date(ld.date_of_delivery), date(ld.visit_date))\n" +
 				"    BETWEEN date(:startDate) AND date(:endDate);";
 

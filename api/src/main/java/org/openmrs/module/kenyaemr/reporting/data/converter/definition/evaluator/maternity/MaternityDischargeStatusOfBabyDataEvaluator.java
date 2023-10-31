@@ -35,10 +35,11 @@ public class MaternityDischargeStatusOfBabyDataEvaluator implements PersonDataEv
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select\n" +
-                "  v.patient_id,\n" +
-                "  (case v.baby_status when 163016 then \"Alive\" when 160432 then \"Dead\" else \"\" end) as baby_status\n" +
-                "from kenyaemr_etl.etl_mchs_discharge v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+        String qry = "SELECT l.patient_id,\n" +
+                "       (case d.baby_status when 163016 then 'Alive' when 160432 then 'Dead' else '' end) as baby_status\n" +
+                "FROM kenyaemr_etl.etl_mchs_delivery l\n" +
+                "         inner join kenyaemr_etl.etl_mchs_discharge d on l.patient_id = d.patient_id\n" +
+                "WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

@@ -37,7 +37,7 @@ public class MaternityTEOGivenAtBirthDataEvaluator implements PersonDataEvaluato
 
         String qry = "select\n" +
                 "  v.patient_id,\n" +
-                "  (case v.teo_given when 1 then \"Yes\" when 0 then \" \" else \"\" end) as teo_given\n" +
+                "  (case v.teo_given when 1 then \"Yes\" when 0 then \"No\" end) as teo_given\n" +
                 "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

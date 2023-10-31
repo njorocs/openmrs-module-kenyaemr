@@ -37,7 +37,7 @@ public class MaternityPartnerHIVTestResultsDataEvaluator implements PersonDataEv
 
         String qry = "select\n" +
                 "  v.patient_id,\n" +
-                "  (case v.partner_hiv_status when 664 then \"HIV Negative\" when 703 then \"HIV Positive\" when 1067 then \"Unknown\" else \"\" end) as partner_hiv_status\n" +
+                "  (case v.partner_hiv_status when 664 then \"Negative\" when 703 then \"Positive\" when 1067 then \"Unknown\" else \"\" end) as partner_hiv_status\n" +
                 "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
