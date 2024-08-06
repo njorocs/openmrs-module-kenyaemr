@@ -286,10 +286,10 @@ public class AdxViewFragmentController {
         Document document = documentBuilder.newDocument();
 
         Element root = document.createElement("adx");
-        root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
+    /*    root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
         root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
-        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));
+        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));*/
         for (String dsKey : reportData.getDataSets().keySet()) {
 
             String datasetName = null;
@@ -392,14 +392,14 @@ public class AdxViewFragmentController {
                 }
             }
         }
-
-        document.appendChild(root);
+       document.appendChild(root);
 
         // create the xml file
         //transform the DOM Object to an XML File
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,"yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         DOMSource domSource = new DOMSource(document);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -424,7 +424,7 @@ public class AdxViewFragmentController {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/adx+xml");
+        con.setRequestProperty("Content-Type", "application/adx+xml; charset=UTF-8");
         con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
         con.setDoOutput(true);
 
