@@ -285,8 +285,9 @@ public class AdxViewFragmentController {
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
 
+
         Element root = document.createElement("adx");
-    /*    root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
+      /*  root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
         root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
         root.setAttribute("exported", isoDateTimeFormat.format(new Date()));*/
@@ -419,13 +420,18 @@ public class AdxViewFragmentController {
     }
 
     private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress) throws IOException {
-
+        String strClientId = "";
+        String strClientSecret = "";
+        String auth = strClientId + ":" + strClientSecret;
+        String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
         URL url = new URL(serverAddress);
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/adx+xml; charset=UTF-8");
+        con.setRequestProperty("Content-Type", "application/xml");
         con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
+        con.setRequestProperty("Authorization", "Basic " + authentication);
+        con.setRequestProperty("Accept", "*/*");
         con.setDoOutput(true);
 
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
