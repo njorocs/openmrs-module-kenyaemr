@@ -77,7 +77,7 @@ public class AdxViewFragmentController {
     protected final Log log = LogFactory.getLog(getClass());
 
     private LocationService locationService;
-    public String SERVER_ADDRESS = "https://openhimapi.kenyahmis.org/rest/api//IL/MOH_731/test";
+    public String SERVER_ADDRESS = "https://openhimapi.kenyahmis.org/rest/api/IL/MOH_731/test";
     public String KPIF_SERVER_ADDRESS = "https://il.kenyahmis.org:9721/api/3pm/";
     DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -149,7 +149,6 @@ public class AdxViewFragmentController {
         String datasetName = null;
         String indicatorName = null;
         String mappedIndicatorId = null;
-        String comboId  ="NhSoXUMPK2K";
 
         if (location != null) {
             mfl = new Facility(location).getMflCode();
@@ -187,7 +186,7 @@ public class AdxViewFragmentController {
             mappingDetails.get("datasets").getElements();
 
             w.append("\t").append("<dataValueSet xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoYearMonthFormat.format(reportDate)
-                    + "\" completeDate=\"" + isoDateFormat.format(new Date()) + "\" dataSet=\"" + datasetName + "\" attributeOptionCombo=\"" + comboId + "\">\n");
+                    + "\" completeDate=\"" + isoDateFormat.format(new Date()) + "\" dataSet=\"" + datasetName + "\" attributeOptionCombo=\"" + COMBO_ID + "\">\n");
             DataSet dataset = reportData.getDataSets().get(dsKey);
             List<DataSetColumn> columns = dataset.getMetaData().getColumns();
 
@@ -197,7 +196,7 @@ public class AdxViewFragmentController {
                     Object value = row.getColumnValue(column);
 
                     if (reportName.equals(MOH_731)) {
-                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" categoryOptionCombo=\"" + comboId + "\" value=\"" + value.toString() + "\"/>\n");
+                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" categoryOptionCombo=\"" + COMBO_ID + "\" value=\"" + value.toString() + "\"/>\n");
 
                     } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
 
@@ -271,6 +270,10 @@ public class AdxViewFragmentController {
         }
 
         String serverAddress = administrationService.getGlobalProperty("ilServer.address");
+        String strClientId = administrationService.getGlobalProperty("dhis.username");
+        String strClientSecret = administrationService.getGlobalProperty("dhis.password");
+        String auth = strClientId + ":" + strClientSecret;
+        String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
 
         String mfl = "Unknown";
         String columnPrefix = null;
@@ -323,7 +326,7 @@ public class AdxViewFragmentController {
             Element eDataset = document.createElement("dataValueSet");
             // add group attributes
             eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
-            eDataset.setAttribute("orgUnit", mfl);
+            eDataset.setAttribute("orgUnit", "24850");
             eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
             eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
             eDataset.setAttribute("dataSet", datasetName);
@@ -370,7 +373,7 @@ public class AdxViewFragmentController {
                     Element eDataset = document.createElement("dataValueSet");
                     // add group attributes
                     eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
-                    eDataset.setAttribute("orgUnit", mfl);
+                    eDataset.setAttribute("orgUnit", "24850");
                     eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
                     eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
                     eDataset.setAttribute("dataSet", datasetName);
@@ -416,14 +419,11 @@ public class AdxViewFragmentController {
 
         }
 
-        return postAdxToIL(out, reportName.equals(MOH_731)? SERVER_ADDRESS : KPIF_SERVER_ADDRESS);
+        return postAdxToIL(out, reportName.equals(MOH_731)? SERVER_ADDRESS : KPIF_SERVER_ADDRESS, authentication);
     }
 
-    private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress) throws IOException {
-        String strClientId = "";
-        String strClientSecret = "";
-        String auth = strClientId + ":" + strClientSecret;
-        String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
+    private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) throws IOException {
+
         URL url = new URL(serverAddress);
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

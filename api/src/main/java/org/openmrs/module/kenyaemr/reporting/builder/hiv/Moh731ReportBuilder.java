@@ -110,7 +110,7 @@ public class Moh731ReportBuilder extends AbstractReportBuilder {
     @Override
     protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor, ReportDefinition reportDefinition) {
         return Arrays.asList(
-                ReportUtils.map(hivTestingAndCouselingDatasetDefinition(), "startDate=${startDate},endDate=${endDate}"),
+               // ReportUtils.map(hivTestingAndCouselingDatasetDefinition(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(pmtctDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(careAndTreatmentDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(voluntaryMaleCircumcisionDatasetDefinition(), "startDate=${startDate},endDate=${endDate}")
@@ -120,6 +120,7 @@ public class Moh731ReportBuilder extends AbstractReportBuilder {
      * Creates the dataset for section #1
      * : hiv testing and counseling
      * @return the dataset
+     *
      */
     protected DataSetDefinition hivTestingAndCouselingDatasetDefinition() {
         CohortIndicatorDataSetDefinition cohortDsd = new CohortIndicatorDataSetDefinition();

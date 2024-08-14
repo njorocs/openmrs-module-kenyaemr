@@ -310,6 +310,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 
 		install(globalProperty(EmrConstants.GP_DHIS2_DATASET_MAPPING, "ADX Mapping for KenyaEMR and DHIS2 datasets", adxMappingString));
 		install(globalProperty(EmrConstants.GP_3PM_DATASET_MAPPING, "ADX Mapping for KenyaEMR and 3PM datasets", adx3pmMappingString));
+		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
+		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
 
 		install(globalProperty("order.drugDosingUnitsConceptUuid", "Drug dosing units concept", "162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		install(globalProperty("client_number_label", "Label for Client Number", "Client Number"));
