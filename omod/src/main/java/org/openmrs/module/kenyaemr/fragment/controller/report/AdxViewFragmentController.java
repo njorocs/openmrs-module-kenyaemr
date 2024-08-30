@@ -85,6 +85,7 @@ public class AdxViewFragmentController {
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "MOH 731";
     private static final String COMBO_ID = "NhSoXUMPK2K";
+    private static final String GP_MFL_CODE = Context.getAdministrationService().getGlobalProperty("facility.mflcode").trim();
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
                     @RequestParam("returnUrl") String returnUrl,
@@ -150,9 +151,7 @@ public class AdxViewFragmentController {
         String indicatorName = null;
         String mappedIndicatorId = null;
 
-        if (location != null) {
-            mfl = new Facility(location).getMflCode();
-        }
+        mfl = location != null ? new Facility(location).getMflCode() : GP_MFL_CODE;
 
         StringBuilder w = new StringBuilder();
 
