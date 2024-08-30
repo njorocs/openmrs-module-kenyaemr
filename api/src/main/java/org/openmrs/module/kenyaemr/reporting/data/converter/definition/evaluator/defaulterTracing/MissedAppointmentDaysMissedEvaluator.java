@@ -36,28 +36,40 @@ public class MissedAppointmentDaysMissedEvaluator implements EncounterDataEvalua
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id,\n" +
-                "       ifnull(timestampdiff(DAY, missed_refill_date,\n" +
-                "                            least(date(:endDate), if(rtc_refill is null, date(:endDate), rtc_refill))),\n" +
-                "              timestampdiff(DAY, missed_appointment_date,\n" +
-                "                            least(date(:endDate), if(rtcDate is null, date(:endDate), rtcDate)))) as daysMissed\n" +
-                "from (select fup.encounter_id,\n" +
-                "             fup.patient_id,\n" +
-                "             fup.next_appointment_date       missed_appointment_date,\n" +
-                "             fup.refill_date                 missed_refill_date,\n" +
-                "             min(firstVisit.visit_date)   as rtcDate,\n" +
-                "             min(refill_visit.visit_date) as rtc_refill\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "               left join kenyaemr_etl.etl_patient_hiv_followup firstVisit\n" +
-                "                         on firstVisit.patient_id = fup.patient_id and\n" +
-                "                            fup.next_appointment_date < firstVisit.visit_date\n" +
-                "               left join kenyaemr_etl.etl_art_fast_track refill_visit\n" +
-                "                         on refill_visit.patient_id = fup.patient_id and fup.refill_date < refill_visit.visit_date\n" +
-                "               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "      where date(fup.next_appointment_date) between date(:startDate) and date(:endDate)\n" +
-                "         or date(fup.refill_date) between date(:startDate) and date(:endDate)\n" +
-                "      group by fup.encounter_id, fup.patient_id) t;";
+        String qry = "select encounter_id,patient_id, timestampdiff(DAY, appdate,ifnull(rtc,date(current_date))) as days_missed\n" +
+                "from (\n" +
+                "         select fup.encounter_id,\n" +
+                "                fup.patient_id,\n" +
+                "                firstvisit.patient_id as rtc,\n" +
+                "                null as honouredRefill,\n" +
+                "                fup.next_appointment_date as appdate\n" +
+                "         from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+                "                  left join kenyaemr_etl.etl_patient_hiv_followup firstvisit\n" +
+                "                            on firstvisit.patient_id = fup.patient_id\n" +
+                "                                and fup.next_appointment_date < firstvisit.visit_date\n" +
+                "                                and firstvisit.visit_date > fup.visit_date\n" +
+                "                  join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                  join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "         where date(fup.next_appointment_date) between date(:startDate) and date(:endDate)\n" +
+                "         group by fup.encounter_id\n" +
+                "\n" +
+                "         union\n" +
+                "\n" +
+                "         select fup.encounter_id,\n" +
+                "                fup.patient_id,\n" +
+                "                null as honored_appt,\n" +
+                "                refillvisit.patient_id as honouredRefill,\n" +
+                "                fup.refill_date as appdate\n" +
+                "         from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+                "                  left join kenyaemr_etl.etl_art_fast_track refillvisit\n" +
+                "                            on refillvisit.patient_id = fup.patient_id\n" +
+                "                                and fup.refill_date < refillvisit.visit_date\n" +
+                "                                and refillvisit.visit_date > fup.visit_date\n" +
+                "                  join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                  join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "         where date(fup.refill_date) between date(:startDate) and date(:endDate)\n" +
+                "         group by fup.encounter_id\n" +
+                "     ) as mApp1;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");
