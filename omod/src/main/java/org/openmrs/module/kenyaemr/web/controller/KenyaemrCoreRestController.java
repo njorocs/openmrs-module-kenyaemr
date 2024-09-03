@@ -453,9 +453,13 @@ public class KenyaemrCoreRestController extends BaseRestController {
             node.put("changeReasons", obj.get("changeReasons").toString());
             node.put("regimenUuid", obj.get("regimenUuid").toString());
             node.put("current", obj.get("current").toString());
-            regimenNode.add(node);
-        }
 
+            if (!obj.get("startDate").toString().isEmpty() && !obj.get("endDate").toString().isEmpty() && !obj.get("regimenShortDisplay").toString().isEmpty() &&
+                    !obj.get("regimenLine").toString().isEmpty() && !obj.get("regimenLongDisplay").toString().isEmpty() && !obj.get("changeReasons").toString().isEmpty() &&
+                    !obj.get("regimenUuid").toString().isEmpty() && !obj.get("current").toString().isEmpty()) {
+                regimenNode.add(node);
+            }
+        }
         regimenObj.put("results", regimenNode);
         return regimenObj.toString();
 
