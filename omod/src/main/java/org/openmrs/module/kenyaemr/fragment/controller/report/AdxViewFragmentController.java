@@ -184,7 +184,7 @@ public class AdxViewFragmentController {
 
             mappingDetails.get("datasets").getElements();
 
-            w.append("\t").append("<dataValueSet xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoYearMonthFormat.format(reportDate)
+            w.append("\t").append("<group xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoYearMonthFormat.format(reportDate)
                     + "\" completeDate=\"" + isoDateFormat.format(new Date()) + "\" dataSet=\"" + datasetName + "\" attributeOptionCombo=\"" + COMBO_ID + "\">\n");
             DataSet dataset = reportData.getDataSets().get(dsKey);
             List<DataSetColumn> columns = dataset.getMetaData().getColumns();
@@ -215,7 +215,7 @@ public class AdxViewFragmentController {
                     }
                 }
             }
-            w.append("</dataValueSet>\n");
+            w.append("</group>\n");
         }
         if (reportName.equals(MOH_731)) {
             for (ReportDatasetValueEntryMapper e : getFaclityReportData(MOH_731_ID, isoDateFormat.format(reportDate), isoDateFormat.format(endDate))) {
@@ -234,7 +234,7 @@ public class AdxViewFragmentController {
 
                     }
                 }
-                w.append("</dataValueSet>\n");
+                w.append("</group>\n");
             }
         }
         w.append("</adx>\n");
@@ -289,10 +289,10 @@ public class AdxViewFragmentController {
 
 
         Element root = document.createElement("adx");
-      /*  root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
+        root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
         root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
-        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));*/
+        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));
         for (String dsKey : reportData.getDataSets().keySet()) {
 
             String datasetName = null;
@@ -322,9 +322,9 @@ public class AdxViewFragmentController {
             if (datasetName == null)
                 continue;
 
-            Element eDataset = document.createElement("dataValueSet");
+            Element eDataset = document.createElement("group");
             // add group attributes
-            eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
+            //eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
             eDataset.setAttribute("orgUnit", "24850");
             eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
             eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
@@ -369,9 +369,9 @@ public class AdxViewFragmentController {
                     FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
                     String datasetName = ds.getMapping();
 
-                    Element eDataset = document.createElement("dataValueSet");
+                    Element eDataset = document.createElement("group");
                     // add group attributes
-                    eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
+                   // eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
                     eDataset.setAttribute("orgUnit", "24850");
                     eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
                     eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
