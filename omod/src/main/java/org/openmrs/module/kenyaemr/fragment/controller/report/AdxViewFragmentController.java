@@ -184,7 +184,7 @@ public class AdxViewFragmentController {
 
             mappingDetails.get("datasets").getElements();
 
-            w.append("\t").append("<group xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoYearMonthFormat.format(reportDate)
+            w.append("\t").append("<group xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoDateFormat.format(reportDate)
                     + "\" completeDate=\"" + isoDateFormat.format(new Date()) + "\" dataSet=\"" + datasetName + "\" attributeOptionCombo=\"" + COMBO_ID + "\">\n");
             DataSet dataset = reportData.getDataSets().get(dsKey);
             List<DataSetColumn> columns = dataset.getMetaData().getColumns();
@@ -223,7 +223,7 @@ public class AdxViewFragmentController {
                 Integer datasetId = Integer.parseInt(e.getDatasetID());
                 FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
 
-                w.append("\t").append("<group orgUnit=\"" + mfl + "\" period=\"" + isoYearMonthFormat.format(reportDate)
+                w.append("\t").append("<group orgUnit=\"" + mfl + "\" period=\"" + isoDateFormat.format(reportDate).concat("/P1M")
                         + " dataSetId=\"" + ds.getMapping() + "\">\n");
                 for (DatasetIndicatorDetails row : e.getIndicators()) {
                     if (row.getValue() != null && !"".equals(row.getValue()) && StringUtils.isNotEmpty(row.getValue())) {
@@ -326,7 +326,7 @@ public class AdxViewFragmentController {
             // add group attributes
             //eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
             eDataset.setAttribute("orgUnit", "24850");
-            eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
+            eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
             eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
             eDataset.setAttribute("dataSet", datasetName);
             eDataset.setAttribute("attributeOptionCombo", COMBO_ID);
@@ -373,7 +373,7 @@ public class AdxViewFragmentController {
                     // add group attributes
                    // eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
                     eDataset.setAttribute("orgUnit", "24850");
-                    eDataset.setAttribute("period", isoYearMonthFormat.format(reportDate));
+                    eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
                     eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
                     eDataset.setAttribute("dataSet", datasetName);
                     eDataset.setAttribute("attributeOptionCombo", COMBO_ID);
