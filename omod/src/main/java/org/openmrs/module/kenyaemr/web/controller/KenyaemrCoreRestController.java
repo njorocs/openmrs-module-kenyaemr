@@ -110,11 +110,13 @@ import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import javax.crypto.CipherOutputStream;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -3529,16 +3531,21 @@ else {
 
             if (processComplete == 0) {
                 // Encrypt the exported file
-                byte[] dumpData = Files.readAllBytes(Paths.get(filePath));
-                byte[] encryptedData = encrypt(dumpData);
+                System.out.println("------We want to encrypt the dump");
+                long fileSize = Files.size(Paths.get(filePath));
+System.out.println("----size of the dump file is "+fileSize+ " bytes");
+long startEncryptionTime = System.currentTimeMillis();
+               // byte[] dumpData = Files.readAllBytes(Paths.get(filePath));
 
-                // Write the encrypted content to a new file
-                Files.write(Paths.get(encryptedFilePath), encryptedData);
+                System.out.println("----File read successfully, starting encryption...");
+                encryptFileStreaming(filePath,encryptedFilePath);
+                long endEcryptionTime = System.currentTimeMillis();
+                System.out.println("----Encryption completed. Took "+(endEcryptionTime - startEncryptionTime)+ " ms");
 
                 // Clean up the original file
                 Files.delete(Paths.get(filePath));
 
-                System.out.println("Database exported and encrypted successfully as " + encryptedFilePath);
+                System.out.println("-------------Database exported and encrypted successfully as " + encryptedFilePath);
             } else {
                 System.err.println("Database export failed!");
             }
@@ -3614,6 +3621,35 @@ else {
         }
     }
 
+    // Streaming Encryption
+    private void encryptFileStreaming(String inputFilePath, String outputFilePath) throws Exception {
+        // Define the encryption algorithm (for example, AES)
+
+        MessageDigest sha = MessageDigest.getInstance("SHA-1");
+        byte[] keyBytes = sha.digest(ENCRYPTION_KEY.getBytes("UTF-8"));
+        keyBytes = Arrays.copyOf(keyBytes, 16);  // Use only the first 128 bit
+        SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
+
+        // Create the Cipher object
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        try (InputStream fileInputStream = new FileInputStream(inputFilePath);
+             OutputStream fileOutputStream = new FileOutputStream(outputFilePath);
+             CipherOutputStream cipherOutputStream = new CipherOutputStream(fileOutputStream, cipher)) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                cipherOutputStream.write(buffer, 0, bytesRead);
+            }
+
+            cipherOutputStream.flush();  // Ensure all encrypted data is written
+            System.out.println("------File encrypted successfully: " + outputFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // Encryption method using AES
     private byte[] encrypt(byte[] data) throws Exception {
         Cipher cipher = Cipher.getInstance("AES");
