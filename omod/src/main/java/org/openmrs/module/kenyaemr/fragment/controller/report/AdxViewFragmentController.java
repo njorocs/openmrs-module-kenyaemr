@@ -81,7 +81,6 @@ public class AdxViewFragmentController {
     public String KPIF_SERVER_ADDRESS = "https://il.kenyahmis.org:9721/api/3pm/";
     DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    DateFormat isoYearMonthFormat = new SimpleDateFormat("yyyyMM");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "MOH 731";
     private static final String COMBO_ID = "NhSoXUMPK2K";
@@ -93,6 +92,7 @@ public class AdxViewFragmentController {
                     PageModel model,
                     @SpringBean ReportManager reportManager,
                     @SpringBean KenyaUiUtils kenyaUi,
+
                     @SpringBean ReportService reportService) throws Exception {
 
         ReportDefinition definition = reportRequest.getReportDefinition().getParameterizable();
@@ -134,9 +134,6 @@ public class AdxViewFragmentController {
         locationService = Context.getLocationService();
         String reportName = reportData.getDefinition().getName();
 
-        Integer locationId = Integer.parseInt(administrationService.getGlobalProperty("kenyaemr.defaultLocation"));
-
-        Location location = locationService.getLocation(locationId);
         ObjectNode mappingDetails = null;
 
         if (reportName.equals(MOH_731)) {
@@ -145,16 +142,27 @@ public class AdxViewFragmentController {
             mappingDetails = EmrUtils.getDatasetMappingForReport(reportName, administrationService.getGlobalProperty("kenyakeypop.adx3pmDatasetMapping"));
         }
 
-        String mfl = "Unknown";
         String columnPrefix = mappingDetails.get("prefix").getTextValue();
         String datasetName = null;
         String indicatorName = null;
         String mappedIndicatorId = null;
 
-        mfl = location != null ? new Facility(location).getMflCode() : GP_MFL_CODE;
-
         StringBuilder w = new StringBuilder();
 
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = null;
+        try {
+            documentBuilder = documentFactory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        Document document = documentBuilder.newDocument();
+
+        Element root = document.createElement("adx");
+        //root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
+        root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
+        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));
         for (String dsKey : reportData.getDataSets().keySet()) {
 
             // String datasetName = null;
@@ -183,27 +191,23 @@ public class AdxViewFragmentController {
                 continue;
 
             mappingDetails.get("datasets").getElements();
-
-            w.append("\t").append("<group xmlns=\"http://dhis2.org/schema/dxf/2.0\" orgUnit=\"" + mfl + "\" period=\"" + isoDateFormat.format(reportDate)
-                    + "\" completeDate=\"" + isoDateFormat.format(new Date()) + "\" dataSet=\"" + datasetName + "\" attributeOptionCombo=\"" + COMBO_ID + "\">\n");
+/*
+            w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            w.append("<adx xmlns=\"urn:ihe:qrph:adx:2015\"" +
+                    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                    "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
+                    "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");*/
             DataSet dataset = reportData.getDataSets().get(dsKey);
             List<DataSetColumn> columns = dataset.getMetaData().getColumns();
-
             for (DataSetRow row : dataset) {
                 for (DataSetColumn column : columns) {
                     indicatorName = column.getName();
                     Object value = row.getColumnValue(column);
 
                     if (reportName.equals(MOH_731)) {
-                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" categoryOptionCombo=\"" + COMBO_ID + "\" value=\"" + value.toString() + "\"/>\n");
+                        w.append("\t").append("<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" categoryOptionCombo=\"" + COMBO_ID + "\" value=\"" + value.toString() + "\"/>\n");
 
                     } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
-
-                        w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-                        w.append("<adx xmlns=\"urn:ihe:qrph:adx:2015\"\n" +
-                                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                                "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
-                                "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");
                         if (indicatorName.contains("PWUD"))
                             continue;
 
@@ -217,27 +221,38 @@ public class AdxViewFragmentController {
             }
             w.append("</group>\n");
         }
+        w.append(root);
         if (reportName.equals(MOH_731)) {
             for (ReportDatasetValueEntryMapper e : getFaclityReportData(MOH_731_ID, isoDateFormat.format(reportDate), isoDateFormat.format(endDate))) {
 
                 Integer datasetId = Integer.parseInt(e.getDatasetID());
                 FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
+                Element eDataset = document.createElement("group");
+                eDataset.setAttribute("orgUnit", getMflCode());
+                eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
+                eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
+                eDataset.setAttribute("dataSet", datasetName);
+                eDataset.setAttribute("attributeOptionCombo", COMBO_ID);
 
-                w.append("\t").append("<group orgUnit=\"" + mfl + "\" period=\"" + isoDateFormat.format(reportDate).concat("/P1M")
-                        + " dataSetId=\"" + ds.getMapping() + "\">\n");
                 for (DatasetIndicatorDetails row : e.getIndicators()) {
                     if (row.getValue() != null && !"".equals(row.getValue()) && StringUtils.isNotEmpty(row.getValue())) {
                         String name = row.getName();
                         Object value = row.getValue();
 
-                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + name + "\" value=\"" + value.toString() + "\"/>\n");
+                        Element dataValue = document.createElement("dataValue");
+                        dataValue.setAttribute("dataElement", columnPrefix.concat(name));
+                        dataValue.setAttribute("categoryOptionCombo", COMBO_ID);
+                        dataValue.setAttribute("value", value.toString());
+                        eDataset.appendChild(dataValue);
 
                     }
                 }
-                w.append("</group>\n");
+                document.appendChild(eDataset);
+               // w.append("</group>\n");
             }
         }
-        w.append("</adx>\n");
+       // document.appendChild(root);
+       // w.append("</adx>\n");
         //w.flush();
         return w.toString();
     }
@@ -256,9 +271,6 @@ public class AdxViewFragmentController {
         Date reportDate = (Date) reportData.getContext().getParameterValue("startDate");
         Date endDate = (Date) reportData.getContext().getParameterValue("endDate");
 
-        Integer locationId = Integer.parseInt(administrationService.getGlobalProperty("kenyaemr.defaultLocation"));
-
-        Location location = locationService.getLocation(locationId);
         ObjectNode mappingDetails = null;
         String mappedIndicatorId = null;
 
@@ -274,19 +286,13 @@ public class AdxViewFragmentController {
         String auth = strClientId + ":" + strClientSecret;
         String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
 
-        String mfl = "Unknown";
         String columnPrefix = null;
 
         columnPrefix = mappingDetails.get("prefix").getTextValue();
 
-        if (location != null) {
-            mfl = new Facility(location).getMflCode();
-        }
-
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
-
 
         Element root = document.createElement("adx");
         root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
@@ -325,7 +331,7 @@ public class AdxViewFragmentController {
             Element eDataset = document.createElement("group");
             // add group attributes
             //eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
-            eDataset.setAttribute("orgUnit", "24850");
+            eDataset.setAttribute("orgUnit", getMflCode());
             eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
             eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
             eDataset.setAttribute("dataSet", datasetName);
@@ -372,7 +378,7 @@ public class AdxViewFragmentController {
                     Element eDataset = document.createElement("group");
                     // add group attributes
                    // eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
-                    eDataset.setAttribute("orgUnit", "24850");
+                    eDataset.setAttribute("orgUnit", getMflCode());
                     eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
                     eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
                     eDataset.setAttribute("dataSet", datasetName);
@@ -580,7 +586,20 @@ public class AdxViewFragmentController {
         return list;
 
     }
+    String getMflCode() {
+        String mfl;
+        Integer locationId;
+        String locationProperty = administrationService.getGlobalProperty("kenyaemr.defaultLocation");
 
+        if (locationProperty != null || !locationProperty.isEmpty()) {
+            locationId = Integer.parseInt(locationProperty);
+            Location location = locationService.getLocation(locationId);
+            mfl = new Facility(location).getMflCode();
+        } else {
+            mfl = GP_MFL_CODE;
+        }
+        return mfl;
+    }
     //Mappings for KPIF monthly report indicators to 3pm DUIDs/CUIDs
     public static String get3PIndicatorId(String indicatorDisaggr) {
 
