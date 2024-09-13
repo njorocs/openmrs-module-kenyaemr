@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.validation.constraints.Null;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,11 +53,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -84,7 +79,6 @@ public class AdxViewFragmentController {
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "MOH 731";
     private static final String COMBO_ID = "NhSoXUMPK2K";
-    private static final String GP_MFL_CODE = Context.getAdministrationService().getGlobalProperty("facility.mflcode").trim();
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
                     @RequestParam("returnUrl") String returnUrl,
@@ -134,6 +128,9 @@ public class AdxViewFragmentController {
         locationService = Context.getLocationService();
         String reportName = reportData.getDefinition().getName();
 
+        Integer locationId = Integer.parseInt(administrationService.getGlobalProperty("kenyaemr.defaultLocation"));
+
+        Location location = locationService.getLocation(locationId);
         ObjectNode mappingDetails = null;
 
         if (reportName.equals(MOH_731)) {
@@ -148,21 +145,12 @@ public class AdxViewFragmentController {
         String mappedIndicatorId = null;
 
         StringBuilder w = new StringBuilder();
+       // w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        w.append("<adx xmlns=\"urn:ihe:qrph:adx:2015\"\n" +
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
+                "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");
 
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = null;
-        try {
-            documentBuilder = documentFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        Document document = documentBuilder.newDocument();
-
-        Element root = document.createElement("adx");
-        //root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
-        root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
-        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));
         for (String dsKey : reportData.getDataSets().keySet()) {
 
             // String datasetName = null;
@@ -191,23 +179,21 @@ public class AdxViewFragmentController {
                 continue;
 
             mappingDetails.get("datasets").getElements();
-/*
-            w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            w.append("<adx xmlns=\"urn:ihe:qrph:adx:2015\"" +
-                    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                    "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
-                    "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");*/
+
+            w.append("\t").append("<group orgUnit=\"" + getMflCode() + "\" attributeOptionCombo=\"" + COMBO_ID + "\" completeDate=\"" + isoDateFormat.format(new Date()) +  "\" period=\"" + isoDateFormat.format(reportDate)
+                    + "/P1M\" dataSet=\"" + datasetName + "\">\n");
             DataSet dataset = reportData.getDataSets().get(dsKey);
             List<DataSetColumn> columns = dataset.getMetaData().getColumns();
+
             for (DataSetRow row : dataset) {
                 for (DataSetColumn column : columns) {
                     indicatorName = column.getName();
                     Object value = row.getColumnValue(column);
 
                     if (reportName.equals(MOH_731)) {
-                        w.append("\t").append("<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" categoryOptionCombo=\"" + COMBO_ID + "\" value=\"" + value.toString() + "\"/>\n");
-
+                        w.append("\t\t").append( "<dataValue categoryOptionCombo=\""+ COMBO_ID +"\" dataElement=\"" + columnPrefix + "" + indicatorName + "\" value=\"" + value.toString() + "\"/>\n");
                     } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
+
                         if (indicatorName.contains("PWUD"))
                             continue;
 
@@ -221,40 +207,29 @@ public class AdxViewFragmentController {
             }
             w.append("</group>\n");
         }
-        w.append(root);
         if (reportName.equals(MOH_731)) {
             for (ReportDatasetValueEntryMapper e : getFaclityReportData(MOH_731_ID, isoDateFormat.format(reportDate), isoDateFormat.format(endDate))) {
 
                 Integer datasetId = Integer.parseInt(e.getDatasetID());
                 FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
-                Element eDataset = document.createElement("group");
-                eDataset.setAttribute("orgUnit", getMflCode());
-                eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
-                eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
-                eDataset.setAttribute("dataSet", datasetName);
-                eDataset.setAttribute("attributeOptionCombo", COMBO_ID);
 
+                w.append("\t").append("<group orgUnit=\"" + getMflCode() + "\" period=\"" + isoDateFormat.format(reportDate)
+                        + "/P1M\" dataSetId=\"" + ds.getMapping() + "\">\n");
                 for (DatasetIndicatorDetails row : e.getIndicators()) {
                     if (row.getValue() != null && !"".equals(row.getValue()) && StringUtils.isNotEmpty(row.getValue())) {
                         String name = row.getName();
                         Object value = row.getValue();
 
-                        Element dataValue = document.createElement("dataValue");
-                        dataValue.setAttribute("dataElement", columnPrefix.concat(name));
-                        dataValue.setAttribute("categoryOptionCombo", COMBO_ID);
-                        dataValue.setAttribute("value", value.toString());
-                        eDataset.appendChild(dataValue);
-
+                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + name + "\" value=\"" + value.toString() + "\"/>\n");
                     }
                 }
-                document.appendChild(eDataset);
-               // w.append("</group>\n");
+                w.append("</group>\n");
             }
         }
-       // document.appendChild(root);
-       // w.append("</adx>\n");
+        w.append("</adx>\n");
         //w.flush();
         return w.toString();
+
     }
 
     public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
@@ -441,9 +416,7 @@ public class AdxViewFragmentController {
 
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
 
-
         out.writeBytes(outStream.toString());
-
 
         out.flush();
         out.close();
@@ -481,9 +454,7 @@ public class AdxViewFragmentController {
 
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
 
-
         out.writeBytes(outStream.toString());
-
 
         out.flush();
         out.close();
@@ -590,7 +561,7 @@ public class AdxViewFragmentController {
         String mfl;
         Integer locationId;
         String locationProperty = administrationService.getGlobalProperty("kenyaemr.defaultLocation");
-
+        String GP_MFL_CODE = Context.getAdministrationService().getGlobalProperty("facility.mflcode").trim();
         if (locationProperty != null || !locationProperty.isEmpty()) {
             locationId = Integer.parseInt(locationProperty);
             Location location = locationService.getLocation(locationId);
