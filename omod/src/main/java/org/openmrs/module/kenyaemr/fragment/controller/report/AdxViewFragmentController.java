@@ -77,7 +77,7 @@ public class AdxViewFragmentController {
     DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
-    public static final String MOH_731 = "MOH 731";
+    public static final String MOH_731 = "Revised MOH 731";
     private static final String COMBO_ID = "NhSoXUMPK2K";
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
@@ -408,7 +408,7 @@ public class AdxViewFragmentController {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/xml");
+        con.setRequestProperty("Content-Type", "application/adx+xml");
         con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
         con.setRequestProperty("Authorization", "Basic " + authentication);
         con.setRequestProperty("Accept", "*/*");
