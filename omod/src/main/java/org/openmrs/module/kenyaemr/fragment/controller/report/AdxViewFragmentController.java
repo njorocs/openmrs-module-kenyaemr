@@ -212,7 +212,7 @@ public class AdxViewFragmentController {
 
                 Integer datasetId = Integer.parseInt(e.getDatasetID());
                 FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
-
+System.out.println("---Inside line 215: getMFLCode(): "+getMflCode());
                 w.append("\t").append("<group orgUnit=\"" + getMflCode() + "\" period=\"" + isoDateFormat.format(reportDate)
                         + "/P1M\" dataSetId=\"" + ds.getMapping() + "\">\n");
                 for (DatasetIndicatorDetails row : e.getIndicators()) {
@@ -353,7 +353,7 @@ public class AdxViewFragmentController {
                     Element eDataset = document.createElement("group");
                     // add group attributes
                    // eDataset.setAttribute("xmlns","http://dhis2.org/schema/dxf/2.0");
-                    eDataset.setAttribute("orgUnit", getMflCode());
+                    eDataset.setAttribute("orgUnit", getMflCode());System.out.println("--This is the org unit: "+getMflCode());
                     eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
                     eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
                     eDataset.setAttribute("dataSet", datasetName);
@@ -558,16 +558,18 @@ public class AdxViewFragmentController {
 
     }
     String getMflCode() {
-        String mfl;
+        String mfl= "";
         Integer locationId;
         String locationProperty = administrationService.getGlobalProperty("kenyaemr.defaultLocation");
         String GP_MFL_CODE = Context.getAdministrationService().getGlobalProperty("facility.mflcode").trim();
-        if (locationProperty != null || !locationProperty.isEmpty()) {
+        if (!GP_MFL_CODE.isEmpty()) {
+            mfl = GP_MFL_CODE;
+        } else if (locationProperty != null && !locationProperty.isEmpty()) {
             locationId = Integer.parseInt(locationProperty);
             Location location = locationService.getLocation(locationId);
             mfl = new Facility(location).getMflCode();
         } else {
-            mfl = GP_MFL_CODE;
+            System.err.println("Missing mflcode and location properties");
         }
         return mfl;
     }

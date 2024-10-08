@@ -143,7 +143,7 @@ public class Moh731ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(cohortDsd, "HV01", "Tested Positive", ReportUtils.map(moh731GreenCardIndicators.htsPositiveFemales(), indParams), htsFemaleDisaggregation, Arrays.asList("07", "09", "11", "13", "15"));
         cohortDsd.addColumn("HV01-16", "Tested Positive (KVP)", ReportUtils.map(moh731GreenCardIndicators.htsPositiveKVP(), indParams),"");
         EmrReportingUtils.addRow(cohortDsd, "HV01", "Tested Discordant", ReportUtils.map(moh731GreenCardIndicators.htsDiscordant(), indParams), genderDisaggregation, Arrays.asList("17", "18"));
-        EmrReportingUtils.addRow(cohortDsd, "HV01", "Inconclusive", ReportUtils.map(moh731GreenCardIndicators.inconclusiveResults(), indParams), genderDisaggregation, Arrays.asList("47", "48"));
+        //EmrReportingUtils.addRow(cohortDsd, "HV01", "Inconclusive", ReportUtils.map(moh731GreenCardIndicators.inconclusiveResults(), indParams), genderDisaggregation, Arrays.asList("47", "48"));
 
         //1.3. No. Initiated on PrEP (NEW)
         EmrReportingUtils.addRow(cohortDsd, "HV01", "GP Initiated on PrEP (NEW)", ReportUtils.map(moh731GreenCardIndicators.initiatedOnPrEPGP(), indParams), genderDisaggregation, Arrays.asList("19", "20"));
@@ -213,7 +213,7 @@ public class Moh731ReportBuilder extends AbstractReportBuilder {
         String indParams = "startDate=${startDate},endDate=${endDate}";
 
         // 2.1  Maternal HIV Testing
-        dsd.addColumn("HV02-01A", "Known Positive at 1st ANC (Antenatal)", ReportUtils.map(moh731GreenCardIndicators.knownPositiveAtFirstANC(), indParams), "");
+        dsd.addColumn("HV02-01", "Known Positive at 1st ANC (Antenatal)", ReportUtils.map(moh731GreenCardIndicators.knownPositiveAtFirstANC(), indParams), "");
         dsd.addColumn("HV02-02", "Initial test at ANC (Antenatal)", ReportUtils.map(moh731GreenCardIndicators.initialTestAtANC(), indParams), "");
         dsd.addColumn("HV02-03", "Retest at ANC (Antenatal)", ReportUtils.map(moh731GreenCardIndicators.retestAtANC(), indParams), "");
         dsd.addColumn("HV02-04", "Initial Test at Labor and Delivery", ReportUtils.map(moh731GreenCardIndicators.initialTestAtLabourAndDelivery(), indParams), "");
@@ -278,7 +278,7 @@ public class Moh731ReportBuilder extends AbstractReportBuilder {
         String indParams = "startDate=${startDate},endDate=${endDate}";
 
         // 3.1 (Starting ART)
-        EmrReportingUtils.addRow(cohortDsd, "HV03", "Starting ART", ReportUtils.map(moh731GreenCardIndicators.startingArt(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15"));
+        EmrReportingUtils.addRow(cohortDsd, "HV03", "Starting ART", ReportUtils.map(moh731GreenCardIndicators.startingArt(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14"));
 
         // 3.2 (Currently on ART [All])
         EmrReportingUtils.addRow(cohortDsd, "HV03", "Current on ART", ReportUtils.map(moh731GreenCardIndicators.currentlyOnArt(), indParams), allAgeDisaggregation, Arrays.asList("15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25","26","27","28"));
