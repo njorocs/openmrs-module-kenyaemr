@@ -7,32 +7,32 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi;
+package org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport;
 
 import org.openmrs.module.reporting.data.BaseDataDefinition;
-import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
+import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
 import org.openmrs.module.reporting.definition.configuration.ConfigurationPropertyCachingStrategy;
 import org.openmrs.module.reporting.evaluation.caching.Caching;
 
 /**
- *  Visit type with complaints Data Definition
+ *Visit Date Column
  */
-@Caching(strategy= ConfigurationPropertyCachingStrategy.class)
-public class CaseUniqueIDDataDefinition extends BaseDataDefinition implements EncounterDataDefinition {
+@Caching(strategy=ConfigurationPropertyCachingStrategy.class)
+public class InterviewDateDataDefinition extends BaseDataDefinition implements VisitDataDefinition {
 
     public static final long serialVersionUID = 1L;
 
     /**
      * Default Constructor
      */
-    public CaseUniqueIDDataDefinition() {
+    public InterviewDateDataDefinition() {
         super();
     }
 
     /**
      * Constructor to populate name only
      */
-    public CaseUniqueIDDataDefinition(String name) {
+    public InterviewDateDataDefinition(String name) {
         super(name);
     }
 

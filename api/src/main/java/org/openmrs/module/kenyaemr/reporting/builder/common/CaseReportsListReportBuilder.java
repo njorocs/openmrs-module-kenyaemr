@@ -18,20 +18,40 @@ import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyacore.report.data.patient.definition.CalculationDataDefinition;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.CountyAddressCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.SubCountyAddressCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.mchcs.PersonAddressCalculation;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculationResultConverter;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.*;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.ComplaintCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.IllCasesCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.LabsCohortDefinition;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.VitalSignsCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.CalculationResultConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MFLCodeDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.AgeAtReportingDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLNextAppointmentDateDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.*;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplainCaseUniqueIdDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplainDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplainDurationDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplainOnsetDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.DiagnosisCaseUniqueIdDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.DiagnosisDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.DiagnosisDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.LabsCaseUniqueIDDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.LabsOrderIDDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.LabsTestDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.LabsTestNameDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.LabsTestResultsDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.VisitTypeWithComplaintsDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.AdmissionDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.CaseUniqueIdDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.DateCreatedDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.DateUpdatedDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.FinalPatientManagementOutcomeDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.FinalPatientManagementOutcomeDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.InterviewDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.OutpatientDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDOxygenSaturationDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDRespiratoryRateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDTemperatureDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.library.dmi.IDSRIndicatorLibrary;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.data.DataDefinition;
 import org.openmrs.module.reporting.data.converter.BirthdateConverter;
@@ -41,15 +61,17 @@ import org.openmrs.module.reporting.data.converter.ObjectFormatter;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDatetimeDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.ConvertedPatientDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
-import org.openmrs.module.reporting.data.person.definition.*;
-import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
+import org.openmrs.module.reporting.data.person.definition.BirthdateDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.ConvertedPersonDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PreferredNameDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.EncounterDataSetDefinition;
-import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
+import org.openmrs.module.reporting.dataset.definition.VisitDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -61,82 +83,102 @@ import java.util.List;
 public class CaseReportsListReportBuilder extends AbstractReportBuilder {
 
     public static final String DATE_FORMAT = "dd/MM/yyyy";
+
     @Override
     protected List<Parameter> getParameters(ReportDescriptor reportDescriptor) {
         return Arrays.asList(new Parameter("startDate", "Start Date", Date.class), new Parameter("endDate", "End Date",
                 Date.class), new Parameter("dateBasedReporting", "", String.class));
     }
+
     @Override
     protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor descriptor, ReportDefinition report) {
         return Arrays.asList(
-                ReportUtils.map(illnessCasesDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}"),
+                ReportUtils.map(illnessCasesDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}")/*,
                 ReportUtils.map(labsDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(diagnosisDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(complaintDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}"),
-                ReportUtils.map(vitalSignsDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}")
-                );
+                ReportUtils.map(vitalSignsDataSetDefinitionColumns(),"startDate=${startDate},endDate=${endDate}")*/
+        );
     }
 
     protected DataSetDefinition illnessCasesDataSetDefinitionColumns() {
-        EncounterDataSetDefinition dsd = new EncounterDataSetDefinition();
+        VisitDataSetDefinition dsd = new VisitDataSetDefinition();
         dsd.setName("illness");
         dsd.setDescription("Report Cases information");
         dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
         String paramMapping = "startDate=${startDate},endDate=${endDate}";
 
-        PatientIdentifierType upn = MetadataUtils.existing(PatientIdentifierType.class,
-                HivMetadata._PatientIdentifierType.UNIQUE_PATIENT_NUMBER);
+        PatientIdentifierType openmrsId = MetadataUtils.existing(PatientIdentifierType.class,
+                CommonMetadata._PatientIdentifierType.OPENMRS_ID);
         PatientIdentifierType nupi = MetadataUtils.existing(PatientIdentifierType.class,
                 CommonMetadata._PatientIdentifierType.NATIONAL_UNIQUE_PATIENT_IDENTIFIER);
         DataConverter identifierFormatter = new ObjectFormatter("{identifier}");
         DataDefinition identifierDef = new ConvertedPatientDataDefinition("identifier", new PatientIdentifierDataDefinition(
-                upn.getName(), upn), identifierFormatter);
+                openmrsId.getName(), openmrsId), identifierFormatter);
         DataDefinition nupiDef = new ConvertedPatientDataDefinition("identifier", new PatientIdentifierDataDefinition(
                 nupi.getName(), nupi), identifierFormatter);
         AgeAtReportingDataDefinition ageAtReportingDataDefinition = new AgeAtReportingDataDefinition();
         ageAtReportingDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        ETLNextAppointmentDateDataDefinition lastAppointmentDateDataDefinition = new ETLNextAppointmentDateDataDefinition();
+    /*    ETLNextAppointmentDateDataDefinition lastAppointmentDateDataDefinition = new ETLNextAppointmentDateDataDefinition();
         lastAppointmentDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         lastAppointmentDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
         VisitTypeWithComplaintsDataDefinition visitTypeDataDefinition = new VisitTypeWithComplaintsDataDefinition();
         visitTypeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+*/
+        CaseUniqueIdDataDefinition caseUniqueIdDataDefinition = new CaseUniqueIdDataDefinition();
+        caseUniqueIdDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        caseUniqueIdDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        CaseUniqueIDDataDefinition caseUniqueIDDataDefinition = new CaseUniqueIDDataDefinition();
-        caseUniqueIDDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        caseUniqueIDDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        InterviewDateDataDefinition interviewDateDataDefinition = new InterviewDateDataDefinition();
+        interviewDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        interviewDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        VisitDateWithComplaintsDataDefinition visitDateWithComplaintsDataDefinition = new VisitDateWithComplaintsDataDefinition();
-        visitDateWithComplaintsDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        visitDateWithComplaintsDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        AdmissionDateDataDefinition admissionDateDataDefinition = new AdmissionDateDataDefinition();
+        admissionDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        admissionDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        ComplaintAttendantProviderDataDefinition attendedByDataDefinition = new ComplaintAttendantProviderDataDefinition();
-        attendedByDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        attendedByDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        OutpatientDateDataDefinition outpatientDateDataDefinition = new OutpatientDateDataDefinition();
+        outpatientDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        outpatientDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        DiseaseDataDefinition diseaseDataDefinition = new DiseaseDataDefinition();
-        diseaseDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        diseaseDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        DateCreatedDataDefinition dateCreatedDataDefinition = new DateCreatedDataDefinition();
+        dateCreatedDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        dateCreatedDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        DataConverter formatter = new ObjectFormatter("{familyName}, {givenName}");
-        DataDefinition nameDef = new ConvertedPersonDataDefinition("name",
-                new PreferredNameDataDefinition(), formatter);
-        dsd.addColumn("id", new PersonIdDataDefinition(), "");
-        dsd.addColumn("Name", nameDef, "");
-        dsd.addColumn("Case Unique ID", caseUniqueIDDataDefinition, paramMapping);
+        DateUpdatedDataDefinition dateUpdatedDataDefinition = new DateUpdatedDataDefinition();
+        dateUpdatedDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        dateUpdatedDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        FinalPatientManagementOutcomeDataDefinition finalOutcomeDataDefinition = new FinalPatientManagementOutcomeDataDefinition();
+        finalOutcomeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        finalOutcomeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        FinalPatientManagementOutcomeDateDataDefinition finalOutcomeDateDataDefinition = new FinalPatientManagementOutcomeDateDataDefinition();
+        finalOutcomeDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        finalOutcomeDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        dsd.addColumn("Patient Unique Id", identifierDef, "");
+        dsd.addColumn("NUPI", nupiDef, "");
         dsd.addColumn("Sex", new GenderDataDefinition(), "", null);
-        dsd.addColumn("Age", ageAtReportingDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), "", new BirthdateConverter(DATE_FORMAT));
-       dsd.addColumn("Visit Date", visitDateWithComplaintsDataDefinition, paramMapping);
         dsd.addColumn("MFL Code", new MFLCodeDataDefinition(), "");
         dsd.addColumn("County", new CalculationDataDefinition("County", new CountyAddressCalculation()), "",
                 new CalculationResultConverter());
         dsd.addColumn("Sub County", new CalculationDataDefinition("Subcounty", new SubCountyAddressCalculation()), "",
                 new CalculationResultConverter());
-        dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping);
+        dsd.addColumn("Case Unique ID", caseUniqueIdDataDefinition, paramMapping);
+
+        dsd.addColumn("Interview Date", interviewDateDataDefinition, paramMapping);
+         dsd.addColumn("Admission Date", admissionDateDataDefinition, paramMapping);
+        dsd.addColumn("Outpatient Date", outpatientDateDataDefinition, paramMapping);
+        dsd.addColumn("Created Date", dateCreatedDataDefinition, paramMapping);
+        dsd.addColumn("Updated Date", dateUpdatedDataDefinition, paramMapping);
+        dsd.addColumn("Final Outcome", finalOutcomeDataDefinition, paramMapping);
+        dsd.addColumn("Final Outcome Date", finalOutcomeDateDataDefinition, paramMapping);
 
         IllCasesCohortDefinition cd = new IllCasesCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -194,11 +236,11 @@ public class CaseReportsListReportBuilder extends AbstractReportBuilder {
         labsTestNameDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
 
-        DataConverter formatter = new ObjectFormatter("{familyName}, {givenName}");
+        /*DataConverter formatter = new ObjectFormatter("{familyName}, {givenName}");
         DataDefinition nameDef = new ConvertedPersonDataDefinition("name",
                 new PreferredNameDataDefinition(), formatter);
         PersonAttributeType phoneNumber = MetadataUtils.existing(PersonAttributeType.class,
-                CommonMetadata._PersonAttributeType.TELEPHONE_CONTACT);
+                CommonMetadata._PersonAttributeType.TELEPHONE_CONTACT);*/
         dsd.addColumn("id", new PersonIdDataDefinition(), "");
         dsd.addColumn("Case Unique ID", labCaseUniqueIDDataDefinition, paramMapping);
         dsd.addColumn("Order ID", labsOrderIDDataDefinition, paramMapping);
@@ -309,10 +351,10 @@ public class CaseReportsListReportBuilder extends AbstractReportBuilder {
         complainCaseUniqueIdDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         dsd.addColumn("id", new PersonIdDataDefinition(), "");
         dsd.addColumn("Case Unique ID", complainCaseUniqueIdDataDefinition, paramMapping);
-        dsd.addColumn("Temperature",opdTemperatureDataDefinition, paramMapping);
-        dsd.addColumn("Respiratory Rate",opdRespiratoryRateDataDefinition, paramMapping);
-        dsd.addColumn("Oxygen Saturation",opdOxygenSaturationDataDefinition, paramMapping);
-        dsd.addColumn("Vital Signs Date", new EncounterDatetimeDataDefinition(),"", new DateConverter(DATE_FORMAT));
+        dsd.addColumn("Temperature", opdTemperatureDataDefinition, paramMapping);
+        dsd.addColumn("Respiratory Rate", opdRespiratoryRateDataDefinition, paramMapping);
+        dsd.addColumn("Oxygen Saturation", opdOxygenSaturationDataDefinition, paramMapping);
+        dsd.addColumn("Vital Signs Date", new EncounterDatetimeDataDefinition(), "", new DateConverter(DATE_FORMAT));
 
         VitalSignsCohortDefinition cd = new VitalSignsCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
