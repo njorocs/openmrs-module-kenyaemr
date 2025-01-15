@@ -24,7 +24,7 @@ public class MigratePatientConditionsFromObs extends AbstractChore {
                 "                        condition_coded_name, clinical_status, verification_status, onset_date, date_created, voided,\n" +
                 "                        date_voided, void_reason, uuid, creator, voided_by, changed_by, patient_id, end_date,\n" +
                 "                        date_changed, encounter_id, form_namespace_and_path)  \n" +
-                "select null, null, null,cn1.concept_id,null,cn1.concept_id , 'INACTIVE', 'PROVISIONAL',t2.value_datetime, o1.obs_datetime,\n" +
+                "select null, null, null,cn1.concept_id,null,cn1.concept_name_id , 'INACTIVE', 'PROVISIONAL',t2.value_datetime, o1.obs_datetime,\n" +
                 "        0, null,null,o1.uuid,o1.creator,null,null,o1.person_id,null,null,null,null\n" +
                 "    from obs o1\n" +
                 "    left join (select * from obs where concept_id = 1284) t1\n" +
@@ -39,6 +39,7 @@ public class MigratePatientConditionsFromObs extends AbstractChore {
                 "    ON ( cn3.concept_id = t3.value_coded )\n" +
                 "    where o1.obs_group_id is not null and o1.concept_id in (1284,159948,166937)\n" +
                 "    and t1.concept_id is not null  \n" +
+                "    and cn1.concept_name_id is not null  \n" +
                 " group by o1.person_id, o1.obs_group_id;";
 
 
