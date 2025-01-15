@@ -1018,32 +1018,19 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         return cd;
     }
 
-    public CohortDefinition testedHIVPositive() {
-        String sqlQuery = "select t.encounter_id\n" +
-                "    from kenyaemr_etl.etl_hts_test t\n" +
-                "    inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
-                "    where t.final_test_result = 'Positive'\n" +
-                "    and t.visit_date between date(:startDate) and date(:endDate);";
-        SqlCohortDefinition cd = new SqlCohortDefinition();
-        cd.setName("testedHIVPositive");
-        cd.setQuery(sqlQuery);
-        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("testedHIVPositive");
-        return cd;
-    }
-
     /**
      * HTS +ve tests for Males
      * @return
      */
-    public CohortDefinition htsPositiveMales(Integer minAge, Integer maxAge) {
-        String sqlQuery = "select t.encounter_id\n" +
-                "              from kenyaemr_etl.etl_hts_test t\n" +
-                "                       inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
-                "              where t.final_test_result = 'Positive' and Gender = 'M'\n" +
-                "                and t.voided = 0 and timestampdiff(YEAR, d.DOB, date(:endDate)) between " +minAge+ " and " +maxAge+ "\n" +
-                "                and t.visit_date between date(:startDate) and date(:endDate);";
+    public CohortDefinition htsPositiveMales() {
+        String sqlQuery = "select t.patient_id\n" +
+                "from kenyaemr_etl.etl_hts_test t\n" +
+                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "where t.voided = 0\n" +
+                "  and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "  and t.test_type = 1\n" +
+                "  and t.final_test_result = 'Positive'\n" +
+                "group by t.patient_id";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsPositiveMales");
         cd.setQuery(sqlQuery);
@@ -1052,50 +1039,38 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         cd.setDescription("htsPositiveMales");
         return cd;
     }
-    public CohortDefinition htsPositiveMales25AndAbove(Integer minAge) {
-        String sqlQuery = "select t.encounter_id\n" +
-                "              from kenyaemr_etl.etl_hts_test t\n" +
-                "                       inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
-                "              where t.final_test_result = 'Positive' and Gender = 'M'\n" +
-                "                and t.voided = 0 and timestampdiff(YEAR, d.DOB, date(:endDate)) >= "+minAge+"\n" +
-                "                and t.visit_date between date(:startDate) and date(:endDate);";
-        SqlCohortDefinition cd = new SqlCohortDefinition();
-        cd.setName("htsPositiveMales25+");
-        cd.setQuery(sqlQuery);
-        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("htsPositiveMales25+");
-        return cd;
-    }
 
     /**
      * HTS +VE tests for females
      * @return
      */
-    public CohortDefinition htsPositiveFemales(Integer minAge, Integer maxAge) {
-        String sqlQuery = "select encounter_id\n" +
-                "              from ((select av.patient_id, av.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mch_antenatal_visit av inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
-                "                     where av.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
-                "                       and av.final_test_result = 'Positive')\n" +
-                "                    union\n" +
-                "                    (select d.patient_id, d.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mchs_delivery d inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
-                "                     where d.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
-                "                       and d.final_test_result = 'Positive')\n" +
-                "                    union\n" +
-                "                    (select p.patient_id, p.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mch_postnatal_visit p inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
-                "                     where p.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, d.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
-                "                       and p.final_test_result = 'Positive')\n" +
-                "                    union\n" +
-                "                    (select t.patient_id, t.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_hts_test t\n" +
-                "                              inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
-                "                     where timestampdiff(YEAR, d.DOB, date(:endDate)) between "+minAge+" and "+minAge+"\n" +
-                "                     and t.final_test_result = 'Positive'\n" +
-                "                       and t.voided = 0\n" +
-                "                       and t.visit_date between date(:startDate) and date(:endDate))) a;";
+    public CohortDefinition htsPositiveFemales() {
+        String sqlQuery = "select patient_id\n" +
+                "from ((select av.patient_id\n" +
+                "       from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "                inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
+                "       where av.visit_date between date(:startDate) and date(:endDate)\n" +
+                "         and av.final_test_result = 'Positive')\n" +
+                "      union\n" +
+                "      (select d.patient_id\n" +
+                "       from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "                inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
+                "       where d.visit_date between date(:startDate) and date(:endDate)\n" +
+                "         and d.final_test_result = 'Positive')\n" +
+                "      union\n" +
+                "      (select p.patient_id\n" +
+                "       from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "                inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
+                "       where p.visit_date between date(:startDate) and date(:endDate)\n" +
+                "         and p.final_test_result = 'Positive')\n" +
+                "      union\n" +
+                "      (select t.patient_id\n" +
+                "       from kenyaemr_etl.etl_hts_test t\n" +
+                "                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "       where t.final_test_result = 'Positive'\n" +
+                "         and t.voided = 0\n" +
+                "         and t.test_type = 1\n" +
+                "         and t.visit_date between date(:startDate) and date(:endDate))) a;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsPositiveFemales");
         cd.setQuery(sqlQuery);
@@ -1181,7 +1156,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = "select t.encounter_id\n" +
                 "from kenyaemr_etl.etl_hts_test t\n" +
                 "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
-                "where t.final_test_result = 'Positive'\n" +
+                "where t.final_test_result = 'Positive' and t.test_type = 1\n" +
                 "  and t.population_type = 'Key Population'\n" +
                 "  and t.voided = 0\n" +
                 "  and t.visit_date between date(:startDate) and date(:endDate);";
