@@ -12,12 +12,13 @@ package org.openmrs.module.kenyaemr.dataExchange;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openmrs.Location;
@@ -52,8 +53,8 @@ public class InterventionsDataExchange {
 
     private static final LocationService locationService = Context.getLocationService();
 
-    private static final String BASE_JWT_URL_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT;
     private static final String BASE_URL_KEY = CommonMetadata.GP_HIE_BASE_END_POINT_URL;
+    private static final String SHA_INTERVENTIONS = CommonMetadata.GP_SHA_INTERVENTIONS;
     private static final String API_USER_KEY = CommonMetadata.GP_HIE_API_USER;
     private static final String API_SECRET_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET;
 
@@ -67,12 +68,16 @@ public class InterventionsDataExchange {
 
         try {
             CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(createSslConnectionFactory()).build();
-            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_URL_KEY) + "interventions");
-            getRequest.setHeader("Authorization", "Bearer " + bearerToken);
+            HttpPost postRequest = new HttpPost(getGlobalPropertyValue(SHA_INTERVENTIONS) + "/query");
+            postRequest.setHeader("Authorization", "Bearer " + bearerToken);
+            postRequest.setHeader("Content-Type", "application/json");
 
-            HttpResponse response = httpClient.execute(getRequest);
+            String jsonPayload = "{\"searchKeyAndValues\": {}}"; // Adjust if additional parameters are needed
+            postRequest.setEntity(new StringEntity(jsonPayload, StandardCharsets.UTF_8));
 
+            HttpResponse response = httpClient.execute(postRequest);
             int responseCode = response.getStatusLine().getStatusCode();
+
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(createSuccessResponse(response));
             } else {
@@ -98,7 +103,7 @@ public class InterventionsDataExchange {
         String username = getGlobalPropertyValue(API_USER_KEY).trim();
         String secret = getGlobalPropertyValue(API_SECRET_KEY).trim();
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_JWT_URL_KEY) + "hie-auth?key=O7B-DHABP00278");
+            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_URL_KEY) + "hie-auth?key=O7B-DHABP00278");
             getRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
             getRequest.setHeader("Authorization", createBasicAuthHeader(username, secret));
 
@@ -126,11 +131,16 @@ public class InterventionsDataExchange {
     private static Map<String, String> extractInterventions(String interventions) {
         Map<String, String> statusMap = new HashMap<>();
         statusMap.put("shaInterventions", "--");
-
-        if(interventions != null) {
+        try {
+            JSONObject jsonResponse = new JSONObject(interventions);
+            log.info("JSON Response: {}", jsonResponse.toString(2));
             statusMap.put("shaInterventions", interventions);
-        }
+            System.out.println("StatusMap: " + statusMap);
+            return statusMap;
 
+        } catch (JSONException e) {
+            log.error("Error parsing interventions JSON: {}", e.getMessage());
+        }
         return statusMap;
     }
 
@@ -158,12 +168,14 @@ public class InterventionsDataExchange {
             newAttribute.setDateCreated(new Date());
             location.addAttribute(newAttribute);
             return newAttribute;
-        } else if (!existingAttribute.getValue().equals(value)) {
-            // Update the value if it differs
-            existingAttribute.setValue(value);
-            return existingAttribute;
+        } else {
+            String existingValue = existingAttribute.getValueReference();
+            if (!hash(existingValue).equals(hash(value))) {
+                // Update the value if it differs
+                existingAttribute.setValue(value);
+                return existingAttribute;
+            }
         }
-
         // No changes needed
         return null;
     }
@@ -171,8 +183,8 @@ public class InterventionsDataExchange {
     public static boolean saveInterventions() {
         try {
             ResponseEntity<String> responseEntity = getInterventions();
-            String responseBody = responseEntity.getBody();
-
+             String responseBody = responseEntity.getBody();
+                System.out.println("Response body->: " + responseBody);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseBody != null) {
                 Map<String, String> interventions = extractInterventions(responseBody);
 
@@ -198,6 +210,7 @@ public class InterventionsDataExchange {
             }
         } catch (Exception e) {
             System.err.println("Error in saving interventions: " + e);
+           e.printStackTrace();
             return false;
         }
     }

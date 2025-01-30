@@ -50,6 +50,7 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.Relationship;
+import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
@@ -497,7 +498,6 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
         regimenObj.put("results", regimenNode);
         return regimenObj.toString();
-
     }
 
     /**
@@ -610,6 +610,11 @@ public class KenyaemrCoreRestController extends BaseRestController {
     @ResponseBody
     public Object getShaBenefitsPackage(@RequestParam(value = "synchronize", defaultValue = "false") boolean isSynchronize) {
         ObjectNode locationNode = null;
+
+        User authenticatedUser = Context.getAuthenticatedUser();
+        if (authenticatedUser == null) {
+            throw new IllegalStateException("No authenticated user in context. Please log in.");
+        }
 
         Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
         Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);

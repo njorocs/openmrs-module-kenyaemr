@@ -17,11 +17,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.FacilityMetadata;
@@ -39,8 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.openmrs.module.kenyaemr.util.EmrUtils.getDefaultLocation;
-import static org.openmrs.module.kenyaemr.util.EmrUtils.getGlobalPropertyValue;
+import static org.openmrs.module.kenyaemr.util.EmrUtils.*;
 
 /**
  * A scheduled task that automatically updates the facility status.
@@ -65,7 +67,7 @@ public class BenefitsPackageDataExchange {
 
         try {
             CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(createSslConnectionFactory()).build();
-            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_URL_KEY)+"benefit-package");
+            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_URL_KEY) + "benefit-package");
             getRequest.setHeader("Authorization", "Bearer " + bearerToken);
 
             HttpResponse response = httpClient.execute(getRequest);
@@ -74,11 +76,11 @@ public class BenefitsPackageDataExchange {
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(createSuccessResponse(response));
             } else {
-                System.err.println("Error: failed to connect: "+ responseCode);
+                System.err.println("Error: failed to connect: " + responseCode);
                 return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("{\"status\": \"Error\"}");
             }
         } catch (Exception ex) {
-            System.err.println("Error fetching benefits package: "+ ex.getMessage());
+            System.err.println("Error fetching benefits package: " + ex.getMessage());
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("{\"status\": \"Error\"}");
         }
     }
@@ -107,11 +109,11 @@ public class BenefitsPackageDataExchange {
                     log.info("Bearer token retrieved successfully.");
                     return responseString;
                 } else {
-                    System.err.println("Failed to fetch Bearer Token. HTTP Status:"+ response.getStatusLine().getStatusCode());
+                    System.err.println("Failed to fetch Bearer Token. HTTP Status:" + response.getStatusLine().getStatusCode());
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error retrieving Bearer Token: "+ e.getMessage());
+            System.err.println("Error retrieving Bearer Token: " + e.getMessage());
         }
         return "";
     }
@@ -125,10 +127,21 @@ public class BenefitsPackageDataExchange {
         Map<String, String> statusMap = new HashMap<>();
         statusMap.put("shaBenefitsPackage", "--");
 
-        if(benefitsPackage != null) {
-            statusMap.put("shaBenefitsPackage", benefitsPackage);
+        if (benefitsPackage == null || benefitsPackage.trim().isEmpty()) {
+            log.error("Benefits package response is empty.");
+            return statusMap;
         }
 
+        try {
+            JSONArray jsonArray = new JSONArray(benefitsPackage); // Validate JSON format
+            log.info("Parsed Benefits Package JSON: {}", jsonArray.toString(2));
+
+            // Convert to a properly formatted JSON string before storing
+            statusMap.put("shaBenefitsPackage", jsonArray.toString());
+
+        } catch (JSONException e) {
+            log.error("Error parsing benefits package JSON: {}", e.getMessage());
+        }
         return statusMap;
     }
 
@@ -139,6 +152,7 @@ public class BenefitsPackageDataExchange {
             throw new RuntimeException("Error parsing response", e);
         }
     }
+
     private static LocationAttribute getOrUpdateAttribute(Location location, LocationAttributeType type, String value, User creator) {
         // Check if the attribute already exists
         LocationAttribute existingAttribute = location.getActiveAttributes(type)
@@ -156,12 +170,15 @@ public class BenefitsPackageDataExchange {
             newAttribute.setDateCreated(new Date());
             location.addAttribute(newAttribute);
             return newAttribute;
-        } else if (!existingAttribute.getValue().equals(value)) {
-            // Update the value if it differs
-            existingAttribute.setValue(value);
-            return existingAttribute;
-        }
+        } else {
+            String existingValue = existingAttribute.getValueReference();
 
+            if (!hash(existingValue).equals(hash(value))) {
+                // Update the value if it differs
+                existingAttribute.setValue(value);
+                return existingAttribute;
+            }
+        }
         // No changes needed
         return null;
     }
@@ -170,7 +187,6 @@ public class BenefitsPackageDataExchange {
         try {
             ResponseEntity<String> responseEntity = getBenefitsPackage();
             String responseBody = responseEntity.getBody();
-
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseBody != null) {
                 Map<String, String> benefitsPackage = extractBenefitsPackage(responseBody);
 
@@ -180,22 +196,35 @@ public class BenefitsPackageDataExchange {
                 }
 
                 Location location = getDefaultLocation();
+
+                if (location == null) {
+                    throw new IllegalStateException("No default location found.");
+                }
+
                 User authenticatedUser = Context.getAuthenticatedUser();
 
                 if (authenticatedUser == null) {
                     throw new IllegalStateException("No authenticated user in context");
                 }
-                // Update or create attributes
-                getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_BENEFITS_PACKAGE), benefitsPackage.get("shaBenefitsPackage"), authenticatedUser);
-
-                locationService.saveLocation(location);  // Persist changes
-                return true;
+                System.out.println("benefitsPackage:-----" + benefitsPackage.get("shaBenefitsPackage"));
+                LocationAttribute locationAttribute = getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_BENEFITS_PACKAGE), benefitsPackage.get("shaBenefitsPackage"), authenticatedUser);
+                System.out.println("Location attribute Value reference: " + locationAttribute.getValueReference());
+                System.out.println("Location attribute value: " + locationAttribute.getValue());
+                try {
+                    locationService.saveLocation(location);
+                    return true;
+                } catch (ValidationException e) {
+                    System.err.println("Validation error: " + e.getMessage());
+                    log.error("Validation details: {}", e.getErrors());
+                    return false;
+                }
             } else {
                 System.err.println("Failed to save benefits package: " + responseEntity.getBody());
                 return false;
             }
         } catch (Exception e) {
-            System.err.println("Error in saving benefits package: " + e);
+            e.printStackTrace();
+            System.err.println("Error in saving benefits package  e.getMessage(): " + e.getMessage());
             return false;
         }
     }
