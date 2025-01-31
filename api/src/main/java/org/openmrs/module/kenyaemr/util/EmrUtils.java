@@ -23,6 +23,7 @@ import org.openmrs.EncounterType;
 import org.openmrs.Form;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.Obs;
 import org.openmrs.Order;
@@ -33,6 +34,7 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
@@ -461,18 +463,60 @@ public class EmrUtils {
 			Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
 		}
 	}
-	// Hash function (SHA-256)
-	public static String hash(String input) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] encodedHash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-			StringBuilder hexString = new StringBuilder();
-			for (byte b : encodedHash) {
-				hexString.append(String.format("%02x", b));
+
+	public static boolean getOrUpdateAttribute(Location location, LocationAttributeType type, String value, User creator) {
+				// Check if the attribute already exists
+		// Check if the attribute already exists
+		LocationAttribute existingAttribute = location.getActiveAttributes(type)
+				.stream()
+				.filter(attr -> attr.getAttributeType().equals(type))
+				.findFirst()
+				.orElse(null);
+
+		// If the attribute exists, void it and save
+		if (existingAttribute != null) {
+			System.out.println("The attribute is existing: " + existingAttribute.getValueReference());
+			boolean voided = voidAndSaveAttribute(location, existingAttribute, creator);
+			if(voided){
+				System.out.println("The attribute has been voided " + type + " has been voided. status: "+ existingAttribute.getVoided());
 			}
-			return hexString.toString();
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Error computing hash", e);
 		}
+		// If no existing attribute, save a new one
+		return saveNewAttribute(location, type, value, creator);
 	}
+
+	public static boolean saveNewAttribute(Location location, LocationAttributeType type, String value, User creator) {
+		final LocationService locationService = Context.getLocationService();
+
+		// Create a new attribute
+		LocationAttribute newAttribute = new LocationAttribute();
+		newAttribute.setAttributeType(type);
+		newAttribute.setValue(value);
+		newAttribute.setCreator(creator);
+		newAttribute.setDateCreated(new Date());
+
+		// Add the new attribute to the location
+		location.addAttribute(newAttribute);
+
+		// Save the new attribute and the location
+		return locationService.saveLocation(location) != null;
+	}
+
+	public static boolean voidAndSaveAttribute(Location location, LocationAttribute existingAttribute, User creator) {
+		final LocationService locationService = Context.getLocationService();
+
+		if (existingAttribute != null) {
+			// Mark the existing attribute as voided
+			existingAttribute.setVoided(true);
+			existingAttribute.setVoidedBy(creator);
+			existingAttribute.setDateVoided(new Date());
+
+			// Save the voided attribute and the location
+			location.setAttribute(existingAttribute);
+			System.out.println("---------------The attribute is about to be voided ");
+            return locationService.saveLocation(location) != null;
+		}
+		return false;
+	}
+
 }

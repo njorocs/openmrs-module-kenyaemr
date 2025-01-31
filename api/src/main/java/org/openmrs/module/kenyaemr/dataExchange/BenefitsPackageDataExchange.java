@@ -20,11 +20,9 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
-import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.FacilityMetadata;
@@ -38,7 +36,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,7 +95,7 @@ public class BenefitsPackageDataExchange {
         String username = getGlobalPropertyValue(API_USER_KEY).trim();
         String secret = getGlobalPropertyValue(API_SECRET_KEY).trim();
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_JWT_URL_KEY) + "hie-auth?key=O7B-DHABP00278");
+            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_JWT_URL_KEY));
             getRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
             getRequest.setHeader("Authorization", createBasicAuthHeader(username, secret));
 
@@ -133,7 +130,7 @@ public class BenefitsPackageDataExchange {
         }
 
         try {
-            JSONArray jsonArray = new JSONArray(benefitsPackage); // Validate JSON format
+            JSONArray jsonArray = new JSONArray(benefitsPackage);
             log.info("Parsed Benefits Package JSON: {}", jsonArray.toString(2));
 
             // Convert to a properly formatted JSON string before storing
@@ -151,36 +148,6 @@ public class BenefitsPackageDataExchange {
         } catch (IOException e) {
             throw new RuntimeException("Error parsing response", e);
         }
-    }
-
-    private static LocationAttribute getOrUpdateAttribute(Location location, LocationAttributeType type, String value, User creator) {
-        // Check if the attribute already exists
-        LocationAttribute existingAttribute = location.getActiveAttributes(type)
-                .stream()
-                .filter(attr -> attr.getAttributeType().equals(type))
-                .findFirst()
-                .orElse(null);
-
-        if (existingAttribute == null) {
-            // Create a new attribute if none exists
-            LocationAttribute newAttribute = new LocationAttribute();
-            newAttribute.setAttributeType(type);
-            newAttribute.setValue(value);
-            newAttribute.setCreator(creator);
-            newAttribute.setDateCreated(new Date());
-            location.addAttribute(newAttribute);
-            return newAttribute;
-        } else {
-            String existingValue = existingAttribute.getValueReference();
-
-            if (!hash(existingValue).equals(hash(value))) {
-                // Update the value if it differs
-                existingAttribute.setValue(value);
-                return existingAttribute;
-            }
-        }
-        // No changes needed
-        return null;
     }
 
     public static boolean saveBenefitsPackage() {
@@ -206,24 +173,12 @@ public class BenefitsPackageDataExchange {
                 if (authenticatedUser == null) {
                     throw new IllegalStateException("No authenticated user in context");
                 }
-                System.out.println("benefitsPackage:-----" + benefitsPackage.get("shaBenefitsPackage"));
-                LocationAttribute locationAttribute = getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_BENEFITS_PACKAGE), benefitsPackage.get("shaBenefitsPackage"), authenticatedUser);
-                System.out.println("Location attribute Value reference: " + locationAttribute.getValueReference());
-                System.out.println("Location attribute value: " + locationAttribute.getValue());
-                try {
-                    locationService.saveLocation(location);
-                    return true;
-                } catch (ValidationException e) {
-                    System.err.println("Validation error: " + e.getMessage());
-                    log.error("Validation details: {}", e.getErrors());
-                    return false;
-                }
+                return getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_BENEFITS_PACKAGE), benefitsPackage.get("shaBenefitsPackage"), authenticatedUser);
             } else {
                 System.err.println("Failed to save benefits package: " + responseEntity.getBody());
                 return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
             System.err.println("Error in saving benefits package  e.getMessage(): " + e.getMessage());
             return false;
         }

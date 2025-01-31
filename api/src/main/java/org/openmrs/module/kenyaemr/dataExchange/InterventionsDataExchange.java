@@ -53,7 +53,7 @@ public class InterventionsDataExchange {
 
     private static final LocationService locationService = Context.getLocationService();
 
-    private static final String BASE_URL_KEY = CommonMetadata.GP_HIE_BASE_END_POINT_URL;
+    private static final String BASE_JWT_URL_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT;
     private static final String SHA_INTERVENTIONS = CommonMetadata.GP_SHA_INTERVENTIONS;
     private static final String API_USER_KEY = CommonMetadata.GP_HIE_API_USER;
     private static final String API_SECRET_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET;
@@ -103,7 +103,7 @@ public class InterventionsDataExchange {
         String username = getGlobalPropertyValue(API_USER_KEY).trim();
         String secret = getGlobalPropertyValue(API_SECRET_KEY).trim();
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_URL_KEY) + "hie-auth?key=O7B-DHABP00278");
+            HttpGet getRequest = new HttpGet(getGlobalPropertyValue(BASE_JWT_URL_KEY));
             getRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
             getRequest.setHeader("Authorization", createBasicAuthHeader(username, secret));
 
@@ -151,34 +151,6 @@ public class InterventionsDataExchange {
             throw new RuntimeException("Error parsing response", e);
         }
     }
-    private static LocationAttribute getOrUpdateAttribute(Location location, LocationAttributeType type, String value, User creator) {
-        // Check if the attribute already exists
-        LocationAttribute existingAttribute = location.getActiveAttributes(type)
-                .stream()
-                .filter(attr -> attr.getAttributeType().equals(type))
-                .findFirst()
-                .orElse(null);
-
-        if (existingAttribute == null) {
-            // Create a new attribute if none exists
-            LocationAttribute newAttribute = new LocationAttribute();
-            newAttribute.setAttributeType(type);
-            newAttribute.setValue(value);
-            newAttribute.setCreator(creator);
-            newAttribute.setDateCreated(new Date());
-            location.addAttribute(newAttribute);
-            return newAttribute;
-        } else {
-            String existingValue = existingAttribute.getValueReference();
-            if (!hash(existingValue).equals(hash(value))) {
-                // Update the value if it differs
-                existingAttribute.setValue(value);
-                return existingAttribute;
-            }
-        }
-        // No changes needed
-        return null;
-    }
 
     public static boolean saveInterventions() {
         try {
@@ -200,10 +172,8 @@ public class InterventionsDataExchange {
                     throw new IllegalStateException("No authenticated user in context");
                 }
                 // Update or create attributes
-                getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_INTERVENTIONS), interventions.get("shaInterventions"), authenticatedUser);
+              return getOrUpdateAttribute(location, MetadataUtils.existing(LocationAttributeType.class, FacilityMetadata._LocationAttributeType.SHA_INTERVENTIONS), interventions.get("shaInterventions"), authenticatedUser);
 
-                locationService.saveLocation(location);  // Persist changes
-                return true;
             } else {
                 System.err.println("Failed to save interventions: " + responseEntity.getBody());
                 return false;
