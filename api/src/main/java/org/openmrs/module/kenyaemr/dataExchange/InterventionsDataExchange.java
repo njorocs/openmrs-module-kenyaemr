@@ -22,10 +22,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.User;
-import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.FacilityMetadata;
@@ -39,7 +37,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +47,6 @@ import static org.openmrs.module.kenyaemr.util.EmrUtils.*;
  */
 public class InterventionsDataExchange {
     private static final Logger log = LoggerFactory.getLogger(InterventionsDataExchange.class);
-
-    private static final LocationService locationService = Context.getLocationService();
-
     private static final String BASE_JWT_URL_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT;
     private static final String SHA_INTERVENTIONS = CommonMetadata.GP_SHA_INTERVENTIONS;
     private static final String API_USER_KEY = CommonMetadata.GP_HIE_API_USER;
@@ -135,7 +129,6 @@ public class InterventionsDataExchange {
             JSONObject jsonResponse = new JSONObject(interventions);
             log.info("JSON Response: {}", jsonResponse.toString(2));
             statusMap.put("shaInterventions", interventions);
-            System.out.println("StatusMap: " + statusMap);
             return statusMap;
 
         } catch (JSONException e) {
@@ -156,7 +149,6 @@ public class InterventionsDataExchange {
         try {
             ResponseEntity<String> responseEntity = getInterventions();
              String responseBody = responseEntity.getBody();
-                System.out.println("Response body->: " + responseBody);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseBody != null) {
                 Map<String, String> interventions = extractInterventions(responseBody);
 

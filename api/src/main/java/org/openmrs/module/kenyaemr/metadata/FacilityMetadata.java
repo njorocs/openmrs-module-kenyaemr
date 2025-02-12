@@ -10,10 +10,13 @@
 package org.openmrs.module.kenyaemr.metadata;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Form;
 import org.openmrs.Location;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
+import org.openmrs.customdatatype.datatype.LongFreeTextDatatype;
 import org.openmrs.customdatatype.datatype.RegexValidatedTextDatatype;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.metadata.sync.LocationMflCsvSource;
@@ -122,6 +125,8 @@ public class FacilityMetadata extends AbstractMetadataBundle {
 				FreeTextDatatype.class, "", 0, 1,
 				_LocationAttributeType.SHA_INTERVENTIONS
 		));
+		uninstall(possible(LocationAttributeType.class, "db1cf31e-8b06-4c36-94bf-3a932fadd2d7"), "Location attribute dropped for file system");
+		uninstall(possible(LocationAttributeType.class, "cbe19f79-dcda-4532-a9c9-6f62c7a25b39"), "Location attribute dropped for file system");
 	}
 
 	/**

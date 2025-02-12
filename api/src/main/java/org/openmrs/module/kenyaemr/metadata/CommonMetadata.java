@@ -704,9 +704,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		//Retiring Lab results form
 		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"), "Form deprecated with introduction of Lab orders");
 
-		uninstall(possible(VisitAttributeType.class, "338725fa-3790-4679-98b9-be623214ee29"),
-				"Became location attribute type");
-
 		install(globalProperty(GP_KENYAEMR_VERSION, "The version of the installed KenyaEMR",
 				null));
 	}

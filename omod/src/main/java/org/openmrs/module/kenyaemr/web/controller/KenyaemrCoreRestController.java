@@ -127,6 +127,7 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -177,6 +178,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import static org.openmrs.module.kenyaemr.util.EmrUtils.grantPrivileges;
+import static org.openmrs.module.kenyaemr.util.EmrUtils.revokePrivileges;
 
 /**
  * The rest controller for exposing resources through kenyacore and kenyaemr modules
@@ -609,54 +613,71 @@ public class KenyaemrCoreRestController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET, value = "/sha-benefits-package")
     @ResponseBody
     public Object getShaBenefitsPackage(@RequestParam(value = "synchronize", defaultValue = "false") boolean isSynchronize) {
-        ObjectNode locationNode = null;
-
-        User authenticatedUser = Context.getAuthenticatedUser();
-        if (authenticatedUser == null) {
-            throw new IllegalStateException("No authenticated user in context. Please log in.");
-        }
-
-        Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-        Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-        Context.addProxyPrivilege(PrivilegeConstants.MANAGE_LOCATIONS);
-        Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode localData = null;
+        JsonNode remoteData = null; // Use JsonNode to support both ObjectNode & ArrayNode
 
         try {
-            if (isSynchronize && getRemoteBenefitsPackage()) {
-                locationNode = getSavedBenefitsPackage();
-                if (locationNode != null) {
-                    locationNode.put("source", "HIE");
-                }
-            } else {
-                locationNode = getSavedBenefitsPackage();
-                if (locationNode != null && isValuesEmptyOrDefault(locationNode, "shaBenefitsPackage")) {
+            // Ensure user authentication
+            User authenticatedUser = Context.getAuthenticatedUser();
+            if (Context.getAuthenticatedUser() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("No authenticated user in context. Please log in.");
+            }
 
-                    if (getRemoteBenefitsPackage()) {
-                        locationNode = getSavedBenefitsPackage();
-                        if (locationNode != null) {
-                            locationNode.put("source", "HIE");
-                        }
-                    } else {
-                        locationNode.put("source", "Error synchronizing with HIE and no local data found");
+            grantPrivileges();
+
+            // Fetch the most recent local SHA benefits package
+            localData = getSavedBenefitsPackage();
+
+            // If synchronization is requested or local data is empty, attempt to fetch from remote
+            if (isSynchronize || localData == null || isValuesEmptyOrDefault(localData, "shaBenefitsPackage")) {
+                boolean syncSuccess = getRemoteBenefitsPackage();
+
+                if (syncSuccess) {
+                    // Fetch the newly saved local data after synchronization
+                    ObjectNode refreshedData = getSavedBenefitsPackage();
+                    if (refreshedData != null) {
+                        refreshedData.put("source", "HIE");
+                        return ResponseEntity.ok(refreshedData.toString());
                     }
-                } else if (locationNode != null) {
-                    locationNode.put("source", "Local");
+                }
+
+                // If save failed or sync was not successful, fetch remote data directly
+                ResponseEntity<String> remoteResponse = BenefitsPackageDataExchange.getBenefitsPackage();
+                if (remoteResponse.getStatusCode().is2xxSuccessful() && remoteResponse.getBody() != null) {
+                    // Parse response correctly
+                    remoteData = objectMapper.readTree(remoteResponse.getBody());
+
+                    // Handle ObjectNode vs ArrayNode cases
+                    if (remoteData.isArray()) {
+                        // Convert ArrayNode to ObjectNode if needed
+                        ObjectNode wrappedObject = objectMapper.createObjectNode();
+                        wrappedObject.put("data", remoteData);
+                        wrappedObject.put("source", "HIE");
+                        return ResponseEntity.ok(wrappedObject.toString());
+                    } else if (remoteData.isObject()) {
+                        ((ObjectNode) remoteData).put("source", "HIE");
+                        return ResponseEntity.ok(remoteData.toString());
+                    }
                 }
             }
+
         } catch (Exception e) {
-            System.err.println("Error in fetching SHA benefits package: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving SHA benefits details.");
+            LoggerFactory.getLogger(getClass()).error("Error fetching SHA benefits package", e);
+            // Log the error but do NOT return an error immediately
         } finally {
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-            Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_LOCATIONS);
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
+            revokePrivileges();
         }
 
-        if (locationNode == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Benefits package details not found.");
+        // If we have a valid local copy, return it
+        if (localData != null && !isValuesEmptyOrDefault(localData, "shaBenefitsPackage")) {
+            localData.put("source", "Local");
+            return ResponseEntity.ok(localData.toString());
         }
-        return ResponseEntity.ok(locationNode.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("No valid SHA benefits package available.");
     }
 
     private boolean getRemoteBenefitsPackage() {
@@ -690,49 +711,51 @@ public class KenyaemrCoreRestController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET, value = "/sha-interventions")
     @ResponseBody
     public Object getShaInterventions(@RequestParam(value = "synchronize", defaultValue = "false") boolean isSynchronize) {
-        ObjectNode locationNode = null;
-
-        Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-        Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-        Context.addProxyPrivilege(PrivilegeConstants.MANAGE_LOCATIONS);
-        Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
-
         try {
-            if (isSynchronize && getRemoteInterventions()) {
-                locationNode = getSavedInterventions();
-                if (locationNode != null) {
-                    locationNode.put("source", "HIE");
-                }
-            } else {
-                locationNode = getSavedInterventions();
-                if (locationNode != null && isValuesEmptyOrDefault(locationNode, "shaInterventions")) {
-
-                    if (getRemoteInterventions()) {
-                        locationNode = getSavedInterventions();
-                        if (locationNode != null) {
-                            locationNode.put("source", "HIE");
-                        }
-                    } else {
-                        locationNode.put("source", "Error synchronizing with HIE and no local data found");
-                    }
-                } else if (locationNode != null) {
-                    locationNode.put("source", "Local");
-                }
+            // Ensure an authenticated user exists
+            User authenticatedUser = Context.getAuthenticatedUser();
+            if (authenticatedUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No authenticated user in context. Please log in.");
             }
-        } catch (Exception e) {
-            System.err.println("Error in fetching SHA interventions: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving SHA interventions.");
-        } finally {
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-            Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_LOCATIONS);
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
-        }
 
-        if (locationNode == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("SHA interventions details not found.");
+            grantPrivileges();
+            ObjectNode locationNode = getSavedInterventions();
+
+            if (isSynchronize) {
+                // Always attempt synchronization when requested
+                boolean syncSuccess = getRemoteInterventions();
+                if (syncSuccess) {
+                    locationNode = getSavedInterventions(); // Refresh local data after sync
+                    if (locationNode != null) {
+                        locationNode.put("source", "HIE");
+                        return ResponseEntity.ok(locationNode.toString());
+                    }
+                }
+                // If synchronization fails, return the local data if available
+                if (locationNode != null) {
+                    locationNode.put("source", "Local");
+                    return ResponseEntity.ok(locationNode.toString());
+                }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Synchronization with HIE failed, and no valid SHA interventions available.");
+            }
+
+            // If not synchronizing, return local data if available
+            if (locationNode != null && !isValuesEmptyOrDefault(locationNode, "shaInterventions")) {
+                locationNode.put("source", "Local");
+                return ResponseEntity.ok(locationNode.toString());
+            }
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No valid local SHA interventions found. Synchronization was not performed.");
+
+        } catch (Exception e) {
+            System.err.println("Error fetching SHA benefits package: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving SHA interventions details.");
+        } finally {
+            revokePrivileges();
         }
-        return ResponseEntity.ok(locationNode.toString());
     }
 
     private boolean getRemoteInterventions() {

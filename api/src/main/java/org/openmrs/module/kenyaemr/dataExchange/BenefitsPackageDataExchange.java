@@ -22,7 +22,6 @@ import org.json.JSONException;
 import org.openmrs.Location;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.User;
-import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.FacilityMetadata;
@@ -46,9 +45,6 @@ import static org.openmrs.module.kenyaemr.util.EmrUtils.*;
  */
 public class BenefitsPackageDataExchange {
     private static final Logger log = LoggerFactory.getLogger(BenefitsPackageDataExchange.class);
-
-    private static final LocationService locationService = Context.getLocationService();
-
     private static final String BASE_JWT_URL_KEY = CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT;
     private static final String BASE_URL_KEY = CommonMetadata.GP_HIE_BASE_END_POINT_URL;
     private static final String API_USER_KEY = CommonMetadata.GP_HIE_API_USER;
@@ -179,7 +175,7 @@ public class BenefitsPackageDataExchange {
                 return false;
             }
         } catch (Exception e) {
-            System.err.println("Error in saving benefits package  e.getMessage(): " + e.getMessage());
+            System.err.println("Error saving benefits package: " + e.getMessage());
             return false;
         }
     }
