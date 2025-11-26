@@ -80,6 +80,9 @@ import org.openmrs.module.kenyaemr.DwapiMetricsUtil;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.FacilityDashboardUtil;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.api.events.EventsBroadcaster;
+import org.openmrs.module.kenyaemr.api.impl.ekyc.EkycService;
+import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.AllCd4CountCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.AllVlCountCalculation;
@@ -145,6 +148,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -184,7 +188,9 @@ import java.util.Map;
 import java.util.Set;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.openmrs.module.kenyaemr.FacilityDashboardUtil.*;
 import static org.openmrs.module.kenyaemr.api.impl.HieConsentServiceImpl.ConsentOTPValidation;
@@ -204,6 +210,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 	@Autowired
 	private ProgramManager programManager;
+    @Autowired
+    private EkycService ekycService;
+    @Autowired
+    private EventsBroadcaster eventsBroadcaster;
 
 	public static String HIV_PROGRAM_UUID = "dfdc6d40-2f2f-463d-ba90-cc97350441a8";
 	public static String MCH_CHILD_PROGRAM_UUID = "c2ecdf11-97cd-432a-a971-cfd9bd296b83";
@@ -4349,4 +4359,93 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 		return(ret);
 	}
+
+    @PostMapping("/start-verification")
+    public ResponseEntity<?> startVerification(@RequestBody Map<String, String> body) throws Exception {
+
+        try {
+            String patientUuid = body.get("patientUuid");
+            String subjectId = body.get("subjectId");
+            String subjectIdType = body.get("subjectIdType");
+            String agentId = body.get("agentId");
+            String agentIdType = body.get("agentIdType");
+            String reason = body.get("reason");
+            String locationName = body.get("locationName");
+
+            BiometricVerification v = ekycService.startVerification(
+                    patientUuid, subjectId, subjectIdType,
+                    agentId, agentIdType, reason, locationName
+            );
+
+            // Send back identifiers needed for SSE + iframe
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("requestId", v.getRequestId());
+            resp.put("relyingPartyRequestId", v.getRelyingPartyRequestId());
+            resp.put("totalAttempts", v.getTotalAttempts());
+
+            return ResponseEntity.ok(resp);
+
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(
+                    Collections.singletonMap("error", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/ekyc-callback")
+    public ResponseEntity<String> callback(@RequestBody String body) {
+        try {
+            ekycService.handleCallback(body);
+            return ResponseEntity.ok("OK");
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Error: " + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/ekyc-request-otp-use")
+    public ResponseEntity<?> requestOtp(@RequestBody Map<String, String> body) {
+
+        try {
+            String requestId = body.get("requestId");
+            String reason = body.get("reason");
+            String userUuid = body.get("userUuid");
+
+            ekycService.requestOtpUse(requestId, reason, userUuid);
+
+            return ResponseEntity.ok(Collections.singletonMap("status", "ok"));
+
+        } catch(Exception ex) {
+            return ResponseEntity.status(500)
+                    .body(Collections.singletonMap("error", ex.getMessage()));
+        }
+    }
+    @GetMapping(value = "/ekyc-events/{requestId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter events(@PathVariable String requestId) {
+        SseEmitter emitter = new SseEmitter(0L); // infinite timeout
+
+        // Register emitter in the broadcaster map
+        eventsBroadcaster.register(requestId, emitter);
+
+        // Start sending heartbeat every 20s
+        startHeartbeat(emitter);
+
+        return emitter;
+    }
+
+    /**
+     * Send keep-alive events so SSE connection stays healthy.
+     */
+    private void startHeartbeat(SseEmitter emitter) {
+
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+
+        exec.scheduleAtFixedRate(() -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("heartbeat")
+                        .data("ping"));
+            } catch (Exception ex) {
+                exec.shutdown();
+            }
+        }, 20, 20, TimeUnit.SECONDS);
+    }
 }

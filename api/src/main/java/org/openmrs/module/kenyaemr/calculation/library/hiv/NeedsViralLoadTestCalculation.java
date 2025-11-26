@@ -74,6 +74,7 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
      * After 12 months = Adults aged 25+ years with suppressed VL (upto 200 cps/ml)
      *
      * @see org.openmrs.module.kenyacore.calculation.PatientFlagCalculation#getFlagMessage()
+     *
      */
     @Override
     public String getFlagMessage() {

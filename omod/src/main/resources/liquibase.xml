@@ -494,7 +494,80 @@
 			ALTER TABLE location_attribute MODIFY COLUMN value_reference MEDIUMTEXT;
 		</sql>
 	</changeSet>
+    <changeSet id="${project.parent.artifactId}-20251125-1530" author="schege">
+        <createTable tableName="ekyc_biometric_verification">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_ekyc_bio_ver"/>
+            </column>
 
+            <column name="request_id" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="relying_party_request_id" type="VARCHAR(100)"/>
+            <column name="patient_uuid" type="VARCHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="result" type="VARCHAR(50)"/>
+            <column name="final_result" type="VARCHAR(50)"/>
+
+            <column name="attempts_used" type="INT" defaultValueNumeric="0"/>
+            <column name="total_attempts" type="INT"/>
+
+            <column name="completed" type="BOOLEAN" defaultValueBoolean="false"/>
+
+            <column name="last_callback_raw" type="LONGTEXT"/>
+            <column name="date_created" type="DATETIME"/>
+            <column name="date_updated" type="DATETIME"/>
+        </createTable>
+
+        <createIndex tableName="ekyc_biometric_verification" indexName="idx_ekyc_bio_ver_reqid">
+            <column name="request_id"/>
+        </createIndex>
+
+        <createIndex tableName="ekyc_biometric_verification" indexName="idx_ekyc_bio_ver_patientuuid">
+            <column name="patient_uuid"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="${project.parent.artifactId}-20251125-1540" author="schege">
+        <createTable tableName="ekyc_otp_use_request">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_ekyc_otp_req"/>
+            </column>
+
+            <column name="verification_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="patient_uuid" type="VARCHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="reason" type="TEXT"/>
+            <column name="requested_by" type="VARCHAR(50)"/>
+
+            <column name="approved" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="date_requested" type="DATETIME"/>
+        </createTable>
+
+        <createIndex tableName="ekyc_otp_use_request" indexName="idx_ekyc_otp_verid">
+            <column name="verification_id"/>
+        </createIndex>
+
+        <createIndex tableName="ekyc_otp_use_request" indexName="idx_ekyc_otp_patientuuid">
+            <column name="patient_uuid"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="ekyc_otp_use_request"
+                baseColumnNames="verification_id"
+                constraintName="fk_ekyc_otp_ver"
+                referencedTableName="ekyc_biometric_verification"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
 </databaseChangeLog>
 
 
