@@ -22,30 +22,55 @@ import java.util.Objects;
 @Entity
 @Table(name = "ekyc_biometric_verification")
 public class BiometricVerification {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(name="request_id", unique=true)
     private String requestId;
+
     @Column(name="relying_party_request_id")
     private String relyingPartyRequestId;
+
     @Column(name="patient_uuid")
     private String patientUuid;
+
     @Column(name="status")
     private String status;
+
+    @Column(name="status_code")
+    private String statusCode;
+
     @Column(name="result")
     private String result;
+
     @Column(name="attempts_used")
     private Integer attemptsUsed = 0;
+
     @Column(name="total_attempts")
     private Integer totalAttempts;
+
     @Column(name="completed")
     private Boolean completed = false;
+
     @Column(name="final_result")
     private String finalResult;
+
     @Column(name="last_callback_raw", columnDefinition = "LONGTEXT")
     private String lastCallbackRaw;
+
+    @Column(name="verification_context")
+    private String verificationContext;
+
+    @Column(name="verification_completed_at")
+    private Date verificationCompletedAt;
+
+    @Column(name="verification_expiry")
+    private Date verificationExpiry;
+
     @Column(name="date_created")
     private Date dateCreated = new Date();
+
     @Column(name="date_updated")
     private Date dateUpdated;
 
@@ -59,6 +84,30 @@ public class BiometricVerification {
     @Override
     public int hashCode() {
         return Objects.hash(id, requestId, relyingPartyRequestId, patientUuid, status, result, attemptsUsed, totalAttempts, completed, finalResult, lastCallbackRaw, dateCreated, dateUpdated);
+    }
+
+    public String getVerificationContext() {
+        return verificationContext;
+    }
+
+    public void setVerificationContext(String verificationContext) {
+        this.verificationContext = verificationContext;
+    }
+
+    public Date getVerificationCompletedAt() {
+        return verificationCompletedAt;
+    }
+
+    public void setVerificationCompletedAt(Date verificationCompletedAt) {
+        this.verificationCompletedAt = verificationCompletedAt;
+    }
+
+    public Date getVerificationExpiry() {
+        return verificationExpiry;
+    }
+
+    public void setVerificationExpiry(Date verificationExpiry) {
+        this.verificationExpiry = verificationExpiry;
     }
 
     public Integer getId() {
@@ -99,6 +148,14 @@ public class BiometricVerification {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String getResult() {

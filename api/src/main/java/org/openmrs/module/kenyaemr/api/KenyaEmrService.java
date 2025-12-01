@@ -14,6 +14,7 @@ import org.openmrs.Patient;
 import org.openmrs.Visit;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,4 +110,25 @@ public interface KenyaEmrService extends OpenmrsService {
 	public List<SimpleObject> search(String sqlQuery, Map<String, String[]> params);
 
 	public SimpleObject sendKenyaEmrSms(String recipient, String message, String nationalId);
+
+    BiometricVerification startVerification(
+            String patientUuid,
+            String subjectId,
+            String subjectIdType,
+            String agentId,
+            String agentIdType,
+            String reason,
+           // String locationName,
+            String verificationContext
+    ) throws Exception;
+
+    void handleCallback(String callbackJson);
+
+    void requestOtpUse(String requestId,
+                       String reason,
+                       String otpContext,
+                       String subjectId,
+                       String subjectIdType,
+                       String agentId,
+                       String locationName) throws Exception;
 }

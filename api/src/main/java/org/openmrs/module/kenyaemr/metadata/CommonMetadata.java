@@ -91,7 +91,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
     public static final String GP_EKYC_EMBED_IFRAME_URL = "kenyaemr.ekyc.embedBaseUrl";
     public static final String GP_EKYC_TOKEN_REFRESH_MARGIN_SECONDS = "kenyaemre.kyc.tokenRefreshMarginSeconds";
     public static final String GP_EKYC_TOKEN_CACHE_KEY = "kenyaemr.ekyc.tokenCacheKey";
-	
+    public static final String GP_CHECKIN_VALIDITY_MINS = "kenyaemr.ekyc.checkin.validity.mins";
+    public static final String GP_CLAIMS_VALIDITY_MINS = "kenyaemr.ekyc.claim.validity.mins";
+    public static final String GP_EKYC_REQUEST_EXPIRY_SECONDS = "kenyaemr.ekyc.requestExpirySeconds";
+    private static final String GP_EKYC_OTP_APPROVAL_URL = "kenyaemr.ekyc.getOTPUseApproval.url";
+
     public static final class _Program {
         public static final String NUTRITION = Metadata.Program.NUTRITION;
     }
@@ -673,6 +677,19 @@ public class CommonMetadata extends AbstractMetadataBundle {
         }
         if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_EKYC_TOKEN_CACHE_KEY) == null) {
             install(globalProperty(GP_EKYC_TOKEN_CACHE_KEY, "EKYC Authentication token cache key", ""));
+        }
+        if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_CHECKIN_VALIDITY_MINS) == null) {
+            install(globalProperty(GP_EKYC_TOKEN_CACHE_KEY, "EKYC validity of a checkin verification in minutes", ""));
+        }
+        if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_CLAIMS_VALIDITY_MINS) == null) {
+            install(globalProperty(GP_EKYC_TOKEN_CACHE_KEY, "EKYC validity of a claim verification in minutes", ""));
+        }
+
+        if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_EKYC_REQUEST_EXPIRY_SECONDS) == null) {
+            install(globalProperty(GP_EKYC_REQUEST_EXPIRY_SECONDS, "EKYC request expiry duration in seconds", ""));
+        }
+        if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_EKYC_OTP_APPROVAL_URL) == null) {
+            install(globalProperty(GP_EKYC_OTP_APPROVAL_URL, "Endpoint for request approval for use of OTP", ""));
         }
 
         install(patientIdentifierType("Old Identification Number", "Identifier given out prior to OpenMRS",

@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.kenyaemr.api.db;
 
+import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
+import org.openmrs.module.kenyaemr.api.model.OtpUseRequest;
+
 import java.util.List;
 import java.util.Map;
 
@@ -18,4 +21,23 @@ import java.util.Map;
 public interface KenyaEmrDAO {
 	public List<Object> executeSqlQuery(String query, Map<String, Object> substitutions);
 	public List<Object> executeHqlQuery(String query, Map<String, Object> substitutions);
+    BiometricVerification getByRequestId(String requestId);
+
+    void saveVerification(BiometricVerification v);
+
+    void updateVerification(BiometricVerification v);
+
+    void saveOtpRequest(OtpUseRequest r);
+
+    /**
+     * Returns ONLY completed (final) verification
+     * for enforcement (visit/claim).
+     */
+    BiometricVerification getLatestCompletedForPatientAndContext(String patientUuid, String context);
+
+    /**
+     * Returns latest verification (even incomplete)
+     * for UI display / SSE.
+     */
+    BiometricVerification getLatestAnyStatusForPatientAndContext(String patientUuid, String context);
 }

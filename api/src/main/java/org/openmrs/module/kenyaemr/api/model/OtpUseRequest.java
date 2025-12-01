@@ -22,8 +22,7 @@ import java.util.Objects;
 @Table(name = "ekyc_otp_use_request")
 public class OtpUseRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "verification_id")
@@ -38,22 +37,87 @@ public class OtpUseRequest {
     @Column(name = "requested_by")
     private String requestedBy;
 
+    @Column(name = "otp_context")
+    private String otpContext;
+
     @Column(name = "date_requested")
     private Date dateRequested = new Date();
 
     @Column(name = "approved")
     private Boolean approved = false;
 
+    @Column(name = "approval_id")
+    private String approvalId;
+
+    @Column(name = "response_status")
+    private String responseStatus;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
+    @Column(name = "expires_at")
+    private Date expiresAt;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         OtpUseRequest that = (OtpUseRequest) o;
-        return Objects.equals(id, that.id) && Objects.equals(verificationId, that.verificationId) && Objects.equals(patientUuid, that.patientUuid) && Objects.equals(reason, that.reason) && Objects.equals(requestedBy, that.requestedBy) && Objects.equals(dateRequested, that.dateRequested) && Objects.equals(approved, that.approved);
+        return Objects.equals(id, that.id) && Objects.equals(verificationId, that.verificationId) && Objects.equals(patientUuid, that.patientUuid) && Objects.equals(reason, that.reason) && Objects.equals(requestedBy, that.requestedBy) && Objects.equals(otpContext, that.otpContext) && Objects.equals(dateRequested, that.dateRequested) && Objects.equals(approved, that.approved) && Objects.equals(approvalId, that.approvalId) && Objects.equals(responseStatus, that.responseStatus) && Objects.equals(rejectionReason, that.rejectionReason) && Objects.equals(expiresAt, that.expiresAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, verificationId, patientUuid, reason, requestedBy, dateRequested, approved);
+        return Objects.hash(id, verificationId, patientUuid, reason, requestedBy, otpContext, dateRequested, approved, approvalId, responseStatus, rejectionReason, expiresAt);
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
+
+    public String getApprovalId() {
+        return approvalId;
+    }
+
+    public void setApprovalId(String approvalId) {
+        this.approvalId = approvalId;
+    }
+
+    public String getResponseStatus() {
+        return responseStatus;
+    }
+
+    public void setResponseStatus(String responseStatus) {
+        this.responseStatus = responseStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public Date getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Date expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public Date getDateRequested() {
+        return dateRequested;
+    }
+    public String getOtpContext() {
+        return otpContext;
+    }
+
+    public void setOtpContext(String otpContext) {
+        this.otpContext = otpContext;
     }
 
     public Integer getId() {
@@ -94,14 +158,6 @@ public class OtpUseRequest {
 
     public Boolean getApproved() {
         return approved;
-    }
-
-    public void setApproved(Boolean approved) {
-        this.approved = approved;
-    }
-
-    public Date getDateRequested() {
-        return dateRequested;
     }
 
     public void setDateRequested(Date dateRequested) {

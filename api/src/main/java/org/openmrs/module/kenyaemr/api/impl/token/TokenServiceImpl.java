@@ -10,9 +10,7 @@
 package org.openmrs.module.kenyaemr.api.impl.token;
 
 import org.json.JSONObject;
-import org.openmrs.GlobalProperty;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,43 +26,32 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public synchronized String getValidToken() throws Exception {
-        long now = System.currentTimeMillis();
 
-        // 1. If current access token is still valid, return it immediately
         if (TokenCache.isValid()) {
             return TokenCache.getAccessToken();
         }
 
-        // 2. If we have a refresh token, attempt refresh first
         String refreshToken = TokenCache.getRefreshToken();
-        if (refreshToken != null) {
+        if (refreshToken != null && !refreshToken.isEmpty()) {
             try {
                 return refreshWithRefreshToken(refreshToken);
             } catch (Exception ex) {
-                // Refresh token invalid or expired → fallback to client_credentials
+                // failed to refresh - clear cache and fallback to client_credentials
+                TokenCache.clear();
             }
         }
 
-        // 3. Refresh token missing or failed → use client_credentials
         return fetchNewTokenClientCredentials();
     }
 
     private String refreshWithRefreshToken(String refreshToken) throws Exception {
-
-        GlobalProperty ekycTokenUrl = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_TOKEN_URL);
-        GlobalProperty ekycClientId = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_CLIENT_ID);
-        GlobalProperty ekycClientSecret = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_CLIENT_SECRET);
-
-        String tokenUrl = ekycTokenUrl.getPropertyValue();
-        String clientId = ekycClientId.getPropertyValue();
-        String clientSecret = ekycClientSecret.getPropertyValue();
+        String ekycTokenUrl = EmrUtils.getGlobalPropertyValue("kenyaemre.kyc.tokenUrl");
+        String ekycClientId = EmrUtils.getGlobalPropertyValue("kenyaemr.ekyc.clientId");
+        String ekycClientSecret = EmrUtils.getGlobalPropertyValue("kenyaemr.ekyc.clientSecret");
 
         JSONObject payload = new JSONObject();
-        payload.put("client_id", clientId);
-        payload.put("client_secret", clientSecret);
+        payload.put("client_id", ekycClientId);
+        payload.put("client_secret", ekycClientSecret);
         payload.put("grant_type", "refresh_token");
         payload.put("refresh_token", refreshToken);
 
@@ -74,7 +61,7 @@ public class TokenServiceImpl implements TokenService {
         HttpEntity<String> entity = new HttpEntity<>(payload.toString(), headers);
 
         ResponseEntity<String> resp =
-                rest.exchange(tokenUrl, HttpMethod.POST, entity, String.class);
+                rest.exchange(ekycTokenUrl, HttpMethod.POST, entity, String.class);
 
         if (!resp.getStatusCode().is2xxSuccessful()) {
             throw new IllegalStateException("Refresh token failed: " + resp.getStatusCode());
@@ -86,19 +73,13 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private String fetchNewTokenClientCredentials() throws Exception {
-        GlobalProperty ekycTokenUrl = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_TOKEN_URL);
-        GlobalProperty ekycClientId = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_CLIENT_ID);
-        GlobalProperty ekycClientSecret = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_CLIENT_SECRET);
+        String ekycTokenUrl = EmrUtils.getGlobalPropertyValue("kenyaemre.kyc.tokenUrl");
+        String ekycClientId = EmrUtils.getGlobalPropertyValue("kenyaemr.ekyc.clientId");
+        String ekycClientSecret = EmrUtils.getGlobalPropertyValue("kenyaemr.ekyc.clientSecret");
 
-        String tokenUrl = ekycTokenUrl.getPropertyValue();
-        String clientId = ekycClientId.getPropertyValue();
-        String clientSecret = ekycClientSecret.getPropertyValue();
         JSONObject payload = new JSONObject();
-        payload.put("client_id", clientId);
-        payload.put("client_secret", clientSecret);
+        payload.put("client_id", ekycClientId);
+        payload.put("client_secret", ekycClientSecret);
         payload.put("grant_type", "client_credentials");
 
         HttpHeaders headers = new HttpHeaders();
@@ -107,7 +88,7 @@ public class TokenServiceImpl implements TokenService {
         HttpEntity<String> entity = new HttpEntity<>(payload.toString(), headers);
 
         ResponseEntity<String> resp =
-                rest.exchange(tokenUrl, HttpMethod.POST, entity, String.class);
+                rest.exchange(ekycTokenUrl, HttpMethod.POST, entity, String.class);
 
         if (!resp.getStatusCode().is2xxSuccessful()) {
             throw new IllegalStateException("Client credentials flow failed: " + resp.getStatusCode());
@@ -119,22 +100,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private void storeToken(JSONObject json) {
-        GlobalProperty ekycTokenRefreshMargin = Context.getAdministrationService()
-                .getGlobalPropertyObject(CommonMetadata.GP_EKYC_TOKEN_REFRESH_MARGIN_SECONDS);
-        int tokenRefreshMargin = Integer.parseInt(ekycTokenRefreshMargin.getPropertyValue());
+        String ekycTokenRefreshMargin = EmrUtils.getGlobalPropertyValue("kenyaemre.kyc.tokenRefreshMarginSeconds");
+        int tokenRefreshMargin = Integer.parseInt(ekycTokenRefreshMargin);
         String accessToken = json.getString("access_token");
         String tokenType = json.optString("token_type", "Bearer"); // Safe fallback
         String refreshToken = json.optString("refresh_token", null);
 
-        int expiresIn = json.getInt("expires_in"); // Provided by eCitizen
+        int expiresIn = json.optInt("expires_in", 3600); // Provided by eCitizen or defaults to 3600
 
-        long expiryEpoch = System.currentTimeMillis() + ((expiresIn - tokenRefreshMargin) * 1000L);
+        long expiryEpoch = System.currentTimeMillis() + Math.max(0, (expiresIn - tokenRefreshMargin)) * 1000L;
 
-        TokenCache.store(
-                accessToken,
-                refreshToken,
-                tokenType,
-                expiryEpoch
-        );
+        TokenCache.store(accessToken, refreshToken, tokenType, expiryEpoch);
     }
 }

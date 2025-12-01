@@ -10,7 +10,6 @@
 package org.openmrs.module.kenyaemr.api.impl.token;
 
 public class TokenCache {
-
     private static volatile String accessToken;
     private static volatile String refreshToken;
     private static volatile String tokenType;

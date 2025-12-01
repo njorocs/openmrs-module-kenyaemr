@@ -202,6 +202,12 @@
 	</bean>
 
 	<!-- Module service -->
+    <bean id="kenyaEmrDAO" class="org.openmrs.module.kenyaemr.api.db.hibernate.HibernateKenyaEmrDAO">
+        <property name="sessionFactory"><ref bean="sessionFactory"/></property>
+    </bean>
+
+    <bean id="tokenService" class="org.openmrs.module.kenyaemr.api.impl.token.TokenServiceImpl" />
+    <bean id="eventsBroadcaster" class="org.openmrs.module.kenyaemr.api.events.EventsBroadcaster" />
 
 	<bean id="kenyaEmrService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager">
@@ -210,10 +216,10 @@
 		<property name="target">
 			<bean class="org.openmrs.module.kenyaemr.api.impl.KenyaEmrServiceImpl">
 				<property name="kenyaEmrDAO">
-					<bean class="org.openmrs.module.kenyaemr.api.db.hibernate.HibernateKenyaEmrDAO">
-						<property name="sessionFactory"><ref bean="sessionFactory"/></property>
-					</bean>
+                    <ref bean="kenyaEmrDAO" />
 				</property>
+                <property name="tokenService"><ref bean="tokenService"/></property>
+                <property name="events"><ref bean="eventsBroadcaster"/></property>
 			</bean>
 		</property>
 		<property name="preInterceptors">
@@ -234,6 +240,9 @@
 			</list>
 		</property>
 	</bean>
+    <!-- 1. Register Hibernate Entities -->
+<!--    <bean id="tokenService" class="org.openmrs.module.kenyaemr.api.impl.token.TokenServiceImpl" />
+    <bean id="eventsBroadcaster" class="org.openmrs.module.kenyaemr.api.events.EventsBroadcaster" />-->
 
 	<!-- External requirements -->
 

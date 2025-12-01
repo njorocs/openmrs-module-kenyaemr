@@ -1,0 +1,54 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.kenyaemr.api.impl.ekyc.enforcement;
+
+import org.openmrs.module.kenyaemr.api.db.KenyaEmrDAO;
+import org.openmrs.module.kenyaemr.api.db.hibernate.HibernateKenyaEmrDAO;
+import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+
+@Service
+public class EkycVerificationEnforcementService {
+
+    @Autowired
+    private KenyaEmrDAO dao;
+
+    public void assertCheckinVerified(String patientUuid) {
+        assertVerifiedForContext(patientUuid, "CHECKIN");
+    }
+
+    public void assertClaimVerified(String patientUuid) {
+        assertVerifiedForContext(patientUuid, "CLAIM");
+    }
+
+    private void assertVerifiedForContext(String patientUuid, String context) {
+
+        BiometricVerification v = dao.getLatestCompletedForPatientAndContext(patientUuid, context);
+
+        if (v == null)
+            throw new VerificationException("No verification record found for " + context);
+
+        if (!Boolean.TRUE.equals(v.getCompleted()))
+            throw new VerificationException("Verification not completed");
+
+        String fr = v.getFinalResult();
+        if (!( "match".equals(fr) || "otp_verified".equals(fr) ))
+            throw new VerificationException("Verification failed: " + fr);
+
+        if (v.getVerificationExpiry() == null)
+            throw new VerificationException("Verification expiry missing");
+
+        if (new Date().after(v.getVerificationExpiry()))
+            throw new VerificationException("Verification expired");
+    }
+}

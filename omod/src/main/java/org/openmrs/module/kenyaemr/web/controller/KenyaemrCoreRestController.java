@@ -80,8 +80,8 @@ import org.openmrs.module.kenyaemr.DwapiMetricsUtil;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.FacilityDashboardUtil;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.api.db.KenyaEmrDAO;
 import org.openmrs.module.kenyaemr.api.events.EventsBroadcaster;
-import org.openmrs.module.kenyaemr.api.impl.ekyc.EkycService;
 import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.AllCd4CountCalculation;
@@ -147,13 +147,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
@@ -168,6 +175,8 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -182,12 +191,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -211,7 +219,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@Autowired
 	private ProgramManager programManager;
     @Autowired
-    private EkycService ekycService;
+    private KenyaEmrService ekycService;
     @Autowired
     private EventsBroadcaster eventsBroadcaster;
 
@@ -263,6 +271,11 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	public static final String GP_COUNTY = "kenyakeypop.countyCode";
 	public static final String GP_KP_IMPLEMENTING_PARTNER = "kenyakeypop.implementingPartnerCode";
 
+    private final KenyaEmrDAO dao;
+
+    public KenyaemrCoreRestController(KenyaEmrDAO dao) {
+        this.dao = dao;
+    }
 	/**
 	 * Gets a list of available/completed forms for a patient
 	 *
@@ -4361,26 +4374,38 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	}
 
     @PostMapping("/start-verification")
+    @ResponseBody
     public ResponseEntity<?> startVerification(@RequestBody Map<String, String> body) throws Exception {
 
         try {
             String patientUuid = body.get("patientUuid");
-            String subjectId = body.get("subjectId");
-            String subjectIdType = body.get("subjectIdType");
             String agentId = body.get("agentId");
             String agentIdType = body.get("agentIdType");
             String reason = body.get("reason");
-            String locationName = body.get("locationName");
+            //todo get location name and mfl code from backend. WHat is the location code used? mfl or facility id?
+          //  String locationName = "123:Test location";
+            String verificationContext = body.get("verificationContext");
+
+            PatientIdentifierType nationalIdIdfType = MetadataUtils.existing(PatientIdentifierType.class,
+                    CommonMetadata._PatientIdentifierType.NATIONAL_ID);
+            Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+            PatientIdentifier pi = nationalIdIdfType != null && patient != null ? patient.getPatientIdentifier(nationalIdIdfType) : null;
+            String subjectId = pi != null ? pi.getIdentifier() : null;
+
+            String subjectIdType = subjectId == null ? null : "citizen";
 
             BiometricVerification v = ekycService.startVerification(
                     patientUuid, subjectId, subjectIdType,
-                    agentId, agentIdType, reason, locationName
+                    agentId,agentIdType, reason, verificationContext
             );
+        //todo validate required values
 
             // Send back identifiers needed for SSE + iframe
             Map<String, Object> resp = new HashMap<>();
             resp.put("requestId", v.getRequestId());
             resp.put("relyingPartyRequestId", v.getRelyingPartyRequestId());
+            resp.put("verificationContext", v.getVerificationContext());
+            resp.put("embedToken", v.getRequestId());
             resp.put("totalAttempts", v.getTotalAttempts());
 
             return ResponseEntity.ok(resp);
@@ -4392,6 +4417,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
     }
 
     @PostMapping("/ekyc-callback")
+    @ResponseBody
     public ResponseEntity<String> callback(@RequestBody String body) {
         try {
             ekycService.handleCallback(body);
@@ -4402,14 +4428,18 @@ public class KenyaemrCoreRestController extends BaseRestController {
     }
 
     @PostMapping("/ekyc-request-otp-use")
+    @ResponseBody
     public ResponseEntity<?> requestOtp(@RequestBody Map<String, String> body) {
 
         try {
-            String requestId = body.get("requestId");
+            String requestId = body.get("requestId"); //todo we need patient id, location
             String reason = body.get("reason");
-            String userUuid = body.get("userUuid");
-
-            ekycService.requestOtpUse(requestId, reason, userUuid);
+            String otpContext = body.get("otpContext");
+            String subjectId = body.get("subjectId");
+            String subjectIdType = body.get("subjectIdType");
+            String agentId = body.get("agentId");
+            String locationName = body.get("locationName");
+            ekycService.requestOtpUse(requestId, reason, otpContext, subjectId, subjectIdType, agentId, locationName); // TODO get actual payload
 
             return ResponseEntity.ok(Collections.singletonMap("status", "ok"));
 
@@ -4419,6 +4449,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
         }
     }
     @GetMapping(value = "/ekyc-events/{requestId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseBody
     public SseEmitter events(@PathVariable String requestId) {
         SseEmitter emitter = new SseEmitter(0L); // infinite timeout
 
@@ -4430,7 +4461,36 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
         return emitter;
     }
+    /**
+     * Returns the latest verification, EVEN IF incomplete.
+     * Used by frontend to display progress + connect SSE.
+     */
+    @GetMapping("/current")
+    @ResponseBody
+    public Object getCurrentVerification(
+            @RequestParam String patientUuid,
+            @RequestParam String context) {
 
+        BiometricVerification v =
+                dao.getLatestAnyStatusForPatientAndContext(patientUuid, context);
+
+        if (v == null) {
+            return Collections.singletonMap("status", "none");
+        }
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("requestId", v.getRequestId());
+        out.put("status", v.getStatus());
+        out.put("result", v.getResult());
+        out.put("attemptsUsed", v.getAttemptsUsed());
+        out.put("totalAttempts", v.getTotalAttempts());
+        out.put("completed", v.getCompleted());
+        out.put("finalResult", v.getFinalResult());
+        out.put("verificationExpiry", v.getVerificationExpiry());
+        out.put("verificationContext", v.getVerificationContext());
+
+        return out;
+    }
     /**
      * Send keep-alive events so SSE connection stays healthy.
      */

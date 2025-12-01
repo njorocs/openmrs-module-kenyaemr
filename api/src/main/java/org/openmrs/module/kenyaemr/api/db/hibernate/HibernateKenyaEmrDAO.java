@@ -15,6 +15,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Cohort;
 import org.openmrs.module.kenyaemr.api.db.KenyaEmrDAO;
+import org.openmrs.module.kenyaemr.api.model.BiometricVerification;
+import org.openmrs.module.kenyaemr.api.model.OtpUseRequest;
 
 import java.util.Collection;
 import java.util.Date;
@@ -97,5 +99,64 @@ public class HibernateKenyaEmrDAO implements KenyaEmrDAO {
 			}
 		}
 	}
+    @Override
+    public void saveVerification(BiometricVerification v) {
+        sessionFactory.getCurrentSession().save(v);
+    }
 
+    @Override
+    public void updateVerification(BiometricVerification v) {
+        sessionFactory.getCurrentSession().update(v);
+    }
+
+    @Override
+    public BiometricVerification getByRequestId(String requestId) {
+        org.hibernate.query.Query<BiometricVerification> q = sessionFactory.getCurrentSession().createQuery(
+                "from BiometricVerification where requestId = :rid", BiometricVerification.class);
+        q.setParameter("rid", requestId);
+        List<BiometricVerification> list = q.list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public void saveOtpRequest(OtpUseRequest r) {
+        sessionFactory.getCurrentSession().save(r);
+    }
+
+    @Override
+    public BiometricVerification getLatestCompletedForPatientAndContext(String patientUuid, String context) {
+        String hql =
+                "from BiometricVerification v " +
+                        "where v.patientUuid = :pu " +
+                        "and v.verificationContext = :ctx " +
+                        "and v.completed = true " +
+                        "order by v.verificationCompletedAt desc";
+
+        List<BiometricVerification> list = sessionFactory.getCurrentSession()
+                .createQuery(hql, BiometricVerification.class)
+                .setParameter("pu", patientUuid)
+                .setParameter("ctx", context)
+                .setMaxResults(1)
+                .list();
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public BiometricVerification getLatestAnyStatusForPatientAndContext(String patientUuid, String context) {
+        String hql =
+                "from BiometricVerification v " +
+                        "where v.patientUuid = :pu " +
+                        "and v.verificationContext = :ctx " +
+                        "order by v.dateUpdated desc";
+
+        List<BiometricVerification> list = sessionFactory.getCurrentSession()
+                .createQuery(hql, BiometricVerification.class)
+                .setParameter("pu", patientUuid)
+                .setParameter("ctx", context)
+                .setMaxResults(1)
+                .list();
+
+        return list.isEmpty() ? null : list.get(0);
+    }
 }
