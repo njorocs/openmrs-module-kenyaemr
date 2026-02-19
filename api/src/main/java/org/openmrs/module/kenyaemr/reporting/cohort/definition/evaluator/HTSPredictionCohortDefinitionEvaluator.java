@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.HTSPredictionCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -49,7 +50,7 @@ public class HTSPredictionCohortDefinitionEvaluator implements CohortDefinitionE
 
 		Cohort newCohort = new Cohort();
 
-		String qry="SELECT patient_id FROM kenyaemr_etl.etl_hts_eligibility_screening where date(visit_date) >= date(:startDate) and date(visit_date) <= date(:endDate);";
+		String qry="SELECT patient_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening where date(visit_date) >= date(:startDate) and date(visit_date) <= date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

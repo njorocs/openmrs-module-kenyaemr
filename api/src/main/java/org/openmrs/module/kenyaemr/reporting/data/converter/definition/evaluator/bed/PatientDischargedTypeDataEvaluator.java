@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.bed;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.bed.PatientDischargedTypeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,7 +41,7 @@ public class PatientDischargedTypeDataEvaluator implements PersonDataEvaluator {
                 "when 164165 then 'Referred to another facility'\n" +
                 "else '' end) as discharge_status\n" +
                 "from encounter d \n" +
-                "inner join kenyaemr_etl.etl_inpatient_discharge v on d.patient_id = v.patient_id \n"+
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge v on d.patient_id = v.patient_id \n"+
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) \n" +
                 " group by d.patient_id; ";
 

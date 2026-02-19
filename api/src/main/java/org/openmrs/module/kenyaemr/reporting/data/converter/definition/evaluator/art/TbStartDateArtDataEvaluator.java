@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.TbStartDateArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class TbStartDateArtDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id,\n" +
-                "  mid(min(concat(visit_date,date_treatment_started)),11)  as tb_start_date from kenyaemr_etl.etl_tb_enrollment\n" +
+                "  mid(min(concat(visit_date,date_treatment_started)),11)  as tb_start_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment\n" +
                 "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

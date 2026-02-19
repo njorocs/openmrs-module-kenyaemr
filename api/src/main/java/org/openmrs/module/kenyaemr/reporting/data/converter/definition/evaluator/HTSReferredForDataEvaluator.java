@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSReferredForDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,7 +37,7 @@ public class HTSReferredForDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select encounter_id, \n" +
                 " (case neg_referral_for when 162223 then \"VMMC\" when 166536 then \"PrEP\" when 1691 then \"PEP\" when 167125 then \"PMTCT\" else \"NA\" end) as neg_referral_for\n" +
-                "from kenyaemr_etl.etl_hts_test;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

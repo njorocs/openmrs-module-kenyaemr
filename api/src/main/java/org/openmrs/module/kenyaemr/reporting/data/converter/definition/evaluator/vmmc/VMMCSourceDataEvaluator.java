@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCSourceDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class VMMCSourceDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select patient_id, case source_of_vmmc_info when 167095 then 'Radio/Tv' when 167096 then 'Print Media'when 167098 then 'Road Show'" +
                 " when 1555 then 'Mobilizer CHWl' when 1555 then 'Mobilizer CHWl' when 160542 then'OPD/MCH/HT' when 167097 then 'Social Media' when 5622 then" +
-                " other_source_of_vmmc_info else '' end as source_of_vmmc_info from kenyaemr_etl.etl_vmmc_enrolment GROUP BY patient_id;";
+                " other_source_of_vmmc_info else '' end as source_of_vmmc_info from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

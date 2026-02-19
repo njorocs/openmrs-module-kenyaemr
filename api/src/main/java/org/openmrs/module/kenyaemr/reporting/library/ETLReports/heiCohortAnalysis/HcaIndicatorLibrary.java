@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.heiCohortAnalysis;
 
-import static org.openmrs.module.kenyacore.report.ReportUtils.map;
-import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
-
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.openmrs.module.kenyacore.report.ReportUtils.map;
+import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
 @Component
 public class HcaIndicatorLibrary {

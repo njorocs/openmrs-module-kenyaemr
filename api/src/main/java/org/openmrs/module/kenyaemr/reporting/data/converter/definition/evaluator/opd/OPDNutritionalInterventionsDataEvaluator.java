@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDNutritionalInterventionsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,34 +40,34 @@ public class OPDNutritionalInterventionsDataEvaluator implements EncounterDataEv
         String qry = "SELECT\n" +
 			"   ce.encounter_id,\n" +
 			"   GROUP_CONCAT(sp.val SEPARATOR '|') AS nutritional_services\n" +
-			"FROM kenyaemr_etl.etl_clinical_encounter ce\n" +
+			"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
 			"        INNER JOIN (\n" +
 			"   SELECT\n" +
 			"       v.encounter_id,\n" +
 			"       v.patient_id,\n" +
 			"       CASE WHEN v.counselling_ordered = 'Nutritional and Dietary' THEN 1  END AS val\n" +
-			"    FROM kenyaemr_etl.etl_clinical_encounter v\n" +
+			"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"   WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 			"   UNION\n" +
 			"       SELECT\n" +
 			"           v.encounter_id,\n" +
 			"           v.patient_id,\n" +
 			"           CASE WHEN v.critical_nutrition_practices IS NOT NULL THEN 1 END AS val\n" +
-			"       FROM kenyaemr_etl.etl_special_clinics v\n" +
+			"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
 			"       WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 			"       UNION\n" +
 			"   SELECT\n" +
 			"       v.encounter_id,\n" +
 			"       v.patient_id,\n" +
 			"       CASE WHEN v.micronutrients IS NOT NULL THEN 2 END\n" +
-			"   FROM kenyaemr_etl.etl_special_clinics v\n" +
+			"   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
 			"   WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 			"   UNION\n" +
 			"   SELECT\n" +
 			"       v.encounter_id,\n" +
 			"       v.patient_id,\n" +
 			"       CASE WHEN v.supplemental_food IS NOT NULL THEN 3 END\n" +
-			"   FROM kenyaemr_etl.etl_special_clinics v\n" +
+			"   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
 			"   WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 			") sp\n" +
 			"                   ON ce.patient_id = sp.patient_id\n" +

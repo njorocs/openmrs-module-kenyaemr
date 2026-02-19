@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityChlorhexidineAppliedOnCordStumpDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +39,7 @@ public class MaternityChlorhexidineAppliedOnCordStumpDataEvaluator implements Pe
         String qry = "select\n" +
                 "  v.patient_id,\n" +
                 "  (case v.chlohexidine_applied_on_code_stump when 1065 then \"Yes\" when 1066 then \"No\" else \"\" end) as chlohexidine_applied_on_code_stump\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

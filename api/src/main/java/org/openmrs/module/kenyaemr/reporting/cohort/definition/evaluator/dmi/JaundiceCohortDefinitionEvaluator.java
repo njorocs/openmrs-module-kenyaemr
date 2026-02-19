@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.JaundiceCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -49,13 +50,13 @@ public class JaundiceCohortDefinitionEvaluator implements CohortDefinitionEvalua
 		String sqlQuery = "SELECT a.patient_id\n" +
 				"FROM (\n" +
 				"    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
-				"    FROM kenyaemr_etl.etl_clinical_encounter c\n" +
+				"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c\n" +
 				"    WHERE c.general_examination LIKE '%Jaundice%'\n" +
 				"      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"    GROUP BY patient_id\n" +
 				"    UNION ALL\n" +
 				"    SELECT patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
-				"    FROM kenyaemr_etl.etl_patient_hiv_followup h\n" +
+				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup h\n" +
 				"    WHERE h.general_examination LIKE '%Jaundice%'\n" +
 				"      AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"    GROUP BY patient_id\n" +

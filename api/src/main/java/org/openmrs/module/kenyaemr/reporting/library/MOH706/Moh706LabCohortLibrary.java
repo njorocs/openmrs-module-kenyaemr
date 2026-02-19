@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.MOH706;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
@@ -28,8 +29,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get total tests by lab concept");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"    join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"    where le.set_member_conceptId = " + labSetConceptId + "\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;"
 
@@ -42,8 +43,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get patients with tests recorded based on concept id");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"                               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"                               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"where le.set_member_conceptId = " + question + "\n" +
 			"  and le.test_result in  (" + StringUtils.join(ans, ',') + ")\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;");
@@ -55,8 +56,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get patients with tests recorded based on concept id");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"                               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"                               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"where le.set_member_conceptId in  (" + StringUtils.join(question, ',') + ")\n" +
 			"  and le.test_result in  (" + StringUtils.join(ans, ',') + ")\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;");
@@ -68,8 +69,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get patients with tests recorded based on concept id");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"                               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"                               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"where le.set_member_conceptId in  (" + StringUtils.join(question, ',') + ")\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;");
 		return sql;
@@ -80,8 +81,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get patients with tests recorded based on concept id within limits");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"                               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"                               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"where le.set_member_conceptId = " + question + "\n" +
 			"  and le.test_result between " + lower + "  and  " + upper + "\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;");
@@ -93,8 +94,8 @@ public class Moh706LabCohortLibrary {
 		sql.setName("Get patients with tests recorded based on concept id ");
 		sql.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sql.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sql.setQuery("select  le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"                               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id\n" +
+		sql.setQuery("select  le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"                               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id\n" +
 			"where le.set_member_conceptId = " + question + "\n" +
 			"  and le.test_result is not null\n" +
 			"  and date(le.visit_date) between :startDate and :endDate;");

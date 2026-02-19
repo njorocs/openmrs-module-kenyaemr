@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.MeningitisCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -51,7 +52,7 @@ public class MeningitisCohortDefinitionEvaluator implements CohortDefinitionEval
 		String sqlQuery = "SELECT a.patient_id\n" +
 				"FROM (\n" +
 				"    SELECT patient_id, GROUP_CONCAT(c.complaint) AS complaint\n" +
-				"    FROM kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+				"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"    WHERE c.complaint IN (112721)\n" +
 				"      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"    GROUP BY patient_id\n" +

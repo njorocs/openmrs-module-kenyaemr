@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIPCRConfirmatoryResultsStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,19 +42,19 @@ public class HEIPCRConfirmatoryResultsStatusDataEvaluator implements PersonDataE
                 "        from\n" +
                 "          (\n" +
                 "            (select patient_id, visit_date, test_result dna_pcr_result\n" +
-                "             from kenyaemr_etl.etl_laboratory_extract\n" +
+                "             from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "             where lab_test = 1030\n" +
                 "            )\n" +
                 "            union\n" +
                 "            (\n" +
                 "              select patient_id, visit_date, dna_pcr_result\n" +
-                "              from kenyaemr_etl.etl_hei_follow_up_visit\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit\n" +
                 "              where dna_pcr_result is not null\n" +
                 "            )\n" +
                 "          ) t\n" +
                 "        group by t.patient_id\n" +
                 "        ) f\n" +
-                "        INNER JOIN kenyaemr_etl.etl_patient_demographics d ON f.patient_id = d.patient_id\n" +
+                "        INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON f.patient_id = d.patient_id\n" +
                 "WHERE f.dna_pcr_result = 703\n" +
                 "GROUP BY f.patient_id;";
 

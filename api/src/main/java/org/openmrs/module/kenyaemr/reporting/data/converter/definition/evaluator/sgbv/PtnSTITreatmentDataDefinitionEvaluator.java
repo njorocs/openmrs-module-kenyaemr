@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.PEPDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.PtnSTITreatmentDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,9 +36,9 @@ public class PtnSTITreatmentDataDefinitionEvaluator implements EncounterDataEval
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT a.encounter_id, IF(sti.action_taken=165200, 'Yes', 'No') sti_treatment\n" +
-                "    FROM kenyaemr_etl.etl_gbv_screening a\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening a\n" +
                 "    LEFT JOIN (SELECT gsa.visit_id, gsa.action_taken, DATE(gsa.date_created) date_created\n" +
-                "    FROM kenyaemr_etl.etl_gbv_screening_action gsa\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening_action gsa\n" +
                 "    WHERE gsa.action_taken = 165200 ) sti ON a.visit_id = sti.visit_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

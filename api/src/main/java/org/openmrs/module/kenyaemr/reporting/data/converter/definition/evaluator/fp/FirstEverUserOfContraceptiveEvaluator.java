@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FirstEverUserOfContraceptiveDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class FirstEverUserOfContraceptiveEvaluator implements EncounterDataEvalu
                         "           WHEN 1066 THEN 'No' " +
                         "           ELSE NULL " +
                         "       END AS first_user_of_contraceptive_name " +
-                        "FROM kenyaemr_etl.etl_family_planning v " +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
                         "WHERE v.first_user_of_contraceptive IN (1065, 1066) " +
                         "  AND DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 

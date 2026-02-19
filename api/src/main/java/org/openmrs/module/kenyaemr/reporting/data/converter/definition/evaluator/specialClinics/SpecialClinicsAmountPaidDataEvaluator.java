@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsAmountPaidDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +38,7 @@ public class SpecialClinicsAmountPaidDataEvaluator implements EncounterDataEvalu
         SpecialClinicsAmountPaidDataDefinition cohortDefinition = (SpecialClinicsAmountPaidDataDefinition) definition;
         String specialClinic = cohortDefinition.getSpecialClinic();
         String qry = "SELECT v.encounter_id, tp.amount AS amount\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "LEFT JOIN openmrs.cashier_bill t \n" +
                 "    ON v.patient_id = t.patient_id \n" +
                 "    AND DATE(t.date_created) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +

@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.IPTRegisterCohortDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.OTZRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -51,7 +51,7 @@ public class OTZRegisterCohortDefinitionEvaluator implements CohortDefinitionEva
 
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
-		String qry = "Select e.patient_id from kenyaemr_etl.etl_otz_enrollment e left join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id and d.program_name = 'OTZ' and d.patient_id is null\n" +
+		String qry = "Select e.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id and d.program_name = 'OTZ' and d.patient_id is null\n" +
 				"group by e.patient_id having date(max(e.visit_date)) between date(:startDate) and date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

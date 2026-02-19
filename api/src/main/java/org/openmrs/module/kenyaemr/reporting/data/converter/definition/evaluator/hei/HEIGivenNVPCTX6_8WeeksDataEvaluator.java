@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIGivenNVPCTX6_8WeeksDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,8 +37,8 @@ public class HEIGivenNVPCTX6_8WeeksDataEvaluator implements PersonDataEvaluator 
 
         String qry = "select  f.patient_id,\n" +
                 "  concat_ws('\\r\\n', case f.nvp_given when 80586 then \"Yes\" else \"No\" end, case f.ctx_given when 105281 then \"Yes\" else \"No\" end) as givenCTXorNVP\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "  INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "      d.patient_id = f.patient_id\n" +
                 "WHERE round(DATEDIFF(f.visit_date,d.DOB)/7) BETWEEN 6 AND 8\n" +
                 "GROUP BY patient_id;";

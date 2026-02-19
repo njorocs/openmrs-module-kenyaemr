@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.enrollmentTracker;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.enrollmentTracker.HtsDateConfirmedPositiveDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.enrollmentTracker.HtsSameDayEnrollmentDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,9 +38,9 @@ public class HtsSameDayEnrollmentDataEvaluator implements PersonDataEvaluator {
         String qry = "select patient_id, if(linked is not null or enrolled is not null, \"Yes\",\"No\") sameDayEnrollment\n" +
                 "from (\n" +
                 "select t.patient_id, max(l.patient_id) linked, max(e.patient_id) enrolled\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "left outer join kenyaemr_etl.etl_hts_referral_and_linkage l on l.patient_id = t.patient_id and date(t.visit_date)=date(l.visit_date) and l.tracing_status=\"Contacted and linked\"\n" +
-                "left outer join kenyaemr_etl.etl_hiv_enrollment e on e.patient_id = t.patient_id and date(t.visit_date)=date(e.visit_date)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l on l.patient_id = t.patient_id and date(t.visit_date)=date(l.visit_date) and l.tracing_status=\"Contacted and linked\"\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on e.patient_id = t.patient_id and date(t.visit_date)=date(e.visit_date)\n" +
                 "where t.voided=0\n" +
                 "group by t.patient_id\n" +
                 ") l ;";

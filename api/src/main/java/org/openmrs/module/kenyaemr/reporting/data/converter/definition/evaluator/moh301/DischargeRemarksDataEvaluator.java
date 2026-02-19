@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.DischargeRemarksDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class DischargeRemarksDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select d.patient_id,CONCAT_WS(',',case d.discharge_status when 1694 then 'Left against medical advice' when 160431 then 'Absconded' end, d.discharge_instructions ) as remarks from kenyaemr_etl.etl_inpatient_discharge d where d.visit_date between date(:startDate) and date(:endDate);";
+        String qry = "select d.patient_id,CONCAT_WS(',',case d.discharge_status when 1694 then 'Left against medical advice' when 160431 then 'Absconded' end, d.discharge_instructions ) as remarks from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d where d.visit_date between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date) context.getParameterValue("startDate");

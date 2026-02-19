@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCGestationDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,7 +37,7 @@ public class ANCGestationDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
                 "       max(v.gestation_in_weeks) as gestation_in_weeks\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "GROUP BY v.encounter_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

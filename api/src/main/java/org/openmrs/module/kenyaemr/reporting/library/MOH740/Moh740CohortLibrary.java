@@ -9,12 +9,10 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.MOH740;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
-import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition cumulativePatientWithDiabetes() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
+        String sqlQuery = "select ne.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
                 "and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Cumulative no. of diabetes");
@@ -41,7 +39,7 @@ public class Moh740CohortLibrary {
     }
     public CohortDefinition cumulativePatientWithHypertension() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
                 "and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Cumulative no. of Hypertension");
@@ -54,7 +52,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithDiabetes() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
                 "and ne.diabetes_condition = 1000488 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("New Diagnosed with Diabetes");
@@ -67,7 +65,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithHypertension() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
                 "and ne.hypertension_condition = 1000490 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("New Diagnosed with Hypertension");
@@ -80,7 +78,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition cumulativePatientWithDMAndHTN() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
                 "and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Cumulative with DMA and HTN");
@@ -93,7 +91,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithPreExistingDMandHTN() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
                 "and ne.comorbid_condition = 1000492 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Diagnosed Diabetes and Hypertension");
@@ -106,7 +104,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithKnownDM() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
                 "and ne.diabetes_condition = 1000489 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Known DM");
@@ -119,7 +117,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition preExistingPatientWithDM() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 142486 \n"+
                 "and ne.diabetes_condition = 1000489 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Known DM");
@@ -132,7 +130,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition preExistingPatientWithHTN() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 117399 \n"+
                 "and ne.hypertension_condition = 1000491 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Known DM");
@@ -145,7 +143,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition preExistingPatientWithComorbidDMandHTN() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.disease_type = 166020 \n"+
                 "and ne.comorbid_condition = 1000493 and ne.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Known DM");
@@ -158,7 +156,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientFirstVisitToClinic(int visitType) {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) " +
                 "and ne.visit_type = "+visitType+";";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("First Visit To Clinic");
@@ -171,7 +169,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition cumulativePatientInCare() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate)";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Cumulative No. of Patients");
         cd.setQuery(sqlQuery);
@@ -183,7 +181,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithDiabetesByTypeOne() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 142474";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 142474";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Diabetes By Type One");
         cd.setQuery(sqlQuery);
@@ -195,7 +193,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithDiabetesByTypeTwo() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 2004524";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 2004524";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Diabetes By Type Two");
         cd.setQuery(sqlQuery);
@@ -207,7 +205,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithGestational() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 117807";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 117807";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Gestational diabetes melitus");
         cd.setQuery(sqlQuery);
@@ -219,7 +217,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithDiabetesSecondaryToOther() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 126985";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.diabetes_type = 126985";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Diabetes By Type Two");
         cd.setQuery(sqlQuery);
@@ -231,7 +229,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientOnInsulinTreatment() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Insulin%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Insulin%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients on insulin");
         cd.setQuery(sqlQuery);
@@ -243,7 +241,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientOnOGLAsTreatment() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%OGLAs%' ";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%OGLAs%' ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients on OGLAs");
         cd.setQuery(sqlQuery);
@@ -255,7 +253,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientOnInsulinAndOGLAsTreatment() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Insulin and OGLAs%' ";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Insulin and OGLAs%' ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients on both (Insulin and OGLAs)");
         cd.setQuery(sqlQuery);
@@ -267,7 +265,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientOnDietAndExerciseTreatment() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Diet & physical activity%' ";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Diet & physical activity%' ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients on diet and exercise only (DM and HTN)");
         cd.setQuery(sqlQuery);
@@ -279,7 +277,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientNumberDoneHbA1c() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne inner join kenyaemr_etl.etl_laboratory_extract la on ne.patient_id = la.patient_id " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract la on ne.patient_id = la.patient_id " +
                 "where ne.visit_date between date(:startDate) and date(:endDate) and la.lab_test = 159644";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients done HbA1c");
@@ -292,7 +290,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientNumberMetHbA1cTarget() { // 159644
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne inner join kenyaemr_etl.etl_laboratory_extract la on ne.patient_id = la.patient_id " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract la on ne.patient_id = la.patient_id " +
                 "where ne.visit_date between date(:startDate) and date(:endDate) and la.lab_test = 159644 and la.test_result < 7";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Patients that met HbA1c target (< 7%)");
@@ -305,7 +303,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithHypertension() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.disease_type = 117399;";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.disease_type = 117399;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. of Hypertension");
         cd.setQuery(sqlQuery);
@@ -317,7 +315,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithAntihypertensives() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Anti hypertensives%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.treatment_given like '%Anti hypertensives%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients on antihypertensives");
         cd.setQuery(sqlQuery);
@@ -329,7 +327,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithHighBPOnClinicVisit() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne inner join kenyaemr_etl.etl_patient_triage pt on ne.patient_id = pt.patient_id " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage pt on ne.patient_id = pt.patient_id " +
                 "where ne.visit_date between date(:startDate) and date(:endDate) and pt.systolic_pressure >= 140 and pt.diastolic_pressure >=90";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patients with high BP at clinic visit (≥140/90)");
@@ -341,7 +339,7 @@ public class Moh740CohortLibrary {
     }
     public CohortDefinition newDiagnosedWithCVDTotal() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and (ne.new_complications like '%Stroke%' " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and (ne.new_complications like '%Stroke%' " +
                 "or ne.new_complications like '%Ischaemic Heart Disease%' or ne.new_complications like '%Peripheral Vascular Disease%' or ne.new_complications like '%Heart failure%')";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new no. of patients with CVD");
@@ -354,7 +352,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithStroke() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Stroke%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Stroke%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new no. of patients with Stroke");
         cd.setQuery(sqlQuery);
@@ -366,7 +364,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithHeartDisease() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Ischaemic Heart Disease%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Ischaemic Heart Disease%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new no. of patients with Ischemic heart disease");
         cd.setQuery(sqlQuery);
@@ -378,7 +376,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithPeripheralDisease() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Peripheral Vascular Disease%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Peripheral Vascular Disease%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new no. of patients with Peripheral vascular/artery disease");
         cd.setQuery(sqlQuery);
@@ -390,7 +388,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedWithHeartFailure() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Heart failure%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Heart failure%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new no. of patients with Heart failure");
         cd.setQuery(sqlQuery);
@@ -402,7 +400,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedPatientWithNeuropathies() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Nephropathy%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Nephropathy%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("new diagnosis Patients with neuropathies");
         cd.setQuery(sqlQuery);
@@ -414,7 +412,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition noPatientScreenedForDiabeticFoot() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne " +
                 "where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Diabetic Foot%' or ne.existing_complications like '%Diabetic Foot%' ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. of patients screened for diabetic foot");
@@ -427,7 +425,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newDiagnosedPatientWithFootUlcer() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Diabetic Foot Ulcer%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Diabetic Foot Ulcer%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("New diagnosis with diabetic foot ulcer");
         cd.setQuery(sqlQuery);
@@ -439,7 +437,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientFeetSavedThroughTreatment() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.footcare_outcome = 162130 ";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.footcare_outcome = 162130 ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. of feet saved through treatment");
         cd.setQuery(sqlQuery);
@@ -451,7 +449,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithAmputatedDiabeticFoot() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.footcare_outcome = 164009";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.footcare_outcome = 164009";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. of amputation due to diabetic foot");
         cd.setQuery(sqlQuery);
@@ -463,7 +461,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newPatientDiagnosedWithKidneyComplication() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Kidney Failure(CKD)%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Kidney Failure(CKD)%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("New diagnosis with kidney complications");
         cd.setQuery(sqlQuery);
@@ -475,7 +473,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition newPatientDiagnosedWithDiabeticRetinopathy() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Retinopathy%'";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.new_complications like '%Retinopathy%'";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("New diagnosis with diabetic retinopathy ");
         cd.setQuery(sqlQuery);
@@ -487,7 +485,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition noPatientScreenedForTuberculosis() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and (ne.tb_screening = 142177 or ne.tb_screening = 1660 or ne.tb_screening = 1662)";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and (ne.tb_screening = 142177 or ne.tb_screening = 1660 or ne.tb_screening = 1662)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. Screened for Tuberculosis");
         cd.setQuery(sqlQuery);
@@ -499,7 +497,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition noPatientScreenedPositiveTuberculosis() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.tb_screening = 1662";
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.tb_screening = 1662";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. Screened Positive for Tuberculosis ");
         cd.setQuery(sqlQuery);
@@ -511,7 +509,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition noPatientEnrolledSHA() {
 
-        String sqlQuery = "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne inner join kenyaemr_etl.etl_patient_demographics pd on ne.patient_id = pd.patient_id " +
+        String sqlQuery = "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on ne.patient_id = pd.patient_id " +
                 "where ne.visit_date between date(:startDate) and date(:endDate) and pd.sha_number is not null";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. enrolled with SHA ");
@@ -524,7 +522,7 @@ public class Moh740CohortLibrary {
 
     public CohortDefinition patientWithcondition() {
 
-        String sqlQuery =  "select ne.patient_id from kenyaemr_etl.etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.disease_type = 117399 ";
+        String sqlQuery =  "select ne.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment ne where ne.visit_date between date(:startDate) and date(:endDate) and ne.disease_type = 117399 ";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("No. of Patient Condition");
         cd.setQuery(sqlQuery);

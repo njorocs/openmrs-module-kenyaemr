@@ -24,7 +24,6 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculationResultConverter;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.NCDRegisterCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.CalculationResultConverter;
-//import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.*;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MFLCodeDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.*;
 import org.openmrs.module.metadatadeploy.MetadataUtils;

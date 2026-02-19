@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCHivStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -34,7 +35,7 @@ public class VMMCHivStatusDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id, case hiv_status when 703 then 'Positive' when 664 then 'Negative' when 1067 then 'Unknown' else '' end as hiv_status from kenyaemr_etl.etl_vmmc_medical_history GROUP BY patient_id;";
+        String qry = "select patient_id, case hiv_status when 703 then 'Positive' when 664 then 'Negative' when 1067 then 'Unknown' else '' end as hiv_status from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_medical_history GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

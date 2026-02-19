@@ -10,10 +10,11 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDOrderingClinicianDataDefinition;
+import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
 import org.openmrs.module.reporting.data.obs.evaluator.ObsDataEvaluator;
-import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
@@ -37,8 +38,8 @@ public class OPDOrderingClinicianDataEvaluator implements ObsDataEvaluator {
         EvaluatedObsData c = new EvaluatedObsData(definition, context);
 
         String qry = "select le.obs_id, concat_ws(' ', d.family_name, d.given_name, d.middle_name) as creator\n" +
-			"from kenyaemr_etl.etl_laboratory_extract le\n" +
-			" inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = le.created_by\n" +
+			"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			" inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = le.created_by\n" +
                 " where date(le.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

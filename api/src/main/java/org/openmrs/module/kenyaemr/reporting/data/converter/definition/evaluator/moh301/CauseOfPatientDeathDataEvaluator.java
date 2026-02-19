@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.CauseOfPatientDeathDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -60,7 +61,7 @@ public class CauseOfPatientDeathDataEvaluator implements PersonDataEvaluator {
                 "when 156669 then 'HIV disease resulting in cytomegaloviral disease'\n" +
                 "when 171 then 'Fungal infection'\n" +
                 "when 165609 then 'Infection due to severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)' else 'N/A' end\n" +
-                "from kenyaemr_etl.etl_patient_demographics d where d.death_date between date(:startDate) and date(:endDate);";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d where d.death_date between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date) context.getParameterValue("startDate");

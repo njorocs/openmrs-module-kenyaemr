@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.specia
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.specialClinics.SpecialClinicsRegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -46,8 +47,8 @@ public class SpecialClinicsRegisterCohortDefinitionEvaluator implements Encounte
 		String comparisonOperator = cohortDefinition.getComparisonOperator();
 		Integer age = cohortDefinition.getAge();
 		String qry = "select a.encounter_id from (SELECT ce.encounter_id , max(ce.visit_date) as visit_date, p.DOB\n" +
-				"FROM kenyaemr_etl.etl_special_clinics ce\n" +
-				"INNER JOIN kenyaemr_etl.etl_patient_demographics p \n" +
+				"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics ce\n" +
+				"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p \n" +
 				"ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
 				"WHERE date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
 				"AND ce.special_clinic_form_uuid = '" + specialClinic + "' group by ce.encounter_id) a\n" +

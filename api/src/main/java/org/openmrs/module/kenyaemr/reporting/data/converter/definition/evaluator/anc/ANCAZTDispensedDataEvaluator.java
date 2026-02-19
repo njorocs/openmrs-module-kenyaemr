@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCAZTDispensedDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class ANCAZTDispensedDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
                 "     v.encounter_id,\n" +
                 "   (case v.baby_azt_dispensed when 160123 then 'Yes' when 1066 then 'No' when 1175 then 'N/A' else '' end) as baby_azt_dispensed\n" +
-                "  from kenyaemr_etl.etl_mch_antenatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                "  from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

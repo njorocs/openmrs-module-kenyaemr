@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLResultValidityDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -93,8 +94,8 @@ public class ETLLastVLResultValidityDataEvaluator implements PersonDataEvaluator
                 "                v.previous_date_test_requested,\n" +
                 "                v.date_test_requested\n" +
                 "             ) AS effective_date_requested\n" +
-                "         FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-                "                  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON v.patient_id = d.patient_id\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
+                "                  INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON v.patient_id = d.patient_id\n" +
                 "         WHERE v.date_test_requested <= date(:endDate)\n" +
                 "     ) t\n" +
                 "ORDER BY t.patient_id ASC;";

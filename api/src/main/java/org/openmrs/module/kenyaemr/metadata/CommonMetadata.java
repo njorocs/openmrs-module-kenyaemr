@@ -21,6 +21,7 @@ import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.Metadata;
 import org.openmrs.module.kenyaemr.datatype.FormDatatype;
 import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
+import org.openmrs.module.kenyaemr.util.EmrDatabaseUtil;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
@@ -355,7 +356,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String CASUALTY = "0419d15f-67ad-4fd0-97a1-9b5246b2d0d7";
 		public static final String MORTUARY = "02b67c47-6071-4091-953d-ad21452e830c";
 	}
+	public static final class EmrDatabaseEtl {
+		public static final String ETL_DATABASE = EmrDatabaseUtil.getEtlDatabaseName();
+		public static final String DATATOOLS_DATABASE = EmrDatabaseUtil.getDataToolsSchema();
 
+	}
 
 	/**
 	 * @see org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle#install()

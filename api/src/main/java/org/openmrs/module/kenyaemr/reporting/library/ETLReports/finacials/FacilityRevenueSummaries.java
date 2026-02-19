@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.finacials;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+
 public class FacilityRevenueSummaries {
     public static final String getMonthlySummaryQueryM1() {
         return "SELECT transaction_date,\n" +
@@ -41,6 +43,6 @@ public class FacilityRevenueSummaries {
 			"          revenue_not_collected_patient_not_yet_paid_waivers,\n" +
 			"          revenue_not_collected_write_offs_exemptions,\n" +
 			"          revenue_not_collected_write_offs_absconders\n" +
-			"    FROM kenyaemr_etl.etl_daily_revenue_summary  dr WHERE dr.transaction_date BETWEEN :startDate AND :endDate";
+			"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary  dr WHERE dr.transaction_date BETWEEN :startDate AND :endDate";
     }
 }

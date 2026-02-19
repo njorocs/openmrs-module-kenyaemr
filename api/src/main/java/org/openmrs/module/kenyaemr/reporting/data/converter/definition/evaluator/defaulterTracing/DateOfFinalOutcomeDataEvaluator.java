@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.DateOfFinalOutcomeDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.FinalOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -38,7 +38,7 @@ public class DateOfFinalOutcomeDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select encounter_id,\n" +
 			"       visit_date\n" +
-			"from kenyaemr_etl.etl_ccc_defaulter_tracing\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing\n" +
 			"           where true_status in (160432,1693,160037,5240,142917)\n" +
 			"           and visit_date between date(:startDate) and date(:endDate);";
 

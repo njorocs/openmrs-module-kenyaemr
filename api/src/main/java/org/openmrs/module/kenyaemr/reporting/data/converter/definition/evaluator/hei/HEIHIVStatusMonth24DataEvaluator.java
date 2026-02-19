@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIHIVStatusMonth24DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -42,9 +43,9 @@ public class HEIHIVStatusMonth24DataEvaluator implements PersonDataEvaluator {
                 "       when final_antibody_result = 703 and infant_feeding = 5526 then \"Infected_Breastfed (IBF)\"\n" +
                 "       when final_antibody_result = 703 and infant_feeding = 1595 then \"Infected_not Breastfed (UBFn)\"\n" +
                 "       when final_antibody_result = 703 and infant_feeding = \"\" then \"Infected_Breastfed Uknown (UBFu)\" else \"\" end))),11) as HIV_status_24_months\n" +
-                "from  kenyaemr_etl.etl_hei_follow_up_visit f\n" +
+                "from  "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
                 "\n" +
-                "  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "  f.patient_id = d.patient_id\n" +
                 "WHERE  round(DATEDIFF(f.visit_date,d.DOB)/7) BETWEEN 72 AND 96\n" +
                 "GROUP BY f.patient_id";

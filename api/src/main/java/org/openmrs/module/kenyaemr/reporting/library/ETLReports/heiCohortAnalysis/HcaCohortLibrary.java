@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.heiCohortAnalysis;
 
-        import org.openmrs.module.kenyacore.report.ReportUtils;
-        import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
-        import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
-        import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
-        import org.openmrs.module.reporting.evaluation.parameter.Parameter;
-        import org.springframework.stereotype.Component;
+import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
+import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
+import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
+import org.openmrs.module.reporting.evaluation.parameter.Parameter;
+import org.springframework.stereotype.Component;
 
-        import java.util.Date;
+import java.util.Date;
 
 @Component
 public class HcaCohortLibrary {
@@ -30,8 +31,8 @@ public class HcaCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition heiCohort12Months() {
-        String sqlQuery = "SELECT he.patient_id FROM kenyaemr_etl.etl_hei_enrollment he\n" +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
+        String sqlQuery = "SELECT he.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
                 "WHERE DATE(pd.DOB) between date_sub(date(:startDate),interval 1 YEAR) and  date_sub(date(:endDate),interval 1 YEAR);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("heiCohort12Months");
@@ -50,8 +51,8 @@ public class HcaCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition heiCohort24Months() {
-        String sqlQuery = "SELECT he.patient_id FROM kenyaemr_etl.etl_hei_enrollment he\n" +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
+        String sqlQuery = "SELECT he.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
                 "WHERE DATE(pd.DOB) between date_sub(date(:startDate),interval 2 YEAR) and  date_sub(date(:endDate),interval 2 YEAR);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("heiCohort24Months");
@@ -68,7 +69,7 @@ public class HcaCohortLibrary {
 
     public CohortDefinition mothersReceivedPMTCTARV() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT patient_id FROM kenyaemr_etl.etl_hei_enrollment where mother_on_art_at_infant_enrollment IS NOT NULL;";
+        String sqlQuery = "SELECT patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment where mother_on_art_at_infant_enrollment IS NOT NULL;";
         cd.setName("mothersReceivedPMTCTARVs");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -97,8 +98,8 @@ public class HcaCohortLibrary {
      */
     public CohortDefinition infantReceivedARVsWithinSixWeeks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT he.patient_id FROM kenyaemr_etl.etl_hei_enrollment he\n" +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
+        String sqlQuery = "SELECT he.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON he.patient_id = pd.patient_id\n" +
                 "WHERE he.infant_prophylaxis in (80586,1652,162326,160123,78643,1652,1107)\n" +
                 "AND TIMESTAMPDIFF(WEEK,pd.DOB,he.visit_date) BETWEEN 0 AND 6;";
 
@@ -129,8 +130,8 @@ public class HcaCohortLibrary {
         */
     public CohortDefinition heiPCRTestSixWeeks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                " inner join kenyaemr_etl.etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
                 " where  hf.dna_pcr_result is not null and TIMESTAMPDIFF(WEEK,pd.DOB,hf.dna_pcr_sample_date) BETWEEN 0 AND 8\n" +
                 " group by hf.patient_id\n";
 
@@ -160,8 +161,8 @@ public class HcaCohortLibrary {
         */
     public CohortDefinition heiPCRTestedPositiveSixWeeks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "inner join kenyaemr_etl.etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
                 "where hf.dna_pcr_result = 703 and TIMESTAMPDIFF(WEEK,pd.DOB,hf.dna_pcr_sample_date) BETWEEN 0 AND 8\n" +
                 "group by hf.patient_id;\n;";
 
@@ -192,8 +193,8 @@ public class HcaCohortLibrary {
         */
     public CohortDefinition heiInitialPCRTestWithinTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
                 " where TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) between 0 and  12\n" +
                 "and hf.dna_pcr_result is not null and dna_pcr_contextual_status =162080\n" +
                 "group by hf.patient_id;";
@@ -225,8 +226,8 @@ public class HcaCohortLibrary {
           */
     public CohortDefinition heiEligibleRepeatPCRSixMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
                 "where TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) = 6\n" +
                 "      and hf.dna_pcr_result is not null  and dna_pcr_contextual_status =162081\n" +
                 "group by hf.patient_id;\n";
@@ -259,8 +260,8 @@ public class HcaCohortLibrary {
            */
     public CohortDefinition heiPCRTestedPositivePCR12Months() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
                 "where TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) between 0 and 12\n" +
                 "         and dna_pcr_contextual_status in (162080,162081) and hf.dna_pcr_result = 703\n" +
                 "group by hf.patient_id;";
@@ -290,8 +291,8 @@ public class HcaCohortLibrary {
               */
     public CohortDefinition heiExclusiveBFWithinSixMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
                 "where TIMESTAMPDIFF(MONTH,pd.DOB,hf.visit_date) <= 6\n" +
                 "group by hf.patient_id\n" +
                 "having mid(max(concat(hf.visit_date,hf.infant_feeding)),11)=5526;";
@@ -322,9 +323,9 @@ public class HcaCohortLibrary {
              */
     public CohortDefinition heiPCRTestedPositiveAt12MonthsLinkedToCCC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
-                "  inner join kenyaemr_etl.etl_hiv_enrollment e on (hf.patient_id = e.patient_id)\n" +
+        String sqlQuery = "select  hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on (hf.patient_id = e.patient_id)\n" +
                 "where TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) <= 12\n" +
                 "      and hf.dna_pcr_result = 703 and pd.unique_patient_no is not null\n" +
                 "group by hf.patient_id;";
@@ -355,10 +356,10 @@ public class HcaCohortLibrary {
            */
     public CohortDefinition infantBaselineDocumented12MonthsVLResults() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select enr.patient_id from kenyaemr_etl.etl_hei_enrollment enr\n" +
-                "   inner join kenyaemr_etl.etl_patient_demographics pd on enr.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select enr.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment enr\n" +
+                "   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on enr.patient_id = pd.patient_id\n" +
                 "   inner join(select x.patient_id, max(x.visit_date) as latest_vl_date, mid(max(concat(x.visit_date,if(x.lab_test = 856, x.test_result, if(x.lab_test=1305 and x.test_result = 1302, 'LDL','')))),11) as latest_vl_result\n" +
-                "             from kenyaemr_etl.etl_laboratory_extract x where x.lab_test in (1305, 856) group by x.patient_id) vl on enr.patient_id= vl.patient_id\n" +
+                "             from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x where x.lab_test in (1305, 856) group by x.patient_id) vl on enr.patient_id= vl.patient_id\n" +
                 "      where (vl.latest_vl_result is not null or vl.latest_vl_result !='')\n" +
                 "               and TIMESTAMPDIFF(MONTH,pd.DOB,vl.latest_vl_date) between 0 and 12\n" +
                 "      group by enr.patient_id;";
@@ -390,11 +391,11 @@ public class HcaCohortLibrary {
            */
     public CohortDefinition heiActiveFollowupTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t1.patient_id from kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "    inner join kenyaemr_etl.etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
-                "    left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
+        String sqlQuery = "select t1.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
                 "    (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 12)))\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
                 "    (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 12)))\n" +
                 "    where DATE_ADD(pd.DOB, INTERVAL 12 MONTH) <= t1.next_appointment_date\n" +
                 "    and ho.patient_id is null and hd.patient_id is null\n" +
@@ -426,8 +427,8 @@ public class HcaCohortLibrary {
             */
     public CohortDefinition heiTestedPositiveWithinTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
                 "where hf.dna_pcr_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) <= 12\n" +
                 "group by hf.patient_id;";
 
@@ -458,9 +459,9 @@ public class HcaCohortLibrary {
             */
     public CohortDefinition heiTransferredOutWithinTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "        inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
-                "        inner join kenyaemr_etl.etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 159492)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 159492)\n" +
                 "  where TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) <= 12\n" +
                 "    group by hf.patient_id;\n";
 
@@ -491,17 +492,17 @@ public class HcaCohortLibrary {
                 */
     public CohortDefinition heiMissingVisitTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT t1.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "           INNER JOIN kenyaemr_etl.etl_patient_demographics pd ON (t1.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "SELECT t1.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "           INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON (t1.patient_id = pd.patient_id)\n" +
                 "           LEFT JOIN (SELECT MAX(next_appointment_date) AS latest_tca, t4.patient_id FROM\n" +
-                "           kenyaemr_etl.etl_hei_follow_up_visit t4\n" +
-                "           left join kenyaemr_etl.etl_patient_demographics t5 using(patient_id)\n" +
+                "           "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t4\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics t5 using(patient_id)\n" +
                 "           where DATE_ADD(t5.DOB, INTERVAL 12 MONTH) <= t4.next_appointment_date\n" +
                 "       GROUP BY t4.patient_id) latest_tca ON t1.patient_id = latest_tca.patient_id\n" +
-                "       left join kenyaemr_etl.etl_hei_follow_up_visit t2 on (latest_tca.patient_id = t2.patient_id and latest_tca.latest_tca = t2.next_appointment_date)\n" +
-                "       left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
+                "       left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t2 on (latest_tca.patient_id = t2.patient_id and latest_tca.latest_tca = t2.next_appointment_date)\n" +
+                "       left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
                 "       (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 12)))\n" +
-                "       left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
+                "       left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
                 "       (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 12)))\n" +
                 "   WHERE latest_tca.patient_id is null and ho.patient_id is null and hd.patient_id is null\n" +
                 "   and (t2.dna_pcr_result is null or t2.dna_pcr_result != 703) GROUP BY t1.patient_id;";
@@ -533,9 +534,9 @@ public class HcaCohortLibrary {
                    */
     public CohortDefinition heiDiedWithinTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "        inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
-                "        inner join kenyaemr_etl.etl_patient_program_discontinuation ho on hf.patient_id = ho.patient_id and ho.discontinuation_reason = 160034\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on hf.patient_id = ho.patient_id and ho.discontinuation_reason = 160034\n" +
                 "   where TIMESTAMPDIFF(MONTH,pd.DOB,ho.date_died) <= 12";
 
         cd.setName("diedTwelveonths");
@@ -565,8 +566,8 @@ public class HcaCohortLibrary {
                        */
     public CohortDefinition heiEligibleRepeatPCRTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
                 "    where TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) = 12\n" +
                 "    and hf.dna_pcr_result is not null\n" +
                 "    group by hf.patient_id;";
@@ -599,8 +600,8 @@ public class HcaCohortLibrary {
              */
     public CohortDefinition heiTestedPositiveTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON hf.patient_id = pd.patient_id\n" +
                 "    where dna_pcr_contextual_status in (162081)\n" +
                 "      and dna_pcr_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) = 12\n" +
                 "      group by hf.patient_id;";
@@ -633,8 +634,8 @@ public class HcaCohortLibrary {
              */
     public CohortDefinition heiPositiveConfirmatoryPCRTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "     inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "     inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
                 " where dna_pcr_contextual_status in (162082)\n" +
                 "     and dna_pcr_result = 703 AND TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) between 12 and 18\n" +
                 "    group by hf.patient_id;";
@@ -666,8 +667,8 @@ public class HcaCohortLibrary {
              */
     public CohortDefinition heiEligibleABEigteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "     inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "     inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
                 "  where final_antibody_result is not null and TIMESTAMPDIFF(MONTH,pd.DOB,hf.final_antibody_sample_date) >= 18\n" +
                 "  group by hf.patient_id;";
 
@@ -698,9 +699,9 @@ public class HcaCohortLibrary {
                  */
     public CohortDefinition heiTestedPositiveLinkedtoCCCTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "        inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
-                "        inner join kenyaemr_etl.etl_hiv_enrollment e on hf.patient_id = e.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+                "        inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on hf.patient_id = e.patient_id\n" +
                 "    where (final_antibody_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.final_antibody_sample_date) between 12 and 18)\n" +
                 "          or (dna_pcr_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) between 12 and 18)\n" +
                 "          and pd.unique_patient_no is not null\n" +
@@ -735,8 +736,8 @@ public class HcaCohortLibrary {
                      */
     public CohortDefinition heiABNegativeEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "          inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "          inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
                 "    where final_antibody_result = 664\n" +
                 "         and TIMESTAMPDIFF(MONTH,pd.DOB,hf.visit_date) BETWEEN 18 AND 23 group by hf.patient_id;";
 
@@ -767,13 +768,13 @@ public class HcaCohortLibrary {
                     */
     public CohortDefinition activeHeiNoABTestEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT t1.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd ON t1.patient_id = pd.patient_id\n" +
-                "      left join (select patient_id,final_antibody_result, first_antibody_result_date from kenyaemr_etl.etl_hei_follow_up_visit t1 where \n" +
+        String sqlQuery = "SELECT t1.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON t1.patient_id = pd.patient_id\n" +
+                "      left join (select patient_id,final_antibody_result, first_antibody_result_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1 where \n" +
                 "      final_antibody_result is not null group by t1.patient_id) ab_test on (ab_test.patient_id = t1.patient_id)\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
                 "  (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 9)))\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
                 "  (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 9)))\n" +
                 "  WHERE date(ab_test.first_antibody_result_date) <=  DATE_ADD(pd.DOB, INTERVAL 18 MONTH)\n" +
                 "  and ho.patient_id is null and hd.patient_id is null\n" +
@@ -807,8 +808,8 @@ public class HcaCohortLibrary {
                     */
     public CohortDefinition positiveIdentifiedEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
                 "where (dna_pcr_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.visit_date) between 18 and 23) or\n" +
                 "      (final_antibody_result = 703 and TIMESTAMPDIFF(MONTH,pd.DOB,hf.visit_date) between 18 and 23)\n" +
                 "group by hf.patient_id;";
@@ -841,9 +842,9 @@ public class HcaCohortLibrary {
                   */
     public CohortDefinition transferredOutEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "      inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
-                "      inner join kenyaemr_etl.etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 159492)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "      inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+                "      inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 159492)\n" +
                 "      where TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) <= 18\n" +
                 "      group by hf.patient_id;";
 
@@ -874,17 +875,17 @@ public class HcaCohortLibrary {
                      */
     public CohortDefinition ltfuEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT t1.patient_id FROM kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "      INNER JOIN kenyaemr_etl.etl_patient_demographics pd ON (t1.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "SELECT t1.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "      INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd ON (t1.patient_id = pd.patient_id)\n" +
                 "          LEFT JOIN(SELECT MAX(next_appointment_date) AS latest_tca, t4.patient_id\n" +
-                "      FROM kenyaemr_etl.etl_hei_follow_up_visit t4\n" +
-                "          left join kenyaemr_etl.etl_patient_demographics t5 using(patient_id)\n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t4\n" +
+                "          left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics t5 using(patient_id)\n" +
                 "          where DATE_ADD(t5.DOB, INTERVAL 18 MONTH) <= t4.next_appointment_date\n" +
                 "      GROUP BY t4.patient_id) latest_tca ON t1.patient_id = latest_tca.patient_id\n" +
-                "      left join kenyaemr_etl.etl_hei_follow_up_visit t2 on (latest_tca.patient_id = t2.patient_id and latest_tca.latest_tca = t2.next_appointment_date)\n" +
-                "      left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
+                "      left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t2 on (latest_tca.patient_id = t2.patient_id and latest_tca.latest_tca = t2.next_appointment_date)\n" +
+                "      left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and \n" +
                 "      (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 9)))\n" +
-                "      left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
+                "      left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and \n" +
                 "      (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 9)))\n" +
                 "  WHERE latest_tca.patient_id is null and ho.patient_id is null and hd.patient_id is null\n" +
                 "  and (t2.dna_pcr_result is null or t2.dna_pcr_result != 703) GROUP BY t1.patient_id;";
@@ -916,9 +917,9 @@ public class HcaCohortLibrary {
                      */
     public CohortDefinition diedEighteenMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from  kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "   inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
-                "   inner join kenyaemr_etl.etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 160034)\n" +
+        String sqlQuery = "select hf.patient_id from  "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+                "   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (hf.patient_id = ho.patient_id and ho.discontinuation_reason = 160034)\n" +
                 "   where ho.patient_id is not null and TIMESTAMPDIFF(MONTH,pd.DOB,ho.date_died) <= 18\n" +
                 "   group by hf.patient_id;";
 
@@ -950,11 +951,11 @@ public class HcaCohortLibrary {
          */
     public CohortDefinition activeHeiLessPositiveToDiedSixMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t1.patient_id from kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
+        String sqlQuery = "select t1.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
                 "                                                                                                       (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 6)))\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
                 "                                                                                                       (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 6)))\n" +
                 "where DATE_ADD(pd.DOB, INTERVAL 6 MONTH) <= t1.next_appointment_date\n" +
                 "      and ho.patient_id is null and hd.patient_id is null\n" +
@@ -989,8 +990,8 @@ public class HcaCohortLibrary {
          */
     public CohortDefinition heiWithDocumentedFeedingMethodSixMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on hf.patient_id = pd.patient_id\n" +
                 "where TIMESTAMPDIFF(month, date(pd.DOB),date(hf.visit_date)) <= 6\n" +
                 "      and infant_feeding is not null";
 
@@ -1022,11 +1023,11 @@ public class HcaCohortLibrary {
             */
     public CohortDefinition activeHeiLessPositiveToDiedTwelveMonths() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t1.patient_id from kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
+        String sqlQuery = "select t1.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
                 "                                                                                                       (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 12)))\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation hd on (t1.patient_id = hd.patient_id and (hd.discontinuation_reason = 160034 and\n" +
                 "                                                                                                       (hd.date_died is null or TIMESTAMPDIFF(MONTH,pd.DOB,hd.date_died) > 12)))\n" +
                 "where DATE_ADD(pd.DOB, INTERVAL 12 MONTH) <= t1.next_appointment_date\n" +
                 "      and ho.patient_id is null and hd.patient_id is null\n" +
@@ -1060,8 +1061,8 @@ public class HcaCohortLibrary {
                */
     public CohortDefinition heiWithABTestPositiveAndPCRBetween12And18Months() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (hf.patient_id = pd.patient_id)\n" +
                 "where dna_pcr_contextual_status in (162082)\n" +
                 "      and first_antibody_result is not null and TIMESTAMPDIFF(MONTH,pd.DOB,hf.dna_pcr_sample_date) between 12 and 18\n" +
                 "group by hf.patient_id";
@@ -1097,9 +1098,9 @@ public class HcaCohortLibrary {
               */
     public CohortDefinition heiWithABTestActiveAndLTFU() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t1.patient_id from kenyaemr_etl.etl_hei_follow_up_visit t1\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
-                "  left join kenyaemr_etl.etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
+        String sqlQuery = "select t1.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit t1\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on (t1.patient_id = pd.patient_id)\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ho on (t1.patient_id = ho.patient_id and (ho.discontinuation_reason = 159492 and\n" +
                 "                                                                     (ho.transfer_date is null or TIMESTAMPDIFF(MONTH,pd.DOB,ho.transfer_date) > 12)))\n" +
                 "where DATE_ADD(pd.DOB, INTERVAL 18 MONTH) <= t1.next_appointment_date\n" +
                 "      or ho.patient_id is not null\n" +

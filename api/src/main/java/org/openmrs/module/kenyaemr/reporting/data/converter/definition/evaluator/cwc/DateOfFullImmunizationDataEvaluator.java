@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.cwc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.cwc.DateOfFullImmunizationDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.cwc.DateOfVaccineDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -35,7 +35,7 @@ public class DateOfFullImmunizationDataEvaluator implements EncounterDataEvaluat
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id, NULLIF(date(fully_immunized),'0000-00-00') as immunization_date from kenyaemr_etl.etl_immunization ";
+        String qry = "select encounter_id, NULLIF(date(fully_immunized),'0000-00-00') as immunization_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

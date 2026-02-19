@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCHIVResultsWithin6WeeksDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,7 +37,7 @@ public class PNCHIVResultsWithin6WeeksDataEvaluator implements EncounterDataEval
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select v.encounter_id,v.final_test_result\n" +
-                "            from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "            where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and v.hiv_test_timing = 162080;";
 

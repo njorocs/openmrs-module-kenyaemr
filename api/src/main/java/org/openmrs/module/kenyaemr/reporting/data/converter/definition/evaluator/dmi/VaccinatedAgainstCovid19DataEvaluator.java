@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.VaccinatedAgainstCovid19DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class VaccinatedAgainstCovid19DataEvaluator implements PersonDataEvaluato
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id\n" +
-                "from kenyaemr_etl.etl_covid19_assessment\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment\n" +
                 "where date(visit_date) <= date(:endDate)\n" +
                 "group by patient_id\n" +
                 "having mid(max(concat(visit_date, final_vaccination_status)), 11) in\n" +

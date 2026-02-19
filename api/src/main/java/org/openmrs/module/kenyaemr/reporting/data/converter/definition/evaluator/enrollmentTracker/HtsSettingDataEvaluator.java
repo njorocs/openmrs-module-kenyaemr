@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.enrollmentTracker;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.enrollmentTracker.HtsSettingDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class HtsSettingDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "SELECT patient_id, test_strategy\n" +
-                "FROM kenyaemr_etl.etl_hts_test\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "where test_strategy is not NULL ;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

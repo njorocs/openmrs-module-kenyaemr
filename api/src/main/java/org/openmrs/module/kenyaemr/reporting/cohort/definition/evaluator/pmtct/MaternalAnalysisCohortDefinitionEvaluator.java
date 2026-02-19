@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.ARTRegisterCohortDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.MaternalAnalysisCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -52,9 +52,9 @@ public class MaternalAnalysisCohortDefinitionEvaluator implements CohortDefiniti
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
 		String qry = "select mch.patient_id as patient_id\n" +
-				"from kenyaemr_etl.etl_mch_enrollment mch\n" +
-				"  inner join kenyaemr_etl.etl_patient_demographics dm on dm.patient_id=mch.patient_id\n" +
-				"  inner join kenyaemr_etl.etl_hiv_enrollment hiv on hiv.patient_id=mch.patient_id\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+				"  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics dm on dm.patient_id=mch.patient_id\n" +
+				"  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment hiv on hiv.patient_id=mch.patient_id\n" +
 				"where mch.service_type = 1622;\n";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

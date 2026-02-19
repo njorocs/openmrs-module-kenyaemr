@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCUrinalysisDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -55,7 +56,7 @@ public class ANCUrinalysisDataEvaluator implements EncounterDataEvaluator {
                 "                )\n" +
                 "                OR EXISTS (\n" +
                 "                SELECT 1\n" +
-                "                FROM kenyaemr_etl.etl_laboratory_extract l\n" +
+                "                FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l\n" +
                 "                WHERE l.patient_id = v.patient_id\n" +
                 "                  AND DATE(l.visit_date) = DATE(v.visit_date)\n" +
                 "                  AND l.lab_test = '1000073'\n" +
@@ -63,7 +64,7 @@ public class ANCUrinalysisDataEvaluator implements EncounterDataEvaluator {
                 "            ),\n" +
                 "            'Y', 'N'\n" +
                 "    ) AS urinalysis\n" +
-                "FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.VillageEstateAndLandmarkDatadefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class VillageEstateAndLandmarkDataEvaluator implements PersonDataEvaluato
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select a.patient_id, CONCAT_WS('/', a.sub_location,a.village, a.land_mark) as landmark_village_estate from kenyaemr_etl.etl_person_address a;";
+        String qry = "select a.patient_id, CONCAT_WS('/', a.sub_location,a.village, a.land_mark) as landmark_village_estate from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_person_address a;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date) context.getParameterValue("startDate");

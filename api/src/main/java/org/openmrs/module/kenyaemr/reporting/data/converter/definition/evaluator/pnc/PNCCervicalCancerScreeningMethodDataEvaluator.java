@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCCervicalCancerScreeningMethodDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,7 +43,7 @@ public class PNCCervicalCancerScreeningMethodDataEvaluator implements EncounterD
                 "            when 164977 then 'VILI'\n" +
                 "            when 5622 then 'Other' end)\n" +
                 "           as cacx_method\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

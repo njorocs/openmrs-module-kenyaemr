@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.HTSClientsTestedPositiveNotLinkedCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -44,19 +45,19 @@ public class HTSClientsTestedPositiveNotLinkedCohortDefinitionEvaluator implemen
 
 		Cohort newCohort = new Cohort();
 		String qry=" select t.patient_id\n" +
-				"from kenyaemr_etl.etl_hts_test t\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
 				"  left join\n" +
 				"((SELECT l.patient_id\n" +
-				" from kenyaemr_etl.etl_hts_referral_and_linkage l\n" +
-				"   inner join kenyaemr_etl.etl_patient_demographics pt on pt.patient_id=l.patient_id and pt.voided=0\n" +
-				"   inner join kenyaemr_etl.etl_hts_test t on t.patient_id=l.patient_id and t.test_type in(1,2) and t.final_test_result='Positive' and t.visit_date <=l.visit_date and t.voided=0\n" +
+				" from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l\n" +
+				"   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pt on pt.patient_id=l.patient_id and pt.voided=0\n" +
+				"   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t on t.patient_id=l.patient_id and t.test_type in(1,2) and t.final_test_result='Positive' and t.visit_date <=l.visit_date and t.voided=0\n" +
 				" where (l.ccc_number is not null or facility_linked_to is not null)\n" +
 				")\n" +
 				"union\n" +
 				"( SELECT t.patient_id\n" +
-				"  FROM kenyaemr_etl.etl_hts_test t\n" +
-				"    INNER JOIN kenyaemr_etl.etl_patient_demographics pt ON pt.patient_id=t.patient_id AND pt.voided=0\n" +
-				"    INNER JOIN kenyaemr_etl.etl_hiv_enrollment e ON e.patient_id=t.patient_id AND e.voided=0\n" +
+				"  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+				"    INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pt ON pt.patient_id=t.patient_id AND pt.voided=0\n" +
+				"    INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e ON e.patient_id=t.patient_id AND e.voided=0\n" +
 				"  WHERE t.test_type IN (1, 2) AND t.final_test_result='Positive' AND t.voided=0\n" +
 				")) l on l.patient_id = t.patient_id\n" +
 				"where t.final_test_result = 'Positive' and t.voided = 0 and t.test_type=2 and l.patient_id is null\n" +

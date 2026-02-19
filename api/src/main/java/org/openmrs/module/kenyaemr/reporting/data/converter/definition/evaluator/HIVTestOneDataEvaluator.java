@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HIVTestOneDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -34,7 +35,7 @@ public class HIVTestOneDataEvaluator implements EncounterDataEvaluator {
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id, CONCAT_WS('\\n', test_1_kit_name,'____________', test_1_kit_lot_no, '____________', test_1_kit_expiry, '____________', test_1_result) AS test_result from kenyaemr_etl.etl_hts_test;";
+        String qry = "select encounter_id, CONCAT_WS('\\n', test_1_kit_name,'____________', test_1_kit_lot_no, '____________', test_1_kit_expiry, '____________', test_1_result) AS test_result from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

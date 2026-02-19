@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCMethodDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class VMMCMethodDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id, case circumcision_method when 167120 then 'Device Circumcision' when 167119 then 'Conventional Surgical' else ''" +
-                " end as circumcision_method from kenyaemr_etl.etl_vmmc_circumcision_procedure GROUP BY patient_id;";
+                " end as circumcision_method from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

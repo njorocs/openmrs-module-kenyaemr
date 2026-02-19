@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.DiffCareUnstableMales15PlusYearsCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.DiffCareUnstableUnder15YearsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
@@ -48,7 +48,7 @@ public class DiffCareUnstableMales15PlusCohortDefinitionEvaluator implements Coh
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select patient_id from kenyaemr_etl.etl_current_in_care c where c.started_on_drugs is not null and c.stability=2\n" +
+		String qry="select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.started_on_drugs is not null and c.stability=2\n" +
 				"and c.gender =\"M\" and timestampdiff(year ,c.dob,c.latest_vis_date) >=15 group by c.patient_id;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

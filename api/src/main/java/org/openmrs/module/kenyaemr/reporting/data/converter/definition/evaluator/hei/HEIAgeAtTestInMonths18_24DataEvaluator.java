@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIAgeAtTestInMonths18_24DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class HEIAgeAtTestInMonths18_24DataEvaluator implements PersonDataEvaluat
         String qry = "select\n" +
                 "  d.patient_id,\n" +
                 "  round(DATEDIFF(f.visit_date,d.DOB)/30) as age_at_test_24_months\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
-                "  INNER JOIN kenyaemr_etl.etl_hei_follow_up_visit f ON\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f ON\n" +
                 "  d.patient_id = f.patient_id\n" +
                 "WHERE round(DATEDIFF(f.visit_date,d.DOB)/7) BETWEEN 72 AND 96\n" +
                 "GROUP BY patient_id";

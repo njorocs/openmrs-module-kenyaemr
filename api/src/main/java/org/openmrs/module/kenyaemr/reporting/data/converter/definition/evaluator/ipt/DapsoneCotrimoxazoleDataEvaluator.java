@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.DapsoneCotrimoxazoleDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,8 +36,8 @@ public class DapsoneCotrimoxazoleDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,if ((init.patient_id = x.patient_id or fup.ctx_dispensed =105281 or fup.ctx_dispensed = 1065 or fup.dapsone_dispensed = 74250 or fup.dapsone_dispensed = 1065  ),\"Y\",\"N\") as on_ctx from kenyaemr_etl.etl_ipt_initiation init\n" +
-                "    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
+        String qry = "select init.patient_id,if ((init.patient_id = x.patient_id or fup.ctx_dispensed =105281 or fup.ctx_dispensed = 1065 or fup.dapsone_dispensed = 74250 or fup.dapsone_dispensed = 1065  ),\"Y\",\"N\") as on_ctx from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+                "    left outer join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
                 "                      left outer join (select o.patient_id,o.date_stopped from orders o inner join drug_order do on o.order_id = do.order_id\n" +
                 "                      where o.concept_id in (105281,74250) and o.date_stopped is not null group by o.patient_id) x on init.patient_id = x.patient_id\n" +
                 "                      where init.voided = 0 and (date(fup.visit_date) <= date(init.visit_date) or date(x.date_stopped) <= date(init.visit_date)) group by init.patient_id;";

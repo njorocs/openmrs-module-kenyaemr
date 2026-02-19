@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.cacx;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.cacx.CACXMethodDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -64,7 +65,7 @@ public class CACXMethodDataEvaluator implements EncounterDataEvaluator {
                 "                ELSE NULL\n" +
                 "                END\n" +
                 "    ) AS screening_methods\n" +
-                "FROM kenyaemr_etl.etl_cervical_cancer_screening\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening\n" +
                 "WHERE DATE(visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

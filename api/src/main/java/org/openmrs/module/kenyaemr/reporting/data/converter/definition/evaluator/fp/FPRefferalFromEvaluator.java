@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPRefferalFromDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class FPRefferalFromEvaluator implements EncounterDataEvaluator {
                "        WHEN 164407 THEN 'Another Health Facility'\n" +
                "        WHEN 1175   THEN 'Not Applicable'\n" +
                "    END AS referral_from_label\n" +
-               "FROM kenyaemr_etl.etl_family_planning f\n" +
+               "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                "WHERE DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);\n";
 
 

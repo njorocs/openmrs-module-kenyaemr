@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ARTPreparationRegisterCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.HEIRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
@@ -52,7 +52,7 @@ public class ARTPreparationRegisterCohortDefinitionEvaluator implements CohortDe
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 		//EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
-		String qry = "select patient_id from kenyaemr_etl.etl_ART_preparation where visit_date between date(:startDate) and date(:endDate);";
+		String qry = "select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation where visit_date between date(:startDate) and date(:endDate);";
 
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

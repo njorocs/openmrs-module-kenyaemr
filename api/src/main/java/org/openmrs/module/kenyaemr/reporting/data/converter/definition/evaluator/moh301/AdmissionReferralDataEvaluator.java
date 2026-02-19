@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.AdmissionReferralDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class AdmissionReferralDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id, case e.referred_from when 164407 then 'other facilities' when 1759 then 'CHU' when 164918 then 'Internal(Department)' end as referred_from from kenyaemr_etl.etl_clinical_encounter e where e.visit_date between date(:startDate) and date(:endDate);";
+        String qry = "select patient_id, case e.referred_from when 164407 then 'other facilities' when 1759 then 'CHU' when 164918 then 'Internal(Department)' end as referred_from from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e where e.visit_date between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date) context.getParameterValue("startDate");

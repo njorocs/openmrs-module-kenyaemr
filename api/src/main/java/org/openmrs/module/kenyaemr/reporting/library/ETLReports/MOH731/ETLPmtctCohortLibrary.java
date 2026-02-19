@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
@@ -26,8 +27,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition firstANCVisitMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =" select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "inner join kenyaemr_etl.etl_mch_enrollment e on v.patient_id = e.patient_id and e.date_of_discontinuation IS NULL\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on v.patient_id = e.patient_id and e.date_of_discontinuation IS NULL\n" +
                 "where anc_visit_number = 1 and date(v.visit_date)  between date(:startDate) and date(:endDate);";
 
         cd.setName("First ANC Visit");
@@ -43,9 +44,9 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition deliveryFromHIVPositiveMothers(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct ld.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
-                "   left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id= ld.patient_id\n" +
-                "   left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id= ld.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id= ld.patient_id\n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id= ld.patient_id\n" +
                 "   where (date(ld.visit_date) between date(:startDate) and date(:endDate)) and\n" +
                 "   ld.final_test_result=\"Positive\" or e.hiv_status = 703 or v.final_test_result =\"Positive\" ;";
 
@@ -61,7 +62,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition knownPositiveAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id\n" +
-                "                    from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "                     where date(visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "                (e.patient_id is not null) and hiv_status=703;";
 
@@ -77,10 +78,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition initialHIVTestInMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct v.patient_id\n" +
-                "         from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "                     left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id= v.patient_id\n" +
-                "                     left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= v.patient_id\n" +
-                "                     left outer join kenyaemr_etl.etl_mch_postnatal_visit p on p.patient_id=ld.patient_id\n" +
+                "         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "                     left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id= v.patient_id\n" +
+                "                     left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= v.patient_id\n" +
+                "                     left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p on p.patient_id=ld.patient_id\n" +
                 "                   where date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "                         e.hiv_status !=703 and\n" +
                 "                         ld.final_test_result is null and\n" +
@@ -99,10 +100,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedForHivInMchmsDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct ld.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
-                "   left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=ld.patient_id\n" +
-                "   left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=ld.patient_id\n" +
-                "   left outer join kenyaemr_etl.etl_mch_postnatal_visit p on p.patient_id=ld.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=ld.patient_id\n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=ld.patient_id\n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p on p.patient_id=ld.patient_id\n" +
                 "where date(ld.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      e.hiv_status !=703 and\n" +
                 "      v.final_test_result is null and\n" +
@@ -121,10 +122,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition initialTestAtPNCUpto6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(p.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      round(DATEDIFF(ld.visit_date,:endDate)/7) <=6 and\n" +
                 "      e.hiv_status !=703 and\n" +
@@ -144,7 +145,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedForHivInMchmsTotal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (e.hiv_test_date between date(:startDate) and date(:endDate)) ;";
         cd.setName("testedForHivInMchms");
         cd.setQuery(sqlQuery);
@@ -158,9 +159,9 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pncRetestUpto6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct pnc.patient_id " +
-                " from kenyaemr_etl.etl_mch_postnatal_visit pnc \n" +
-                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=pnc.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=pnc.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc \n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=pnc.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=pnc.patient_id\n" +
                 "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
                 "pnc.patient_id is not null and pnc.final_test_result is not null and anc.final_test_result is not null and ld.final_test_result is not null\n"+
                 "and round(endDate,DATEDIFF(ld.visit_date)/7) <=6";
@@ -177,9 +178,9 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pncTestBtwn6WeeksAnd6Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct pnc.patient_id " +
-                "from kenyaemr_etl.etl_mch_postnatal_visit pnc " +
-                "left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=pnc.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=pnc.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc " +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=pnc.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=pnc.patient_id\n" +
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate) and \n" +
                 "(pnc.patient_id is not null and anc.patient_id is null and ld.patient_id is null) and (round(DATEDIFF(endDate,ld.visit_date)/7) >6) AND (round(DATEDIFF(endDate,ld.visit_date)/7)<=24) ";
 
@@ -195,8 +196,8 @@ public class ETLPmtctCohortLibrary {
    /* public CohortDefinition knownPositiveAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
-                "    join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
                 "    where (e.visit_date between date(:startDate) and date(:endDate)) " +
                 "    and hiv_status=703 and e.visit_date>hiv_test_date;";
 
@@ -212,8 +213,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedHivPositiveInMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =" select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "  left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=v.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=v.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      e.hiv_status !=703 and\n" +
                 "      v.final_test_result =\"Positive\";";
@@ -232,9 +233,9 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition positiveHIVResultsAtLabourAndDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct ld.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
-                "  left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=ld.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=ld.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=ld.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=ld.patient_id\n" +
                 "where date(ld.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      e.hiv_status !=703 and\n" +
                 "      (v.final_test_result is null or v.final_test_result !=\"Positive\") and\n" +
@@ -252,10 +253,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedHivPositiveInPNCWithin6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      round(DATEDIFF(p.visit_date,endDate)/7) <=6 and\n" +
                 "      e.hiv_status !=703 and\n" +
@@ -275,7 +276,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalHivPositiveMothersInMchms(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (hiv_status=703 and e.hiv_test_date between date(:startDate) and date(:endDate)) ;";
 
         cd.setName("totalHivPositiveInMchms");
@@ -290,10 +291,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalHivPositivePNC6WeeksTo6monthsInMchms(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      ((round(DATEDIFF(p.visit_date,endDate)/7) >=6) AND (round(DATEDIFF(ld.visit_date,endDate)/7) <=24)) and\n" +
                 "      (e.hiv_status !=703) and\n" +
@@ -313,8 +314,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalOnHAARTAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct anc.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit a \n" +
-                "inner join kenyaemr_etl.etl_drug_event d on anc.patient_id=d.patient_id \n"+
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a \n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on anc.patient_id=d.patient_id \n"+
                 "where date(anc.visit_date) BETWEEN date(:startDate) and date(:endDate) and \n" +
                 "anc_visit_number = 1 and d.date_started < anc.visit_date";
 
@@ -331,8 +332,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition startedHAARTAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct a.patient_id\n" +
-                "                from kenyaemr_etl.etl_mch_antenatal_visit a \n" +
-                "                inner join kenyaemr_etl.etl_drug_event d on a.patient_id=d.patient_id\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a \n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on a.patient_id=d.patient_id\n" +
                 "                where date(a.visit_date) between date(:startDate) and date(:endDate)  \n" +
                 "                and d.date_started >= a.visit_date;";
 
@@ -350,8 +351,8 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct ld.patient_id\\n\" +\n" +
-                "                \"from kenyaemr_etl.etl_mchs_delivery ld\\n\" +\n" +
-                "                \"  inner join kenyaemr_etl.etl_drug_event d on d.patient_id=ld.patient_id\\n\" +\n" +
+                "                \"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\\n\" +\n" +
+                "                \"  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id=ld.patient_id\\n\" +\n" +
                 "                \"where date(ld.visit_date) between date(:startDate) and date(:endDate)\\n\" +\n" +
                 "                \"      and d.date_started >= ld.visit_date;";
 
@@ -370,7 +371,7 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct pnc.patient_id \n"+
-                "from kenyaemr_etl.etl_mch_postnatal_visit pnc \n"+
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc \n"+
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate)\n"+
                 "and round(DATEDIFF(endDate,pnc.haart_start_date)/7) <= 6";
 
@@ -402,7 +403,7 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct pnc.patient_id \n"+
-                "from kenyaemr_etl.etl_mch_postnatal_visit pnc \n"+
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc \n"+
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate)\n"+
                 "and (round(DATEDIFF(endDate,pnc.haart_start_date)/7)>6) and (round(DATEDIFF(endDate,pnc.haart_start_date)/7)<=24)";
 
@@ -419,7 +420,7 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct pnc.patient_id \n"+
-                "from kenyaemr_etl.etl_mch_postnatal_visit pnc \n"+
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc \n"+
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate)\n"+
                 "and round(DATEDIFF(endDate,pnc.haart_start_date)/7) >=48";
 
@@ -453,8 +454,8 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
                 "where anc_visit_number = 1 and date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "v.syphilis_test_status is not null or v.syphilis_test_status !=1402;";
 
@@ -472,8 +473,8 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "        v.syphilis_test_status =1228;";
 
@@ -491,8 +492,8 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      v.syphilis_treated_status =1065;";
 
@@ -510,10 +511,10 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      (ld.final_test_result=\"Positive\" or e.hiv_status = 703 or v.final_test_result =\"Positive\") and\n" +
                 "      (round(DATEDIFF(p.visit_date,endDate)/7) <=6) and\n" +
@@ -533,10 +534,10 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "  where date(p.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      (ld.final_test_result=\"Positive\" or e.hiv_status = 703 or v.final_test_result =\"Positive\") and\n" +
                 "      (round(DATEDIFF(ld.visit_date,\"2018-10-10\")/7) <=6);";
@@ -555,7 +556,7 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct patient_id \n" +
-                "    from kenyaemr_etl.etl_mch_enrollment e \n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e \n" +
                 "    where (e.partner_hiv_status=703 and  e.visit_date between date(:startDate) and date(:endDate))";
 
         cd.setName("knownHIVPositive1stContact");
@@ -572,10 +573,10 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct anc.patient_id \n " +
-                " from kenyaemr_etl.etl_mch_antenatal_visit anc \n" +
-                "left join kenyaemr_etl.etl_mch_enrollment e on anc.patient_id=e.patient_id\n" +
-                "left join kenyaemr_etl.etl_mchs_delivery ld on anc.patient_id=ld.patient_id\n" +
-                "left join kenyaemr_etl.etl_mch_postnatal_visit pnc on anc.patient_id=pnc.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc \n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on anc.patient_id=e.patient_id\n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on anc.patient_id=ld.patient_id\n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc on anc.patient_id=pnc.patient_id\n" +
                 "where date(anc.visit_date) between date(:startDate) and date(:endDate) and \n" +
                 "and anc.partner_hiv_tested is not null and \n"+
                 "(anc.patient_id is not null and ld.patient_id is null and pnc.patient_id is null);";
@@ -596,10 +597,10 @@ public class ETLPmtctCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =   "select distinct pnc.patient_id \n " +
-                " from kenyaemr_etl.etl_mch_postnatal_visit pnc \n" +
-                " left join kenyaemr_etl.etl_mch_enrollment e on pnc.patient_id=e.patient_id\n" +
-                "left join kenyaemr_etl.etl_mchs_delivery ld on pnc.patient_id=ld.patient_id\n" +
-                "left join kenyaemr_etl.etl_mch_antenatal_visit anc on pnc.patient_id=anc.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc \n" +
+                " left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on pnc.patient_id=e.patient_id\n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on pnc.patient_id=ld.patient_id\n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on pnc.patient_id=anc.patient_id\n" +
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate) and \n" +
                 "and anc.partner_hiv_tested is not null and \n"+
                 "(pnc.patient_id is not null and ld.patient_id is null and anc.patient_id is null);";
@@ -995,7 +996,7 @@ public class ETLPmtctCohortLibrary {
 //    public CohortDefinition testedForHivInMchmsTotal(){
 //        SqlCohortDefinition cd = new SqlCohortDefinition();
 //        String sqlQuery =  " select distinct patient_id " +
-//                "    from kenyaemr_etl.etl_mch_enrollment e " +
+//                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
 //                "    where (e.hiv_test_date between date(:startDate) and date(:endDate)) ;";
 //
 //        cd.setName("testedForHivInMchms");
@@ -1010,7 +1011,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedHivPositiveInMchmsTotal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (hiv_status=703 and e.hiv_test_date between date(:startDate) and date(:endDate)) ;";
 
         cd.setName("testedHivPositeInMchms");
@@ -1027,8 +1028,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition exclusiveBreastFeedingAtSixMonths(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id  " +
-                " from kenyaemr_etl.etl_hei_follow_up_visit e   " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e   " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  timestampdiff(month,d.dob,date(:endDate))>=6 and e.infant_feeding=5526 and \n" +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
 
@@ -1044,8 +1045,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition exclusiveReplacementFeedingAtSixMonths(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id  " +
-                " from kenyaemr_etl.etl_hei_follow_up_visit e   " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e   " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  timestampdiff(month,d.dob,date(:endDate))>=6 and e.infant_feeding=1595 and \n" +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
         cd.setName("exclusiveReplacementFeedingAtSixMonths");
@@ -1060,8 +1061,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition mixedFeedingAtSixMonths(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id  " +
-                " from kenyaemr_etl.etl_hei_follow_up_visit e   " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e   " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  timestampdiff(month,d.dob,date(:endDate))>=6 and e.infant_feeding=6046 and \n" +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
         cd.setName("mixedFeedingAtSixMonths");
@@ -1076,8 +1077,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalExposedAgedSixMonths(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id  " +
-                " from kenyaemr_etl.etl_hei_follow_up_visit e   " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e   " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where timestampdiff(month,d.dob,date(:endDate))>=6 and e.infant_feeding in (1595,6046,5526)  and \n " +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
         cd.setName("totalExposedAgedSixMonths");
@@ -1092,8 +1093,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition motherOnTreatmentAndBreastFeeding(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id " +
-                " from kenyaemr_etl.etl_hei_enrollment e  " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e  " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  mother_breastfeeding=1065 and \n " +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
 
@@ -1109,8 +1110,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition motherOnTreatmentAndNotBreastFeeding(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id " +
-                " from kenyaemr_etl.etl_hei_enrollment e  " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e  " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  mother_breastfeeding=1066 and \n " +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ;
 
@@ -1126,8 +1127,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition motherOnTreatmentAndNotBreastFeedingUnknown(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id " +
-                " from kenyaemr_etl.etl_hei_enrollment e  " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e  " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  mother_breastfeeding=1067 and \n " +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ; //this concept unknown 1067 is missing on the hei enrollment form and should be corrected
 
@@ -1143,8 +1144,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalBreastFeedingMotherOnTreatment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  Select distinct e.patient_id " +
-                " from kenyaemr_etl.etl_hei_enrollment e  " +
-                " join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e  " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id " +
                 " where  mother_breastfeeding is not null and \n " +
                 "  date(e.visit_date) between date(:startDate) and date(:endDate) ;" ; //this concept unknown 1067 is missing on the hei enrollment form and should be corrected
 
@@ -1160,10 +1161,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedForHivInMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  select distinct anc.patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
-                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
                 "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
                 "(anc.patient_id is not null);";
 
@@ -1180,10 +1181,10 @@ public class ETLPmtctCohortLibrary {
 //public CohortDefinition testedForHivInMchmsDelivery(){
 //        SqlCohortDefinition cd = new SqlCohortDefinition();
 //        String sqlQuery ="  select distinct ld.patient_id " +
-//                "    from kenyaemr_etl.etl_mch_enrollment e " +
-//                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
-//                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
-//                "left outer join kenyaemr_etl.etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
+//                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+//                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
+//                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
+//                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
 //                "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
 //                "(ld.patient_id is not null and anc.patient_id is null);";
 //
@@ -1200,10 +1201,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedForHivInMchmsPostnatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  select distinct panc.patient_id " +
-                " from kenyaemr_etl.etl_mch_enrollment e " +
-                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
                 "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
                 "(panc.patient_id is not null and anc.patient_id is null and ld.patient_id is null);";
 
@@ -1219,8 +1220,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedHivPositiveBeforeMchms(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
-                "    join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
                 "    where (e.visit_date between date(:startDate) and date(:endDate)) " +
                 "    and hiv_status=703 and e.visit_date>hiv_test_date;";
 
@@ -1237,10 +1238,10 @@ public class ETLPmtctCohortLibrary {
 // public CohortDefinition testedHivPositiveInMchmsAntenatal(){
 //        SqlCohortDefinition cd = new SqlCohortDefinition();
 //        String sqlQuery ="  select distinct anc.patient_id " +
-//                "    from kenyaemr_etl.etl_mch_enrollment e " +
-//                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
-//                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
-//                "left outer join kenyaemr_etl.etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
+//                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+//                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
+//                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
+//                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
 //                "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
 //                "(anc.patient_id is not null) and hiv_status=703;";
 //
@@ -1258,10 +1259,10 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition testedHivPositiveInMchmsPostnatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="  select distinct panc.patient_id " +
-                " from kenyaemr_etl.etl_mch_enrollment e " +
-                " left outer join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
-                "left outer join kenyaemr_etl.etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id=e.patient_id\n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit panc on panc.patient_id=e.patient_id\n" +
                 "where date(hiv_test_date) between date(:startDate) and date(:endDate) and \n" +
                 "(panc.patient_id is not null and anc.patient_id is null and ld.patient_id is null) and " +
                 " hiv_status=703;";
@@ -1278,8 +1279,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition serologyAntBodyTestBetween9And12Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where (first_antibody_result is not null or final_antibody_result is not null) and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) between 9 and 12; ";
 
@@ -1295,8 +1296,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalHeitestedBy12Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result is not null and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate))<=12; ";
 
@@ -1313,8 +1314,8 @@ public class ETLPmtctCohortLibrary {
  public CohortDefinition pcrWithInitialIn2Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result is not null and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate))<=2; ";
 
@@ -1331,8 +1332,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pcrWithInitialBetween3And8MonthsOfAge(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select  distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result is not null and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) between 3 and 8; ";
 
@@ -1348,8 +1349,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pcrTestBetween9And12MonthsAge(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result is not null and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) between 9 and 12; ";
 
@@ -1365,8 +1366,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pcrConfirmedPositive2Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result=1301 and dna_pcr_contextual_status=162082 and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate))<=2; ";
 
@@ -1382,8 +1383,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pcrConfirmedPositiveBetween3To8Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select  distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result=1301 and dna_pcr_contextual_status=162082 and" +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) between 3 and 8; ";
 
@@ -1399,8 +1400,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition pcrConfirmedPositiveBetween9To12Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result = 1301 and dna_pcr_contextual_status=162082 and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) between 9 and 12; ";
 
@@ -1416,8 +1417,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition totalHeiConfirmedPositiveBy12Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where dna_pcr_result= 1301 and dna_pcr_contextual_status=162082 and " +
                 "    (e.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate))<=12; ";
 
@@ -1433,8 +1434,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition assessedForArtEligibilityTotal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = " select distinct m.patient_id " +
-                "    from kenyaemr_etl.etl_mch_antenatal_visit m " +
-                "   join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit m " +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
                 "    where date(e.visit_date) between date(:startDate) and date(:endDate) " +
                 "    and who_stage is not null or cd4 is not null;";
 
@@ -1450,8 +1451,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition assessedForArtEligibilityWho(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "  Select distinct m.patient_id " +
-                "    from kenyaemr_etl.etl_mch_antenatal_visit m " +
-                "   join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit m " +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
                 "    where date(e.visit_date) between date(:startDate) and date(:endDate) " +
                 "    and who_stage is not null ;";
 
@@ -1467,8 +1468,8 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition assessedForArtEligibilityCd4(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "  Select distinct m.patient_id " +
-                "    from kenyaemr_etl.etl_mch_antenatal_visit m " +
-                "   join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit m " +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = m.patient_id \n"+
                 "    where date(e.visit_date) between date(:startDate) and date(:endDate) " +
                 "    and cd4 is not null ;";
 
@@ -1484,7 +1485,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition discordantCouples(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = " select patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (e.visit_date between date(:startDate) and date(:endDate)) and ((hiv_status=703 and partner_hiv_status=664) or (hiv_status=664 and partner_hiv_status=703));";
 
         cd.setName("discordantCouples");
@@ -1499,7 +1500,7 @@ public class ETLPmtctCohortLibrary {
     public CohortDefinition partnerTestedDuringAncOrDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "   select distinct patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (partner_hiv_status is not null and e.visit_date between date(:startDate) and date(:endDate));";
 
         cd.setName("partnerTestedDuringAncOrDelivery");
@@ -1515,7 +1516,7 @@ public class ETLPmtctCohortLibrary {
         //testedForHivBeforeOrDuringMchms
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
                 "    where (e.visit_date between date(:startDate) and date(:endDate)) " +
                 "    and hiv_status=703 and visit_date>hiv_test_date;";
 

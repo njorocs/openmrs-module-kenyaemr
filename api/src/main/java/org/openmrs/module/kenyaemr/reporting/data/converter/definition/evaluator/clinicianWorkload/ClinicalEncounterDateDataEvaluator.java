@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.clinicianWorkload;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.clinicianWorkload.ClinicalEncounterDateDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,7 +38,7 @@ public class ClinicalEncounterDateDataEvaluator implements VisitDataEvaluator {
 
         String qry = "WITH filtered_patients AS (\n" +
                 "    SELECT patient_id\n" +
-                "    FROM kenyaemr_etl.etl_patient_demographics\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
                 "    WHERE voided = 0\n" +
                 "),\n" +
                 "     checked_in AS (\n" +
@@ -56,7 +57,7 @@ public class ClinicalEncounterDateDataEvaluator implements VisitDataEvaluator {
                 "             ce.visit_id,\n" +
                 "             ce.patient_id,\n" +
                 "             ce.visit_date AS clinical_date\n" +
-                "         FROM kenyaemr_etl.etl_clinical_encounter ce\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
                 "                  JOIN filtered_patients p ON p.patient_id = ce.patient_id\n" +
                 "                  LEFT JOIN checked_in v ON v.patient_id = ce.patient_id AND v.visit_id = ce.visit_id\n" +
                 "                  JOIN users u ON u.user_id = ce.provider\n" +

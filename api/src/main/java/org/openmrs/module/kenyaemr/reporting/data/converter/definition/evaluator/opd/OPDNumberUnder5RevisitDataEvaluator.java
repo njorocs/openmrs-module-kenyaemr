@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDNumberUnder5RevisitDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,8 +38,8 @@ public class OPDNumberUnder5RevisitDataEvaluator implements EncounterDataEvaluat
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT ce.encounter_id, CONCAT_WS(CHAR(10), 'Revisit',p.patient_clinic_number)\n" +
-                "from kenyaemr_etl.etl_clinical_encounter ce\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = ce.patient_id and p.voided = 0\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = ce.patient_id and p.voided = 0\n" +
                 "where date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "  and ce.visit_type = 'Revisit'\n" +
                 "  and ce.voided = 0;";

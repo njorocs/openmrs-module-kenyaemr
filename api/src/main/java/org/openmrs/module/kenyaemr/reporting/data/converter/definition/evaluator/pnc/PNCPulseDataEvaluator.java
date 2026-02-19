@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCPulseDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,8 +38,8 @@ public class PNCPulseDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
 			"  coalesce(v.pulse_rate,t.pulse_rate) as pulse_rate\n" +
-			"from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
-			"          LEFT JOIN kenyaemr_etl.etl_patient_triage t ON v.patient_id = t.patient_id AND date(v.visit_date) = date(t.visit_date)\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
+			"          LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t ON v.patient_id = t.patient_id AND date(v.visit_date) = date(t.visit_date)\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

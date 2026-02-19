@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.FinalPatientManagementOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -41,7 +42,7 @@ public class FinalPatientManagementOutcomeDataEvaluator implements VisitDataEval
                 "           when 1654 then \"Admit\"\n" +
                 "           when 1693 then \"Referral\"\n" +
                 "           when 159 then \"Deceased\" end as final_outcome\n" +
-                "from kenyaemr_etl.etl_clinical_encounter e\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

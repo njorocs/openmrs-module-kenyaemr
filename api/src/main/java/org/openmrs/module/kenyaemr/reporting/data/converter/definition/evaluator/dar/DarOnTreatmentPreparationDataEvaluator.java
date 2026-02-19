@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarEnrolledInCareDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarOnTreatmentPreparationDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -42,15 +42,15 @@ public class DarOnTreatmentPreparationDataEvaluator implements PersonDataEvaluat
         String qry = "";
         if (sex != null) {
             qry = "SELECT e.patient_id, 'X' treatmentPrep\n" +
-                    "FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex' \n" +
-                    "         inner join kenyaemr_etl.etl_ART_preparation tp on tp.patient_id = e.patient_id and  date(tp.visit_date) = date(:startDate) \n" +
+                    "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex' \n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation tp on tp.patient_id = e.patient_id and  date(tp.visit_date) = date(:startDate) \n" +
                     "where e.voided = 0 ";
         } else {
             qry = "SELECT e.patient_id, 'X' treatmentPrep\n" +
-                    "FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
-                    "         inner join kenyaemr_etl.etl_ART_preparation tp on tp.patient_id = e.patient_id and  date(tp.visit_date) = date(:startDate) \n" +
+                    "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation tp on tp.patient_id = e.patient_id and  date(tp.visit_date) = date(:startDate) \n" +
                     "where e.voided = 0 ";
         }
         String ageConditionString = "";

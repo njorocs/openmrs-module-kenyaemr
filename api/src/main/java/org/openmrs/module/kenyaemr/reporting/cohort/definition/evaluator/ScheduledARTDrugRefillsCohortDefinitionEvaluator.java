@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ScheduledARTDrugRefillsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -62,12 +63,12 @@ public class ScheduledARTDrugRefillsCohortDefinitionEvaluator implements CohortD
 				"    d.patient_id as disc_patient,\n" +
 				"  de.patient_id as started_on_drugs,\n" +
 				"  de.program as hiv_program\n" +
-				"from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-				"join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-				"left outer join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and date(date_started) <= date(:endDate)\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+				"left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and date(date_started) <= date(:endDate)\n" +
 				"left outer JOIN\n" +
-				"(select patient_id, visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"(select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
 				"group by patient_id\n" +
 				") d on d.patient_id = fup.patient_id\n" +

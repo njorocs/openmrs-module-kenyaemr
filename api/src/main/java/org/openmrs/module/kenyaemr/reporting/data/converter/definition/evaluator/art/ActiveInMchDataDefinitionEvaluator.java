@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ActiveInMchDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -51,14 +51,14 @@ public class ActiveInMchDataDefinitionEvaluator implements PersonDataEvaluator {
                 "        MAX(f.visit_date) AS hiv_fup_date,\n" +
                 "        anc.patient_id AS anc_client,\n" +
                 "        anc.visit_date AS anc_visit_date\n" +
-                "    FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                "    INNER JOIN kenyaemr_etl.etl_patient_demographics d \n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                "    INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d \n" +
                 "        ON f.patient_id = d.patient_id AND d.gender = 'F'\n" +
                 "    LEFT JOIN (\n" +
                 "        SELECT \n" +
                 "            anc.patient_id,\n" +
                 "            anc.visit_date \n" +
-                "        FROM kenyaemr_etl.etl_mch_antenatal_visit anc \n" +
+                "        FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc \n" +
                 "        WHERE anc.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    ) anc \n" +
                 "        ON f.patient_id = anc.patient_id\n" +

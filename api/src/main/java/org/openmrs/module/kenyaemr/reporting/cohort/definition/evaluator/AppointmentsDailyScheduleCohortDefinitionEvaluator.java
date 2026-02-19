@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.AppointmentsDailyScheduleCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -46,7 +47,7 @@ public class AppointmentsDailyScheduleCohortDefinitionEvaluator implements Cohor
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select patient_id from kenyaemr_etl.etl_patients_booked_today;";
+		String qry="select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patients_booked_today;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDNonTracerDrugsPrescribedDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDTracerDrugsPrescribedDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -39,8 +39,8 @@ public class OPDNonTracerDrugsPrescribedDataEvaluator implements EncounterDataEv
 
         String qry = "select v.encounter_id,\n" +
 			"        d.drug_name\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         INNER JOIN kenyaemr_etl.etl_drug_order d ON v.patient_id = d.patient_id and date(d.visit_date) = date(v.visit_date)\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order d ON v.patient_id = d.patient_id and date(d.visit_date) = date(v.visit_date)\n" +
 			"where d.drug_concept_id not in (351,86672,71161,86339,81341,70439,162650) \n" +
 			"  and date(v.visit_date) between date(:startDate) and date(:endDate);";
 

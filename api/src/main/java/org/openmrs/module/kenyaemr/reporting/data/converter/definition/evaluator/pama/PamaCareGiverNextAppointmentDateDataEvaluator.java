@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pama;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverLastVisitDateDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverNextAppointmentDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,8 +38,8 @@ public class PamaCareGiverNextAppointmentDateDataEvaluator implements PersonData
 
         String qry = "select distinct r.person_a,\n" +
                 "    date(mid(max(concat(fup.visit_date,fup.next_appointment_date, '' )),11)) as next_appointment_date\n" +
-                "  from kenyaemr_etl.etl_patient_demographics d\n" +
-                "    inner join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id = d.patient_id and date(fup.visit_date) <= date(:endDate)\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "    inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id = d.patient_id and date(fup.visit_date) <= date(:endDate)\n" +
                 "    inner join relationship r on d.patient_id = r.person_b\n" +
                 "    inner join relationship_type t on r.relationship = t.relationship_type_id and t.uuid ='3667e52f-8653-40e1-b227-a7278d474020'\n" +
                 "  group by r.person_a;";

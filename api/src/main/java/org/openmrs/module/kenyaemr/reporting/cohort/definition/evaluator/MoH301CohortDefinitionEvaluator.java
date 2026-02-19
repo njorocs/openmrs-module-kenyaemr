@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MoH301CohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -49,7 +50,7 @@ public class MoH301CohortDefinitionEvaluator implements CohortDefinitionEvaluato
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select a.patient_id from kenyaemr_etl.etl_inpatient_admission a where date(a.admission_date) between date(:startDate) and date(:endDate);";
+		String qry="select a.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a where date(a.admission_date) between date(:startDate) and date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

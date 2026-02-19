@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPHIVStatusCounseledDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,15 +44,15 @@ public class FPHIVStatusCounseledEvaluator implements EncounterDataEvaluator {
                         "           WHEN hts.patient_id IS NOT NULL THEN 'Y' " +
                         "           ELSE 'N' " +
                         "       END AS hiv_counselled_tested " +
-                        "FROM kenyaemr_etl.etl_family_planning fp " +
+                        "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp " +
                         "LEFT JOIN ( " +
                         "    SELECT patient_id " +
-                        "    FROM kenyaemr_etl.etl_patient_program " +
+                        "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program " +
                         "    WHERE program = 'HIV' AND date_completed IS NULL " +
                         ") hiv ON fp.patient_id = hiv.patient_id " +
                         "LEFT JOIN ( " +
                         "    SELECT ht.patient_id " +
-                        "    FROM kenyaemr_etl.etl_hts_test ht " +
+                        "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht " +
                         "    WHERE ht.test_type = 1 " +
                         ") hts ON fp.patient_id = hts.patient_id " +
                         "WHERE DATE(fp.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";

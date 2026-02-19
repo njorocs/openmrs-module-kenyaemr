@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDDiagnosisDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,7 +40,7 @@ public class OPDDiagnosisDataEvaluator implements EncounterDataEvaluator {
 		String qry = "select\n" +
 			"  v.encounter_id,\n" +
 			"  con.name as mnci_diagnosis\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"            inner join (select\n" +
 			"                            cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
 			"                        from openmrs.encounter_diagnosis ed\n" +
@@ -50,7 +51,7 @@ public class OPDDiagnosisDataEvaluator implements EncounterDataEvaluator {
 			"select\n" +
 			"   sc.encounter_id,\n" +
 			"    con.name as mnci_diagnosis\n" +
-			"from kenyaemr_etl.etl_special_clinics sc\n" +
+			"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc\n" +
 			"         inner join (select\n" +
 			"                         cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
 			"                     from openmrs.encounter_diagnosis ed\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityTEOGivenAtBirthDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class MaternityTEOGivenAtBirthDataEvaluator implements PersonDataEvaluato
 
         String qry = "select v.patient_id,\n" +
                 "       (case v.teo_given when 84893 then \"Yes\" when 1066 then \"No\" when 1175 then \"N/A\" end) as teo_given\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

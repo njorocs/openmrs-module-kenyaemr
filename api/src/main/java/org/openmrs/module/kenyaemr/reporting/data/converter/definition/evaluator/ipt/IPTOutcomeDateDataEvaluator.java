@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.IPTOutcomeDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,8 +36,8 @@ public class IPTOutcomeDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,o.visit_date as ipt_outcome_date from kenyaemr_etl.etl_ipt_initiation init\n" +
-                "                                                               left outer join kenyaemr_etl.etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
+        String qry = "select init.patient_id,o.visit_date as ipt_outcome_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+                "                                                               left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
                 "where init.voided = 0;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

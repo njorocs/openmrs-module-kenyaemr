@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDTbScreeningDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDVisualAcuityDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,8 +40,8 @@ public class OPDVisualAcuityDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
 			"    v.encounter_id,\n" +
 			"    (case sc.eye_assessed when 160350 then 'RE' when 160349 then 'LE' else '' end) as resulting_tb_status\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         LEFT JOIN kenyaemr_etl.etl_special_clinics sc ON v.patient_id = sc.patient_id\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc ON v.patient_id = sc.patient_id\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

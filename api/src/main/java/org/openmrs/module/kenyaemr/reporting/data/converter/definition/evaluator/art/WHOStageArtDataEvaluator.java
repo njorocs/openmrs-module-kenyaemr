@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.HTSDiscordanceArtDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.WHOStageArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -44,7 +44,7 @@ public class WHOStageArtDataEvaluator implements PersonDataEvaluator {
                 " when 1206 then \"3\"\n" +
                 " when 1222 then \"3\"\n" +
                 " when 1207 then \"4\"\n" +
-                " when 1223 then \"4\"  else \"\" end), \"\" )),11) as who_stage from kenyaemr_etl.etl_patient_hiv_followup where who_stage is not null\n" +
+                " when 1223 then \"4\"  else \"\" end), \"\" )),11) as who_stage from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup where who_stage is not null\n" +
                 "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

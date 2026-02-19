@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCBloodRhesusGroupDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,8 +37,8 @@ public class ANCBloodRhesusGroupDataEvaluator implements EncounterDataEvaluator 
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select v.encounter_id, if(x.patient_id is not null, 'Y', 'N') as tested_for_rhesus_blood_group\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract x on x.patient_id = v.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x on x.patient_id = v.patient_id\n" +
                 "    and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
                 "    and x.lab_test = 300\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";

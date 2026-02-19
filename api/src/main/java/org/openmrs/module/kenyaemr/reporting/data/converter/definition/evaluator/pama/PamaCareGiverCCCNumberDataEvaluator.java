@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pama;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverCCCNumberDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverNameDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -37,7 +37,7 @@ public class PamaCareGiverCCCNumberDataEvaluator implements PersonDataEvaluator 
 
         String qry = "select distinct r.person_a,\n" +
                 "     d.unique_patient_no as careGiverCCCNumber\n" +
-                "    from kenyaemr_etl.etl_patient_demographics d\n" +
+                "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "      inner join relationship r on d.patient_id = r.person_b\n" +
                 "      inner join relationship_type t on r.relationship = t.relationship_type_id\n" +
                 "                                                and t.uuid = '3667e52f-8653-40e1-b227-a7278d474020';\n";

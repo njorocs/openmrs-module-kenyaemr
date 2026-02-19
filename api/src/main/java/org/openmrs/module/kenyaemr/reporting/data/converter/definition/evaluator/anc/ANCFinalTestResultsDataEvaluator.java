@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCFinalTestResultsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class ANCFinalTestResultsDataEvaluator implements EncounterDataEvaluator 
                 "            PARTITION BY l.patient_id, DATE(l.visit_date)\n" +
                 "            ORDER BY l.date_test_result_received DESC, l.date_test_requested DESC\n" +
                 "            ) AS rn\n" +
-                "    FROM kenyaemr_etl.etl_laboratory_extract l\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l\n" +
                 "    WHERE l.lab_test = '1356'\n" +
                 "      AND DATE(l.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "),\n" +
@@ -54,7 +55,7 @@ public class ANCFinalTestResultsDataEvaluator implements EncounterDataEvaluator 
                 "             v.patient_id,\n" +
                 "             DATE(v.visit_date) AS visit_date,\n" +
                 "             v.final_test_result AS anc_hiv_final_results\n" +
-                "         FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "         WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "     )\n" +
                 "SELECT\n" +

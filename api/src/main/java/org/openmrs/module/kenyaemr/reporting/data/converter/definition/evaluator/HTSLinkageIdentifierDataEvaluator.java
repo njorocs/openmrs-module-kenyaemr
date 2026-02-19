@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSLinkageIdentifierDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,9 +36,9 @@ public class HTSLinkageIdentifierDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select t.patient_id, coalesce(p.unique_patient_no, l.ccc_number) as upn\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=t.patient_id and p.voided=0\n" +
-                "left join kenyaemr_etl.etl_hts_referral_and_linkage l on l.patient_id=t.patient_id and l.voided=0 and l.ccc_number is not null\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=t.patient_id and p.voided=0\n" +
+                "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l on l.patient_id=t.patient_id and l.voided=0 and l.ccc_number is not null\n" +
                 "group by t.patient_id having upn is not null";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -13,10 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openmrs.Concept;
-
-import static org.openmrs.module.kenyaemr.reporting.MohReportUtils.DiagnosisConcepts.getConcept;
-
 
 public class DiagnosisLists {
 

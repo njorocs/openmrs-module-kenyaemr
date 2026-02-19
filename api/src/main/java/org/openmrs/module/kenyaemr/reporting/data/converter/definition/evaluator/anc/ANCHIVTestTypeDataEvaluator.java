@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCHIVTestTypeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,7 +43,7 @@ public class ANCHIVTestTypeDataEvaluator implements EncounterDataEvaluator {
                 "            when 169173 then 'Known positive'\n" +
                 "            when 164142 then 'Revisit'\n" +
                 "            when 1118 then 'Not done' end) as hiv_test_during_visit\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "group by v.encounter_id;";
 

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityVaginalExaminationDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +39,7 @@ public class MaternityVaginalExaminationDataEvaluator implements PersonDataEvalu
         String qry = "select\n" +
                 "  v.patient_id,\n" +
                 "  (case v.vaginal_examination when 132681 then \"Normal\" when 5577 then \"Episiotomy\" when 159264 then \"Vaginal Tear\" when 118935 then \"FGM\" when 139505 then \"Vaginal wart\" else \"\" end) as vaginal_examination\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

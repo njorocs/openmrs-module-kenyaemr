@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPReferralToDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,7 +37,7 @@ public class FPReferralToEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
 
         String qry = "SELECT v.encounter_id, cn.name AS referred_to " +
-                "FROM kenyaemr_etl.etl_family_planning v " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
                 "JOIN openmrs.concept_name cn " +
                 "  ON v.referred_to = cn.concept_id " +
                 " AND cn.locale = 'en' " +

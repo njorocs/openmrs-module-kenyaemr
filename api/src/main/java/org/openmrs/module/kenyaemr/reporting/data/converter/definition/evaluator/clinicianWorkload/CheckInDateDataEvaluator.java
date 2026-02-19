@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.clinicianWorkload;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.clinicianWorkload.CheckinDateDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,7 +38,7 @@ public class CheckInDateDataEvaluator implements VisitDataEvaluator {
 
         String qry = "WITH filtered_patients AS (\n" +
                 "    SELECT patient_id\n" +
-                "    FROM kenyaemr_etl.etl_patient_demographics\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
                 "    WHERE voided = 0\n" +
                 "),\n" +
                 "    checked_in AS (\n" +

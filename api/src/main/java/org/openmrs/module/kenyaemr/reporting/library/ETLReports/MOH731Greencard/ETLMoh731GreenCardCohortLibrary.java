@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard
 
 import org.openmrs.Encounter;
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -44,8 +45,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition hivEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_hiv_enrollment e\n" +
-                "         join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id\n" +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and (e.patient_type = 164144 or (e.patient_type is null and transfer_in_date is null));";
         cd.setName("newHhivEnrollment");
@@ -59,7 +60,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition kpsWithHIVFollowupVisit(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select f.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "where date(f.visit_date) <= date(:endDate)\n" +
                 "  and f.population_type is not null\n" +
                 "group by f.patient_id\n" +
@@ -99,12 +100,12 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca,\n" +
                 "  max(d.visit_date) as date_discontinued,\n" +
                 "  d.patient_id as disc_patient \n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup \n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id \n" +
-                "join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup \n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id \n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id \n" +
                 // ensure those discontinued are catered for
                 "left outer JOIN\n" +
-                "  (select patient_id, visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "  (select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "  where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "  group by patient_id\n" + //check if this line is necessary
                 "  ) d on d.patient_id = fup.patient_id \n" +
@@ -154,13 +155,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "  mid(min(concat(e.date_started,e.regimen_name)),11) as regimen,\n" +
                 "  mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line,\n" +
                 "  max(if(discontinued,1,0))as alternative_regimen\n" +
-                "  from kenyaemr_etl.etl_drug_event e\n" +
-                "   join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "  where e.program = 'HIV'\n" +
                 "  group by e.patient_id) e\n" +
-                "  left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
                 "  where date(e.date_started) between date(:startDate) and date(:endDate)\n" +
                 "  group by e.patient_id\n" +
                 "  having TI_on_art=0 and latest_patient_type in (164144,160563,159833)\n" +
@@ -201,16 +202,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "             d.effective_disc_date                                                            as effective_disc_date,\n" +
                 "             max(d.visit_date)                                                                as date_discontinued,\n" +
                 "             de.patient_id                                                                    as started_on_drugs\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-                "                           left join kenyaemr_etl.etl_drug_event de\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+                "                           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                          on e.patient_id = de.patient_id and de.program = 'HIV' and date(de.date_started) <= date(:endDate)\n" +
                 "               left outer JOIN\n" +
                 "           (select patient_id,\n" +
                 "                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
                 "                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-                "            from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "            where date(visit_date) <= date(:endDate)\n" +
                 "              and program_name = 'HIV'\n" +
                 "            group by patient_id) d on d.patient_id = fup.patient_id\n" +
@@ -242,7 +243,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition enrolledKPs() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery="select c.client_id from kenyaemr_etl.etl_contact c\n" +
+        String sqlQuery="select c.client_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_contact c\n" +
                 "                         where date(c.visit_date) <= date(:endDate)\n" +
                 "                         group by c.client_id having mid(max(concat(date(c.visit_date), c.key_population_type)), 11)\n" +
                 "                in ('FSW','MSM','MSW','PWUD','PWID','Transgender','People in prison and other closed settings');";
@@ -273,15 +274,15 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "min(e.visit_date) as enroll_date,\n" +
                 "max(fup.visit_date) as latest_vis_date,\n" +
                 "mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-                "join kenyaemr_etl.etl_hiv_enrollment e  on fup.patient_id=e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e  on fup.patient_id=e.patient_id\n" +
                 "where (fup.visit_date between date_sub(date(:startDate), interval 3 month) and date(:endDate))\n" +
                 "group by patient_id\n" +
                 "having (latest_tca>date(:endDate) or\n" +
                 "(latest_tca between date(:startDate) and date(:endDate) and latest_vis_date between date(:startDate) and date(:endDate)) )\n" +
                 ") e\n" +
-                "where e.patient_id not in (select patient_id from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "where e.patient_id not in (select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "group by patient_id\n" +
                 "having if(e.latest_tca>max(visit_date),1,0)=0)\n" +
@@ -290,8 +291,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "mid(min(concat(e.date_started,e.regimen_name)),11) as regimen,\n" +
                 "mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line,\n" +
                 "max(if(discontinued,1,0))as alternative_regimen\n" +
-                "from kenyaemr_etl.etl_drug_event e\n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id \n" +
                 "where e.program = 'HIV'\n" +
                 "group by e.patient_id) e\n" +
                 "where date(e.date_started)<date(:startDate));";
@@ -322,13 +323,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "mid(min(concat(e.date_started,e.regimen_name)),11) as regimen, \n" +
                 "mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line, \n" +
                 "max(if(discontinued,1,0))as alternative_regimen \n" +
-                "from kenyaemr_etl.etl_drug_event e \n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e \n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id \n" +
                 "where e.program = 'HIV' \n" +
                 "group by e.patient_id) e \n" +
-                "left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
-                "left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
-                "left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
+                "left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
                 "group by e.patient_id \n" +
                 "having  (TI_on_art =0 and date_started<=date(:endDate) ) )net;";
 
@@ -348,8 +349,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition startingARTPregnant() {
 
         String sqlQuery = " select  fup.patient_id " +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup " +
-                "join (select patient_id from kenyaemr_etl.etl_drug_event e " +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup " +
+                "join (select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e " +
                 "where e.program = 'HIV' and e.date_started between date(:startDate) and date(:endDate)) started_art on  " +
                 "started_art.patient_id = fup.patient_id " +
                 "where fup.pregnancy_status =1065 " +
@@ -368,11 +369,11 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition startingARTWhileTbPatient() {
 
         String sqlQuery = "select  fup.patient_id \n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup \n" +
-                "join (select patient_id from kenyaemr_etl.etl_drug_event e \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup \n" +
+                "join (select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e \n" +
                 "where e.program = 'HIV' and date_started between date(:startDate) and date(:endDate)) started_art on  \n" +
                 "started_art.patient_id = fup.patient_id \n" +
-                "join kenyaemr_etl.etl_tb_enrollment tb on tb.patient_id=fup.patient_id\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment tb on tb.patient_id=fup.patient_id\n" +
                 "where fup.visit_date between date(:startDate) and date(:endDate);";
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -391,7 +392,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition screenedForTbWithinPeriod() {
         String sqlQuery = "select tb.patient_id\n" +
-                "from kenyaemr_etl.etl_tb_screening tb\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tb\n" +
                 "where tb.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and tb.person_present = 978\n" +
                 "  and tb.resulting_tb_status in (1660, 1662, 142177);";
@@ -424,7 +425,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     public CohortDefinition presumedTBResult() {
-        String sqlQuery = "select tb.patient_id from kenyaemr_etl.etl_tb_screening tb where tb.visit_date between date(:startDate) and date(:endDate) and tb.resulting_tb_status =142177 group by tb.patient_id;";
+        String sqlQuery = "select tb.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tb where tb.visit_date between date(:startDate) and date(:endDate) and tb.resulting_tb_status =142177 group by tb.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("presumedTB");
         cd.setQuery(sqlQuery);
@@ -451,8 +452,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition condomsProvided() {
 
         String sqlQuery = " select  e.patient_id " +
-                "from kenyaemr_etl.etl_patient_hiv_followup e " +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup e " +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate) and  condom_provided=1065 ;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("pwpCondom_provided");
@@ -466,8 +467,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition modernContraceptivesProvided() {
 
         String sqlQuery = " select  e.patient_id " +
-                "from kenyaemr_etl.etl_patient_hiv_followup e " +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup e " +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate) and (family_planning_method is not null and family_planning_method<>190) ;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("pwpModernContraceptivesProvided");
@@ -488,13 +489,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "  mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca, \n" +
                 "  if(enr.transfer_in_date is not null, 1, 0) as TIn, max(fup.visit_date) as latest_vis_date\n" +
                 "   from (select e.patient_id,p.dob,p.Gender,min(e.date_started) as date_started\n" +
-                "   from kenyaemr_etl.etl_drug_event e \n" +
-                "   join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id \n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e \n" +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id \n" +
                 "   where e.program='HIV' \n" +
                 "   group by e.patient_id) e \n" +
-                "   left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
-                "   left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
-                "   left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
                 "   where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) \n" +
                 "   group by e.patient_id \n" +
                 "   having   (dis_date>date(:endDate) or dis_date is null or TOut=0 ) \n" +
@@ -521,13 +522,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "    mid(min(concat(e.date_started,e.regimen_name)),11) as regimen, " +
                 "    mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line, " +
                 "    max(if(discontinued,1,0))as alternative_regimen " +
-                "    from kenyaemr_etl.etl_drug_event e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where e.program='HIV' " +
                 "    group by e.patient_id) e " +
-                "    left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
-                "    left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
-                "    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
                 "    where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) " +
                 "    group by e.patient_id " +
                 "    having   (dis_date>date(:endDate) or dis_date is null) and (regimen_line='1st Line' and alternative_regimen=0) )net; ";
@@ -552,13 +553,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "    mid(min(concat(e.date_started,e.regimen_name)),11) as regimen, " +
                 "    mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line, " +
                 "    max(if(discontinued,1,0))as alternative_regimen " +
-                "    from kenyaemr_etl.etl_drug_event e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where e.program='HIV' " +
                 "    group by e.patient_id) e " +
-                "    left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
-                "    left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
-                "    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
                 "    where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) " +
                 "    group by e.patient_id " +
                 "    having   (dis_date>date(:endDate) or dis_date is null) and (regimen_line='1st Line' and alternative_regimen=1) )net; ";
@@ -583,13 +584,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "    mid(min(concat(e.date_started,e.regimen_name)),11) as regimen, " +
                 "    mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line, " +
                 "    max(if(discontinued,1,0))as alternative_regimen " +
-                "    from kenyaemr_etl.etl_drug_event e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where e.program='HIV' " +
                 "    group by e.patient_id) e " +
-                "    left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
-                "    left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
-                "    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
+                "    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id " +
                 "    where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) " +
                 "    group by e.patient_id " +
                 "    having   (dis_date>date(:endDate) or dis_date is null) and (regimen_line='2nd Line') )net; ";
@@ -611,13 +612,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 " mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca, \n" +
                 " if(enr.transfer_in_date is not null, 1, 0) as TIn, max(fup.visit_date) as latest_vis_date\n" +
                 "   from (select e.patient_id,p.dob,p.Gender,min(e.date_started) as date_started\n" +
-                "   from kenyaemr_etl.etl_drug_event e \n" +
-                "   join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id \n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e \n" +
+                "   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id \n" +
                 "   where e.program='HIV' \n" +
                 "   group by e.patient_id) e \n" +
-                "   left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
-                "   left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
-                "   left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
+                "   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
                 "   where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) \n" +
                 "   group by e.patient_id \n" +
                 "   having   (dis_date>date(:endDate) or dis_date is null or TOut=0 ) and (\n" +
@@ -649,13 +650,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca,\n" +
                 "if(enr.transfer_in_date is not null, 1, 0) as TIn, max(fup.visit_date) as latest_vis_date\n" +
                 " from (select e.patient_id,p.dob,p.Gender,min(e.date_started) as date_started\n" +
-                " from kenyaemr_etl.etl_drug_event e\n" +
-                " join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 " where e.program='HIV'\n" +
                 " group by e.patient_id) e\n" +
-                " left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee'\n" +
-                " left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-                " left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee'\n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
                 " where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 " group by e.patient_id\n" +
                 "having   (dis_date>date(:endDate) or dis_date is null or TOut=0 ) and (\n" +
@@ -674,7 +675,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "       if(mid(max(concat(b.visit_date,b.lab_test)),11) = 856, mid(max(concat(b.visit_date,b.test_result)),11), if(mid(max(concat(b.visit_date,b.lab_test)),11)=1305 and mid(max(concat(visit_date,test_result)),11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "       mid(max(concat(b.visit_date,b.urgency)),11) as urgency\n" +
                 "from (select x.patient_id as patient_id,x.visit_date as visit_date,x.lab_test as lab_test, x.test_result as test_result,urgency as urgency\n" +
-                "      from kenyaemr_etl.etl_laboratory_extract x where x.lab_test in (1305,856)\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x where x.lab_test in (1305,856)\n" +
                 "      group by x.patient_id,x.visit_date order by visit_date desc)b\n" +
                 "group by patient_id\n" +
                 "having max(visit_date) between\n" +
@@ -702,13 +703,13 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                  mid(max(concat(fup.visit_date,fup.next_appointment_date)),11) as latest_tca, \n" +
                 "                  if(enr.transfer_in_date is not null, 1, 0) as TIn, max(fup.visit_date) as latest_vis_date\n" +
                 "                   from (select e.patient_id,p.dob,p.Gender,min(e.date_started) as date_started\n" +
-                "                   from kenyaemr_etl.etl_drug_event e \n" +
-                "                   join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id \n" +
+                "                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e \n" +
+                "                   join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id \n" +
                 "                   where e.program='HIV' \n" +
                 "                   group by e.patient_id) e \n" +
-                "                   left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
-                "                   left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
-                "                   left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
+                "                   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id and d.program_uuid='2bdada65-4c72-4a48-8730-859890e25cee' \n" +
+                "                   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id \n" +
+                "                   left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id \n" +
                 "                   where  date(e.date_started) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year) \n" +
                 "                   group by e.patient_id\n" +
                 "                  having   (dis_date>date(:endDate) or dis_date is null or TOut=0 ) and (\n" +
@@ -725,7 +726,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                    visit_date,\n" +
                 "                    if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, 'LDL','')) as vl_result,\n" +
                 "                    urgency\n" +
-                "                  from kenyaemr_etl.etl_laboratory_extract\n" +
+                "                  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "                  where lab_test in (1305, 856)  and visit_date between  date_sub(date(:startDate) , interval 12 MONTH) and date(:endDate)\n" +
                 "                  ) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "                group by e.patient_id\n" +
@@ -742,9 +743,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition hivCareVisitsFemale18() {
 
         String sqlQuery = "select  e.patient_id " +
-                "from kenyaemr_etl.etl_patient_hiv_followup e " +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
-                "join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup e " +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id " +
                 "where timestampdiff(year,p.dob,date(:endDate))>=18 and p.gender='F' and date(e.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -762,10 +763,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = " select  patient_id \n" +
                 "from (\n" +
                 "select f1.patient_id,max(f1.visit_date) as visit_date, max(f2.next_appointment_date) as next_appointment_date \n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f1\n" +
-                "join kenyaemr_etl.etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f1\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
                 "and f1.patient_id=f2.patient_id\n" +
-                "join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
                 "where date(f1.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "group by f1.patient_id, f1.visit_date)vis where visit_date=next_appointment_date";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -783,10 +784,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = " select  patient_id \n" +
                 "from (\n" +
                 "select f1.patient_id,max(f1.visit_date) as visit_date, max(f2.next_appointment_date) as next_appointment_date \n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f1\n" +
-                "join kenyaemr_etl.etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f1\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
                 "and f1.patient_id=f2.patient_id\n" +
-                "join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
                 "where date(f1.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "group by f1.patient_id, f1.visit_date)vis where visit_date<>next_appointment_date";
 
@@ -803,8 +804,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition hivCareVisitsTotal() {
 
         String sqlQuery = "select f.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                "         join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id = f.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id = f.patient_id\n" +
                 "where date(f.visit_date) between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("hivCareVisitsTotal");
@@ -825,8 +826,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                0) as dapsone_dispensed,\n" +
                 "             if(mid(max(concat(date(fup.visit_date), fup.prophylaxis_given)), 11) in (105281, 74250), 1,\n" +
                 "                0) as prophylaxis_dispensed\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
                 "      where fup.visit_date <= date(:endDate)\n" +
                 "      group by fup.patient_id\n" +
                 "      having (\n" +
@@ -852,8 +853,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     protected CohortDefinition hivExposedInfantsWithin2Months() {
         String sqlQuery = " select  e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_enrollment e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where  child_exposed=822 and timestampdiff(month,p.dob,:endDate)<=2 and date(e.visit_date) between :startDate and :endDate";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("hivExposedInfantsWithin2Months");
@@ -866,8 +867,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     protected CohortDefinition hivExposedInfantsWithin2MonthsAndEligibleForCTX() {
         String sqlQuery = " select  e.patient_id " +
-                "    from kenyaemr_etl.etl_hei_enrollment e " +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 "    where  child_exposed=822 and timestampdiff(month,p.dob,:endDate)<=2 and date(e.visit_date) between :startDate and :endDate";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("hivExposedInfantsWithin2Months");
@@ -902,7 +903,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     // HIV testing cohort. includes all those who tested during the reporting period
     public CohortDefinition htsAllNumberTested() {
-        String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_hts_test t inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id where test_type = 1 and\n" +
+        String sqlQuery = "select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id where test_type = 1 and\n" +
                 "    t.final_test_result in ('Positive','Negative') and t.voided = 0 and t.visit_date between date (:startDate) and date (:endDate)\n" +
                 "    group by t.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -917,8 +918,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     public CohortDefinition htsTestsMales() {
         String sqlQuery = "SELECT t.encounter_id AS tests_done\n" +
-                "FROM kenyaemr_etl.etl_hts_test t\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = t.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = t.patient_id\n" +
                 "WHERE t.final_test_result IN ('Positive', 'Negative')\n" +
                 "  AND Gender = 'M'\n" +
                 "  AND t.voided = 0\n" +
@@ -935,23 +936,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition hivTestsFemales() {
         String sqlQuery = "select encounter_id\n" +
                 "from ((select av.patient_id, av.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "       where av.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and av.final_test_result in ('Positive', 'Negative'))\n" +
                 "      union\n" +
                 "      (select d.patient_id, d.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "       where d.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and d.final_test_result in ('Positive', 'Negative'))\n" +
                 "      union\n" +
                 "      (select p.patient_id, p.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "       where p.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and p.final_test_result in ('Positive', 'Negative'))\n" +
                 "      union\n" +
                 "      (select t.patient_id, t.encounter_id\n" +
-                "       from kenyaemr_etl.etl_hts_test t\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
                 "       where t.final_test_result in ('Positive', 'Negative')\n" +
                 "         and t.voided = 0\n" +
                 "         and t.visit_date between date(:startDate) and date(:endDate))) a;";
@@ -967,8 +968,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     public CohortDefinition htsNumberTestedAtFacilityEntryPointsMales() {
         String sqlQuery = "select t.encounter_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.final_test_result in ('Positive', 'Negative') and Gender = 'M'\n" +
                 "  and t.voided = 0\n" +
                 "  and t.hts_entry_point in (5485,160542,162181,160552,160541,162050,159940,162223,160546,160522)\n" +
@@ -984,8 +985,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     }
     public CohortDefinition htsNumberTestedAtCommunityEntryPointsMales() {
         String sqlQuery = "select t.encounter_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.final_test_result in ('Positive', 'Negative') and Gender = 'M'\n" +
                 "  and t.voided = 0\n" +
                 "  and t.hts_entry_point in (159938,159939,163096,5622)\n" +
@@ -1005,8 +1006,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsNumberTestedKVP() {
         String sqlQuery = "select t.encounter_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.population_type = 'Key Population'\n" +
                 "  and t.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1020,8 +1021,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     public CohortDefinition testedHIVPositive() {
         String sqlQuery = "select t.encounter_id\n" +
-                "    from kenyaemr_etl.etl_hts_test t\n" +
-                "    inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "    where t.final_test_result = 'Positive'\n" +
                 "    and t.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1039,8 +1040,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsPositiveMales(Integer minAge, Integer maxAge) {
         String sqlQuery = "select t.encounter_id\n" +
-                "              from kenyaemr_etl.etl_hts_test t\n" +
-                "                       inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "                       inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "              where t.final_test_result = 'Positive' and Gender = 'M'\n" +
                 "                and t.voided = 0 and timestampdiff(YEAR, d.DOB, date(:endDate)) between " +minAge+ " and " +maxAge+ "\n" +
                 "                and t.visit_date between date(:startDate) and date(:endDate);";
@@ -1054,8 +1055,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     }
     public CohortDefinition htsPositiveMales25AndAbove(Integer minAge) {
         String sqlQuery = "select t.encounter_id\n" +
-                "              from kenyaemr_etl.etl_hts_test t\n" +
-                "                       inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "                       inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "              where t.final_test_result = 'Positive' and Gender = 'M'\n" +
                 "                and t.voided = 0 and timestampdiff(YEAR, d.DOB, date(:endDate)) >= "+minAge+"\n" +
                 "                and t.visit_date between date(:startDate) and date(:endDate);";
@@ -1075,23 +1076,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition htsPositiveFemales(Integer minAge, Integer maxAge) {
         String sqlQuery = "select encounter_id\n" +
                 "              from ((select av.patient_id, av.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mch_antenatal_visit av inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
                 "                     where av.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
                 "                       and av.final_test_result = 'Positive')\n" +
                 "                    union\n" +
                 "                    (select d.patient_id, d.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mchs_delivery d inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = d.patient_id\n" +
                 "                     where d.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
                 "                       and d.final_test_result = 'Positive')\n" +
                 "                    union\n" +
                 "                    (select p.patient_id, p.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_mch_postnatal_visit p inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on p.patient_id = d.patient_id\n" +
                 "                     where p.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, d.DOB, date(:endDate)) between "+minAge+" and "+maxAge+"\n" +
                 "                       and p.final_test_result = 'Positive')\n" +
                 "                    union\n" +
                 "                    (select t.patient_id, t.encounter_id\n" +
-                "                     from kenyaemr_etl.etl_hts_test t\n" +
-                "                              inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "                              inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
                 "                     where timestampdiff(YEAR, d.DOB, date(:endDate)) between "+minAge+" and "+minAge+"\n" +
                 "                     and t.final_test_result = 'Positive'\n" +
                 "                       and t.voided = 0\n" +
@@ -1113,23 +1114,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition htsPositiveFemales25AndAbove(Integer minAge) {
         String sqlQuery = "select encounter_id\n" +
                 "from ((select av.patient_id, av.encounter_id\n" +
-                "     from kenyaemr_etl.etl_mch_antenatal_visit av inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
                 "     where av.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) >= "+minAge+"\n" +
                 "       and av.final_test_result = 'Positive')\n" +
                 "    union\n" +
                 "    (select d.patient_id, d.encounter_id\n" +
-                "     from kenyaemr_etl.etl_mchs_delivery d inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = d.patient_id\n" +
                 "     where d.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, a.DOB, date(:endDate)) >= "+minAge+"\n" +
                 "       and d.final_test_result = 'Positive')\n" +
                 "    union\n" +
                 "    (select p.patient_id, p.encounter_id\n" +
-                "     from kenyaemr_etl.etl_mch_postnatal_visit p inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on p.patient_id = d.patient_id\n" +
                 "     where p.visit_date between date(:startDate) and date(:endDate) and timestampdiff(YEAR, d.DOB, date(:endDate)) >= "+minAge+"\n" +
                 "       and p.final_test_result = 'Positive')\n" +
                 "    union\n" +
                 "    (select t.patient_id, t.encounter_id\n" +
-                "     from kenyaemr_etl.etl_hts_test t\n" +
-                "              inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "              inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id and d.Gender = 'F'\n" +
                 "     where timestampdiff(YEAR, d.DOB, date(:endDate)) >= "+minAge+"\n" +
                 "     and t.final_test_result = 'Positive'\n" +
                 "       and t.voided = 0\n" +
@@ -1149,23 +1150,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition htsPositives() {
         String sqlQuery = "select patient_id\n" +
                 "from ((select av.patient_id, av.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "       where av.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and av.final_test_result = 'Positive')\n" +
                 "      union\n" +
                 "      (select d.patient_id, d.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "       where d.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and d.final_test_result = 'Positive')\n" +
                 "      union\n" +
                 "      (select p.patient_id, p.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "       where p.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and p.final_test_result = 'Positive')\n" +
                 "      union\n" +
                 "      (select t.patient_id, t.encounter_id\n" +
-                "       from kenyaemr_etl.etl_hts_test t\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "       where t.final_test_result = 'Positive'\n" +
                 "         and t.voided = 0\n" +
                 "         and t.visit_date between date(:startDate) and date(:endDate))) a;";
@@ -1179,8 +1180,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     }
     public CohortDefinition htsPositiveKVP() {
         String sqlQuery = "select t.encounter_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.final_test_result = 'Positive'\n" +
                 "  and t.population_type = 'Key Population'\n" +
                 "  and t.voided = 0\n" +
@@ -1195,8 +1196,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     }
     public CohortDefinition htsDiscordant() {
         String sqlQuery = "select t.patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.client_tested_as = 'Couple' and t.couple_discordant = 'Yes'\n" +
                 "  and t.voided = 0\n" +
                 "  and t.visit_date between date(:startDate) and date(:endDate);";
@@ -1215,7 +1216,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPGP() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 164928\n" +
                 "  and date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -1233,7 +1234,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPMSMAndMSW() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 164929\n" +
                 "  and e.kp_type in (160578, 165084)\n" +
@@ -1253,7 +1254,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPFSW() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 164929\n" +
                 "  and e.kp_type = 160579\n" +
@@ -1272,7 +1273,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPPWIDAndPWUD() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 164929\n" +
                 "  and e.kp_type in (105, 165085)\n" +
@@ -1292,7 +1293,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPDiscordantCouple() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 6096\n" +
                 "             and date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -1311,7 +1312,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPVulnerablePop() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where e.patient_type = 'New Patient'\n" +
                 "  and e.population_type = 164929 and e.kp_type in (162277, 162198)\n" +
                 "             and date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -1329,8 +1330,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPAdolescentsYoungPeople() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "where timestampdiff(YEAR\n" +
                 "    , date(d.DOB)\n" +
                 "    , date(:endDate)) between 15\n" +
@@ -1350,8 +1351,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition initiatedOnPrEPPregnantOrBreastfeeding() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_prep_followup f on e.patient_id = f.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f on e.patient_id = f.patient_id\n" +
                 "where (f.breastfeeding = 'Yes' or f.pregnant = 'Yes')\n" +
                 "  and e.patient_type = 'New Patient'\n" +
                 "  and date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -1377,24 +1378,24 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 + "         r.latest_refill_app_date,\n"
                 + "         d.latest_disc_date,\n"
                 + "         d.disc_patient\n"
-                + "  from kenyaemr_etl.etl_prep_enrolment e\n"
+                + "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n"
                 + "           left join\n"
                 + "       (select f.patient_id,\n"
                 + "               max(f.visit_date)                                      as latest_fup_date,\n"
                 + "               mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n"
-                + "        from kenyaemr_etl.etl_prep_followup f\n"
+                + "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n"
                 + "       where f.visit_date <= date(:endDate)\n"
                 + "        group by f.patient_id) f on e.patient_id = f.patient_id\n"
                 + "           left join (select r.patient_id,\n"
                 + "                             max(r.visit_date)                                      as latest_refill_visit_date,\n"
                 + "                             mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n"
-                + "                      from kenyaemr_etl.etl_prep_monthly_refill r\n"
+                + "                      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n"
                 + "           where r.visit_date <= date(:endDate)\n"
                 + "                      group by r.patient_id) r on e.patient_id = r.patient_id\n"
                 + "           left join (select patient_id as disc_patient,\n"
                 + "                             max(d.visit_date)                                        as latest_disc_date,\n"
                 + "                             mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n"
-                + "                      from kenyaemr_etl.etl_prep_discontinuation d\n"
+                + "                      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n"
                 + "           where d.visit_date <= date(:endDate)\n" + "           group by patient_id\n"
                 + "                      having latest_disc_date <= date(:endDate)) d on e.patient_id = d.disc_patient\n"
                 + "  group by e.patient_id having\n"
@@ -1419,7 +1420,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition generalPopulationPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164928;";
@@ -1439,7 +1440,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition msmPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1459,7 +1460,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition mswPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1480,7 +1481,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition fswPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1502,7 +1503,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition pwidPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1523,7 +1524,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition pwudPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1544,7 +1545,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition discordantCouplePrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 6096;";
@@ -1564,7 +1565,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition adolescentAndYoungPeople() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select d.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "where timestampdiff(YEAR\n" +
                 "          , date(d.DOB)\n" +
                 "          , date(:endDate)) between 15\n" +
@@ -1583,8 +1584,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition pregnantOrBreastFeedingPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_prep_followup f on e.patient_id = f.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f on e.patient_id = f.patient_id\n" +
                 "where (f.breastfeeding = 'Yes' or f.pregnant = 'Yes')\n" +
                 "  and date(f.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("pregnantOrBreastFeedingPrEP");
@@ -1602,7 +1603,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition vulnerablePopulationPrEP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "group by e.patient_id\n" +
                 "having mid(max(concat(date(e.visit_date), e.population_type)), 11) = 164929\n" +
@@ -1744,7 +1745,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition diagnosedWithSTI() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_prep_followup f\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
                 "where f.genital_ulcer_disease = 'GUD'\n" +
                 "   or f.vaginal_discharge = 'VG'\n" +
                 "   or f.cervical_discharge = 'CD'\n" +
@@ -1887,17 +1888,17 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition testedAtFacilityMCH() {
         String sqlQuery = "select encounter_id\n" +
                 "from ((select av.patient_id, av.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "       where av.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and av.final_test_result in ('Positive', 'Negative'))\n" +
                 "      union\n" +
                 "      (select d.patient_id, d.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "       where d.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and d.final_test_result in ('Positive', 'Negative'))\n" +
                 "      union\n" +
                 "      (select p.patient_id, p.encounter_id\n" +
-                "       from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "       where p.visit_date between date(:startDate) and date(:endDate)\n" +
                 "         and p.final_test_result in ('Positive', 'Negative'))) a;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1917,7 +1918,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsTestsAtFacility() {
         String sqlQuery = "select encounter_id\n" +
-                "from kenyaemr_etl.etl_hts_test\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "WHERE setting = 'Facility'\n" +
                 "  AND final_test_result in ('Positive', 'Negative')\n" +
                 "  AND visit_date between date(:startDate) and date(:endDate);";
@@ -1948,7 +1949,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsNumberTestedAtCommunity() {
         String sqlQuery = "select encounter_id\n" +
-                "FROM kenyaemr_etl.etl_hts_test\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "WHERE setting = 'Community'\n" +
                 "  AND final_test_result in ('Positive', 'Negative')\n" +
                 "  AND visit_date between date(:startDate) and date(:endDate);";
@@ -1981,7 +1982,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     protected CohortDefinition htsAllNumberTestedAsCouple() {
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_hts_test where test_type =1 AND final_test_result in ('Positive','Negative')\n" +
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test where test_type =1 AND final_test_result in ('Positive','Negative')\n" +
                 " and client_tested_as ='Couple' and date(visit_date) between date(:startDate) and date(:endDate)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsNumberTestedAsCouple");
@@ -2012,7 +2013,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     protected CohortDefinition htsAllNumberTestedKeyPopulation() {
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "where final_test_result in ('Positive', 'Negative')\n" +
                 "  and population_type = 'Key Population'\n" +
                 "  and visit_date between date(:startDate) and date(:endDate);";
@@ -2045,8 +2046,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsAllNumberTestedPositive() {
         String sqlQuery = "select t.patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.voided = 0\n" +
                 "  and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and t.test_type = 1\n" +
@@ -2081,8 +2082,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsAllNumberTestedNegative() {
         String sqlQuery = "select t.patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "where t.voided = 0\n" +
                 "  and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and t.test_type = 1\n" +
@@ -2116,7 +2117,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     public CohortDefinition htsAllNumberTestedDiscordant() {
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_hts_test where test_type =1\n" +
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test where test_type =1\n" +
                 " and couple_discordant ='Yes' and final_test_result in ('Positive','Negative') and date(visit_date) between date(:startDate) and date(:endDate)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsNumberTestedDiscordant");
@@ -2146,7 +2147,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     public CohortDefinition htsAllNumberTestedKeypopPositive() {
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_hts_test where test_type =1\n" +
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test where test_type =1\n" +
                 " and population_type ='Key Population' and final_test_result='Positive' and date(visit_date) between date(:startDate) and date(:endDate)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("htsNumberTestedKeypopPositive");
@@ -2178,7 +2179,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition referredAndLinkedSinceThreeMonthsAgo() {
         String sqlQuery = "select r.patient_id\n" +
-                "from kenyaemr_etl.etl_hts_referral_and_linkage r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage r\n" +
                 "where (r.ccc_number != '' or r.ccc_number IS NOT NULL)\n" +
                 "  and (r.facility_linked_to != '' or r.facility_linked_to IS NOT NULL)\n" +
                 "  and r.art_start_date is not null \n" +
@@ -2201,8 +2202,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition enrolledToHIVAndOnDrugsSinceThreeMonthsAgo() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_hiv_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on e.patient_id = d.patient_id and d.program = 'HIV'\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on e.patient_id = d.patient_id and d.program = 'HIV'\n" +
                 "where date(e.visit_date) >= date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
                 "                                     interval 3 MONTH)\n" +
                 "  and date(d.date_started) between date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
@@ -2235,7 +2236,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     public CohortDefinition everTestedHIVPositive() {
-        String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_hts_test t where t.final_test_result = 'Positive' and date(t.visit_date) <= date(:endDate);";
+        String sqlQuery = "select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where t.final_test_result = 'Positive' and date(t.visit_date) <= date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Ever tested positive for HIV");
         cd.setQuery(sqlQuery);
@@ -2250,7 +2251,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      * @return
      */
     public CohortDefinition assessedForHIVRiskWithinPeriod() {
-        String sqlQuery = "select a.patient_id from kenyaemr_etl.etl_prep_behaviour_risk_assessment a where date(a.visit_date) between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select a.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_behaviour_risk_assessment a where date(a.visit_date) between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Assessed for HIV risk within the period");
         cd.setQuery(sqlQuery);
@@ -2280,7 +2281,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     private CohortDefinition testedPmtct3MonthsAgo() {
         String sqlQuery = "select hts.patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test hts\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test hts\n" +
                 "where hts.hts_entry_point in (160538, 160456, 1623)\n" +
                 "  and hts.patient_given_result = 'Yes'\n" +
                 "  and hts.voided = 0\n" +
@@ -2304,7 +2305,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsAllNumberTestedPositiveThreeMonthsAgo() {
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "where test_type = 1\n" +
                 "  and final_test_result = 'Positive'\n" +
                 "  and t.visit_date between date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
@@ -2347,7 +2348,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                SELECT\n" +
                 "                  patient_id,\n" +
                 "                  visit_date      AS test_date\n" +
-                "                FROM kenyaemr_etl.etl_hts_test\n" +
+                "                FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "                WHERE test_type = 1 and final_test_result in ('Positive','Negative')\n" +
                 "                and ever_tested_for_hiv = 'No'\n" +
                 "                GROUP BY patient_id\n" +
@@ -2371,7 +2372,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsClientsWithPreviousTestOver12MonthsAgo() {
         String sqlQuery = "SELECT patient_id\n" +
-                "FROM kenyaemr_etl.etl_hts_test\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "WHERE test_type = 1 AND final_test_result in ('Positive','Negative')\n" +
                 "  and ever_tested_for_hiv = 'Yes'\n" +
                 "  and months_since_last_test > 12\n" +
@@ -2410,7 +2411,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                         patient_id,\n" +
                 "                         max(visit_date)      AS latest_test_date,\n" +
                 "                         min(visit_date) AS first_test_date\n" +
-                "                       FROM kenyaemr_etl.etl_hts_test\n" +
+                "                       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "                       WHERE test_type = 1 AND final_test_result in ('Positive','Negative')\n" +
                 "                       GROUP BY patient_id\n" +
                 "                       having latest_test_date between date(:startDate) and date(:endDate)\n" +
@@ -2432,7 +2433,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition htsRepeatClientReported() {
         String sqlQuery = "SELECT patient_id\n" +
-                "FROM kenyaemr_etl.etl_hts_test\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
                 "WHERE test_type = 1 AND final_test_result in ('Positive','Negative')\n" +
                 "  and ever_tested_for_hiv = 'Yes'\n" +
                 "  and months_since_last_test <= 12\n" +
@@ -2463,11 +2464,11 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "disc.disc_date as date_disc,\n" +
                 "      de.date_started  AS date_started_drugs,\n" +
                 "      de.patient_id  AS on_drugs\n" +
-                "FROM kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "      JOIN kenyaemr_etl.etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
-                "      LEFT OUTER JOIN (select de.patient_id, de.date_started as date_started from kenyaemr_etl.etl_drug_event de group by de.patient_id)de ON e.patient_id = de.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "      JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
+                "      LEFT OUTER JOIN (select de.patient_id, de.date_started as date_started from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de group by de.patient_id)de ON e.patient_id = de.patient_id\n" +
                 "      LEFT OUTER JOIN\n" +
-                "         (select disc.patient_id,max(disc.visit_date) as disc_date from kenyaemr_etl.etl_patient_program_discontinuation disc where\n" +
+                "         (select disc.patient_id,max(disc.visit_date) as disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation disc where\n" +
                 "             program_name='HIV' group by patient_id) disc ON disc.patient_id = fup.patient_id\n" +
                 "GROUP BY fup.patient_id\n" +
                 "HAVING (\n" +
@@ -2492,7 +2493,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition assessedForNutritionStatus() {
         String sqlQuery = "select a.patient_id from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_status)), 11) as nutritional_status\n" +
-                "from kenyaemr_etl.etl_patient_triage t\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by patient_id\n" +
                 "having nutritional_status is not null)a;";
@@ -2524,7 +2525,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition malnourished() {
         String sqlQuery = "select a.patient_id\n" +
                 "from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_status)), 11) as nutritional_status\n" +
-                "      from kenyaemr_etl.etl_patient_triage t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "      where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id\n" +
                 "      having nutritional_status in (163302, 163303)) a;";
@@ -2551,7 +2552,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition startedOnIPTWithinPeriod() {
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_ipt_initiation\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation\n" +
                 "where visit_date between date(:startDate) and date(:endDate)\n" +
                 " and voided = 0;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2579,7 +2580,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = "select a.patient_id\n" +
                 "from (select f.patient_id,\n" +
                 "             mid(max(concat(f.visit_date, f.stability)), 11) as stability\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      where f.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.stability = 1;";
@@ -2596,7 +2597,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = "select a.patient_id\n" +
                 "from (select f.patient_id,\n" +
                 "             mid(max(concat(f.visit_date, f.stability)), 11) as stability\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      where f.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.stability = 2;";
@@ -2612,7 +2613,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = "select a.patient_id\n" +
                 "from (select f.patient_id,\n" +
                 "             mid(max(concat(f.visit_date, f.differentiated_care)), 11) as differentiated_care_setting\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      where f.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.differentiated_care_setting = 163488;";
@@ -2628,7 +2629,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery = "select a.patient_id\n" +
                 "from (select f.patient_id,\n" +
                 "             mid(max(concat(f.visit_date, f.differentiated_care)), 11) as differentiated_care_setting\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      where f.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.differentiated_care_setting = 1537;";
@@ -2642,7 +2643,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     }
 
     public CohortDefinition clinicalVisit() {
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_patient_hiv_followup f where f.person_present = 978 and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f where f.person_present = 978 and f.visit_date between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("ClinicalVisit");
         cd.setQuery(sqlQuery);
@@ -2656,7 +2657,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "from (select f.patient_id,\n" +
                 "             mid(max(concat(f.visit_date, f.pregnancy_status)), 11) as pregnancy_status,\n" +
                 "             mid(max(concat(f.visit_date, f.breastfeeding)), 11)    as breastfeeding\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      where f.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where (a.breastfeeding = 1065 or a.pregnancy_status = 1065);";
@@ -2671,7 +2672,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition severeMalnutritionClients() {
         String sqlQuery = "select a.patient_id\n" +
                 "from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_status)), 11) as nutritional_status\n" +
-                "      from kenyaemr_etl.etl_patient_triage t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "      where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.nutritional_status in (164131, 163302);";
@@ -2707,7 +2708,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition moderateMalnutritionClients() {
         String sqlQuery = "select a.patient_id\n" +
                 "from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_status)), 11) as nutritional_status\n" +
-                "      from kenyaemr_etl.etl_patient_triage t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "      where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.nutritional_status in (163303, 123815);";
@@ -2743,7 +2744,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition OnTherapeuticFoodsClients() {
         String sqlQuery = "select a.patient_id\n" +
                 "from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_intervention)), 11) as nutritional_intervention\n" +
-                "      from kenyaemr_etl.etl_patient_triage t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "      where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.nutritional_intervention = 161650;";
@@ -2779,7 +2780,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition onSupplementalFoodsClients() {
         String sqlQuery = "select a.patient_id\n" +
                 "from (select t.patient_id, mid(max(concat(t.visit_date, t.nutritional_intervention)), 11) as nutritional_intervention\n" +
-                "      from kenyaemr_etl.etl_patient_triage t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "      where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
                 "where a.nutritional_intervention = 159854;";
@@ -2818,7 +2819,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition completedIPT12Months() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select patient_id \n" +
-                "from kenyaemr_etl.etl_patient_program \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program \n" +
                 "where program='TPT' and date_completed between date(:startDate) and date(:endDate) and date_enrolled  between DATE_SUB(date(:startDate), INTERVAL 1 YEAR) and DATE_SUB(date(:endDate), INTERVAL 1 YEAR) and outcome=1267 " +
                 ";";
         cd.setName("completedIPT12Months");
@@ -2837,8 +2838,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition tbEnrollment() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select  e.patient_id " +
-                " from kenyaemr_etl.etl_tb_enrollment e " +
-                " join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id " +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment e " +
+                " join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id " +
                 " where date(e.visit_date) between date(:startDate) and date(:endDate) " +
                 ";";
         cd.setName("newTBEnrollment");
@@ -2857,8 +2858,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition tbNewKnownPositive() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_tb_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id = e.patient_id and\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id = e.patient_id and\n" +
                 "                                                          coalesce(date(he.date_confirmed_hiv_positive),\n" +
                 "                                                                   date(he.visit_date)) < date(:startDate)\n" +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -2878,8 +2879,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition tbTestedForHIV() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_tb_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_hts_test h\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test h\n" +
                 "                    on e.patient_id = h.patient_id and h.visit_date between date(:startDate) and date(:endDate) and\n" +
                 "                       h.test_type = 1\n" +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -2899,8 +2900,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition tbNewTestedHIVPositive() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_tb_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_hts_test h\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test h\n" +
                 "                    on e.patient_id = h.patient_id and h.visit_date between date(:startDate) and date(:endDate) and\n" +
                 "                       h.test_type = 1 and h.final_test_result = 'Positive'\n" +
                 "where date(e.visit_date) between date(:startDate) and date(:endDate);";
@@ -2949,9 +2950,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition tbTotalOnHAART() {
             SqlCohortDefinition cd = new SqlCohortDefinition();
             String sqlQuery = "select  e.patient_id\n" +
-                    "from kenyaemr_etl.etl_tb_enrollment e\n" +
-                    "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
-                    "inner join kenyaemr_etl.etl_drug_event d on d.patient_id=e.patient_id and d.date_started <= :endDate\n" +
+                    "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment e\n" +
+                    "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                    "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id=e.patient_id and d.date_started <= :endDate\n" +
                     "where d.program = 'HIV' and date(e.visit_date) between :startDate and :endDate;";
         cd.setName("tbNewTotalOnHAART");
         cd.setQuery(sqlQuery);
@@ -2965,8 +2966,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition screenedForCaCx() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select f.patient_id \n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f \n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=f.patient_id \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f \n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=f.patient_id \n" +
                 "where  date(f.visit_date) between date(:startDate) and date(:endDate) and f.cacx_screening in(703, 664, 1118) " +
                 ";";
         cd.setName("screenedforCaCx");
@@ -2983,9 +2984,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition firstANCVisitMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select d.patient_id from\n" +
-                "         (select e.patient_id, max(e.visit_date) as latest_enrollment_date,av.visit_date as 1st_anc_visit from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "         (select e.patient_id, max(e.visit_date) as latest_enrollment_date,av.visit_date as 1st_anc_visit from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "       inner join\n" +
-                "        (select av.patient_id,av.visit_date as visit_date from kenyaemr_etl.etl_mch_antenatal_visit av where av.anc_visit_number = 1\n" +
+                "        (select av.patient_id,av.visit_date as visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av where av.anc_visit_number = 1\n" +
                 "        and av.visit_date between date(:startDate) and date(:endDate)) av on e.patient_id = av.patient_id\n" +
                 "       group by e.patient_id\n" +
                 "       having 1st_anc_visit between date(:startDate) and date(:endDate))d;";
@@ -3003,9 +3004,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition deliveryFromHIVPositiveMothers(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct ld.patient_id\n" +
-                " from kenyaemr_etl.etl_mchs_delivery ld\n" +
-                " left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id= ld.patient_id\n" +
-                " left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id= ld.patient_id\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id= ld.patient_id\n" +
+                " left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id= ld.patient_id\n" +
                 " where (date(ld.visit_date) between date(:startDate) and date(:endDate))\n" +
                 " and (ld.final_test_result=\"Positive\" or e.hiv_status = 703 or v.final_test_result =\"Positive\") ;";
 
@@ -3021,7 +3022,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition knownPositiveAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "where a.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.anc_visit_number = 1\n" +
                 "  and a.hiv_test_during_visit = 169173;";
@@ -3040,10 +3041,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "from (select e.patient_id,\n" +
                 "             max(e.visit_date)                                  as enr_date,\n" +
                 "             mid(max(concat(e.visit_date, e.service_type)), 11) as service_type\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "               left join kenyaemr_etl.etl_hts_test t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                         on e.patient_id = t.patient_id and t.final_test_result in ('Positive', 'Negative')\n" +
-                "               left join kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                         on e.patient_id = v.patient_id and t.final_test_result in ('Positive', 'Negative')\n" +
                 "      where (v.patient_id is not null and v.visit_date <= date(:endDate))\n" +
                 "         or (t.patient_id is not null and t.visit_date <= date(:endDate))\n" +
@@ -3066,10 +3067,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "from (select e.patient_id,\n" +
                 "             max(e.visit_date)                                  as enr_date,\n" +
                 "             mid(max(concat(e.visit_date, e.service_type)), 11) as service_type\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "               left join kenyaemr_etl.etl_hts_test t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                         on e.patient_id = t.patient_id and t.final_test_result in ('Positive', 'Negative')\n" +
-                "               left join kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                         on e.patient_id = v.patient_id and t.final_test_result in ('Positive', 'Negative')\n" +
                 "      where (v.patient_id is not null and v.visit_date <= date(:endDate))\n" +
                 "         or (t.patient_id is not null and t.visit_date <= date(:endDate))\n" +
@@ -3090,7 +3091,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition initialTestAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and v.final_test_result in ('Positive', 'Negative')\n" +
                 "  and v.hiv_test_during_visit = 164180;";
@@ -3106,7 +3107,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition retestAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and v.final_test_result in ('Positive', 'Negative')\n" +
                 "  and v.hiv_test_during_visit = 160530;";
@@ -3124,10 +3125,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "from (select e.patient_id,\n" +
                 "             max(e.visit_date)                                  as enr_date,\n" +
                 "             mid(max(concat(e.visit_date, e.service_type)), 11) as service_type\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "               left join kenyaemr_etl.etl_hts_test t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                         on e.patient_id = t.patient_id and t.final_test_result ='Positive'\n" +
-                "               left join kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                         on e.patient_id = v.patient_id and t.final_test_result ='Positive'\n" +
                 "      where (v.patient_id is not null and v.visit_date <= date(:endDate))\n" +
                 "         or (t.patient_id is not null and t.visit_date <= date(:endDate))\n" +
@@ -3168,15 +3169,15 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left join (SELECT v.patient_id\n" +
-                "                    FROM kenyaemr_etl.etl_mchs_delivery v\n" +
+                "                    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v\n" +
                 "                    WHERE DATE(v.visit_date) between DATE(:startDate) and DATE(:endDate)\n" +
                 "                      and final_test_result in ('Positive','Negative')\n" +
                 "                    GROUP BY v.patient_id) v\n" +
                 "                   on e.patient_id = v.patient_id\n" +
                 "         left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160456\n" +
                 "                      and DATE(t.visit_date) between DATE(:startDate) and DATE(:endDate)\n" +
                 "                    group by patient_id) t\n" +
@@ -3223,16 +3224,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         String sqlQuery = "select a.patient_id\n" +
                 "from (select e.patient_id, hts_date, delivery_date\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "               left join (SELECT v.patient_id, v.delivery_date\n" +
-                "                          FROM kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "                          FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "                          WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                            and final_test_result in ('Positive','Negative')\n" +
                 "                            and TIMESTAMPDIFF(WEEK, v.delivery_date, DATE(v.visit_date)) <= 6\n" +
                 "                          GROUP BY v.patient_id) v\n" +
                 "                         on e.patient_id = v.patient_id\n" +
                 "               left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                          from kenyaemr_etl.etl_hts_test t\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                          where t.hts_entry_point = 1623\n" +
                 "                            and DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                          group by patient_id) t\n" +
@@ -3254,9 +3255,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         String sqlQuery = "select a.patient_id\n" +
                 "from (select e.patient_id, hts_date, delivery_date\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "               left join (SELECT v.patient_id, v.delivery_date\n" +
-                "                          FROM kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "                          FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "                          WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                            and final_test_result in ('Positive','Negative')\n" +
                 "                            and TIMESTAMPDIFF(WEEK, v.delivery_date, DATE(v.visit_date)) > 6\n" +
@@ -3264,7 +3265,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                          GROUP BY v.patient_id) v\n" +
                 "                         on e.patient_id = v.patient_id\n" +
                 "               left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                          from kenyaemr_etl.etl_hts_test t\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                          where t.hts_entry_point = 1623\n" +
                 "                            and DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                          group by patient_id) t\n" +
@@ -3305,7 +3306,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and v.hiv_test_timing = "+timing+"\n" +
                 "  and v.hiv_test_type = '"+testType+"';";
@@ -3377,15 +3378,15 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left join (SELECT v.patient_id\n" +
-                "                    FROM kenyaemr_etl.etl_mchs_delivery v\n" +
+                "                    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v\n" +
                 "                    WHERE DATE(v.visit_date) between DATE(:startDate) and DATE(:endDate)\n" +
                 "                      and final_test_result = 'Positive'\n" +
                 "                    GROUP BY v.patient_id) v\n" +
                 "                   on e.patient_id = v.patient_id\n" +
                 "         left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160456\n" +
                 "                      and t.final_test_result = 'Positive'\n" +
                 "                      and DATE(t.visit_date) between DATE(:startDate) and DATE(:endDate)\n" +
@@ -3418,16 +3419,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         String sqlQuery = "select a.patient_id\n" +
                 "from (select e.patient_id, hts_date, delivery_date\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "               left join (SELECT v.patient_id, v.delivery_date\n" +
-                "                          FROM kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "                          FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "                          WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                            and final_test_result = 'Positive'\n" +
                 "                            and TIMESTAMPDIFF(WEEK, v.delivery_date, DATE(v.visit_date)) <= 6\n" +
                 "                          GROUP BY v.patient_id) v\n" +
                 "                         on e.patient_id = v.patient_id\n" +
                 "               left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                          from kenyaemr_etl.etl_hts_test t\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                          where t.hts_entry_point = 1623\n" +
                 "                            and DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                          group by patient_id) t\n" +
@@ -3448,9 +3449,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         String sqlQuery = "select a.patient_id\n" +
                 "from (select e.patient_id, hts_date, delivery_date\n" +
-                "      from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "               left join (SELECT v.patient_id, v.delivery_date\n" +
-                "                          FROM kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "                          FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "                          WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                            and final_test_result = 'Positive'\n" +
                 "                            and TIMESTAMPDIFF(WEEK, v.delivery_date, DATE(v.visit_date)) > 6\n" +
@@ -3458,7 +3459,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                          GROUP BY v.patient_id) v\n" +
                 "                         on e.patient_id = v.patient_id\n" +
                 "               left join (select t.patient_id, max(t.visit_date) as hts_date\n" +
-                "                          from kenyaemr_etl.etl_hts_test t\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                          where t.hts_entry_point = 1623\n" +
                 "                            and DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                          group by patient_id) t\n" +
@@ -3517,16 +3518,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition testedForHivInMchmsDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select ld.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "         left outer join (select a.patient_id, a.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "                          where a.final_test_result is not null\n" +
                 "                            and date(a.visit_date) <= date(:endDate)\n" +
                 "                          group by a.patient_id\n" +
                 "                          having max(date(a.visit_date))) a\n" +
                 "                         on ld.patient_id = a.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160538\n" +
                 "                      and date(t.visit_date) <= date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3549,23 +3550,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition initialTestAtPNCUpto6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "         left outer join (select a.patient_id, a.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "                          where a.final_test_result is not null\n" +
                 "                            and date(a.visit_date) <= date(:endDate)\n" +
                 "                          group by a.patient_id\n" +
                 "                          having max(date(a.visit_date))) a\n" +
                 "                         on p.patient_id = a.patient_id\n" +
                 "         left outer join (select ld.patient_id, ld.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "                          where ld.final_test_result is not null\n" +
                 "                            and date(ld.visit_date) <= date(:endDate)\n" +
                 "                          group by ld.patient_id\n" +
                 "                          having max(date(ld.visit_date))) ld\n" +
                 "                         on p.patient_id = ld.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160538\n" +
                 "                      and date(t.visit_date) <= date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3610,23 +3611,23 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition pncRetestUpto6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "         left join (select a.patient_id, a.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "                          where a.final_test_result is not null\n" +
                 "                            and date(a.visit_date) <= date(:endDate)\n" +
                 "                          group by a.patient_id\n" +
                 "                          having max(date(a.visit_date))) a\n" +
                 "                         on p.patient_id = a.patient_id\n" +
                 "         left outer join (select ld.patient_id, ld.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "                          where ld.final_test_result is not null\n" +
                 "                            and date(ld.visit_date) <= date(:endDate)\n" +
                 "                          group by ld.patient_id\n" +
                 "                          having max(date(ld.visit_date))) ld\n" +
                 "                         on p.patient_id = ld.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160538\n" +
                 "                      and date(t.visit_date) <= date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3650,16 +3651,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition pncTestBtwn6WeeksAnd6Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left join (select a.patient_id, a.visit_date, a.delivery_date\n" +
-                "                    from kenyaemr_etl.etl_mch_postnatal_visit a\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit a\n" +
                 "                    where a.final_test_result is not null\n" +
                 "                      and date(a.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                    group by a.patient_id\n" +
                 "                    having max(date(a.visit_date))) p\n" +
                 "                   on e.patient_id = p.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160538\n" +
                 "                      and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3684,8 +3685,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     /*public CohortDefinition knownPositiveAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  " select distinct e.patient_id " +
-                "    from kenyaemr_etl.etl_mch_enrollment e " +
-                "    join kenyaemr_etl.etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e " +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on anc.patient_id=e.patient_id " +
                 "    where (e.visit_date between date(:startDate) and date(:endDate)) " +
                 "    and hiv_status=703 and e.visit_date>hiv_test_date;";
 
@@ -3701,8 +3702,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition testedHivPositiveInMchmsAntenatal(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select distinct v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "       left outer join kenyaemr_etl.etl_mch_enrollment e on e.patient_id=v.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "       left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id=v.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "    (e.hiv_status !=703) and\n" +
                 "    v.final_test_result =\"POSITIVE\";";
@@ -3721,16 +3722,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition positiveHIVResultsAtLabourAndDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left outer join (select ld.patient_id, ld.visit_date\n" +
-                "                          from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "                          where ld.final_test_result = 'Positive'\n" +
                 "                            and date(ld.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                          group by ld.patient_id\n" +
                 "                          having max(date(ld.visit_date))) ld\n" +
                 "                         on e.patient_id = ld.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 160456\n" +
                 "                      and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3752,16 +3753,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition testedHivPositiveInPNCWithin6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left outer join (select p.patient_id, p.visit_date, p.delivery_date\n" +
-                "                          from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "                          where p.final_test_result = 'Positive' and p.patient_given_result = 'Yes'\n" +
                 "                            and date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                          group by p.patient_id\n" +
                 "                          having max(date(p.visit_date))) p\n" +
                 "                         on p.patient_id = e.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date,t.final_test_result\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 1623\n" +
                 "                      and date(t.visit_date)  between date(:startDate) and date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3801,16 +3802,16 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition totalHivPositivePNC6WeeksTo6monthsInMchms(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left outer join (select p.patient_id, p.visit_date, p.delivery_date\n" +
-                "                          from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "                          where p.final_test_result = 'Positive' and p.patient_given_result = 'Yes'\n" +
                 "                            and date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                          group by p.patient_id\n" +
                 "                          having max(date(p.visit_date))) p\n" +
                 "                         on p.patient_id = e.patient_id\n" +
                 "         left join (select t.patient_id, t.visit_date,t.final_test_result\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where t.hts_entry_point = 1623\n" +
                 "                      and date(t.visit_date)  between date(:startDate) and date(:endDate)\n" +
                 "                    group by t.patient_id\n" +
@@ -3836,7 +3837,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition totalOnHAARTAtFirstANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select a.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "where a.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.anc_visit_number = 1\n" +
                 "  and a.started_haart_at_anc = 160119\n" +
@@ -3854,7 +3855,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition givenHAARTAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where v.prophylaxis_given in (105281, 74250)\n" +
                 "  and date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("givenHAARTAtANC");
@@ -3883,7 +3884,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition startedHAARTAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select a.patient_id\n" +
-                "    from kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n" +
                 "    where a.visit_date between date(:startDate) and date(:endDate)\n" +
                 "    and a.started_haart_at_anc = 167790;";
         cd.setName("startedHAARTAtLabourAndDelivery");
@@ -3898,7 +3899,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v\n" +
                 "where v.mother_started_haart_at_maternity = 1065\n" +
                 "  and v.mother_on_haart_during_anc != 1065\n" +
                 "  and date(v.visit_date) between date(:startDate) and date(:endDate);";
@@ -3925,11 +3926,11 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "         left join kenyaemr_etl.etl_hts_test t\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                   on p.patient_id = t.patient_id and p.visit_date = t.visit_date and t.final_test_result = 'Positive'\n" +
                 "         left join (select e.patient_id, min(e.date_started) as date_started\n" +
-                "                    from kenyaemr_etl.etl_drug_event e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
                 "                    where date(e.date_started) <= date(:endDate)\n" +
                 "                      and e.program = 'HIV'\n" +
                 "                    group by e.patient_id) e\n" +
@@ -3954,11 +3955,11 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "         left join kenyaemr_etl.etl_hts_test t\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                   on p.patient_id = t.patient_id and p.visit_date = t.visit_date and t.final_test_result = 'Positive'\n" +
                 "         left join (select e.patient_id, min(e.date_started) as date_started\n" +
-                "                    from kenyaemr_etl.etl_drug_event e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
                 "                    where date(e.date_started) <= date(:endDate)\n" +
                 "                      and e.program = 'HIV'\n" +
                 "                    group by e.patient_id) e\n" +
@@ -3998,7 +3999,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and v.hepatitis_b_screening in (664, 703);";
         cd.setName("screenedForHBVAtANC");
@@ -4017,7 +4018,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and v.hepatitis_b_screening = 703;";
         cd.setName("screenedPositiveForHBVAtANC");
@@ -4060,8 +4061,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct mch.patient_id\n" +
-                "  from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "  inner join kenyaemr_etl.etl_drug_event d on d.patient_id=mch.patient_id and d.program = 'HIV'\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id=mch.patient_id and d.program = 'HIV'\n" +
                 "  where d.date_started between date_sub(date(:startDate), INTERVAL 12 MONTH) and date_sub(date(:endDate), INTERVAL 12 MONTH);";
         cd.setName("onHAARTUpto12Months");
         cd.setQuery(sqlQuery);
@@ -4077,9 +4078,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct e.patient_id\n" +
-                "   from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "     inner join kenyaemr_etl.etl_drug_event d on d.patient_id=e.patient_id and d.program = 'HIV'\n" +
-                "     left join (select disc.patient_id, max(disc.visit_date) latest_visit from kenyaemr_etl.etl_patient_program_discontinuation disc where disc.program_name='HIV') disc on e.patient_id = disc.patient_id\n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "     inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id=e.patient_id and d.program = 'HIV'\n" +
+                "     left join (select disc.patient_id, max(disc.visit_date) latest_visit from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation disc where disc.program_name='HIV') disc on e.patient_id = disc.patient_id\n" +
                 "   where (disc.patient_id is null or disc.latest_visit > date(:endDate)) and d.date_started between date_sub(date(:startDate), INTERVAL 12 MONTH) and date_sub(date(:endDate), INTERVAL 12 MONTH);\n" +
                 "\n";
 
@@ -4098,8 +4099,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         inner join kenyaemr_etl.etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on v.patient_id = e.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and (v.syphilis_test_status in (1229, 1228, 1304) or\n" +
                 "       (e.visit_date between date(:startDate) and date(:endDate) and e.serology in (1229, 1228, 1304)));";
@@ -4118,8 +4119,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id = e.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "    and v.syphilis_test_status = 1228;";
 
@@ -4136,8 +4137,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition treatedForSyphilis(){
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery =  "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id= e.patient_id\n" +
+        String sqlQuery =  "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id= e.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      and v.syphilis_treated_status =1065;";
 
@@ -4155,9 +4156,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
-                "inner join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(p.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "(ld.final_test_result=\"Positive\" or e.hiv_status = 703 or p.final_test_result =\"Positive\") and\n" +
                 "(round(DATEDIFF(ld.date_of_delivery,:endDate)/7) <=6) and\n" +
@@ -4177,10 +4178,10 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct p.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "  inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
-                "  left outer join kenyaemr_etl.etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=p.patient_id\n" +
+                "  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld on ld.patient_id= p.patient_id\n" +
                 "where date(p.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "      (ld.final_test_result=\"Positive\" or e.hiv_status = 703 or v.final_test_result =\"Positive\") and\n" +
                 "      (round(DATEDIFF(ld.date_of_delivery,:endDate)/7) <=6);";
@@ -4199,8 +4200,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_mch_antenatal_visit v on e.patient_id = v.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on e.patient_id = v.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "    and v.anc_visit_number = 1\n" +
                 "    and coalesce(v.partner_hiv_status,e.partner_hiv_status) in (703, 664);";
@@ -4218,7 +4219,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct anc.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit anc\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc\n" +
                 "where date(anc.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and anc.partner_hiv_tested =1065;";
         cd.setName("initialTestAtANCForMale");
@@ -4235,7 +4236,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct ld.patient_id\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where date(ld.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and ld.partner_hiv_tested =1065;";
         cd.setName("initialTestAtDeliveryForMale");
@@ -4252,7 +4253,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =   "select distinct pnc.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit pnc\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc\n" +
                 "where date(pnc.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and pnc.partner_hiv_tested =1065;";
 
@@ -4270,14 +4271,14 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select c.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit c\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit c\n" +
                 "         left join (select e.patient_id, max(e.visit_date) as latest_mch_enrollment\n" +
-                "                    from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "                    where e.visit_date <= date(:endDate)\n" +
                 "                      and e.hiv_status = 703\n" +
                 "                    group by e.patient_id) e on c.patient_id = e.patient_id\n" +
                 "         left join (select h.patient_id, max(h.visit_date) as latest_hiv_enrollment\n" +
-                "                    from kenyaemr_etl.etl_hiv_enrollment h\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment h\n" +
                 "                    where h.visit_date <= date(:endDate)\n" +
                 "                    group by h.patient_id) h\n" +
                 "                   on c.patient_id = h.patient_id\n" +
@@ -4299,7 +4300,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
     public CohortDefinition firstHIVTestAtANCOrDelivery(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery =  "select t.patient_id from kenyaemr_etl.etl_hts_test t where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery =  "select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and t.ever_tested_for_hiv = 'No' and t.hts_entry_point in (160538,160456);";
         cd.setName("firstHIVTestAtANCOrDelivery");
         cd.setQuery(sqlQuery);
@@ -4312,21 +4313,21 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition firstHIVTestAtPNCWithin6Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left join\n" +
                 "     (select t.patient_id, t.visit_date\n" +
-                "      from kenyaemr_etl.etl_hts_test t\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "               left join (select pn.patient_id,\n" +
                 "                                 max(pn.visit_date)                                    as latest_pn_visit,\n" +
                 "                                 mid(max(concat(pn.visit_date, pn.delivery_date)), 11) as delivery_date\n" +
-                "                          from kenyaemr_etl.etl_mch_postnatal_visit pn\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pn\n" +
                 "                          where date(pn.visit_date) <= date(:endDate)) pn on t.patient_id = pn.patient_id\n" +
                 "      where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "        and t.ever_tested_for_hiv = 'No'\n" +
                 "        and t.hts_entry_point = 1623\n" +
                 "        and timestampdiff(WEEK, pn.delivery_date, t.visit_date) <= 6) hts on e.patient_id = hts.patient_id\n" +
                 "         left join (select p.patient_id\n" +
-                "                    from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "                    where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                      and p.final_test_result is not null\n" +
                 "                      and p.final_test_result != ''\n" +
@@ -4357,14 +4358,14 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition adolescentsStartedOnHAART(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "         left join (select de.patient_id\n" +
-                "                    from kenyaemr_etl.etl_drug_event de\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                             inner join (select pn.patient_id,\n" +
                 "                                                mid(max(concat(pn.visit_date, pn.visit_timing_mother)), 11) as mother_visit_timing,\n" +
                 "                                                max(pn.visit_date)                                          as latest_pn_visit,\n" +
                 "                                                mid(max(concat(pn.visit_date, pn.delivery_date)), 11)       as delivery_date\n" +
-                "                                         from kenyaemr_etl.etl_mch_postnatal_visit pn\n" +
+                "                                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pn\n" +
                 "                                         where date(pn.visit_date) <= date(:endDate)) pn\n" +
                 "                                        on de.patient_id = pn.patient_id\n" +
                 "                    where date(de.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -4372,17 +4373,17 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "                      and (timestampdiff(WEEK, date(pn.delivery_date), date(de.date_started)) <= 6)) de\n" +
                 "                   on e.patient_id = de.patient_id\n" +
                 "         left join (select c.patient_id\n" +
-                "                    from kenyaemr_etl.etl_mch_antenatal_visit c\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit c\n" +
                 "                    where date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                      and date(c.date_given_haart) between date(:startDate) and date(:endDate)) c\n" +
                 "                   on e.patient_id = c.patient_id\n" +
                 "         left join (select d.patient_id, d.visit_date\n" +
-                "                    from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "                    where date(d.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                      and d.mother_started_haart_at_maternity = 1065) d\n" +
                 "                   on e.patient_id = d.patient_id\n" +
                 "         left join (select p.patient_id\n" +
-                "                    from kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
                 "                    where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                      and p.mother_haart_given = 1065\n" +
                 "                      and (timestampdiff(WEEK, date(p.delivery_date), date(p.visit_date)) <= 6 or\n" +
@@ -4405,8 +4406,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct he.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_enrollment he\n" +
-                "  inner join kenyaemr_etl.etl_immunization hi on hi.patient_id=he.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization hi on hi.patient_id=he.patient_id\n" +
                 "where date(hi.visit_date) between (:startDate) and (:endDate)\n" +
                 "      and he.child_exposed != 1067 AND\n" +
                 "      hi.PCV_10_1 = \"Yes\" ;";
@@ -4425,8 +4426,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select distinct he.patient_id\n" +
-                "                from kenyaemr_etl.etl_hei_enrollment he\n" +
-                "                 inner join kenyaemr_etl.etl_immunization hi on hi.patient_id=he.patient_id\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+                "                 inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization hi on hi.patient_id=he.patient_id\n" +
                 "                where date(hi.visit_date) between (:startDate) and (:endDate)\n" +
                 "                  and hi.PCV_10_1 = \"Yes\" ;";
 
@@ -4444,8 +4445,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         inner join kenyaemr_etl.etl_mch_enrollment en on en.patient_id = v.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment en on en.patient_id = v.patient_id\n" +
                 "where (v.baby_nvp_dispensed = 80586\n" +
                 "   or v.baby_azt_dispensed = 160123)\n" +
                 "    and date(v.visit_date) between date(:startDate) and date(:endDate);";
@@ -4465,7 +4466,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select r.person_b as child\n" +
                 "from openmrs.relationship r\n" +
-                "inner join kenyaemr_etl.etl_mchs_delivery d on d.patient_id = r.person_a and r.relationship = 3\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d on d.patient_id = r.person_a and r.relationship = 3\n" +
                 "and\n" +
                 "                                         (d.baby_nvp_dispensed = 1\n" +
                 "                                             or d.baby_azt_dispensed = 1)\n" +
@@ -4476,9 +4477,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
                 "            mid(max(concat(e.visit_date, coalesce(e.lmp, e.lmp_estimated))), 11) as lmp_date,\n" +
                 "            timestampdiff(WEEK,\n" +
                 "                          mid(max(concat(e.visit_date, coalesce(e.lmp, e.lmp_estimated))), 11), date(:endDate))\n" +
-                "     from kenyaemr_etl.etl_mch_enrollment e\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "              inner join (select v.patient_id, max(v.visit_date) latest_anc_with_prohylaxis\n" +
-                "                          from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                          where (v.baby_nvp_dispensed = 80586\n" +
                 "                              or v.baby_azt_dispensed = 160123) and date(v.visit_date) <= date(:endDate)\n" +
                 "                          group by v.patient_id) v\n" +
@@ -4502,7 +4503,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select r.person_b as child\n" +
                 "from openmrs.relationship r\n" +
-                "inner join kenyaemr_etl.etl_mch_postnatal_visit p on p.patient_id = r.person_a and r.relationship = 3\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p on p.patient_id = r.person_a and r.relationship = 3\n" +
                 "and\n" +
                 "            (p.baby_nvp_dispensed = 80586\n" +
                 "                or p.baby_azt_dispensed = 160123)\n" +
@@ -4550,7 +4551,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition sixMonthCohort(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select d.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "where d.dob between date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
                 "                             interval 12 MONTH)\n" +
                 "          and date_sub(date(:endDate), interval 6 MONTH);";
@@ -4568,7 +4569,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition twelveMonthCohort(){
     SqlCohortDefinition cd = new SqlCohortDefinition();
     String sqlQuery =  "select d.patient_id\n" +
-            "from kenyaemr_etl.etl_patient_demographics d\n" +
+            "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
             "where d.dob between date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
             "                             interval 12 MONTH)\n" +
             "          and date_sub(date(:endDate), interval 12 MONTH);";
@@ -4587,8 +4588,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition twentyFourMonthCohort(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select d.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
-                "         inner join kenyaemr_etl.etl_hei_enrollment e on d.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on d.patient_id = e.patient_id\n" +
                 "where d.dob between date_sub(date(DATE_SUB(date(:endDate), INTERVAL DAYOFMONTH(date(:endDate)) - 1 DAY)),\n" +
                 "                             interval 24 MONTH)\n" +
                 "          and date_sub(date(:endDate), interval 24 MONTH) and timestampdiff(month, (d.dob), date(e.visit_date)) between 0 and 18;";
@@ -4602,9 +4603,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition heiDDSCTXStartWithin2Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "SELECT en.patient_id\n" +
-                "FROM kenyaemr_etl.etl_hei_enrollment en\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics pd on en.patient_id = pd.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_hei_follow_up_visit hf on hf.patient_id = en.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment en\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd on en.patient_id = pd.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf on hf.patient_id = en.patient_id\n" +
                 "where TIMESTAMPDIFF(MONTH, pd.DOB, hf.visit_date) <= 2\n" +
                 "  and hf.ctx_given = 105281;";
         cd.setName("heiDDSCTSStartLessThan2Months");
@@ -4631,8 +4632,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select hv.patient_id \n" +
-                "    from kenyaemr_etl.etl_hei_follow_up_visit hv \n" +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=hv.patient_id \n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv \n" +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=hv.patient_id \n" +
                 "    where hv.dna_pcr_result is not null and \n" +
                 "    (hv.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(week,p.dob,date(:endDate))<= 8; ";
         cd.setName("initialPCRLessThan8Weeks");
@@ -4649,8 +4650,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select hv.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
-                "         join kenyaemr_etl.etl_patient_demographics p on p.patient_id = hv.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = hv.patient_id\n" +
                 "where hv.dna_pcr_result is not null\n" +
                 "  and (hv.visit_date between date(:startDate) and date(:endDate))\n" +
                 "  and timestampdiff(WEEK, p.dob, date(:endDate)) > 8\n" +
@@ -4668,8 +4669,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition totalInitialPCRTestLessThan12Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select hv.patient_id\n" +
-                "                  from kenyaemr_etl.etl_hei_follow_up_visit hv \n" +
-                "                  join kenyaemr_etl.etl_patient_demographics p on p.patient_id=hv.patient_id \n" +
+                "                  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv \n" +
+                "                  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=hv.patient_id \n" +
                 "                  where hv.dna_pcr_result is not null and\n" +
                 "                  (hv.visit_date between date(:startDate) and date(:endDate)) and timestampdiff(month,p.dob,date(:endDate)) <= 12;";
         cd.setName("totalInitialPCRTestLessThan12Months");
@@ -4684,7 +4685,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition totalInfectedHEI(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select hv.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
                 "where hv.dna_pcr_result = 703 and date(hv.visit_date) <= date(:endDate);";
         cd.setName("totalInfectedHEI");
         cd.setQuery(sqlQuery);
@@ -4707,7 +4708,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition totalUninfectedHEIs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select hv.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
                 "where dna_pcr_result = 664\n" +
                 "  and dna_pcr_contextual_status = 162082 and date(hv.visit_date) <= date(:endDate);";
         cd.setName("totalUninfectedHEIs");
@@ -4753,7 +4754,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition exitedHEI(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select d.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "where program_name = 'MCH Child HEI'\n" +
                 "  and d.discontinuation_reason in (5240, 159492, 160034)\n" +
                 "  and date(coalesce(d.effective_discontinuation_date, d.visit_date)) <= date(:endDate);";
@@ -4768,7 +4769,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition unknownStatusHEI(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select hv.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
                 "where date(hv.visit_date) <= date(:endDate)\n" +
                 "group by hv.patient_id\n" +
                 "having group_concat(hv.dna_pcr_result) is null;";
@@ -4783,7 +4784,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition heiTransferredOut(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select d.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "where program_name in ('MCH Child HEI', 'MCH Child')\n" +
                 "  and d.discontinuation_reason = 159492\n" +
                 "  and date(coalesce(d.effective_discontinuation_date, d.visit_date)) <= date(:endDate);";
@@ -4802,7 +4803,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition motherBabyPairs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select hv.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
                 "where hv.primary_caregiver = 970\n" +
                 "  and hv.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("motherBabyPairsIn24Months");
@@ -4826,7 +4827,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition heiWithLivingMotherAtEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select he.patient_id\n" +
-                "    from kenyaemr_etl.etl_hei_enrollment he\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
                 "    where he.mother_alive = 1;";
         cd.setName("heiWithLivingMotherAtEnrollment");
         cd.setQuery(sqlQuery);
@@ -4849,9 +4850,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition exclusiveBFAt6Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select f.patient_id from (Select e.patient_id, f.infant_feeding, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "  and timestampdiff(month, d.dob, date(f.visit_date)) <= 6\n" +
                 "group by e.patient_id\n" +
@@ -4882,9 +4883,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition exclusiveRFAt6Months(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select f.patient_id from (Select e.patient_id, f.infant_feeding, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "where date(e.visit_date) <= date(:endDate)\n" +
                 "  and timestampdiff(month, d.dob, date(f.visit_date)) <= 6\n" +
                 "group by e.patient_id\n" +
@@ -4913,9 +4914,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select f.patient_id\n" +
                 "from (Select e.patient_id, f.infant_feeding, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "      from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "               inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "      where date(e.visit_date) <= date(:endDate)\n" +
                 "        and timestampdiff(month, d.dob, date(f.visit_date)) <= 6\n" +
                 "      group by e.patient_id\n" +
@@ -4942,9 +4943,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select f.patient_id\n" +
                 "from (Select e.patient_id, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "      from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "               inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "      where date(e.visit_date) <= date(:endDate)\n" +
                 "        and timestampdiff(month, d.dob, date(f.visit_date)) <= 12\n" +
                 "      group by e.patient_id\n" +
@@ -4986,9 +4987,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select f.patient_id\n" +
                 "from (Select e.patient_id, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "      from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "               inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "      where date(e.visit_date) <= date(:endDate)\n" +
                 "        and timestampdiff(month, d.dob, date(f.visit_date)) <= 12\n" +
                 "      group by e.patient_id\n" +
@@ -5011,9 +5012,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select f.patient_id\n" +
                 "from (Select e.patient_id, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "      from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "               inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "      where date(e.visit_date) <= date(:endDate)\n" +
                 "        and timestampdiff(month, d.dob, date(f.visit_date)) <= 24\n" +
                 "      group by e.patient_id\n" +
@@ -5050,7 +5051,7 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
     public CohortDefinition infantFeedingByMethod(Integer feedingMethod){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit v\n" +
                 "where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and v.infant_feeding = "+feedingMethod+";";
         cd.setName("infantFeedingByMethod");
@@ -5065,9 +5066,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select f.patient_id\n" +
                 "from (Select e.patient_id, group_concat(f.infant_feeding) as feeding, d.dob\n" +
-                "      from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "               inner join kenyaemr_etl.etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f on e.patient_id = f.patient_id\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "      where date(e.visit_date) <= date(:endDate)\n" +
                 "        and timestampdiff(month, d.dob, date(f.visit_date)) <= 24\n" +
                 "      group by e.patient_id\n" +
@@ -5103,9 +5104,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition circumcisedWithModerateAEDuringProcedure() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_vmmc_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-procedure'\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-procedure'\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.severity = 1499\n" +
                 "group by e.patient_id;";
@@ -5125,9 +5126,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition circumcisedWithSevereAEDuringProcedure() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_vmmc_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-procedure'\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-procedure'\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.severity = 1500\n" +
                 "group by e.patient_id;";
@@ -5147,9 +5148,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition circumcisedWithModerateAEPostProcedure() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_vmmc_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-followup'\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-followup'\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.severity = 1499;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -5168,9 +5169,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
      */
     public CohortDefinition circumcisedWithSevereAEPostProcedure() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_vmmc_enrolment e\n" +
-                "         inner join kenyaemr_etl.etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-followup'\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure c on e.patient_id = c.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events a on e.patient_id = a.patient_id and a.form = 'vmmc-followup'\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and a.severity = 1500;";
         SqlCohortDefinition cd = new SqlCohortDefinition();

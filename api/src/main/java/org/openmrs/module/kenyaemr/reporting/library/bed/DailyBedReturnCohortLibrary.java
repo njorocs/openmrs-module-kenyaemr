@@ -8,7 +8,9 @@
  * graphic logo is a trademark of OpenMRS Inc.
  */
 package org.openmrs.module.kenyaemr.reporting.library.bed;
+
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
@@ -56,7 +58,7 @@ public class DailyBedReturnCohortLibrary {
     public CohortDefinition patientDischargedStatus(Integer dischargeStatus) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_inpatient_discharge \n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge \n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate) \n" +
                 "and discharge_status = '" + dischargeStatus + "';";
         cd.setName("Patient Discharged");
@@ -98,7 +100,7 @@ public class DailyBedReturnCohortLibrary {
     public CohortDefinition totalPatientDischargedStatus() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_inpatient_discharge \n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge \n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate) \n" +
                 "and discharge_status in (160431,162677,1694,159,164165)";
         cd.setName("Total Patient Discharged");
@@ -168,7 +170,7 @@ public class DailyBedReturnCohortLibrary {
     public CohortDefinition patientsDischargedByEndOfToday() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select patient_id\n" +
-                "from kenyaemr_etl.etl_inpatient_discharge\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge\n" +
                 "where date(visit_date) = CURDATE();";
         cd.setName("Patient Discharged Today");
         cd.setQuery(sqlQuery);

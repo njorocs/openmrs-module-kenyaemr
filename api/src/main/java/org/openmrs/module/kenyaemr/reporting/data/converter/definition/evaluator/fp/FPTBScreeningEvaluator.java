@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPTBScreeningDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -35,12 +36,12 @@ public class FPTBScreeningEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry =
                 "SELECT f.encounter_id, c.name AS resulting_tb_status " +
-                        "FROM kenyaemr_etl.etl_family_planning f " +
-                        "JOIN kenyaemr_etl.etl_tb_screening t " +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f " +
+                        "JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening t " +
                         "  ON f.patient_id = t.patient_id " +
                         "  AND t.visit_date = (" +
                         "       SELECT MAX(ts.visit_date) " +
-                        "       FROM kenyaemr_etl.etl_tb_screening ts " +
+                        "       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening ts " +
                         "       WHERE ts.patient_id = f.patient_id " +
                         "         AND DATE(ts.visit_date) <= DATE(f.visit_date)" +
                         "  ) " +

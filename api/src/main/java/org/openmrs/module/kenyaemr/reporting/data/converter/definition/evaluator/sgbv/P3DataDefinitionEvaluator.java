@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.P3DataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.PRCDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -36,9 +36,9 @@ public class P3DataDefinitionEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT a.encounter_id, IF(pth.action_taken=165228, pth.date_created, NULL) p3_fill_date\n" +
-                " FROM kenyaemr_etl.etl_gbv_screening a\n" +
+                " FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening a\n" +
                 " LEFT JOIN (SELECT gsa.visit_id, gsa.`action_taken`, DATE(gsa.date_created) date_created\n" +
-                " FROM kenyaemr_etl.etl_gbv_screening_action gsa\n" +
+                " FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening_action gsa\n" +
                 " WHERE gsa.action_taken = 165228) pth ON a.visit_id = pth.visit_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

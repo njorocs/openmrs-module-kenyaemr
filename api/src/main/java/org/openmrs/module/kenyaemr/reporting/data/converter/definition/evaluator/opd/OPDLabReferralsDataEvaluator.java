@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDLabReferralsDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -38,14 +39,14 @@ public class OPDLabReferralsDataEvaluator implements ObsDataEvaluator {
 
 		String qry = "select le.obs_id,\n" +
                 "       v.referred_to\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         left join (select v.patient_id,\n" +
                 "                           (case v.referral_to\n" +
                 "                                when 'This health facility' then 1\n" +
                 "                                when 'Other health facility' then 2\n" +
                 "                                when 'Community Unit' then 3\n" +
                 "                                else '' end) as referred_to\n" +
-                "                    from kenyaemr_etl.etl_clinical_encounter v\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
                 "                    where date(v.visit_date) between date(:startDate) and date(:endDate)) v\n" +
                 "                   on v.patient_id = le.patient_id\n" +
                 "where date(le.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +

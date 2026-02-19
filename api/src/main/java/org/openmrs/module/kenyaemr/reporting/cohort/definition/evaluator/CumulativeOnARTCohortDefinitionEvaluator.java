@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.CumulativeOnARTCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -64,13 +65,13 @@ public class CumulativeOnARTCohortDefinitionEvaluator implements CohortDefinitio
 				"mid(min(concat(e.date_started,e.regimen_name)),11) as regimen,\n" +
 				"mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line,\n" +
 				"max(if(discontinued,1,0))as alternative_regimen\n" +
-				"from kenyaemr_etl.etl_drug_event e\n" +
-				"join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
 				"where e.program = 'HIV'\n" +
 				"group by e.patient_id) e\n" +
-				"left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
-				"left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-				"left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
+				"left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
+				"left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+				"left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
 				"group by e.patient_id\n" +
 				"having  (TI_on_art =0 and date_started <= :endDate ) )net;";
 

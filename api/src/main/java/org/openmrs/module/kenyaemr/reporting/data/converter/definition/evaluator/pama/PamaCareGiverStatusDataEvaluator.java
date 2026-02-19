@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pama;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverNameDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,10 +39,10 @@ public class PamaCareGiverStatusDataEvaluator implements PersonDataEvaluator {
                 "  if(ht.final_test_result='Positive' or d.unique_patient_no is not null,'Positive',\n" +
                 "     if(ht.final_test_result='Negative','Negative',\n" +
                 "        if(ht.final_test_result='Unknown','Unknown',''))) as care_giver_status\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "  inner join relationship r on d.patient_id = r.person_b\n" +
                 "  inner join relationship_type t on r.relationship = t.relationship_type_id and t.uuid = '3667e52f-8653-40e1-b227-a7278d474020'\n" +
-                "  left outer join (select mid(max(concat(t.visit_date, t.patient_id)),11) as patient_id,t.final_test_result from kenyaemr_etl.etl_hts_test t  group by t.patient_id) ht on ht.patient_id = d.patient_id;";
+                "  left outer join (select mid(max(concat(t.visit_date, t.patient_id)),11) as patient_id,t.final_test_result from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t  group by t.patient_id) ht on ht.patient_id = d.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

@@ -10,6 +10,7 @@
 package reporting.library.shared.covid;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -27,7 +28,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public static CohortDefinition fullyVaccinated() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment a where a.final_vaccination_status = 5585 and a.visit_date <= date(:endDate)";
+        String sqlQuery = "select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment a where a.final_vaccination_status = 5585 and a.visit_date <= date(:endDate)";
         cd.setName("fullyVaccinated");
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -39,7 +40,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition partiallyVaccinated() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment group by patient_id\n"
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment group by patient_id\n"
                 + "        having mid(max(concat(visit_date,final_vaccination_status)),11) = 166192\n"
                 + "        and max(visit_date) <= date(:endDate);";
         cd.setName("partiallyVaccinated;");
@@ -53,7 +54,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition covid19AssessedPatients() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select a.patient_id from kenyaemr_etl.etl_covid19_assessment a;";
+        String sqlQuery = "select a.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment a;";
         cd.setName("covid19AssessedPatients;");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -65,7 +66,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition everInfected() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment where ever_tested_covid_19_positive = 703 and ever_vaccinated is not null and visit_date <= date(:endDate)\n"
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment where ever_tested_covid_19_positive = 703 and ever_vaccinated is not null and visit_date <= date(:endDate)\n"
                 + "group by patient_id;";
         cd.setName("everInfected;");
         cd.setQuery(sqlQuery);
@@ -78,7 +79,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition everHospitalised() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment where hospital_admission = 1065 and visit_date <= date(:endDate);\n";
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment where hospital_admission = 1065 and visit_date <= date(:endDate);\n";
         cd.setName("everHospitalised");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -90,7 +91,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition diedDueToCovid() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_patient_program_discontinuation where discontinuation_reason =160034 and specific_death_cause=165609\n"
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation where discontinuation_reason =160034 and specific_death_cause=165609\n"
                 + "and coalesce(date(date_died),coalesce(date(effective_discontinuation_date),date(visit_date))) <= date(:endDate);";
         cd.setName("diedDueToCovid");
         cd.setQuery(sqlQuery);
@@ -105,7 +106,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition covidVaccineAgeCohort() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_patient_demographics where timestampdiff(YEAR ,dob,date(:endDate))>= 12;\n";
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics where timestampdiff(YEAR ,dob,date(:endDate))>= 12;\n";
         cd.setName("covidVaccineAgeCohort");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -117,7 +118,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition firstDoseVerifiedSQl() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = " select patient_id from kenyaemr_etl.etl_covid19_assessment where first_vaccination_verified = 164134 and\n"
+        String sqlQuery = " select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment where first_vaccination_verified = 164134 and\n"
                 + "        visit_date <= date(:endDate);";
         cd.setName("firstDose");
         cd.setQuery(sqlQuery);
@@ -130,7 +131,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition secondDoseVerifiedSQL() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment where second_vaccination_verified = 164134 and\n"
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment where second_vaccination_verified = 164134 and\n"
                 + "        visit_date <= date(:endDate);";
         cd.setName("secondDose");
         cd.setQuery(sqlQuery);
@@ -143,7 +144,7 @@ public class Covid19VaccinationCohortLibrary {
 
     public CohortDefinition boosterDoseVerifiedSQL() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = " select patient_id from kenyaemr_etl.etl_covid19_assessment where booster_dose_verified = 164134 and\n"
+        String sqlQuery = " select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment where booster_dose_verified = 164134 and\n"
                 + "        visit_date <= date(:endDate);";
         cd.setName("boosterDose");
         cd.setQuery(sqlQuery);

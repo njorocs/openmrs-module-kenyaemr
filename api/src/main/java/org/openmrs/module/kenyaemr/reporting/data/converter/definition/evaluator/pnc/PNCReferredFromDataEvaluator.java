@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCReferredFromDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class PNCReferredFromDataEvaluator implements EncounterDataEvaluator {
         String qry = "select v.encounter_id,\n" +
                 "(case v.referred_from when 1537 then \"Another Health Facility\" when 163488 then \"Community Unit\"\n" +
                 "when 1175 then \"N/A\" else \"\" end) as referred_from\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);\n";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);\n";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

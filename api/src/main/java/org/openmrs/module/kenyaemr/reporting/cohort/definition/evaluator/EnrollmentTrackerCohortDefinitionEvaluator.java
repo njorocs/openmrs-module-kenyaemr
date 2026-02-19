@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.EnrollmentTrackerCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.RDQAActiveCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
@@ -49,9 +49,9 @@ public class EnrollmentTrackerCohortDefinitionEvaluator implements CohortDefinit
 		Cohort newCohort = new Cohort();
 
 		String qry = "SELECT t.patient_id\n" +
-				"FROM kenyaemr_etl.etl_hts_test t\n" +
-				"left join kenyaemr_etl.etl_hts_referral_and_linkage l on l.patient_id=t.patient_id and t.visit_date <=l.visit_date\n" +
-				"left join kenyaemr_etl.etl_hiv_enrollment e on e.patient_id = t.patient_id and e.voided=0\n" +
+				"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+				"left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l on l.patient_id=t.patient_id and t.visit_date <=l.visit_date\n" +
+				"left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on e.patient_id = t.patient_id and e.voided=0\n" +
 				"where t.final_test_result='Positive' and t.voided=0 and (l.patient_id is not null or e.patient_id is not null)\n" +
 				";";
 

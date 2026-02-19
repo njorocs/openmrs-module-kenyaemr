@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.clinicianWorkload;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.clinicianWorkload.TriageProviderDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,7 +38,7 @@ public class TriageProviderDataEvaluator implements VisitDataEvaluator {
 
         String qry = "WITH filtered_patients AS (\n" +
                 "    SELECT patient_id\n" +
-                "    FROM kenyaemr_etl.etl_patient_demographics\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
                 "    WHERE voided = 0\n" +
                 "),\n" +
                 "     users AS (\n" +
@@ -65,7 +66,7 @@ public class TriageProviderDataEvaluator implements VisitDataEvaluator {
                 "             t.patient_id,\n" +
                 "             t.visit_date AS triage_date,\n" +
                 "             u.full_name AS triaged_by\n" +
-                "         FROM kenyaemr_etl.etl_patient_triage t\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                  JOIN filtered_patients p ON p.patient_id = t.patient_id\n" +
                 "                  LEFT JOIN checked_in v ON v.patient_id = t.patient_id AND v.visit_id = t.visit_id\n" +
                 "           JOIN users u ON u.user_id = t.encounter_provider\n" +

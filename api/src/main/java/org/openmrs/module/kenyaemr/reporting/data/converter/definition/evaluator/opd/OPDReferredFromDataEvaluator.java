@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDReferredFromDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDReferredToDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -40,7 +40,7 @@ public class OPDReferredFromDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
 			"    v.encounter_id,\n" +
 			"    (case v.visit_type when 'Transfer in'  then 2  else '' end) as referred_from\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.HonouredAppointmentDateDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -45,7 +46,7 @@ public class HonouredAppointmentDateDataEvaluator implements EncounterDataEvalua
                 "                                 t.lost_visit                                                as lost_clinical_visit_date,\n" +
                 "                                 t.lost_tca                                                  as lost_tca,\n" +
                 "                                 t.lost_refill_tca                                           as lost_refill_tca\n" +
-                "                          from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "                          from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "                                   inner join\n" +
                 "                               (select t.patient_id,\n" +
                 "                                       t.encounter_id,\n" +
@@ -53,9 +54,9 @@ public class HonouredAppointmentDateDataEvaluator implements EncounterDataEvalua
                 "                                       max(f.visit_date)                                                       as lost_visit,\n" +
                 "                                       mid(max(concat(date(f.visit_date), date(f.next_appointment_date))), 11) as lost_tca,\n" +
                 "                                       mid(max(concat(date(f.visit_date), date(f.refill_date))), 11)              lost_refill_tca\n" +
-                "                                from kenyaemr_etl.etl_ccc_defaulter_tracing t\n" +
+                "                                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing t\n" +
                 "                                         inner join\n" +
-                "                                     kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "                                     "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "                                     on t.patient_id = f.patient_id\n" +
                 "                                where t.visit_date between date(:startDate) and date(:endDate) and t.visit_date > f.visit_date\n" +
                 "                                group by t.patient_id) t on f.patient_id = t.patient_id\n" +

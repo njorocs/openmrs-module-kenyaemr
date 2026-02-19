@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentTracingFinalOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -45,8 +46,8 @@ public class MissedAppointmentTracingFinalOutcomeDataEvaluator implements Encoun
                 "           when 142917 then 'Other'\n" +
                 "       else '' end\n" +
                 "               final_outcome\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "         join kenyaemr_etl.etl_ccc_defaulter_tracing tr on tr.patient_id = fup.patient_id and fup.next_appointment_date = tr.missed_appointment_date and tr.true_status is not null and tr.true_status > 0\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing tr on tr.patient_id = fup.patient_id and fup.next_appointment_date = tr.missed_appointment_date and tr.true_status is not null and tr.true_status > 0\n" +
                 "where next_appointment_date between date(:startDate) and date(:endDate)\n" +
                 "group by fup.encounter_id;";
 

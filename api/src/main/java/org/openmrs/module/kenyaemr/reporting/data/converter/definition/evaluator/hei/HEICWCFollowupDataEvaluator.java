@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCDewormedDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCFollowupDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +37,7 @@ public class HEICWCFollowupDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select encounter_id,\n" +
                 " (case followup_type when 132636 then 'Marasmus' when 116474 then 'Kwashiorkor' when 115122 then 'Mulnutrition' when 5622 then 'Other' else \"\" end) as followup_type\n" +
-                " from kenyaemr_etl.etl_hei_follow_up_visit;";
+                " from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

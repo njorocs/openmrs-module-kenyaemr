@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDBloodPressureDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDHeightDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -39,8 +39,8 @@ public class OPDBloodPressureDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
 			"       concat(t.systolic_pressure, '/',t.diastolic_pressure) as blood_pressure\n" +
-			" from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"      LEFT JOIN kenyaemr_etl.etl_patient_triage t ON v.patient_id = t.patient_id AND date(v.visit_date) = date(t.visit_date)\n" +
+			" from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"      LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t ON v.patient_id = t.patient_id AND date(v.visit_date) = date(t.visit_date)\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

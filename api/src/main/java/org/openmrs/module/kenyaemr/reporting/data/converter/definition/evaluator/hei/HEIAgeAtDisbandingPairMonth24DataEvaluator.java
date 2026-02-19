@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIAgeAtDisbandingPairMonth24DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class HEIAgeAtDisbandingPairMonth24DataEvaluator implements PersonDataEva
         String qry = "select\n" +
                 "  c.patient_id,\n" +
                 "  round(DATEDIFF(c.visit_date,d.DOB)/30) as age_at_disbandment\n" +
-                "from kenyaemr_etl.etl_current_in_care c\n" +
-                "  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c\n" +
+                "  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "  d.patient_id = c.patient_id\n" +
                 "WHERE disc_patient IS NOT NULL\n" +
                 " GROUP BY patient_id";

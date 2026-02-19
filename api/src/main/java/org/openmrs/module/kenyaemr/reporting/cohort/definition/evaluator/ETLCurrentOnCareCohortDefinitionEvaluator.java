@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLCurrentOnCareCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,7 +48,7 @@ public class ETLCurrentOnCareCohortDefinitionEvaluator implements CohortDefiniti
 
 		Cohort newCohort = new Cohort();
 
-		String qry=" SELECT patient_id from kenyaemr_etl.etl_current_in_care ";
+		String qry=" SELECT patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care ";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

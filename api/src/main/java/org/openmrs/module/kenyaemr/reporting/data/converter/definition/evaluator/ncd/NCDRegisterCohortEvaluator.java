@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ncd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.NCDRegisterCohortDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
@@ -22,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 
 @Component
@@ -49,8 +48,8 @@ public class NCDRegisterCohortEvaluator implements EncounterQueryEvaluator {
         }
 
         String sql = "SELECT e.encounter_id " +
-                "FROM kenyaemr_etl.etl_ncd_enrollment e " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics d ON e.patient_id = d.patient_id " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment e " +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON e.patient_id = d.patient_id " +
                 "WHERE date(e.visit_date) BETWEEN date(:startDate) AND date(:endDate)";
 
         SqlQueryBuilder q = new SqlQueryBuilder();

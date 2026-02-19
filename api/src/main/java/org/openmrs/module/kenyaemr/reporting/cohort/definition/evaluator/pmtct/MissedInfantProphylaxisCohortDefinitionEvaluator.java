@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.MissedInfantProphylaxisCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -68,12 +69,12 @@ public class MissedInfantProphylaxisCohortDefinitionEvaluator implements CohortD
 		        + "             t.hts_test_date                                  as latest_hts_test_date,\n"
 		        + "             t.final_hts_result                               as hts_results,\n"
 		        + "             h.patient_id                                     as hiv_patient\n"
-		        + "      from kenyaemr_etl.etl_mch_enrollment e\n"
+		        + "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n"
 		        + "               left join (select a.patient_id,\n"
 		        + "                                 max(a.visit_date)                                       as latest_anc_visit_date,\n"
 		        + "                                 mid(max(concat(a.visit_date, a.final_test_result)), 11) as latest_anc_test_results,\n"
 		        + "                          group_concat(a.baby_nvp_dispensed,a.baby_azt_dispensed) as nvp_azt\n"
-		        + "                          from kenyaemr_etl.etl_mch_antenatal_visit a\n"
+		        + "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n"
 		        + "                          where date(a.visit_date) <= date(:endDate)\n"
 		        + "                          group by a.patient_id) a\n"
 		        + "                         on e.patient_id = a.patient_id\n"
@@ -81,7 +82,7 @@ public class MissedInfantProphylaxisCohortDefinitionEvaluator implements CohortD
 		        + "                                  max(d.visit_date)                                       as latest_mat_visit_date,\n"
 		        + "                                 mid(max(concat(d.visit_date, d.final_test_result)), 11) as latest_mat_test_results,\n"
 		        + "                          group_concat(d.baby_nvp_dispensed,d.baby_azt_dispensed) as nvp_azt\n"
-		        + "                          from kenyaemr_etl.etl_mchs_delivery d\n"
+		        + "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n"
 		        + "                          where date(d.visit_date) <= date(:endDate)\n"
 		        + "                          group by d.patient_id) d\n"
 		        + "                         on e.patient_id = d.patient_id\n"
@@ -89,17 +90,17 @@ public class MissedInfantProphylaxisCohortDefinitionEvaluator implements CohortD
 		        + "                                 max(p.visit_date)                                       as latest_pnc_visit,\n"
 		        + "                                 mid(max(concat(p.visit_date, p.final_test_result)), 11) as latest_test_results_at_pnc,\n"
 		        + "                          group_concat(p.baby_nvp_dispensed,p.baby_azt_dispensed) as nvp_azt\n"
-		        + "                          from kenyaemr_etl.etl_mch_postnatal_visit p\n"
+		        + "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n"
 		        + "                          where date(p.visit_date) <= date(:endDate)\n"
 		        + "                          group by p.patient_id) p\n"
 		        + "                         on e.patient_id = p.patient_id\n"
 		        + "               left join (select t.patient_id,\n"
 		        + "                                 max(t.visit_date)                                       as hts_test_date,\n"
 		        + "                                 mid(max(concat(t.visit_date, t.final_test_result)), 11) as final_hts_result\n"
-		        + "                          from kenyaemr_etl.etl_hts_test t\n"
+		        + "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n"
 		        + "                          where date(t.visit_date) <= date(:endDate)\n"
 		        + "                          group by t.patient_id) t on e.patient_id = t.patient_id\n"
-		        + "               left join kenyaemr_etl.etl_hiv_enrollment h on e.patient_id = h.patient_id\n"
+		        + "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment h on e.patient_id = h.patient_id\n"
 		        + "      group by e.patient_id) c\n"
 		        + "where date(latest_mch_enrollment) between date(:startDate) and date(:endDate)\n"
 		        + "  and (c.hiv_patient is null or c.hts_results = 'Positive')\n"

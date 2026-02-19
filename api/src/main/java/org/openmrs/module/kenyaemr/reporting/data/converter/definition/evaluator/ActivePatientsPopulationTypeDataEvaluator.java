@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ActivePatientsPopulationTypeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -54,7 +55,7 @@ public class ActivePatientsPopulationTypeDataEvaluator implements PersonDataEval
                 "                                    when 162277 then 'Prisoner'\n" +
                 "                                    when 1175 then 'Not applicable'\n" +
                 "                                    when 165192 then 'Military and other uniformed services' else '' end), '' )),11) as priority_population_type\n" +
-                "        FROM kenyaemr_etl.etl_patient_hiv_followup where person_present = 978 GROUP BY patient_id) fup\n" +
+                "        FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup where person_present = 978 GROUP BY patient_id) fup\n" +
                 "GROUP BY fup.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

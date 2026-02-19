@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIFeedingOptionsMonth12DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,8 +40,8 @@ public class HEIFeedingOptionsMonth12DataEvaluator implements PersonDataEvaluato
                 "            when 1595 then \"Exclusive Replacement(ERF)\"\n" +
                 "            when 6046 then \"Mixed Feeding(MF)\"\n" +
                 "            end) as infant_feeding_six_weeks\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "         INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "    d.patient_id = f.patient_id\n" +
                 "WHERE timestampdiff(MONTH, d.DOB, f.visit_date) between 11 and 13 \n" +
                 "GROUP BY patient_id;";

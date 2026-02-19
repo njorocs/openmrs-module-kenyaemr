@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.VitalsOxygenSaturationDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,7 +38,7 @@ public class VitalsOxygenSaturationDataEvaluator implements VisitDataEvaluator {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
         String qry = "select t.visit_id,t.oxygen_saturation\n" +
-                "from kenyaemr_etl.etl_patient_triage t\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "GROUP BY t.visit_id;";
 

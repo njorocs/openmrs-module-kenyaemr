@@ -16,17 +16,8 @@ import org.openmrs.module.kenyacore.report.cohort.definition.CalculationCohortDe
 import org.openmrs.module.kenyacore.report.cohort.definition.DateCalculationCohortDefinition;
 import org.openmrs.module.kenyaemr.calculation.library.MissedLastAppointmentCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.LostToFollowUpCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.EligibleForArtCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.EligibleForArtExclusiveCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnAlternateFirstLineArtCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnArtCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnOriginalFirstLineArtCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnSecondLineArtCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.PregnantAtArtStartCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.TbPatientAtArtStartCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.TransferredInAfterArtStartCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.WhoStageAtArtStartCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.*;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.regimen.RegimenManager;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.RegimenOrderCohortDefinition;
@@ -437,7 +428,7 @@ public class ArtCohortLibrary {
 
 	public  CohortDefinition patientsOnRegimen(String regimenName) {
 		String sqlQuery="SELECT d.patient_id\n" +
-		"from kenyaemr_etl.etl_drug_event d\n" +
+		"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d\n" +
 				"  inner join (\n" +
 				"select fup.visit_date,fup.patient_id, min(e.visit_date) as enroll_date,\n" +
 				"    max(fup.visit_date) as latest_vis_date,\n" +
@@ -446,12 +437,12 @@ public class ArtCohortLibrary {
 				"    d.patient_id as disc_patient,\n" +
 				"  de.patient_id as started_on_drugs,\n" +
 				"  de.program as hiv_program\n" +
-				"from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-				"join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-				"left outer join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and date(date_started) <= date(:endDate)\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+				"left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and date(date_started) <= date(:endDate)\n" +
 				"left outer JOIN\n" +
-				"(select patient_id, visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"(select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
 				"group by patient_id\n" +
 				") d on d.patient_id = fup.patient_id\n" +

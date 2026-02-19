@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.BloodPressureDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.MedicalCoverDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,7 +41,7 @@ public class MedicalCoverDataEvaluator implements PersonDataEvaluator {
                 "        when 1917 then 'NHIF'\n" +
                 "        when 1107 then 'None'\n" +
                 "        when 5622 then 'Other' else '' end) as insurance_type\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup where fup.visit_date <= date(:endDate)\n" +
+                "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup where fup.visit_date <= date(:endDate)\n" +
                 "      GROUP BY fup.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

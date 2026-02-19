@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsNutritionalSamMamDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class SpecialClinicsNutritionalSamMamDataEvaluator implements EncounterDa
                 "           when 1687 then '1st Time Diagnosis'\n" +
                 "           when 160033 then 'Relapse'\n" +
                 "           when 1655 then 'Re-admission' end as sam_mam\n" +
-                "from kenyaemr_etl.etl_special_clinics s\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics s\n" +
                 "where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and s.special_clinic_form_uuid = '"+specialClinic+"';";
 

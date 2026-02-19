@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.DiseaseDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -73,10 +74,10 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
                 "                                             SUBSTRING_INDEX(group_concat(concat_ws('|', c.complaint, c.complaint_duration)), '|', -1),\n" +
                 "                                             ',', 1)\n" +
                 "                                 END                   AS fever_duration_from_days\n" +
-                "                      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
-                "                               inner join kenyaemr_etl.etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
+                "                      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+                "                               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
                 "                               inner join openmrs.visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
-                "                               left join kenyaemr_etl.etl_patient_triage t\n" +
+                "                               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                                         on c.patient_id = t.patient_id and\n" +
                 "                                            date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                      group by patient_id) a\n" +

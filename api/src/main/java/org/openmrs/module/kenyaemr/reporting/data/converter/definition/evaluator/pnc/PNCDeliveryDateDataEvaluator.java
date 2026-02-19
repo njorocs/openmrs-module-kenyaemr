@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCDeliveryDateDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,10 +38,10 @@ public class PNCDeliveryDateDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
                 "       date(coalesce(d.date_of_delivery, v.delivery_date)) as date_of_delivery\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "         left join (select d.patient_id,\n" +
                 "                           mid(max(concat(d.visit_date, date(d.date_of_delivery))), 11) as date_of_delivery\n" +
-                "                    from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "                    where d.visit_date <= date(:endDate)\n" +
                 "                    group by d.patient_id) d\n" +
                 "                   on v.patient_id = d.patient_id\n" +

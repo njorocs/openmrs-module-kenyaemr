@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.reporting.builder.mchms;
 
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.PatientsOnMCHCohortDefinition;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.kenyacore.report.HybridReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
@@ -21,6 +20,7 @@ import org.openmrs.module.kenyaemr.calculation.library.hiv.art.CurrentArtRegimen
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.ViralLoadResultCalculation;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQASimpleObjectRegimenConverter;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.PatientsOnMCHCohortDefinition;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.data.DataDefinition;

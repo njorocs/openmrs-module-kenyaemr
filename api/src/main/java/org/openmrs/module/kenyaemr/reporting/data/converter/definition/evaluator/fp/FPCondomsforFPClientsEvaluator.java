@@ -11,9 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPCondomsforFPClientsDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPEmergencyContraceptiveQtyDispDefinition;
-import org.openmrs.module.reporting.data.BaseDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -39,7 +38,7 @@ public class FPCondomsforFPClientsEvaluator implements EncounterDataEvaluator {
     public EvaluatedEncounterData evaluate(EncounterDataDefinition encounterDataDefinition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry = "SELECT f.encounter_id, SUM(f.quantity_dispensed) AS total_condoms_dispensed " +
-                "FROM kenyaemr_etl.etl_family_planning f " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f " +
                 "WHERE f.contraceptive_dispensed IN (164813, 164814) " +
                 "AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) " +
                 "GROUP BY f.encounter_id";

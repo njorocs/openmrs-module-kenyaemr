@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.cacx.CACXFollowUpDateDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.EmotionalIPVDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -35,7 +35,7 @@ public class EmotionalIPVDataDefinitionEvaluator implements EncounterDataEvaluat
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "SELECT a.encounter_id, IF(a.emotional_ipv=1066, 'No', IF(a.emotional_ipv in (1065,118688), 'Yes', NULL)) emotional_ipv FROM kenyaemr_etl.etl_gbv_screening a";
+        String qry = "SELECT a.encounter_id, IF(a.emotional_ipv=1066, 'No', IF(a.emotional_ipv in (1065,118688), 'Yes', NULL)) emotional_ipv FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening a";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

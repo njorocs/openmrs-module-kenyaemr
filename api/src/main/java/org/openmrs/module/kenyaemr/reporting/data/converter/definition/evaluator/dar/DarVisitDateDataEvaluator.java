@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarTbScreeningResultDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarVisitDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,9 +36,9 @@ public class DarVisitDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
         String qry = "SELECT e.patient_id, coalesce(date(artPrep.visit_date),date(f.visit_date)) as visitDate\n" +
-                "FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-                "         left join kenyaemr_etl.etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
-                "         left join kenyaemr_etl.etl_ART_preparation artPrep on artPrep.patient_id = e.patient_id and  date(artPrep.visit_date) = date(:startDate) \n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation artPrep on artPrep.patient_id = e.patient_id and  date(artPrep.visit_date) = date(:startDate) \n" +
                 "where e.voided = 0 and (f.patient_id is not null or artPrep.patient_id is not null);\n";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

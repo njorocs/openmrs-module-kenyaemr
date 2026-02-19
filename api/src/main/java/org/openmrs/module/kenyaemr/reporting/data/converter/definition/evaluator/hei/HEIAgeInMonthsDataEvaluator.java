@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIAgeInMonthsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,8 +37,8 @@ public class HEIAgeInMonthsDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select e.patient_id,\n" +
                 "       timestampdiff(MONTH, date(d.DOB), date(e.visit_date)) as age\n" +
-                "                     from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "                     inner join kenyaemr_etl.etl_patient_demographics d\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "                     inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                     on e.patient_id = d.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

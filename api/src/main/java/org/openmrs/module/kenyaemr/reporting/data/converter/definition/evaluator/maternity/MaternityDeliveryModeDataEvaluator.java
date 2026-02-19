@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityDeliveryModeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +39,7 @@ public class MaternityDeliveryModeDataEvaluator implements PersonDataEvaluator {
         String qry = "select\n" +
                 "  v.patient_id,\n" +
                 "  (case v.mode_of_delivery when 1170 then \"Normal delivery\" when 1171 then \"Cesarean section\" when 1172 then \"Breech delivery\" when 118159 then \"Assisted vaginal delivery\" else \"\" end) as mode_of_delivery\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "GROUP BY v.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

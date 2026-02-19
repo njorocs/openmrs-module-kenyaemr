@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPReasonsForReferralDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -33,7 +34,7 @@ public class FPReasonsForReferralEvaluator implements EncounterDataEvaluator {
     @Override
     public EvaluatedEncounterData evaluate(EncounterDataDefinition encounterDataDefinition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
-        String qry = "select v.encounter_id, v.reasons_for_referral from kenyaemr_etl.etl_family_planning v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+        String qry = "select v.encounter_id, v.reasons_for_referral from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

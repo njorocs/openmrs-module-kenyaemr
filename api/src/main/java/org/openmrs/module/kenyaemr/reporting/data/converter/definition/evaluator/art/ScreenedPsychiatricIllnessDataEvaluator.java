@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.AdheranceBarriersDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ScreenedPsychiatricIllnessDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +35,7 @@ public class ScreenedPsychiatricIllnessDataEvaluator implements PersonDataEvalua
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id,screened_negative_psychiatric_illness from kenyaemr_etl.etl_ART_preparation group by patient_id;";
+        String qry = "select patient_id,screened_negative_psychiatric_illness from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation group by patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ComorbiditiesDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -20,7 +21,6 @@ import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -59,7 +59,7 @@ public class ComorbiditiesDataEvaluator implements PersonDataEvaluator {
                 "                                          when 114662 then 'Osteoporosis'\n" +
                 "                                          when 117703 then 'Sickle Cell Anaemia'\n" +
                 "                                          when 118976 then 'Thyroid disease'\n" +
-                "    end) from kenyaemr_etl.etl_allergy_chronic_illness a group by a.patient_id;";
+                "    end) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness a group by a.patient_id;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
        // Date startDate = (Date)context.getParameterValue("startDate");
         //queryBuilder.addParameter("startDate", startDate);

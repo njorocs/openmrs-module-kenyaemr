@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSLinkageArtStartDateToDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSLinkageProviderHandedToDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -36,8 +36,8 @@ public class HTSLinkageArtStartDateDataEvaluator implements EncounterDataEvaluat
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select rl.encounter_id, coalesce(date(rl.art_start_date),date(dr.date_started))\n" +
-			"from kenyaemr_etl.etl_hts_referral_and_linkage rl\n" +
-			"         left join (select dr.patient_id, min(dr.date_started) as date_started from kenyaemr_etl.etl_drug_event dr where dr.program = 'HIV' group by dr.patient_id) dr\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage rl\n" +
+			"         left join (select dr.patient_id, min(dr.date_started) as date_started from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event dr where dr.program = 'HIV' group by dr.patient_id) dr\n" +
 			"        on dr.patient_id = rl.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

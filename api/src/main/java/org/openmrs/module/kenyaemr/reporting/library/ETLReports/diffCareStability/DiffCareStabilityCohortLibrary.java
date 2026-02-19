@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.diffCareStability;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class DiffCareStabilityCohortLibrary {
     public CohortDefinition stableUnder1Monthtca(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
+        String sqlQuery = "select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
                 "                  and timestampdiff(month,c.latest_vis_date,c.latest_tca) <1 group by c.patient_id;";
         cd.setName("stableUnder1Monthtca");
         cd.setQuery(sqlQuery);
@@ -31,7 +32,7 @@ public class DiffCareStabilityCohortLibrary {
 
     public CohortDefinition stableUnder4Monthstca(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
                 "                  and timestampdiff(month,c.latest_vis_date,c.latest_tca) <4 group by c.patient_id;";
         cd.setName("stableUnder4Monthstca");
         cd.setQuery(sqlQuery);
@@ -42,7 +43,7 @@ public class DiffCareStabilityCohortLibrary {
 
     public  CohortDefinition stableOver6Monthstca() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
                 "and timestampdiff(month,c.latest_vis_date,c.latest_tca) >6 group by c.patient_id;" ;
         cd.setName("stableOver6Monthstca");
         cd.setQuery(sqlQuery);
@@ -53,7 +54,7 @@ public class DiffCareStabilityCohortLibrary {
 
     public  CohortDefinition stablePatientsMultiMonthAppointments(Integer month) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability =1 and c.started_on_drugs is not null\n" +
                 "and timestampdiff(month,c.latest_vis_date,c.latest_tca) =" + month + " group by c.patient_id;" ;
         cd.setName("multimonthTCA");
         cd.setQuery(sqlQuery);
@@ -63,7 +64,7 @@ public class DiffCareStabilityCohortLibrary {
     }
 
     public  CohortDefinition unstable() {
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability =2 and c.started_on_drugs is not null group by c.patient_id;";
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability =2 and c.started_on_drugs is not null group by c.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("unstable");
         cd.setQuery(sqlQuery);
@@ -72,7 +73,7 @@ public class DiffCareStabilityCohortLibrary {
     }
 
     public  CohortDefinition undocumentedStability() {
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_current_in_care c where c.stability is null and c.started_on_drugs is not null group by c.patient_id;";
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c where c.stability is null and c.started_on_drugs is not null group by c.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("Undocumented stability");
         cd.setQuery(sqlQuery);

@@ -10,10 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.bed;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.bed.PatientDischargedLocationDataDefinition;
-import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
-import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
-import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -39,7 +37,7 @@ public class PatientDischargeLocationDataEvaluator implements PersonDataEvaluato
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select d.patient_id, lc.name\n" +
-                "from kenyaemr_etl.etl_inpatient_discharge d\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d\n" +
                 "inner join location lc \n" +
                 " on d.location_id = lc.location_id\n" +
                 "where date(d.visit_date) between date(:startDate) and date(:endDate) \n" +

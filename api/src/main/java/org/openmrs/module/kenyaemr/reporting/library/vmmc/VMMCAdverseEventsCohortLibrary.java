@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.vmmc;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
@@ -23,7 +24,7 @@ import java.util.Date;
 public class VMMCAdverseEventsCohortLibrary {
     public CohortDefinition getClientsWithVMMCAdverseEvent(Integer adverseEvent, Integer severity, String form) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_adverse_events e where e.visit_date between date(:startDate) and date(:endDate) and e.adverse_event = "+adverseEvent+" and e.severity = "+severity+" and e.form = '"+form+"';";
+        String sqlQuery = "select e.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events e where e.visit_date between date(:startDate) and date(:endDate) and e.adverse_event = "+adverseEvent+" and e.severity = "+severity+" and e.form = '"+form+"';";
         cd.setName("ClientsWithVMMCAdverseEvent");
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));

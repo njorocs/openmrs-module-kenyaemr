@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MchServiceDeliveryPointDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -47,22 +48,22 @@ public class MchServiceDeliveryPointDataEvaluator implements PersonDataEvaluator
 		        + "             m.latest_mat_visit_date,\n"
 		        + "             p.latest_pnc_visit_date,\n"
 		        + "             max(e.visit_date)                             as latest_mch_enr_date\n"
-		        + "      from kenyaemr_etl.etl_mch_enrollment e\n"
+		        + "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n"
 		        + "               left join(select a.patient_id,\n"
 		        + "                                max(a.visit_date) as latest_anc_visit_date,\n"
 		        + "                                mid(max(concat(date(a.visit_date), a.next_appointment_date)),\n"
 		        + "                                    11)           as anc_next_appointment_date\n"
-		        + "                         from kenyaemr_etl.etl_mch_antenatal_visit a\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n"
 		        + "                         where date(a.visit_date) <= date(:endDate)\n"
 		        + "                         group by a.patient_id) a on e.patient_id = a.patient_id\n"
 		        + "               left join(select m.patient_id, max(m.visit_date) as latest_mat_visit_date\n"
-		        + "                         from kenyaemr_etl.etl_mchs_delivery m\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery m\n"
 		        + "                         where date(m.visit_date) <= date(:endDate)\n"
 		        + "                         group by m.patient_id) m on e.patient_id = m.patient_id\n"
 		        + "               left join(select p.patient_id,\n"
 		        + "                                max(p.visit_date)                                            as latest_pnc_visit_date,\n"
 		        + "                                mid(max(concat(date(p.visit_date), p.appointment_date)), 11) as pnc_next_appointment_date\n"
-		        + "                         from kenyaemr_etl.etl_mch_postnatal_visit p\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n"
 		        + "                         where date(p.visit_date) <= date(:endDate)\n"
 		        + "                         group by p.patient_id) p on e.patient_id = p.patient_id\n"
 		        + "      where date(e.visit_date) between date(:startDate) and date(:endDate)\n"

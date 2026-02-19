@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCMaternalHAARTDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,10 +44,10 @@ public class ANCMaternalHaartDataEvaluator implements EncounterDataEvaluator {
             "        when d.date_started > v.visit_date then 'On ART'\n" +
             "        else 'N/A'\n" +
             "    end ) as maternal_on_hart\n" +
-            " from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-            "         inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = v.patient_id\n" +
+            " from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+            "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = v.patient_id\n" +
             "         inner join (select d.patient_id, min(d.date_started) as date_started, d.program as program\n" +
-            "                     from kenyaemr_etl.etl_drug_event d\n" +
+            "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d\n" +
             "                     group by d.patient_id) d\n" +
             "                    on v.patient_id = d.patient_id and d.program = 'HIV'\n" +
             "   where v.visit_date between date(:startDate) AND date(:endDate);";

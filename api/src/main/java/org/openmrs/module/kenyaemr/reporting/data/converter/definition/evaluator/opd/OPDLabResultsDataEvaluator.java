@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDLabResultsDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -37,8 +38,8 @@ public class OPDLabResultsDataEvaluator implements ObsDataEvaluator {
         EvaluatedObsData c = new EvaluatedObsData(definition, context);
 
 		String qry = "SELECT le.obs_id,result_name\n" +
-                "FROM kenyaemr_etl.etl_laboratory_extract le\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics p ON p.patient_id = le.patient_id and p.voided = 0\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = le.patient_id and p.voided = 0\n" +
                 "where obs_id is not null and date(le.visit_date) BETWEEN date(:startDate) AND date(:endDate)";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

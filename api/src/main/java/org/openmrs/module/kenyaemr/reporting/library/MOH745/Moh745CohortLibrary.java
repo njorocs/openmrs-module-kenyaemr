@@ -9,20 +9,18 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.MOH745;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.kenyacore.report.ReportUtils;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.KPTypeDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.springframework.stereotype.Component;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 @Component
 public class Moh745CohortLibrary {
@@ -32,7 +30,7 @@ public class Moh745CohortLibrary {
 
     public CohortDefinition patientVisitType(String visitType) {
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where i.visit_type = '"+visitType+"' and  i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
+        String sqlQuery = "select i.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where i.visit_type = '"+visitType+"' and  i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientVisitType");
         cd.setQuery(sqlQuery);
@@ -46,7 +44,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "          where coalesce(i.via_vili_screening_method,i.hpv_screening_method,i.pap_smear_screening_method,i.colposcopy_screening_method)\n" +
                 "           IN ('"+val+"') and i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by i.patient_id;";
@@ -63,7 +61,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where i.via_vili_screening_method IN ('"+val+"') and i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -89,7 +87,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where i.pap_smear_screening_method IN ('"+val+"') and i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -115,7 +113,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where i.hpv_screening_method IN ('"+val+"') and i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -141,7 +139,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where i.via_vili_screening_method IN ('"+val+"')\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where i.via_vili_screening_method IN ('"+val+"')\n" +
                 "  and i.via_vili_screening_result = 'Positive' and  i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientPositiveViaScreeningMethod");
@@ -166,7 +164,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where i.colposcopy_screening_method IN ('"+val+"')\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where i.colposcopy_screening_method IN ('"+val+"')\n" +
                 "  and i.colposcopy_screening_result = 'Positive' and  i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientPositiveViaScreeningMethod");
@@ -191,7 +189,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(indicatorVal,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where i.hpv_screening_method IN ('"+val+"')\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where i.hpv_screening_method IN ('"+val+"')\n" +
                 "  and i.hpv_screening_result = 'Positive' and  i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientPositiveHpvScreeningMethod");
@@ -215,7 +213,7 @@ public class Moh745CohortLibrary {
 
     public CohortDefinition patientScreeningResult() {
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where\n" +
                 "  coalesce(i.via_vili_screening_result,i.hpv_screening_result,i.pap_smear_screening_result,i.colposcopy_screening_result)  in ('Presumed','Suspicious for Cancer','Low grade lesion') \n" +
                 "  and i.visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -241,7 +239,7 @@ public class Moh745CohortLibrary {
 
         String val = StringUtils.join(treatmentMethod,"','");
 
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i where\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i where\n" +
                 "  coalesce(i.colposcopy_treatment_method,i.hpv_treatment_method,i.pap_smear_treatment_method,i.via_vili_treatment_method) IN ('"+val+"')\n" +
                 "  and visit_date between date(:startDate) and date(:endDate) group by i.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -266,8 +264,8 @@ public class Moh745CohortLibrary {
     /*HIV Positive Clients Screened*/
     public CohortDefinition HIVPositiveClientsScreenedCl(String visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i left join (select h.patient_id from kenyaemr_etl.etl_hiv_enrollment h " +
-                "where h.visit_date <= date(:endDate)) h on h.patient_id = i.patient_id left join (select t.patient_id from kenyaemr_etl.etl_hts_test t where " +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i left join (select h.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment h " +
+                "where h.visit_date <= date(:endDate)) h on h.patient_id = i.patient_id left join (select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where " +
                 "t.final_test_result = 'Positive' and t.test_type = 2 and t.visit_date <= date(:endDate)) t on t.patient_id = i.patient_id where" +
                 " i.visit_type = '"+visitType+"' and (h.patient_id is not null or t.patient_id is not null) and i.visit_date between date(:startDate) and date(:endDate)" +
                 "group by i.patient_id;";
@@ -284,8 +282,8 @@ public class Moh745CohortLibrary {
     /*HIV Positive With Positive Screening Results*/
     public CohortDefinition HIVPositiveClientsScreenedWithPositiveResultsCl(String visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i left join (select h.patient_id from kenyaemr_etl.etl_hiv_enrollment h " +
-                "where h.visit_date <= date(:endDate)) h on h.patient_id = i.patient_id left join (select t.patient_id from kenyaemr_etl.etl_hts_test t where " +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i left join (select h.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment h " +
+                "where h.visit_date <= date(:endDate)) h on h.patient_id = i.patient_id left join (select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where " +
                 "t.final_test_result = 'Positive' and t.test_type = 2 and t.visit_date <= date(:endDate)) t on t.patient_id = i.patient_id where i.visit_type = '"+visitType+"' " +
                 " and coalesce(i.via_vili_screening_result,i.hpv_screening_result,i.pap_smear_screening_result,i.colposcopy_screening_result) = 'Positive' and (h.patient_id is not null or t.patient_id is not null) and  i.visit_date between date(:startDate) and " +
                 "date(:endDate) group by i.patient_id;";

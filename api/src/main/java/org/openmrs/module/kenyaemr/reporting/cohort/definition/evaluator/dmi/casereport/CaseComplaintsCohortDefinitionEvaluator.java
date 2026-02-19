@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.dmi.ca
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.casereport.CaseComplaintsCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -43,7 +44,7 @@ public class CaseComplaintsCohortDefinitionEvaluator implements VisitQueryEvalua
         VisitQueryResult queryResult = new VisitQueryResult(visitQuery, context);
 
         String qry = "select i.visit_id\n" +
-                "from kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness i\n" +
                 "where i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and i.complaint is not null\n" +
                 "group by visit_id;";

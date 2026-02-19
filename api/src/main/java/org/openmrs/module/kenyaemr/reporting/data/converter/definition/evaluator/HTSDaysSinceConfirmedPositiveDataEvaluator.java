@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSDaysSinceConfirmedPositiveDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class HTSDaysSinceConfirmedPositiveDataEvaluator implements PersonDataEva
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "SELECT t.patient_id, datediff(curdate(), t.visit_date) as numDays \n" +
-                "from kenyaemr_etl.etl_hts_test t\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "where t.final_test_result = 'Positive' and t.voided = 0 and t.test_type=2 group by patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FpImplantsQtyDispDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,7 +37,7 @@ public class FpImplantsQtyDispDefinitionEvaluator implements EncounterDataEvalua
         String qry = "SELECT \n" +
                 "    f.encounter_id,\n" +
                 "    CAST(f.quantity_dispensed AS UNSIGNED) AS rods_dispensed\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                 "WHERE f.contraceptive_dispensed IN (76022, 162422, 1873) -- 1 Rod, 2 Rods Implanon, Jadelle\n" +
                 "  AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);\n";
 

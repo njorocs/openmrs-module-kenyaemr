@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.HEIRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -50,9 +51,9 @@ public class HEIRegisterCohortDefinitionEvaluator implements CohortDefinitionEva
 
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
-		String qry = "SELECT DISTINCT hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf\n" +
-				"  INNER JOIN kenyaemr_etl.etl_hei_enrollment he\n" +
-				"  INNER JOIN kenyaemr_etl.etl_patient_demographics pd\n" +
+		String qry = "SELECT DISTINCT hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf\n" +
+				"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
+				"  INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics pd\n" +
 				"    on hf.patient_id = he.patient_id  and hf.patient_id = pd.patient_id\n" +
 				"where  he.visit_date <= hf.visit_date\n" +
 				"and date(pd.DOB) BETWEEN date(:startDate) AND date(:endDate);";

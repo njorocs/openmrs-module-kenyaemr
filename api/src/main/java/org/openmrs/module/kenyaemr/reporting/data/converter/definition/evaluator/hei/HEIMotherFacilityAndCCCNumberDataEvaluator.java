@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIMotherFacilityAndCCCNumberDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class HEIMotherFacilityAndCCCNumberDataEvaluator implements PersonDataEva
 
         String qry = "select  patient_id,\n" +
                 "  concat_ws('\\r\\n',health_facility_name,parent_ccc_number) as mothersFacilityAndCCC\n" +
-                "                from kenyaemr_etl.etl_hei_enrollment\n" +
+                "                from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment\n" +
                 "                GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.CurrentInCareNotStartedOnARTCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -44,7 +45,7 @@ public class CurrentInCareNotStartedOnARTCohortDefinitionEvaluator implements Co
 			return null;
 
 		Cohort newCohort = new Cohort();
-		String qry=" select patient_id from kenyaemr_etl.etl_current_in_care where started_on_drugs is null;";
+		String qry=" select patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care where started_on_drugs is null;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

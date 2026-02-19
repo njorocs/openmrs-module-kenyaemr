@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCTTTDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,8 +45,8 @@ public class ANCTTTDataEvaluator implements EncounterDataEvaluator {
                 "           WHEN tetanus_taxoid_1 IS NOT NULL THEN '4th Dose'\n" +
                 "           WHEN tetanus_taxoid_1 IS NOT NULL THEN '5th Dose'\n" +
                 "           END AS TT\n" +
-                "FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         LEFT JOIN kenyaemr_etl.etl_preventive_services s\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services s\n" +
                 "                   ON v.patient_id = s.patient_id AND v.encounter_id = s.encounter_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 

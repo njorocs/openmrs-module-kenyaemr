@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MFLCodeDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTBenefitsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -35,7 +35,7 @@ public class MFLCodeDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select d.patient_id,f.siteCode from kenyaemr_etl.etl_patient_demographics d join kenyaemr_etl.etl_default_facility_info f;";
+        String qry = "select d.patient_id,f.siteCode from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_default_facility_info f;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

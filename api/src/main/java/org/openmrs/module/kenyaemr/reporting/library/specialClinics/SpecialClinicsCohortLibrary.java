@@ -8,13 +8,13 @@
  * graphic logo is a trademark of OpenMRS Inc.
  */
 package org.openmrs.module.kenyaemr.reporting.library.specialClinics;
+
 import org.openmrs.module.kenyacore.report.ReportUtils;
-import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -26,7 +26,7 @@ import java.util.Date;
 public class SpecialClinicsCohortLibrary {
     public CohortDefinition ageCohort() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_demographics d where timestampdiff(YEAR,d.DOB,date(:endDate)) < 15;";
+        String sqlQuery = "select d.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d where timestampdiff(YEAR,d.DOB,date(:endDate)) < 15;";
         cd.setName("Under 15 Age Cohort");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -36,7 +36,7 @@ public class SpecialClinicsCohortLibrary {
 
     public CohortDefinition visitType(int visitType, String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_special_clinics f inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = f.patient_id and timestampdiff(YEAR,d.DOB,date(:endDate)) < 15 where f.visit_type = '"+visitType+"' and f.visit_date between date(:startDate) and date(:endDate) and f.special_clinic_form_uuid = '" + specialClinic + "';";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics f inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = f.patient_id and timestampdiff(YEAR,d.DOB,date(:endDate)) < 15 where f.visit_type = '"+visitType+"' and f.visit_date between date(:startDate) and date(:endDate) and f.special_clinic_form_uuid = '" + specialClinic + "';";
         cd.setName("Visit Type");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -48,7 +48,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition otIntervention(String interventionType, String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT f.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics f\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics f\n" +
                 "WHERE FIND_IN_SET('"+interventionType+"', f.ot_intervention) > 0\n" +
                 "and f.visit_date between date(:startDate) and date(:endDate) and f.special_clinic_form_uuid = '" + specialClinic + "';";
         cd.setName("OT Intervention");
@@ -62,7 +62,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition totalCountVisits(int newVisit, int reVisit,String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = String.format(
-                "select f.patient_id from kenyaemr_etl.etl_special_clinics f inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = f.patient_id and timestampdiff(YEAR,d.DOB,date(:endDate)) < 15 where f.visit_date between date(:startDate) and date(:endDate)\n" +
+                "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics f inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = f.patient_id and timestampdiff(YEAR,d.DOB,date(:endDate)) < 15 where f.visit_date between date(:startDate) and date(:endDate)\n" +
                         "and f.visit_type in (%d, %d) and f.special_clinic_form_uuid = '" + specialClinic + "';", newVisit, reVisit) ;
         cd.setName("Total Number Count of Visits");
         cd.setQuery(sqlQuery);
@@ -75,7 +75,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition totalATsDispensed(String intervention, String referredIn, String referredOut, String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = String.format(
-                "select f.patient_id from kenyaemr_etl.etl_special_clinics f where f.visit_date between date(:startDate) and date(:endDate)\n" +
+                "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics f where f.visit_date between date(:startDate) and date(:endDate)\n" +
                         "and f.ot_intervention in ('%s', '%s', '%s') and f.special_clinic_form_uuid = '" + specialClinic + "';", intervention, referredIn, referredOut);
         cd.setName("Total ATs Dispensed");
         cd.setQuery(sqlQuery);
@@ -107,7 +107,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition neurodevelopmental(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.neuron_developmental_findings LIKE '%Cerebral palsy%'\n" +
                 "   OR v.neuron_developmental_findings LIKE '%Down syndrome%'\n" +
                 "   OR v.neuron_developmental_findings LIKE '%Hydrocephalus%'\n" +
@@ -125,7 +125,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition learningFindings(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.learning_findings LIKE '%Dysgraphia%'\n" +
                 "   OR v.learning_findings LIKE '%Auditory processing%'\n" +
                 "   OR v.learning_findings LIKE '%Dyslexia%'\n" +
@@ -146,7 +146,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition neurodiversityConditions(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.neurodiversity_conditions LIKE '%ADHD(Attention deficit hyperactivity disorder)%'\n" +
                 "   OR v.neurodiversity_conditions LIKE '%Autism%'\n" +
                 "   AND v.visit_date between date(:startDate) and date(:endDate)\n" +
@@ -162,7 +162,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition childrenWithIntellectualDisabilities(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.disability_classification LIKE '%Intelectual disability%'\n" +
                 "   AND v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "   AND v.special_clinic_form_uuid = '" + specialClinic + "';";
@@ -177,7 +177,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition delayedDevelopmentalMilestones(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.disability_classification LIKE '%Delayed developmental milestone%'\n" +
                 "   AND v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "   AND v.special_clinic_form_uuid = '" + specialClinic + "';";
@@ -191,7 +191,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition childrenTrainedOnAT(String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT DISTINCT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "WHERE v.assistive_technology LIKE '%None%'\n" +
                 "   OR v.assistive_technology LIKE '%Communication%'\n" +
                 "   OR v.assistive_technology LIKE '%Self Care%'\n" +
@@ -212,7 +212,7 @@ public class SpecialClinicsCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT v.patient_id, " +
                 "m.name AS paymentType " +
-                "FROM kenyaemr_etl.etl_special_clinics v " +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v " +
                 "LEFT JOIN openmrs.cashier_bill t " +
                 "    ON v.patient_id = t.patient_id " +
                 "LEFT JOIN openmrs.cashier_bill_payment tp " +
@@ -235,7 +235,7 @@ public class SpecialClinicsCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = " SELECT v.patient_id, tp.amount AS amountPaid\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "LEFT JOIN openmrs.cashier_bill t\n" +
                 "    ON v.patient_id = t.patient_id\n" +
                 "LEFT JOIN openmrs.cashier_bill_payment tp\n" +
@@ -256,7 +256,7 @@ public class SpecialClinicsCohortLibrary {
     public  CohortDefinition procedureDone(Integer procedureType, String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "INNER JOIN (\n" +
                 "    SELECT cn.name, cn.date_created, ed.patient_id\n" +
                 "    FROM orders ed\n" +
@@ -280,7 +280,7 @@ public class SpecialClinicsCohortLibrary {
     public  CohortDefinition procedureOtherDone(Integer crepeBandages,Integer armsling, String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
                 String sqlQuery = "SELECT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "INNER JOIN (\n" +
                 "    SELECT cn.name, cn.date_created, ed.patient_id\n" +
                 "    FROM orders ed\n" +
@@ -303,7 +303,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition facilityFrom (String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "'\n" +
                 "AND v.referred_from IN (159928, 164407, 1000478, 1000479, 1000498, 1175)\n" +
                 "GROUP BY v.patient_id;";
@@ -318,7 +318,7 @@ public class SpecialClinicsCohortLibrary {
     public CohortDefinition facilityTo (String specialClinic) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "'\n" +
                 "AND v.referred_to IN (159928, 164407, 1000478, 1000479, 1000498, 1175)\n" +
                 "GROUP BY v.patient_id;";
@@ -334,7 +334,7 @@ public class SpecialClinicsCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = "SELECT v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "INNER JOIN (\n" +
                 "    SELECT cn.name, cn.date_created, ed.patient_id\n" +
                 "    FROM encounter_diagnosis ed\n" +
@@ -358,7 +358,7 @@ public class SpecialClinicsCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
 
         String sqlQuery = "SELECT v.patient_id \n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "INNER JOIN (\n" +
                 "    SELECT cn.name, cn.date_created, ed.patient_id\n" +
                 "    FROM encounter_diagnosis ed\n" +

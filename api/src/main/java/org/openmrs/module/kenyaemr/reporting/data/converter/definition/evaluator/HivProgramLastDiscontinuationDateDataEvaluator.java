@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HivProgramLastDiscontinuationDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class HivProgramLastDiscontinuationDateDataEvaluator implements PersonDat
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id,\n" +
-                "            date(max(visit_date)) as lastDiscontinuationDate from kenyaemr_etl.etl_patient_program_discontinuation where program_name ='HIV'\n" +
+                "            date(max(visit_date)) as lastDiscontinuationDate from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation where program_name ='HIV'\n" +
                 "\tGROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

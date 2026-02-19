@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.ipt;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
@@ -29,7 +30,7 @@ import java.util.Date;
 public class IPTCohortLibrary {
     public CohortDefinition patientsOnIPT(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
                 "where init.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);
@@ -42,7 +43,7 @@ public class IPTCohortLibrary {
 
     public CohortDefinition PLHIVInitiatedIPT(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
                 "        where init.ipt_indication = 138571 and init.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);
@@ -54,7 +55,7 @@ public class IPTCohortLibrary {
     }
     public CohortDefinition prisonersInitiatedIPT(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
                 "        where init.ipt_indication = 162277 and init.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);
@@ -67,7 +68,7 @@ public class IPTCohortLibrary {
 
     public CohortDefinition hcwInitiatedIPT(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
                 "        where init.ipt_indication = 1555 and init.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);
@@ -79,7 +80,7 @@ public class IPTCohortLibrary {
     }
     public CohortDefinition childrenExposedTB(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
                 "        where init.ipt_indication = 162278 and init.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);
@@ -91,7 +92,7 @@ public class IPTCohortLibrary {
     }
     public CohortDefinition completedIPT(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init left outer join kenyaemr_etl.etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
+        String sqlQuery = "select init.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
                 "where o.outcome = 1267;";
         cd.setName("patientsOnIPT");
         cd.setQuery(sqlQuery);

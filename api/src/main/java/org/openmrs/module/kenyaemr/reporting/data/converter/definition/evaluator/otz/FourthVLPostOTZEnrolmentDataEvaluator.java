@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.FourthVLPostOTZEnrolmentDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,8 +42,8 @@ public class FourthVLPostOTZEnrolmentDataEvaluator implements PersonDataEvaluato
                 "                        if(@v := patient_id, 1, 1)\n" +
                 "                 )\n" +
                 "                 ) as rn\n" +
-                "      from (select t.patient_id,t.visit_date,t.lab_test,t.test_result,concat_ws('\\r\\n',if(mid(min(concat(t.visit_date, t.lab_test)), 11) = 856,mid(min(concat(t.visit_date, t.test_result)), 11), if(mid(min(concat(t.visit_date,t.lab_test)),11) = 1305 and mid(min(concat(t.visit_date, t.test_result)), 11) = 1302,'LDL', '')),t.visit_date)as Vl_post_enr,max(e.visit_date) as latest_otz_enr from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                                                                                                                   left join kenyaemr_etl.etl_laboratory_extract t on e.patient_id = t.patient_id\n" +
+                "      from (select t.patient_id,t.visit_date,t.lab_test,t.test_result,concat_ws('\\r\\n',if(mid(min(concat(t.visit_date, t.lab_test)), 11) = 856,mid(min(concat(t.visit_date, t.test_result)), 11), if(mid(min(concat(t.visit_date,t.lab_test)),11) = 1305 and mid(min(concat(t.visit_date, t.test_result)), 11) = 1302,'LDL', '')),t.visit_date)as Vl_post_enr,max(e.visit_date) as latest_otz_enr from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                                                                                                                   left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract t on e.patient_id = t.patient_id\n" +
                 "            group by t.visit_date,e.patient_id\n" +
                 "            having t.visit_date >= latest_otz_enr) t cross join\n" +
                 "               (select @v := -1, @rn := 0) params\n" +

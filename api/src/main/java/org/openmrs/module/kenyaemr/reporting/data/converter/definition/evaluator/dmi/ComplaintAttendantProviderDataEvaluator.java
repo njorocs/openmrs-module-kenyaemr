@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplaintAttendantProviderDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class ComplaintAttendantProviderDataEvaluator implements PersonDataEvalua
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select a.patient_id, concat_ws(' ', pn.given_name, pn.middle_name,pn.family_name) as provider\n" +
-                "from kenyaemr_etl.etl_allergy_chronic_illness a\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness a\n" +
                 "         inner join encounter e on a.encounter_id = e.encounter_id\n" +
                 "         inner join encounter_provider ep on ep.encounter_id=e.encounter_id\n" +
                 "         inner join provider p on ep.provider_id = p.provider_id\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLResultDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class ETLLastVLResultDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select patient_id,\n" +
                 "       mid(max(concat(date(visit_date),result_name)),11) as vl_result\n" +
-                "from kenyaemr_etl.etl_laboratory_extract\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "where date(visit_date) <= date(:endDate) and lab_test in (1305, 856) and result_name is not null\n" +
                 "GROUP BY patient_id;";
 

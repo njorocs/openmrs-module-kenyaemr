@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDLabRemarksDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -38,9 +39,9 @@ public class OPDLabRemarksDataEvaluator implements ObsDataEvaluator {
 
 		String qry = "select le.obs_id,\n" +
                 "       p.notes\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         left join (select p.patient_id,p.notes\n" +
-                "                    from kenyaemr_etl.etl_progress_note p\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_progress_note p\n" +
                 "                    where date(p.visit_date) between date(:startDate) and date(:endDate)) p\n" +
                 "                   on p.patient_id = le.patient_id\n" +
                 "where date(le.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +

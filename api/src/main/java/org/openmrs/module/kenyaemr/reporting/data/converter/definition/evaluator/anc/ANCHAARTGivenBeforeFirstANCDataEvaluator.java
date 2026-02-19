@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCHAARTGivenBeforeFirstANCDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,10 +39,10 @@ public class ANCHAARTGivenBeforeFirstANCDataEvaluator implements EncounterDataEv
         String qry = "select v.encounter_id,\n" +
                 "       if(coalesce(d.date_started, e.ti_date_started_art) is not null, 'Yes'\n" +
                 "           , 'No') as on_arv_before_first_anc\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         inner join kenyaemr_etl.etl_mch_enrollment e on e.patient_id = v.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e on e.patient_id = v.patient_id\n" +
                 "         left join (select d.patient_id, min(d.date_started) as date_started, d.program as program\n" +
-                "                    from kenyaemr_etl.etl_drug_event d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d\n" +
                 "                    group by d.patient_id) d on d.patient_id = v.patient_id and d.program = 'HIV'\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "    and (d.date_started < e.visit_date\n" +

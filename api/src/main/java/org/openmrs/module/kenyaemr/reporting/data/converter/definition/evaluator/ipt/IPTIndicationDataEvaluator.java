@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.IPTDiscontinuationReasonDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.IPTIndicationDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,7 +41,7 @@ public class IPTIndicationDataEvaluator implements PersonDataEvaluator {
                 "                        when 162278 then 3\n" +
                 "                        when 1555 then 5\n" +
                 "                        when 5619 then 6  else \"\" end)\n" +
-                "  as ipt_indication from kenyaemr_etl.etl_ipt_initiation init;";
+                "  as ipt_indication from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");

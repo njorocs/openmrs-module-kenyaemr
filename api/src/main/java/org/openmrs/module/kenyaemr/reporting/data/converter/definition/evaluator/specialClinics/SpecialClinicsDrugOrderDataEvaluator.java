@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsDrugOrderDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class SpecialClinicsDrugOrderDataEvaluator implements EncounterDataEvalua
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "SELECT v.encounter_id, cn.name AS drug_name\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "INNER JOIN openmrs.orders o ON v.patient_id = o.patient_id\n" +
                 "   AND DATE(o.date_created)  BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "   INNER JOIN openmrs.concept_name cn ON o.concept_id = cn.concept_id\n" +

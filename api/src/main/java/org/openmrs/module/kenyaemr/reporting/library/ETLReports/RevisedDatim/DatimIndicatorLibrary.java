@@ -10,7 +10,6 @@
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
-
 import org.openmrs.module.kenyaemr.reporting.library.mer.MerCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.indicator.CohortIndicator;

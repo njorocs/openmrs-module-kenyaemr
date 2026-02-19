@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.MedicalCoverDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.MedicalCoverStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,7 +39,7 @@ public class MedicalCoverStatusDataEvaluator implements PersonDataEvaluator {
         String qry = "select fup.patient_id,\n" +
                 "  (case mid(max(concat(fup.visit_date,concat(fup.insurance_status))),11)\n" +
                 "   when 161636 then 'Active' when 1118 then 'Inactive' else '' end) as insurance_status\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup where fup.visit_date <= date(:endDate)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup where fup.visit_date <= date(:endDate)\n" +
                 "GROUP BY fup.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

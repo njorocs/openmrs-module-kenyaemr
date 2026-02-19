@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.WateryDiarrhoeaCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -57,7 +58,7 @@ public class WateryDiarrhoeaCohortDefinitionEvaluator implements CohortDefinitio
 				"        DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) AS complaint_date,\n" +
 				"        c.complaint_duration\n" +
 				"    FROM \n" +
-				"        kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+				"        "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"    WHERE \n" +
 				"        c.complaint = 161887\n" +
 				"        AND c.complaint_duration < 14\n" +

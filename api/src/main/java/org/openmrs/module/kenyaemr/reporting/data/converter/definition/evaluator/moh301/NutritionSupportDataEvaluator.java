@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.NutritionSupportDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -50,7 +51,7 @@ public class NutritionSupportDataEvaluator implements PersonDataEvaluator {
                 "or (n.micronutrients is not null and n.micronutrients != 'None' and n.micronutrients != ''),\n" +
                 "'Nutrition supplements', null)\n" +
                 ") as nutrition_intervention\n" +
-                "from kenyaemr_etl.etl_special_clinics n where\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics n where\n" +
                 "n.special_clinic = 'Nutrition' and date(n.visit_date) between date(:startDate) and date(:endDate);\n";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

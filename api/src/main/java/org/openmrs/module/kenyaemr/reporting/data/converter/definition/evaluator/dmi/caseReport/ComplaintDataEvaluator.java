@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.ComplaintDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -128,7 +129,7 @@ public class ComplaintDataEvaluator implements VisitDataEvaluator {
                 "            SEPARATOR ', '\n" +
                 "    ) AS complaint_onset_date\n" +
                 "FROM\n" +
-                "    kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "    "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness i\n" +
                 "WHERE\n" +
                 "    i.visit_date BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "GROUP BY\n" +

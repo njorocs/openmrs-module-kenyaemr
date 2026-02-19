@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.HIVStatusIPDDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,17 +42,17 @@ public class HIVStatusIPDDataEvaluator implements PersonDataEvaluator {
                 "          if((t.test_results = 'Positive' and t.test_date between a.admission_date and date(:endDate)) or\n" +
                 "             (e.patient_id is not null and e.date_confirmed_hiv_pos between a.admission_date and date(:endDate)),\n" +
                 "             'Positive this Visit', t.test_results)) as hiv_status\n" +
-                "from kenyaemr_etl.etl_inpatient_admission a\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a\n" +
                 "         left join (select t.patient_id,\n" +
                 "                           max(t.visit_date)                                       as test_date,\n" +
                 "                           mid(max(concat(t.visit_date, t.final_test_result)), 11) as test_results\n" +
-                "                    from kenyaemr_etl.etl_hts_test t\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                    where date(t.visit_date) <= date(:endDate)\n" +
                 "                    group by t.patient_id) t on a.patient_id = t.patient_id\n" +
                 "         left join (select e.patient_id,\n" +
                 "                           max(e.visit_date)                                                 as enrollment_date,\n" +
                 "                           mid(max(concat(e.visit_date, e.date_confirmed_hiv_positive)), 11) as date_confirmed_hiv_pos\n" +
-                "                    from kenyaemr_etl.etl_hiv_enrollment e\n" +
+                "                    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
                 "                    where e.visit_date <= date(:endDate)\n" +
                 "                    group by e.patient_id) e on a.patient_id = e.patient_id\n" +
                 "where date(a.admission_date) between date(:startDate) and date(:endDate);";

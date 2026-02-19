@@ -13,7 +13,6 @@ import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DiagnosisConcepts {

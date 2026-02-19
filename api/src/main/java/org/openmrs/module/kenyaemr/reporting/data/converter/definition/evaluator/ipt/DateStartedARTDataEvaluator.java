@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.DateStartedARTDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.HIVTestDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -36,7 +36,7 @@ public class DateStartedARTDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select  init.patient_id,concat_ws('\\r\\n',net.date_started,net.regimen) as art_start_date_regimen from kenyaemr_etl.etl_ipt_initiation init\n" +
+        String qry = "select  init.patient_id,concat_ws('\\r\\n',net.date_started,net.regimen) as art_start_date_regimen from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
                 "                                                                                           left outer join\n" +
                 "                                                                                             (\n" +
                 "                                                                                             select e.patient_id,e.date_started,\n" +
@@ -53,12 +53,12 @@ public class DateStartedARTDataEvaluator implements PersonDataEvaluator {
                 "                                                                                                          mid(min(concat(e.date_started,e.regimen_name)),11) as regimen,\n" +
                 "                                                                                                          mid(min(concat(e.date_started,e.regimen_line)),11) as regimen_line,\n" +
                 "                                                                                                          max(if(discontinued,1,0))as alternative_regimen\n" +
-                "                                                                                                   from kenyaemr_etl.etl_drug_event e\n" +
-                "                                                                                                          join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                "                                                                                                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                "                                                                                                          join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "                                                                                                   group by e.patient_id) e\n" +
-                "                                                                                                    left outer join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
-                "                                                                                                    left outer join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-                "                                                                                                    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
+                "                                                                                                    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id=e.patient_id\n" +
+                "                                                                                                    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+                "                                                                                                    left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on fup.patient_id=e.patient_id\n" +
                 "                                                                                             group by e.patient_id\n" +
                 "                                                                                             having TI_on_art=0\n" +
                 "                                                                                             )net on init.patient_id = net.patient_id;";

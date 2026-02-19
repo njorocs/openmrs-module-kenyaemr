@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MOH416RegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -44,8 +45,8 @@ public class MOH416RegisterCohortDefinitionEvaluator implements EncounterQueryEv
 		MOH416RegisterCohortDefinition cohortDefinition = (MOH416RegisterCohortDefinition) definition;
 		String specialClinic = cohortDefinition.getSpecialClinic();
 
-		String qry = "SELECT ce.encounter_id from kenyaemr_etl.etl_special_clinics ce\n" +
-				"                             inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = ce.patient_id and  p.voided = 0\n" +
+		String qry = "SELECT ce.encounter_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics ce\n" +
+				"                             inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = ce.patient_id and  p.voided = 0\n" +
 				"where date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate) and ce.special_clinic = :specialClinic;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

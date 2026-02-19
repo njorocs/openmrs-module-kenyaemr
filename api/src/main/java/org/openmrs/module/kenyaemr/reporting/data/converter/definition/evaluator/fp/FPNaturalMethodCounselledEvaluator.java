@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPNaturalMethodCounselledDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class FPNaturalMethodCounselledEvaluator implements EncounterDataEvaluato
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry =
                 "SELECT v.encounter_id, cn.name AS counselled_on_natural_fp " +
-                        "FROM kenyaemr_etl.etl_family_planning v " +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
                         "LEFT JOIN openmrs.concept_name cn " +
                         "       ON v.counselled_on_natural_fp = cn.concept_id " +
                         "       AND cn.locale = 'en' " +

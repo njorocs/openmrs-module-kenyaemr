@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.HeightAtArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class HeightAtArtDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select t.patient_id,\n" +
-                "       mid(max(concat(t.visit_date,t.height)),11) as height from kenyaemr_etl.etl_patient_triage t inner join kenyaemr_etl.etl_patient_hiv_followup f on t.patient_id = f.patient_id and t.visit_date = f.visit_date\n" +
+                "       mid(max(concat(t.visit_date,t.height)),11) as height from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on t.patient_id = f.patient_id and t.visit_date = f.visit_date\n" +
                 "GROUP BY t.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

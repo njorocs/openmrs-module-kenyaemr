@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MOH240LabRegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -41,8 +42,8 @@ public class MOH240LabRegisterCohortDefinitionEvaluator implements ObsQueryEvalu
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 		ObsQueryResult queryResult = new ObsQueryResult(definition, context);
 
-		String qry = "SELECT le.obs_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-			"   inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = le.patient_id and  p.voided = 0\n" +
+		String qry = "SELECT le.obs_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+			"   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = le.patient_id and  p.voided = 0\n" +
 			"where obs_id is not null and le.test_result is not null and (le.visit_date) BETWEEN date(:startDate) AND date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIFinalAntiBodyResultsCollectionDateMonth18_24DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class HEIFinalAntiBodyResultsCollectionDateMonth18_24DataEvaluator implem
         String qry = "select\n" +
                 "  f.patient_id,\n" +
                 "  f.final_antibody_result_date as 24_months_results_collection_date\n" +
-                "from  kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "from  "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "  f.patient_id = d.patient_id\n" +
                 "WHERE round(DATEDIFF(f.visit_date,d.DOB)/7) BETWEEN 72 AND 96\n" +
                 "GROUP BY f.patient_id";

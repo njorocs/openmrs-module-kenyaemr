@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLMonthsOfPrescriptionDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class ETLMonthsOfPrescriptionDataEvaluator implements PersonDataEvaluator
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry="SELECT patient_id, TIMESTAMPDIFF(MONTH, date(max(visit_date)), date(mid(max(concat(visit_date,next_appointment_date )),11))) as months_of_prescription\n" +
-                "    FROM kenyaemr_etl.etl_patient_hiv_followup\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup\n" +
                 "    WHERE next_appointment_date is not null and date(visit_date) <= date(:endDate)\n" +
                 "    GROUP BY patient_id;";
 

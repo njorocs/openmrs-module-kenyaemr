@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ARTRegisterCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.IPTRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
@@ -57,11 +57,11 @@ public class ARTRegisterCohortDefinitionEvaluator implements CohortDefinitionEva
 				" e.date_started\n" +
 				" from\n" +
 				"    (select dr.patient_id, min(dr.date_started) as date_started\n" +
-				"    from kenyaemr_etl.etl_drug_event dr\n" +
-				"     join kenyaemr_etl.etl_patient_demographics p on p.patient_id=dr.patient_id and p.voided = 0\n" +
+				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event dr\n" +
+				"     join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=dr.patient_id and p.voided = 0\n" +
 				"     where dr.program = 'HIV'\n" +
 				"    group by dr.patient_id) e\n" +
-				"   inner join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+				"   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
 				" where date(e.date_started) between date(:startDate) and date(:endDate)\n" +
 				"  group by e.patient_id) a;";
 

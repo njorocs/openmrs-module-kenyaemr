@@ -11,8 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.FPRegisterCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.NCDRegisterCohortDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
@@ -47,8 +47,8 @@ public class FPRegisterCohortEvaluator implements EncounterQueryEvaluator {
         }
 
         String sql = "SELECT e.encounter_id " +
-                "FROM kenyaemr_etl.etl_family_planning e " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics d ON e.patient_id = d.patient_id " +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning e " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON e.patient_id = d.patient_id " +
                 "WHERE date(e.visit_date) BETWEEN date(:startDate) AND date(:endDate)";
 
         SqlQueryBuilder q = new SqlQueryBuilder();

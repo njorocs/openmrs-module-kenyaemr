@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.MonthlyDrugCollectionDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,8 +40,8 @@ public class MonthlyDrugCollectionDateDataEvaluator implements PersonDataEvaluat
         Integer minMonth = mdef.getMinMonth();
 
 
-    String qry = "select init.patient_id, coalesce(date(f.date_collected_ipt),date(x.date_stopped)) as month1_refill from kenyaemr_etl.etl_ipt_initiation init\n" +
-            "    left outer join kenyaemr_etl.etl_ipt_follow_up f on init.patient_id = f.patient_id\n" +
+    String qry = "select init.patient_id, coalesce(date(f.date_collected_ipt),date(x.date_stopped)) as month1_refill from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+            "    left outer join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_follow_up f on init.patient_id = f.patient_id\n" +
             "                                                                       left outer join (select o.patient_id,o.date_stopped from openmrs.orders o\n" +
             "                                                                       inner join openmrs.drug_order do on o.order_id = do.order_id where o.concept_id = 78280) x on init.patient_id = x.patient_id\n" +
             "where timestampdiff(Month,init.visit_date,coalesce(f.date_collected_ipt,x.date_stopped)) between :minMonth and :maxMonth group by init.patient_id;";

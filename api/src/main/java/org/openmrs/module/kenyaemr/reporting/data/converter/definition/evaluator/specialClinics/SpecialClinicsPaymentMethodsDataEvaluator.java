@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsPaymentMethodsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class SpecialClinicsPaymentMethodsDataEvaluator implements EncounterDataE
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "SELECT v.encounter_id, GROUP_CONCAT(m.name SEPARATOR ', ') AS payment_mode\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "LEFT JOIN openmrs.cashier_bill t \n" +
                 "    ON v.patient_id = t.patient_id\n" +
                 "LEFT JOIN openmrs.cashier_bill_payment tp \n" +

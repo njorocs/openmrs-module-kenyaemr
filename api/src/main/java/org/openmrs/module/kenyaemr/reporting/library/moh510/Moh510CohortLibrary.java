@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.moh510;
 
-import java.util.Arrays;
-import java.util.Date;
-
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
 import org.openmrs.module.kenyaemr.metadata.MchMetadata;
@@ -19,6 +16,9 @@ import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.EncounterCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
+
+import java.util.Arrays;
+import java.util.Date;
 
 public class Moh510CohortLibrary {
 

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsEdemaDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -45,7 +46,7 @@ public class SpecialClinicsEdemaDataEvaluator implements EncounterDataEvaluator 
                 "            when 1065 then 'Yes'\n" +
                 "            when 1066 then 'No'\n" +
                 "             end) as patient_has_edema\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and special_clinic_form_uuid = '"+specialClinic+"';";
 

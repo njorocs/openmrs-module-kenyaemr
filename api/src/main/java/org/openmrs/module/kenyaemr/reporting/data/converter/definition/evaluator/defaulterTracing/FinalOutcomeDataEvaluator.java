@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.FinalOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,7 +43,7 @@ public class FinalOutcomeDataEvaluator implements EncounterDataEvaluator {
 			"           when 160037 then 'Still in care at CCC'\n" +
 			"           when 5240 then 'Lost to follow up'\n" +
 			"           when 142917 then 'Other' else ''  end) as outcome\n" +
-			"from kenyaemr_etl.etl_ccc_defaulter_tracing\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing\n" +
 			"where visit_date between date(:startDate) and date(:endDate);";
 
 		SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

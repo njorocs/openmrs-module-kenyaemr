@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
-import java.util.Date;
-import java.util.Map;
-
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLPredictionScoreDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -22,6 +20,9 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Evaluates Last VL result Data Definition
@@ -35,7 +36,7 @@ public class ETLPredictionScoreDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "SELECT patient_id, hts_risk_score FROM kenyaemr_etl.etl_hts_eligibility_screening\n" +
+        String qry = "SELECT patient_id, hts_risk_score FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening\n" +
                 "where date(visit_date) >= date(:startDate) and date(visit_date) <= date(:endDate) GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

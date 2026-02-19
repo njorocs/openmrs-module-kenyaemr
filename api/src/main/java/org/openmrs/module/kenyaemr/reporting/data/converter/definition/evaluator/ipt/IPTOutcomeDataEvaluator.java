@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.IPTOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -45,8 +46,8 @@ public class IPTOutcomeDataEvaluator implements PersonDataEvaluator {
                 "                  when 160034 then 'D'\n" +
                 "                  when 159492 then 'TO'\n" +
                 "                else \"\"  end) as ipt_outcome\n" +
-                "     from kenyaemr_etl.etl_ipt_initiation init\n" +
-                "     left outer join kenyaemr_etl.etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
+                "     from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+                "     left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_outcome o on init.patient_id = o.patient_id\n" +
                 "     where init.voided = 0;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

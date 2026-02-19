@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.PatientRegimenHistoryCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -40,7 +41,7 @@ public class PatientRegimenHistoryCohortDefinitionEvaluator implements Encounter
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
-		String qry = "SELECT e.encounter_id from kenyaemr_etl.etl_drug_event e  where ifnull(e.voided,0) = 0 and (regimen_line is null or regimen_line ='') and (regimen_name is not null and regimen_name !='') and date(e.date_started) BETWEEN date(:startDate) AND date(:endDate) and program = 'HIV' ;";
+		String qry = "SELECT e.encounter_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e  where ifnull(e.voided,0) = 0 and (regimen_line is null or regimen_line ='') and (regimen_name is not null and regimen_name !='') and date(e.date_started) BETWEEN date(:startDate) AND date(:endDate) and program = 'HIV' ;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

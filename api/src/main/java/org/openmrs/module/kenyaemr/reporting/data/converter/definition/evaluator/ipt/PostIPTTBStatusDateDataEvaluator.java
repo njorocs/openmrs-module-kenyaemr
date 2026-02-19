@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.PostIPTTBStatusDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,10 +40,10 @@ public class PostIPTTBStatusDateDataEvaluator implements PersonDataEvaluator {
         Integer minDays = mdef.getMinDays();
 
 
-    String qry = "Select init.patient_id,COALESCE(concat_ws('\\r\\n',fup.tb_status,date(fup.visit_date)),concat_ws('\\r\\n',tbs.resulting_tb_status,date(tbs.visit_date))) as tb_status_date_m6 from kenyaemr_etl.etl_ipt_initiation init\n" +
-            "                                                                                                                                                                            left outer join kenyaemr_etl.etl_patient_program_discontinuation d on init.patient_id = d.patient_id\n" +
-            "                                                                                                                                                                            left outer join kenyaemr_etl.etl_tb_screening tbs on init.patient_id = tbs.patient_id\n" +
-            "                                                                                                                                                                            left outer join kenyaemr_etl.etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
+    String qry = "Select init.patient_id,COALESCE(concat_ws('\\r\\n',fup.tb_status,date(fup.visit_date)),concat_ws('\\r\\n',tbs.resulting_tb_status,date(tbs.visit_date))) as tb_status_date_m6 from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+            "                                                                                                                                                                            left outer join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on init.patient_id = d.patient_id\n" +
+            "                                                                                                                                                                            left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs on init.patient_id = tbs.patient_id\n" +
+            "                                                                                                                                                                            left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
             "where d.program_name = \"IPT\" and d.discontinuation_reason = 1267 and timestampdiff(DAY ,date(d.visit_date),COALESCE(date(fup.visit_date),date(tbs.visit_date)))  between :minDays and :maxDays\n" +
             "group by init.patient_id;";
 

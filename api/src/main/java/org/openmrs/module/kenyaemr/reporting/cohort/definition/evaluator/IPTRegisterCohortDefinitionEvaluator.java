@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.IPTRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -50,7 +51,7 @@ public class IPTRegisterCohortDefinitionEvaluator implements CohortDefinitionEva
 
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
-		String qry = "select init.patient_id from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
+		String qry = "select init.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on init.patient_id = d.patient_id and init.voided = 0 and d.voided = 0\n" +
 				"where date(init.visit_date) between date(:startDate) and date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

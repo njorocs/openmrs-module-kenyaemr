@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLPatientsWithSuppressedVLInLast12MonthsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,7 +48,7 @@ public class ETLPatientsWithSuppressedVLInLast12MonthsCohortDefinitionEvaluator 
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select vt.patient_id from kenyaemr_etl.etl_viral_load_tracker vt where (vt.vl_result < 200 or vt.vl_result='LDL');";
+		String qry="select vt.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_tracker vt where (vt.vl_result < 200 or vt.vl_result='LDL');";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

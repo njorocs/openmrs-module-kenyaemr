@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.NCDDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,7 +41,7 @@ public class NCDDateDataEvaluator implements PersonDataEvaluator {
                 "    MAX(chronic_illness_onset_date) AS latest_onset_date,\n" +
                 "    COUNT(*) AS date_count\n" +
                 "  FROM\n" +
-                "    kenyaemr_etl.etl_allergy_chronic_illness\n" +
+                "    "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness\n" +
                 "  WHERE\n" +
                 "    visit_date <= DATE(:endDate)\n" +
                 "  GROUP BY\n" +
@@ -54,7 +55,7 @@ public class NCDDateDataEvaluator implements PersonDataEvaluator {
                 "    MAX(ci.chronic_illness_onset_date)\n" +
                 "  END AS ChronicIllness_onset\n" +
                 "FROM\n" +
-                "  kenyaemr_etl.etl_allergy_chronic_illness ci\n" +
+                "  "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness ci\n" +
                 "INNER JOIN LatestIllnessDates lid ON ci.patient_id = lid.patient_id\n" +
                 "WHERE\n" +
                 "  ci.visit_date <= DATE(:endDate)\n" +

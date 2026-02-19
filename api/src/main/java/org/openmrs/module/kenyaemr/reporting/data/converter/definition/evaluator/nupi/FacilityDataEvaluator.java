@@ -9,10 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.nupi;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.openmrs.CohortMembership;
 import org.openmrs.Location;
 import org.openmrs.Person;
@@ -28,6 +24,10 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Handler(supports = FacilityDataDefinition.class)
 public class FacilityDataEvaluator implements PersonDataEvaluator {

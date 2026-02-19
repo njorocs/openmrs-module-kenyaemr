@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ncd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.NCDMedicationsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +38,7 @@ public class NCDMedicationsDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
                 "   v.encounter_id,\n" +
                 "   v.treatment_given\n" +
-                "from kenyaemr_etl.etl_ncd_enrollment v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
 

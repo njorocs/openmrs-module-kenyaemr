@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+
 public class FPQueryVisitTypeLibrary {
     public static final String TYPE_OF_VISIT_QUERY =
             "SELECT f.encounter_id, " +
@@ -16,7 +18,7 @@ public class FPQueryVisitTypeLibrary {
                     "            WHEN 164180 THEN 'New' " +
                     "            WHEN 164142 THEN 'Re-visit' " +
                     "       END AS type_of_visit_for_method " +
-                    "FROM kenyaemr_etl.etl_family_planning f " +
+                    "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f " +
                     "WHERE f.type_of_visit_for_method IN (164180, 164142)"+
                     "  AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 }

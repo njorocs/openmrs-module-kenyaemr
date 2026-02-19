@@ -319,9 +319,11 @@ public class EmrUtils {
 	public static List<String> getSubCountyList() {
 		List<String> subCountyList = new ArrayList<String>();
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+
+		String etlDb = EmrDatabaseUtil.getEtlDatabaseName();
 		StringBuilder q = new StringBuilder();
 		q.append("Select distinct implementation_subcounty ");
-		q.append("from kenyaemr_etl.etl_contact;");
+		q.append("from ").append(etlDb).append(".etl_contact;");
 
 		List<List<Object>> subCounties = Context.getAdministrationService().executeSQL(q.toString(), true);
 		if (!subCounties.isEmpty()) {
@@ -333,6 +335,7 @@ public class EmrUtils {
 		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		return subCountyList;
 	}
+
 
 	public static List<Person> getPersonChildren(Patient patient) {
 		List<Person> people = new ArrayList<Person>();

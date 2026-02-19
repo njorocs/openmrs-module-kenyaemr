@@ -11,8 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MissedAppointmentsDuringPeriodCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -47,14 +47,14 @@ public class MissedAppointmentsDuringPeriodCohortDefinitionEvaluator implements 
 
 		String qry="select encounter_id\n" +
 				"from (select fup.encounter_id,fup.patient_id, honoredVisit.patient_id honored_appt, honoured_refill.patient_id as honouredRefill\n" +
-				"      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"               left join kenyaemr_etl.etl_patient_hiv_followup honoredVisit\n" +
+				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"               left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup honoredVisit\n" +
 				"                         on honoredVisit.patient_id = fup.patient_id and\n" +
 				"                            honoredVisit.next_appointment_date = fup.visit_date and honoredVisit.visit_date > fup.visit_date\n" +
-				"               left join kenyaemr_etl.etl_art_fast_track honoured_refill\n" +
+				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_art_fast_track honoured_refill\n" +
 				"                         on honoured_refill.patient_id = fup.patient_id and honoured_refill.visit_date = fup.refill_date and honoured_refill.visit_date > fup.visit_date\n" +
-				"               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
 				"      where date(fup.next_appointment_date) between date(:startDate) and date(:endDate)\n" +
 				"         or date(fup.refill_date) between date(:startDate) and date(:endDate)\n" +
 				"      group by fup.encounter_id, fup.patient_id\n" +

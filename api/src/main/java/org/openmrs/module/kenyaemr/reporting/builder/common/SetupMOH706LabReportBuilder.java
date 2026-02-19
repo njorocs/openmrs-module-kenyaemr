@@ -15,8 +15,8 @@ import org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.reporting.MohReportUtils.ReportAddonUtils;
 import org.openmrs.module.kenyaemr.reporting.MohReportUtils.ReportingUtils;
-import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706LabCohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706IndicatorLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706LabCohortLibrary;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 

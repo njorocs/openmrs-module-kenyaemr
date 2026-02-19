@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
-
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPEmergencyContraceptivesGivenDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -41,7 +41,7 @@ public class FPEmergencyContraceptivesGivenEvaluator implements EncounterDataEva
                 "        WHEN f.contraceptive_dispensed = 160570 THEN 'Y'\n" +
                 "        ELSE 'N'\n" +
                 "    END AS emergency_contraceptives_given\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                 "WHERE DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);\n";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

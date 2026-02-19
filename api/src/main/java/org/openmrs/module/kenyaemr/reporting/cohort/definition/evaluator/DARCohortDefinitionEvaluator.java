@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.DARCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -50,9 +51,9 @@ public class DARCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
 		Cohort newCohort = new Cohort();
 
 		String qry = "SELECT e.patient_id\n" +
-				"FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-				"         left join kenyaemr_etl.etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
-				"         left join kenyaemr_etl.etl_ART_preparation artPrep on artPrep.patient_id = e.patient_id and  date(artPrep.visit_date) = date(:startDate) \n" +
+				"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+				"         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
+				"         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation artPrep on artPrep.patient_id = e.patient_id and  date(artPrep.visit_date) = date(:startDate) \n" +
 				"where e.voided = 0 and (f.patient_id is not null or artPrep.patient_id is not null);\n";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

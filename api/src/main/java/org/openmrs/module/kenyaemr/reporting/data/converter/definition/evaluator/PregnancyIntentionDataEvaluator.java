@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.PregnancyIntentionDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.TBScreeningAtLastVisitDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -38,8 +38,8 @@ public class PregnancyIntentionDataEvaluator implements PersonDataEvaluator {
         String qry = "select f.patient_id,mid(max(concat(f.visit_date,IF(d.Gender='F',ifnull(coalesce(case f.wants_pregnancy when 1065 then 'Yes' when 1066 then 'No' else NULL end,\n" +
                 "case f.pregnancy_status when 1065 then 'Already Pregnant' when 1066 then 'Not Pregnant' else NULL end), 'Missing'),'NA') )), 11)\n" +
                 "        as pregnancy_intention\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                "join kenyaemr_etl.etl_patient_demographics d on d.patient_id = f.patient_id group by f.patient_id;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = f.patient_id group by f.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

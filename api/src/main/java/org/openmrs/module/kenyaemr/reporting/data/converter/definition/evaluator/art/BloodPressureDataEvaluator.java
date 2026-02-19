@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.BloodPressureDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class BloodPressureDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select t.patient_id,\n" +
                 "       mid(max(concat(t.visit_date,concat(t.systolic_pressure, '/',t.diastolic_pressure))),11) as blood_pressure\n" +
-                "  from kenyaemr_etl.etl_patient_triage t\n" +
-                "  inner join kenyaemr_etl.etl_patient_hiv_followup f on t.patient_id = f.patient_id and t.visit_date = f.visit_date\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+                "  inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on t.patient_id = f.patient_id and t.visit_date = f.visit_date\n" +
                 "  GROUP BY t.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

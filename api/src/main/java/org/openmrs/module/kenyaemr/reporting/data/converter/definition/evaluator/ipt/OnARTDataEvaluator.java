@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.OnARTDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.VTBDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -36,7 +36,7 @@ public class OnARTDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,(select case when exists(Select cic.patient_id from kenyaemr_etl.etl_current_in_care cic where cic.started_on_drugs is not null) then \"Y\" else \"N\" end ) as on_ART from kenyaemr_etl.etl_ipt_initiation init left join kenyaemr_etl.etl_drug_event de on init.patient_id = de.patient_id;";
+        String qry = "select init.patient_id,(select case when exists(Select cic.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care cic where cic.started_on_drugs is not null) then \"Y\" else \"N\" end ) as on_ART from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on init.patient_id = de.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");

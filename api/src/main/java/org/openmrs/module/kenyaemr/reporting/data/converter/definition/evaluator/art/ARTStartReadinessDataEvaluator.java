@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTStartReadinessDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.CareGiverCommitmentDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -35,7 +35,7 @@ public class ARTStartReadinessDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id,ready_to_start_art from kenyaemr_etl.etl_ART_preparation group by patient_id;";
+        String qry = "select patient_id,ready_to_start_art from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ART_preparation group by patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

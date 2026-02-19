@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.publicHealthActionReport;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -50,7 +51,7 @@ public class PublicHealthActionCohortLibrary {
                 "                   x.lab_test    as lab_test,\n" +
                 "                   x.test_result as test_result,\n" +
                 "                   urgency       as urgency\n" +
-                "            from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "            where x.lab_test in (1305, 856)\n" +
                 "            group by x.patient_id, x.visit_date\n" +
                 "            order by visit_date desc) b\n" +
@@ -82,36 +83,36 @@ public class PublicHealthActionCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT a.patient_id number_hiv_positive\n" +
                 "FROM ((SELECT av.patient_id\n" +
-                "FROM kenyaemr_etl.etl_mch_antenatal_visit av\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
                 "WHERE av.visit_date BETWEEN date(:startDate) and date(:endDate)\n" +
                 "  AND av.final_test_result = 'Positive')\n" +
                 "UNION\n" +
                 "(SELECT d.patient_id\n" +
-                "FROM kenyaemr_etl.etl_mchs_delivery d\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = d.patient_id\n" +
                 "WHERE d.visit_date BETWEEN date(:startDate) and date(:endDate)\n" +
                 "  AND d.final_test_result = 'Positive')\n" +
                 "UNION\n" +
                 "(SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_mch_postnatal_visit p\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on p.patient_id = d.patient_id\n" +
                 "WHERE p.visit_date BETWEEN date(:startDate) and date(:endDate)\n" +
                 "  AND p.final_test_result = 'Positive')\n" +
                 "UNION\n" +
                 "(SELECT t.patient_id\n" +
-                "FROM kenyaemr_etl.etl_hts_test t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
                 "    AND t.final_test_result = 'Positive'\n" +
                 "    AND t.voided = 0\n" +
                 "    AND t.visit_date BETWEEN date(:startDate) and date(:endDate))) a\n" +
                 "  LEFT JOIN\n" +
                 "(SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
-                "FROM kenyaemr_etl.etl_hts_referral_and_linkage l\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l\n" +
                 "WHERE date(l.visit_date)BETWEEN date(:startDate) and date(:endDate)\n" +
                 "GROUP BY l.patient_id) l ON a.patient_id = l.patient_id\n" +
                 "  LEFT JOIN (SELECT e.patient_id\n" +
-                "             FROM kenyaemr_etl.etl_drug_event e\n" +
+                "             FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
                 "             WHERE e.program = 'HIV' and COALESCE(date(e.date_started),date(e.visit_date)) <= date(:endDate)) e\n" +
                 "            ON e.patient_id = a.patient_id\n" +
                 "where (e.patient_id is null and l.art_start_date is null);";
@@ -130,7 +131,7 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition allHEIsAgedBetween6And24Weeks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_hei_enrollment e inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "and timestampdiff(WEEK,d.dob,date(:endDate)) between 6 and 96;";
         cd.setName("allHEIsAgedBetween6And24Weeks");
         cd.setQuery(sqlQuery);
@@ -146,7 +147,7 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition childrenBetween6And24WeeksInHIVProgram() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = " select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e inner join kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
+        String sqlQuery = " select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
                 "    where date(visit_date) <= date(:endDate) and timestampdiff(WEEK,d.dob,date(:endDate)) between 6 and 96;";
         cd.setName("childrenBetween6And24WeeksInHIVProgram");
         cd.setQuery(sqlQuery);
@@ -161,7 +162,7 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition allHEIsWithAHIVTestResult() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select v.patient_id from kenyaemr_etl.etl_hei_follow_up_visit v where v.dna_pcr_result is not null or v.first_antibody_result is not null or\n" +
+        String sqlQuery = "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit v where v.dna_pcr_result is not null or v.first_antibody_result is not null or\n" +
                 "v.final_antibody_result is not null group by v.patient_id;";
         cd.setName("allHEIsWithAHIVTestResult");
         cd.setQuery(sqlQuery);
@@ -220,7 +221,7 @@ public class PublicHealthActionCohortLibrary {
                 "                   x.lab_test    as lab_test,\n" +
                 "                   x.test_result as test_result,\n" +
                 "                   urgency       as urgency\n" +
-                "            from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "            where x.lab_test in (1305, 856)\n" +
                 "            group by x.patient_id, x.visit_date\n" +
                 "            order by visit_date desc) b\n" +
@@ -269,10 +270,10 @@ public class PublicHealthActionCohortLibrary {
                 "                d.visit_date                                                    as date_discontinued,\n" +
                 "                d.discontinuation_reason,\n" +
                 "                de.patient_id                                                   as started_on_drugs\n" +
-                "         from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                  join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "                  join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "                  left outer join kenyaemr_etl.etl_drug_event de\n" +
+                "         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "                  left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                                  on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
                 "                                     date(date_started) <= date(curdate())\n" +
                 "                  left outer JOIN\n" +
@@ -280,7 +281,7 @@ public class PublicHealthActionCohortLibrary {
                 "                      coalesce(max(date(effective_discontinuation_date)), max(date(visit_date))) as visit_date,\n" +
                 "                      max(date(effective_discontinuation_date))                                  as effective_disc_date,\n" +
                 "                      discontinuation_reason\n" +
-                "               from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "               from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "               where date(visit_date) <= date(:endDate)\n" +
                 "                 and program_name = 'HIV'\n" +
                 "               group by patient_id\n" +
@@ -325,15 +326,15 @@ public class PublicHealthActionCohortLibrary {
                 "                d.discontinuation_reason, \n" +
                 "                de.patient_id as started_on_drugs,\n" +
                 "                       k.latest_fast_track_visit_date\n" +
-                "                from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
                 "                         left join (select k.patient_id, max(k.visit_date) as latest_fast_track_visit_date\n" +
-                "                                    from kenyaemr_etl.etl_art_fast_track k\n" +
+                "                                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_art_fast_track k\n" +
                 "                                    group by k.patient_id) k on fup.patient_id = k.patient_id\n" +
-                "                join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id \n" +
-                "                join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id \n" +
-                "                left outer join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate) \n" +
+                "                join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id \n" +
+                "                join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id \n" +
+                "                left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate) \n" +
                 "                left outer JOIN \n" +
-                "                (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date,discontinuation_reason from kenyaemr_etl.etl_patient_program_discontinuation \n" +
+                "                (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date,discontinuation_reason from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation \n" +
                 "                where date(visit_date) <= date(:endDate) and program_name='HIV' \n" +
                 "                group by patient_id \n" +
                 "                ) d on d.patient_id = fup.patient_id \n" +
@@ -376,34 +377,34 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition heiMissedHIVTests() {
         String sqlQuery = "select e.patient_id\n" +
-                "         from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
-                "             left join kenyaemr_etl.etl_hiv_enrollment hiv on e.patient_id = hiv.patient_id\n" +
-                "                left join (select p.patient_id from kenyaemr_etl.etl_patient_program_discontinuation p where p.program_name = 'MCH Child HEI') p\n" +
+                "         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
+                "             left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment hiv on e.patient_id = hiv.patient_id\n" +
+                "                left join (select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation p where p.program_name = 'MCH Child HEI') p\n" +
                 "                          on e.patient_id = p.patient_id\n" +
                 "                left join (select x.patient_id week6pcr, x.test_result as week6results\n" +
-                "                           from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                           where x.lab_test = 1030\n" +
                 "                             and x.order_reason = 1040) a on e.patient_id = a.week6pcr\n" +
                 "                left join (select x.patient_id month6pcr, x.test_result as month6results\n" +
-                "                           from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                           where x.lab_test = 1030\n" +
                 "                             and x.order_reason = 1326) b on e.patient_id = b.month6pcr\n" +
                 "                left join (select x.patient_id month12pcr, x.test_result as month12results\n" +
-                "                           from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                           where x.lab_test = 1030\n" +
                 "                             and x.order_reason = 844) c on e.patient_id = c.month12pcr\n" +
                 "                left join (select x.patient_id month18AB, x.test_result as month18results\n" +
-                "                           from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                           where x.lab_test = 163722\n" +
                 "                             and x.order_reason = 164860) f on e.patient_id = f.month18AB\n" +
                 "                left join (select f.patient_id as ceased_bf_hei,\n" +
                 "                                  left(max(concat(date(f.visit_date), f.infant_feeding)), 10) as bf_date,\n" +
                 "                                  mid(max(concat(date(f.visit_date), f.infant_feeding)), 11)  as latest_infant_feeding,\n" +
                 "                                  x.patient_id                                                as cessation_bf_tested_hei\n" +
-                "                           from kenyaemr_etl.etl_hei_follow_up_visit f\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
                 "                                    left join (select x.patient_id\n" +
-                "                                               from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                                               from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                                               where x.lab_test = 163722\n" +
                 "                                                 and x.order_reason = 164460) x\n" +
                 "                                              on x.patient_id = f.patient_id\n" +
@@ -414,12 +415,12 @@ public class PublicHealthActionCohortLibrary {
                 "                                  x.confirmed_hei,\n" +
                 "                                  x.confirmatoryresults,\n" +
                 "                                  x.confirmatory_results\n" +
-                "                           from kenyaemr_etl.etl_laboratory_extract x0\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x0\n" +
                 "                                    left join\n" +
                 "                                (select x.patient_id             confirmed_hei,\n" +
                 "                                        x.date_test_requested as confirmatory_results,\n" +
                 "                                        x.test_result         as confirmatoryresults\n" +
-                "                                 from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                                 from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                                 where x.lab_test = 163722\n" +
                 "                                   and x.order_reason = 164860) x on x0.patient_id = x.confirmed_hei\n" +
                 "                           where x0.lab_test in (1030, 163722)\n" +
@@ -449,7 +450,7 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition allHEIsUnder24MonthsOld() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_hei_enrollment e inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id and timestampdiff(MONTH,d.dob,date(:endDate)) <= 24;";
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id and timestampdiff(MONTH,d.dob,date(:endDate)) <= 24;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("allHEIsUnder24MonthsOld");
         cd.setQuery(sqlQuery);
@@ -464,7 +465,7 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition allHEIsLinkedToMothersInHEIEnrolment() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_hei_enrollment e inner join kenyaemr_etl.etl_patient_demographics d on d.unique_patient_no = e.parent_ccc_number and d.gender = 'F'\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.unique_patient_no = e.parent_ccc_number and d.gender = 'F'\n" +
                 "where e.parent_ccc_number is not null;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("allHEIsLinkedToMothersInHEIEnrolment");
@@ -481,10 +482,10 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition allHEIsLinkedToMothers() {
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "         left join relationship r on e.patient_id = r.person_b\n" +
-                "         inner join (select d.patient_id, d.gender from kenyaemr_etl.etl_patient_demographics d where d.gender = 'F') m\n" +
+                "         inner join (select d.patient_id, d.gender from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d where d.gender = 'F') m\n" +
                 "                    on m.patient_id = r.person_a\n" +
                 "         inner join relationship_type t\n" +
                 "                    on r.relationship = t.relationship_type_id and t.uuid = '8d91a210-c2cc-11de-8d13-0010c6dffd0f';";
@@ -502,14 +503,14 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition adolescentsNotInOTZSql() {
-        String sqlQuery = "select enr.patient_id from kenyaemr_etl.etl_hiv_enrollment enr\n" +
-                "join kenyaemr_etl.etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(YEAR,dm.DOB,date(:endDate)) between 10 and  19\n" +
+        String sqlQuery = "select enr.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr\n" +
+                "join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(YEAR,dm.DOB,date(:endDate)) between 10 and  19\n" +
                 "left join\n" +
-                "  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "  where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "   group by patient_id\n" +
                 "   ) d on d.patient_id = enr.patient_id\n" +
-                "where enr.patient_id not in (select ot.patient_id from kenyaemr_etl.etl_otz_enrollment ot) and d.patient_id is null;";
+                "where enr.patient_id not in (select ot.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment ot) and d.patient_id is null;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("adolescentsNotInOTZ");
         cd.setQuery(sqlQuery);
@@ -537,14 +538,14 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition calhivNotInOVCSql() {
-        String sqlQuery = "select enr.patient_id from kenyaemr_etl.etl_hiv_enrollment enr\n" +
-                "  join kenyaemr_etl.etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(YEAR,dm.DOB,date(:endDate)) <= 17\n" +
+        String sqlQuery = "select enr.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr\n" +
+                "  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(YEAR,dm.DOB,date(:endDate)) <= 17\n" +
                 "  left join\n" +
-                "  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "  where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "  group by patient_id\n" +
                 "  ) d on d.patient_id = enr.patient_id\n" +
-                "where enr.patient_id not in (select ov.patient_id from kenyaemr_etl.etl_ovc_enrolment ov) and d.patient_id is null;";
+                "where enr.patient_id not in (select ov.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ovc_enrolment ov) and d.patient_id is null;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("calhivNotInOVC");
         cd.setQuery(sqlQuery);
@@ -572,7 +573,7 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition patientsOnDTGRegimen() {
-        String sqlQuery = "select de.patient_id from kenyaemr_etl.etl_drug_event de where de.program='HIV' and de.discontinued is null\n" +
+        String sqlQuery = "select de.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de where de.program='HIV' and de.discontinued is null\n" +
                 "group by de.patient_id having mid(max(concat(de.visit_date,de.regimen)),11) like ('%DTG%');";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientsOnDTGRegimen");
@@ -587,7 +588,7 @@ public class PublicHealthActionCohortLibrary {
      * Criteria: Less than 1 month old and weight less than 3 kgs
      */
     public CohortDefinition ineligibleForDTGRegimen() {
-        String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_demographics d left join (select t.patient_id,mid(max(concat(t.visit_date,t.weight)),11) as weight from kenyaemr_etl.etl_patient_triage t\n" +
+        String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d left join (select t.patient_id,mid(max(concat(t.visit_date,t.weight)),11) as weight from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                where date(t.visit_date) <= date(:endDate) group by t.patient_id)t on d.patient_id = t.patient_id\n" +
                 "              where date(d.dob) <= date(:endDate) and timestampdiff(DAY, date(d.DOB), date(:endDate)) < 30 and (t.patient_id is null or t.weight < 3)\n" +
                 "              group by d.patient_id;";
@@ -604,10 +605,10 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition calhivCohort() {
-        String sqlQuery = "select enr.patient_id from kenyaemr_etl.etl_hiv_enrollment enr\n" +
-                "                            join kenyaemr_etl.etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(MONTH,dm.DOB,date(:endDate)) >= 1 and timestampdiff(YEAR,dm.DOB,date(:endDate)) <= 14\n" +
+        String sqlQuery = "select enr.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr\n" +
+                "                            join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics dm on dm.patient_id =enr.patient_id and timestampdiff(MONTH,dm.DOB,date(:endDate)) >= 1 and timestampdiff(YEAR,dm.DOB,date(:endDate)) <= 14\n" +
                 "                            left join\n" +
-                "                            (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                            (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                            where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "                            group by patient_id\n" +
                 "                            ) d on d.patient_id = enr.patient_id\n" +
@@ -642,10 +643,10 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition contactsUndocumentedHIVStatus() {
         String sqlQuery = "select pc.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_contact pc\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_contact pc\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
                 "left join (select ht.patient_id, mid(max(concat(date(ht.visit_date), ht.final_test_result)), 11) as hiv_status\n" +
-                " from kenyaemr_etl.etl_hts_test ht\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht\n" +
                 " group by ht.patient_id\n" +
                 " having hiv_status in ('Negative', 'Positive'))\n" +
                 "ht on ht.patient_id = pc.patient_id\n" +
@@ -673,16 +674,16 @@ public class PublicHealthActionCohortLibrary {
                 "             pc.date_created,\n" +
                 "             pc.voided,\n" +
                 "             ht.patient_id as tested_contact\n" +
-                "      from kenyaemr_etl.etl_patient_contact pc\n" +
-                "               inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_contact pc\n" +
+                "               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
                 "               left join (select ht.patient_id,\n" +
                 "                                 mid(max(concat(date(ht.visit_date), ht.final_test_result)), 11) as hiv_status\n" +
-                "                          from kenyaemr_etl.etl_hts_test ht\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht\n" +
                 "                          group by ht.patient_id\n" +
                 "                          having hiv_status in ('Negative', 'Positive')) ht on ht.patient_id = pc.patient_id\n" +
                 "               left join (select e.patient_id, e.hiv_status_at_exit\n" +
-                "                          from kenyaemr_etl.etl_hei_enrollment e\n" +
-                "                                   inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = e.patient_id\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "                                   inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = e.patient_id\n" +
                 "                              and timestampdiff(WEEK, d.dob, date(:endDate)) between 6 and 96) h\n" +
                 "                         on pc.patient_id = h.patient_id\n" +
                 "     ) c\n" +
@@ -707,10 +708,10 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition snsContactsUndocumentedHIVStatus() {
         String sqlQuery = "select pc.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_contact pc\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_contact pc\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = pc.patient_related_to and p.voided = 0\n" +
                 "left join (select ht.patient_id, mid(max(concat(date(ht.visit_date), ht.final_test_result)), 11) as hiv_status\n" +
-                " from kenyaemr_etl.etl_hts_test ht\n" +
+                " from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht\n" +
                 " group by ht.patient_id\n" +
                 " having hiv_status in ('Negative', 'Positive'))\n" +
                 "ht on ht.patient_id = pc.patient_id\n" +
@@ -730,7 +731,7 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition clientsWithNUPI() {
-        String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_demographics d where d.national_unique_patient_identifier is not null;";
+        String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d where d.national_unique_patient_identifier is not null;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("clientsWithNUPI");
         cd.setQuery(sqlQuery);
@@ -759,7 +760,7 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition numberOfDeaths() {
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                where program_name='HIV' and discontinuation_reason = 160034\n" +
                 "                  and coalesce(date(date_died),date(effective_discontinuation_date),date(visit_date)) between date(:startDate) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -773,7 +774,7 @@ public class PublicHealthActionCohortLibrary {
 
     public CohortDefinition partiallyVaccinated() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment group by patient_id\n"
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment group by patient_id\n"
                 + "        having mid(max(concat(visit_date,final_vaccination_status)),11) = 166192\n"
                 + "        and max(visit_date) <= date(CURRENT_DATE());";
         cd.setName("partiallyVaccinated;");
@@ -788,7 +789,7 @@ public class PublicHealthActionCohortLibrary {
 
     public static CohortDefinition fullyVaccinated() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_covid19_assessment a where a.final_vaccination_status = 5585 and a.visit_date <= date(CURRENT_DATE());";
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment a where a.final_vaccination_status = 5585 and a.visit_date <= date(CURRENT_DATE());";
         cd.setName("fullyVaccinated");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -799,7 +800,7 @@ public class PublicHealthActionCohortLibrary {
 
     public CohortDefinition covid19AssessedPatients() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select a.patient_id from kenyaemr_etl.etl_covid19_assessment a;";
+        String sqlQuery = "select a.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_covid19_assessment a;";
         cd.setName("covid19AssessedPatients;");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -811,7 +812,7 @@ public class PublicHealthActionCohortLibrary {
     // Covid vaccine age for now is 15+ , this can be adjusted accordingly depending on the recommended age limits
     public CohortDefinition covidVaccineAgeCohort() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select patient_id from kenyaemr_etl.etl_patient_demographics where timestampdiff(YEAR ,dob,date(CURRENT_DATE()))>= 15;";
+        String sqlQuery = "select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics where timestampdiff(YEAR ,dob,date(CURRENT_DATE()))>= 15;";
         cd.setName("covidVaccineAgeCohort");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -865,7 +866,7 @@ public class PublicHealthActionCohortLibrary {
                 "         SELECT x.patient_id,\n" +
                 "                COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) as vl_effective_date,\n" +
                 "                COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
-                "         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
                 "         WHERE x.lab_test = 856\n" +
                 "           AND x.order_reason NOT IN (2001236, 162080)\n" +
                 "           AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
@@ -876,7 +877,7 @@ public class PublicHealthActionCohortLibrary {
                 "WHERE NOT EXISTS (\n" +
                 "    -- Exclude patients who received EAC after high VL\n" +
                 "    SELECT 1\n" +
-                "    FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence e\n" +
                 "    WHERE e.patient_id = vl.patient_id\n" +
                 "      AND e.visit_date > vl.vl_effective_date\n" +
                 "      AND e.visit_date <= DATE(:endDate)\n" +
@@ -931,8 +932,8 @@ public class PublicHealthActionCohortLibrary {
                 "                                    v.previous_date_test_requested,\n" +
                 "                                    v.date_test_requested\n" +
                 "                            ) AS effective_date_requested\n" +
-                "                     FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-                "                              INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "                     FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
+                "                              INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                                         ON v.patient_id = d.patient_id\n" +
                 "                     WHERE v.date_test_requested IS NOT NULL),\n" +
                 "     vl_with_status AS (SELECT t.*,\n" +
@@ -1041,16 +1042,16 @@ public class PublicHealthActionCohortLibrary {
                 "                      d.effective_disc_date                                                            as effective_disc_date,\n" +
                 "                      max(d.visit_date)                                                                as date_discontinued,\n" +
                 "                      de.patient_id                                                   as started_on_drugs\n" +
-                "               from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                        join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "                        join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-                "                                    left join kenyaemr_etl.etl_drug_event de\n" +
+                "               from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+                "                                    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                                   on e.patient_id = de.patient_id and de.program = 'HIV' and date(de.date_started) <= date(:endDate)\n" +
                 "                        left outer JOIN\n" +
                 "                    (select patient_id,\n" +
                 "                            coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
                 "                            max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-                "                     from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                     where date(visit_date) <= date(:endDate)\n" +
                 "                       and program_name = 'HIV'\n" +
                 "                     group by patient_id) d on d.patient_id = fup.patient_id\n" +
@@ -1094,11 +1095,11 @@ public class PublicHealthActionCohortLibrary {
 	 */
 	public CohortDefinition heiSixToEightWeeksMissingPCRTests() {
 		String sqlQuery = "SELECT e.patient_id as hei_without_pcr\n" +
-			"FROM kenyaemr_etl.etl_hei_enrollment e\n" +
-			"         INNER JOIN kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
-			"         LEFT JOIN kenyaemr_etl.etl_hiv_enrollment hiv on e.patient_id = hiv.patient_id\n" +
+			"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
+			"         LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment hiv on e.patient_id = hiv.patient_id\n" +
 			"         LEFT JOIN(SELECT x.patient_id week6pcr, x.test_result as week6results\n" +
-			"                   FROM kenyaemr_etl.etl_laboratory_extract x\n" +
+			"                   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
 			"                   WHERE x.lab_test = 1030\n" +
 			"                     AND x.order_reason = 1040) t ON e.patient_id = t.week6pcr\n" +
 			"WHERE TIMESTAMPDIFF(WEEK, d.DOB, DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)) BETWEEN 6 AND 8\n" +
@@ -1118,10 +1119,10 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition heiSixToEightWeeksMissingPCRTestsCs() {
         String sqlQuery = "SELECT e.patient_id as hei_without_pcr\n" +
-                "FROM kenyaemr_etl.etl_hei_enrollment e\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
                 "         LEFT JOIN (SELECT x.patient_id week6pcr, x.test_result as week6results\n" +
-                "                   FROM kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                   WHERE x.lab_test = 1030 and x.date_test_requested <= :endDate) t ON e.patient_id = t.week6pcr\n" +
                 "WHERE d.hei_no is not null AND d.DOB between DATE_SUB(date(:endDate), INTERVAL 8 WEEK) AND\n" +
                 "    DATE_SUB(date(:endDate), INTERVAL 6 WEEK)\n" +
@@ -1140,17 +1141,17 @@ public class PublicHealthActionCohortLibrary {
 	 */
 	public CohortDefinition hei24MonthsUndocumentedOutcome() {
 		String sqlQuery = "SELECT e.patient_id as hei_without_outcome\n" +
-			"FROM kenyaemr_etl.etl_hei_enrollment e\n" +
-			"         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
+			"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
 			"         LEFT JOIN (SELECT v.patient_id\n" +
-			"                    FROM kenyaemr_etl.etl_hei_follow_up_visit v\n" +
+			"                    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit v\n" +
 			"                    WHERE v.dna_pcr_result IS NOT NULL\n" +
 			"                       OR v.first_antibody_result IS NOT NULL\n" +
 			"                       OR v.final_antibody_result IS NOT NULL\n" +
 			"                    GROUP BY v.patient_id) has_test ON e.patient_id = has_test.patient_id\n" +
 			"         LEFT JOIN (SELECT e.patient_id\n" +
-			"                    from kenyaemr_etl.etl_hiv_enrollment e\n" +
-			"                             INNER JOIN kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
+			"                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+			"                             INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
 			"                    WHERE visit_date <= CURRENT_DATE) hiv_prog\n" +
 			"                   ON e.patient_id = hiv_prog.patient_id\n" +
 			"WHERE TIMESTAMPDIFF(MONTH, d.dob, DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)) = 24\n" +
@@ -1170,13 +1171,13 @@ public class PublicHealthActionCohortLibrary {
      */
     public CohortDefinition hei24MonthsUndocumentedOutcomeCs() {
         String sqlQuery = "SELECT e.patient_id\n" +
-                "FROM kenyaemr_etl.etl_hei_enrollment e\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
-                "    LEFT JOIN (select o.patient_id,o.hiv_status_at_exit from kenyaemr_etl.etl_hei_enrollment o where o.encounter_type = 'MCHCS_HEI_COMPLETION'\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
+                "         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
+                "    LEFT JOIN (select o.patient_id,o.hiv_status_at_exit from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment o where o.encounter_type = 'MCHCS_HEI_COMPLETION'\n" +
                 "                   and o.visit_date <= date(:endDate)) o on o.patient_id = e.patient_id\n" +
-                "                               left join kenyaemr_etl.etl_patient_program_discontinuation c\n" +
+                "                               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation c\n" +
                 "                               on e.patient_id = c.patient_id and c.program_name in ('MCH Child HEI','MCH Child')\n" +
-                "                               left join kenyaemr_etl.etl_hts_test t on t.patient_id = e.patient_id\n" +
+                "                               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t on t.patient_id = e.patient_id\n" +
                 "WHERE d.hei_no is not null\n" +
                 "  AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "  AND (c.discontinuation_reason is null and o.hiv_status_at_exit is null and t.final_test_result is null);";
@@ -1195,17 +1196,17 @@ public class PublicHealthActionCohortLibrary {
 	public CohortDefinition pregnantPostPartumNotLinkedToPrep() {
 		String sqlQuery = "SELECT a.patient_id high_risk_not_on_PrEP\n" +
                 "FROM (SELECT s.patient_id\n" +
-                "      FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
                 "               INNER JOIN (SELECT t.patient_id,\n" +
                 "                                  t.final_test_result,\n" +
                 "                                  t.hts_entry_point,\n" +
                 "                                  t.visit_date\n" +
-                "                           from kenyaemr_etl.etl_hts_test t\n" +
+                "                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                           WHERE t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) AND CURRENT_DATE\n" +
                 "                             AND t.final_test_result = 'Negative'\n" +
                 "                             AND t.hts_entry_point in (160538, 160456, 1623)) t\n" +
                 "                          ON s.patient_id = t.patient_id\n" +
-                "                          INNER JOIN kenyaemr_etl.etl_patient_demographics d ON s.patient_id = d.patient_id\n" +
+                "                          INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON s.patient_id = d.patient_id\n" +
                 "      where s.hts_risk_category IN ('High', 'Very high')\n" +
                 "        and (s.currently_on_prep in ('NO', 'Declined to answer', '') OR s.currently_on_prep is null)\n" +
                 "        AND s.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) AND CURRENT_DATE AND d.Gender = 'F') a\n" +
@@ -1221,24 +1222,24 @@ public class PublicHealthActionCohortLibrary {
                 "                           r.latest_refill_app_date,\n" +
                 "                           d.latest_disc_date,\n" +
                 "                           d.disc_patient\n" +
-                "                    from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "                             left join\n" +
                 "                         (select f.patient_id,\n" +
                 "                                 max(f.visit_date)                                      as latest_fup_date,\n" +
                 "                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
-                "                          from kenyaemr_etl.etl_prep_followup f\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
                 "                          where f.visit_date <= CURRENT_DATE\n" +
                 "                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
                 "                             left join (select r.patient_id,\n" +
                 "                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
                 "                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
-                "                                        from kenyaemr_etl.etl_prep_monthly_refill r\n" +
+                "                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
                 "                                        where r.visit_date <= CURRENT_DATE\n" +
                 "                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
                 "                             left join (select patient_id                                               as disc_patient,\n" +
                 "                                               max(d.visit_date)                                        as latest_disc_date,\n" +
                 "                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
-                "                                        from kenyaemr_etl.etl_prep_discontinuation d\n" +
+                "                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
                 "                                        where d.visit_date <= CURRENT_DATE\n" +
                 "                                        group by patient_id\n" +
                 "                                        having latest_disc_date <= CURRENT_DATE) d\n" +
@@ -1265,18 +1266,18 @@ public class PublicHealthActionCohortLibrary {
     public CohortDefinition pregnantPostPartumNotLinkedToPrepCs() {
         String sqlQuery = "SELECT a.patient_id high_risk_not_on_PrEP\n" +
                 "FROM (SELECT s.patient_id\n" +
-                "      FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
                 "               INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
-                "                           FROM kenyaemr_etl.etl_hts_test t\n" +
+                "                           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
                 "                           WHERE t.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                             AND t.final_test_result = 'Negative') t\n" +
                 "                          ON t.patient_id = s.patient_id\n" +
                 "                              -- enforce order: screening must be before (or same day as) HTS test\n" +
                 "                              AND s.visit_date <= t.visit_date\n" +
-                "               INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
+                "               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_behaviour_risk_assessment r\n" +
                 "                          ON r.patient_id = s.patient_id\n" +
                 "                              AND r.willing_to_take_prep = 'Yes'\n" +
-                "               INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                          ON d.patient_id = s.patient_id\n" +
                 "      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
                 "        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
@@ -1300,24 +1301,24 @@ public class PublicHealthActionCohortLibrary {
                 "                           r.latest_refill_app_date,\n" +
                 "                           d.latest_disc_date,\n" +
                 "                           d.disc_patient\n" +
-                "                    from kenyaemr_etl.etl_prep_enrolment e\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
                 "                             left join\n" +
                 "                         (select f.patient_id,\n" +
                 "                                 max(f.visit_date)                                      as latest_fup_date,\n" +
                 "                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
-                "                          from kenyaemr_etl.etl_prep_followup f\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
                 "                          where f.visit_date <= date(:endDate)\n" +
                 "                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
                 "                             left join (select r.patient_id,\n" +
                 "                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
                 "                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
-                "                                        from kenyaemr_etl.etl_prep_monthly_refill r\n" +
+                "                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
                 "                                        where r.visit_date <= date(:endDate)\n" +
                 "                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
                 "                             left join (select patient_id                                               as disc_patient,\n" +
                 "                                               max(d.visit_date)                                        as latest_disc_date,\n" +
                 "                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
-                "                                        from kenyaemr_etl.etl_prep_discontinuation d\n" +
+                "                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
                 "                                        where d.visit_date <= date(:endDate)\n" +
                 "                                        group by patient_id\n" +
                 "                                        having latest_disc_date <= date(:endDate)) d\n" +

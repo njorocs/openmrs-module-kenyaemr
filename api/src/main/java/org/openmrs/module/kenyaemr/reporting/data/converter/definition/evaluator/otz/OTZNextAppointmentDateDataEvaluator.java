@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.OTZNextAppointmentDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class OTZNextAppointmentDateDataEvaluator implements PersonDataEvaluator 
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id,\n" +
-                "date(mid(max(concat(visit_date,next_appointment_date, \"\" )),11)) as next_appointment_date from kenyaemr_etl.etl_patient_hiv_followup\n" +
+                "date(mid(max(concat(visit_date,next_appointment_date, \"\" )),11)) as next_appointment_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup\n" +
                 "\tGROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

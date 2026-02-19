@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentInterruptionDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -47,8 +48,8 @@ public class MissedAppointmentInterruptionDataEvaluator implements EncounterData
                 "                 when 5622 then 'Other'\n" +
                 "                 when 164349 then 'Unknown'\n" +
                 "             else '' end discontinuation_reason\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "               left join kenyaemr_etl.etl_patient_program_discontinuation d on d.patient_id = fup.patient_id and d.program_name='HIV' and\n" +
+                "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on d.patient_id = fup.patient_id and d.program_name='HIV' and\n" +
                 "                                                                               coalesce(d.effective_discontinuation_date, d.visit_date) between fup.visit_date and fup.next_appointment_date\n" +
                 "      where next_appointment_date between date(:startDate) and date(:endDate)\n" +
                 "      group by fup.encounter_id) t;";

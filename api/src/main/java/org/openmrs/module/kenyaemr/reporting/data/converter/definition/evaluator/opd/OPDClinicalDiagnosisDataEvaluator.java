@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDClinicalDiagnosisDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -38,7 +39,7 @@ public class OPDClinicalDiagnosisDataEvaluator implements ObsDataEvaluator {
 
 		String qry = "select le.obs_id,\n" +
                 "       dl.name as diagnosis\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         left join (select GROUP_CONCAT(DISTINCT (cn.name) SEPARATOR '|') as name,\n" +
                 "                           ed.date_created,\n" +
                 "                           ed.dx_rank,\n" +

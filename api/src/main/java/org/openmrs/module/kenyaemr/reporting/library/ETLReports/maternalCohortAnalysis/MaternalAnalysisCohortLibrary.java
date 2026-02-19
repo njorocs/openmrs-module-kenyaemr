@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.maternalCohortAnalysis;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -37,7 +38,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition originalMaternalKpCohort12Months() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
+        String sqlQuery = "select e.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "where e.hiv_status = '703'\n" +
                 "and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -53,9 +54,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition originalMaternalNpCohort12Months() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "      and ((v.final_test_result ='Positive' and date(v.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year))\n" +
@@ -74,8 +75,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "       join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
                 "    where e.hiv_status = 703 and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
@@ -92,10 +93,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "    where e.hiv_status in (664,1067) and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
@@ -114,8 +115,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "  where  e.hiv_status =703 and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "        and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "        and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -132,10 +133,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -155,8 +156,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -173,10 +174,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -230,8 +231,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -248,10 +249,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -271,8 +272,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -289,10 +290,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -312,9 +313,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalKp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 10 month)\n" +
-                "    left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 10 month)\n" +
+                "    left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
                 "    where e.hiv_status =703 \n" +
                 "          and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "          and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month))\n" +
@@ -332,11 +333,11 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalNp3MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 10 month)\n" +
-                "  left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 10 month)\n" +
+                "  left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "      and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month))\n" +
@@ -399,7 +400,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadSamplesCollected3Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "   where le.lab_test in (1305,856) and le.date_test_requested is not null\n" +
                 "     and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -417,7 +418,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadResultsReceived3Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test in (1305,856)  and le.test_result is not null\n" +
                 " and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -489,7 +490,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan10003Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <1000) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -507,7 +508,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan400Month3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <400) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -525,7 +526,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan50Month3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <50) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -543,7 +544,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000Month3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >=1000\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -561,8 +562,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan400WithEACsMonth3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 400\n" +
                 "  and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "  and date(ea.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
@@ -582,7 +583,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFMonth3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -601,7 +602,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth3() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
@@ -622,8 +623,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF3Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on de.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
@@ -875,8 +876,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "       join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
                 "    where e.hiv_status = 703 and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
@@ -893,10 +894,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "    where e.hiv_status in (664,1067) and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
@@ -915,8 +916,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "  where  e.hiv_status =703 and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "        and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "        and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -933,10 +934,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -956,8 +957,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -974,10 +975,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -1031,8 +1032,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -1049,10 +1050,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -1072,8 +1073,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year);";
@@ -1090,10 +1091,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
@@ -1113,9 +1114,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalKp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 7 month)\n" +
-                "    left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 7 month)\n" +
+                "    left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
                 "    where e.hiv_status =703 \n" +
                 "          and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "          and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month))\n" +
@@ -1133,11 +1134,11 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalNp6MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 7 month)\n" +
-                "  left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date_sub(date(:endDate) , interval 7 month)\n" +
+                "  left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 1 year)\n" +
                 "      and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month))\n" +
@@ -1200,7 +1201,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadSamplesCollected6Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "   where le.lab_test in (1305,856) and le.date_test_requested is not null\n" +
                 "     and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1218,7 +1219,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadResultsReceived6Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test in (1305,856)  and le.test_result is not null\n" +
                 " and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1290,7 +1291,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan10006Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <1000) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1308,7 +1309,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan400Month6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <400) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1326,7 +1327,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan50Month6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <50) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1344,7 +1345,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000Month6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >=1000\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1362,8 +1363,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan400WithEACsMonth6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 400\n" +
                 "  and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "  and date(ea.visit_date) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
@@ -1383,7 +1384,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFMonth6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -1402,7 +1403,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth6() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
@@ -1423,8 +1424,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF6Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on de.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
@@ -1677,8 +1678,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "       join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
                 "    where e.hiv_status = 703 and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -1695,10 +1696,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "    where e.hiv_status in (664,1067) and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -1717,8 +1718,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "  where  e.hiv_status =703 and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "        and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "        and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -1735,10 +1736,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -1758,8 +1759,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -1776,10 +1777,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -1833,8 +1834,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -1851,10 +1852,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -1874,8 +1875,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -1892,10 +1893,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -1915,9 +1916,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalKp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
-                "    left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
+                "    left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
                 "    where e.hiv_status =703 \n" +
                 "          and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "          and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate))\n" +
@@ -1935,11 +1936,11 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalNp12MonthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
-                "  left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
+                "  left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "      and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate))\n" +
@@ -2002,7 +2003,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadSamplesCollected12Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "   where le.lab_test in (1305,856) and le.date_test_requested is not null\n" +
                 "     and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2020,7 +2021,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadResultsReceived12Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test in (1305,856)  and le.test_result is not null\n" +
                 " and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2092,7 +2093,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan100012Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <1000) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2110,7 +2111,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan400Month12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <400) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2128,7 +2129,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan50Month12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <50) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2146,7 +2147,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000Month12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >=1000\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2164,8 +2165,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan400WithEACsMonth12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 400\n" +
                 "  and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "  and date(ea.visit_date) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
@@ -2185,7 +2186,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFMonth12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2204,7 +2205,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth12() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -2225,8 +2226,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF12Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on de.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -2483,7 +2484,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition originalMaternalKpCohort24months() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
                 "where e.hiv_status = '703'\n" +
                 "and date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2499,9 +2500,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition originalMaternalNpCohort24months() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
                 "      and ((v.final_test_result ='Positive' and date(v.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year))\n" +
@@ -2520,8 +2521,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "       join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
                 "    where e.hiv_status = 703 and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
@@ -2538,10 +2539,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferInMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "    left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment he on he.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "    where e.hiv_status in (664,1067) and he.patient_type=160563\n" +
                 "    and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
                 "    and date(he.transfer_in_date) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
@@ -2560,8 +2561,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "  where  e.hiv_status =703 and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "        and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "        and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year);";
@@ -2578,10 +2579,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition transferOutMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='HIV' and dis.discontinuation_reason = 159492\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
@@ -2601,8 +2602,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year);";
@@ -2619,10 +2620,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition dischargedToCCCMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160035\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
@@ -2676,8 +2677,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year);";
@@ -2694,10 +2695,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition ltfuMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 5240\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
@@ -2717,8 +2718,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                " inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
                 "where  e.hiv_status =703 and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year);";
@@ -2735,10 +2736,10 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition deceasedMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis on dis.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where  e.hiv_status in (664,1067) and dis.program_name='MCH Mother' and dis.discontinuation_reason = 160034\n" +
                 "       and coalesce(date(dis.effective_discontinuation_date),date(dis.transfer_date),date(dis.visit_date)) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "       and  date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
@@ -2758,9 +2759,9 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalKp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "    inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
-                "    left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
+                "    left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
                 "    where e.hiv_status =703 \n" +
                 "          and date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
                 "          and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 2 year) and date(:endDate))\n" +
@@ -2778,11 +2779,11 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition stoppedTreatmentMaternalNp24monthsCohort() {
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
-                "  left  join kenyaemr_etl.etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
-                "  left join kenyaemr_etl.etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
-                "  left join kenyaemr_etl.etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(de.date_started) <= date(:endDate)\n" +
+                "  left  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on e.patient_id = d.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on v.patient_id=e.patient_id\n" +
+                "  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht on ht.patient_id=e.patient_id and ht.hts_entry_point =160538\n" +
                 "where e.hiv_status in (664,1067)\n" +
                 "      and date(e.visit_date) between date_sub(date(:startDate) , interval 2 year) and date_sub(date(:endDate) , interval 2 year)\n" +
                 "      and ((de.regimen_stopped = 1260 and date(de.visit_date) between date_sub(date(:startDate) , interval 2 year) and date(:endDate))\n" +
@@ -2845,7 +2846,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadSamplesCollected24Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "   where le.lab_test in (1305,856) and le.date_test_requested is not null\n" +
                 "     and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2863,7 +2864,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition patientsWithViralLoadResultsReceived24Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test in (1305,856)  and le.test_result is not null\n" +
                 " and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2935,7 +2936,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan100024Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <1000) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2953,7 +2954,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan400Month24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <400) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2971,7 +2972,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsLessThan50Month24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where (le.lab_test = 856 and le.test_result <50) or le.lab_test=1305\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -2989,7 +2990,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000Month24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >=1000\n" +
                 "and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -3007,8 +3008,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan400WithEACsMonth24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence ea on ea.patient_id = le.patient_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 400\n" +
                 "  and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "  and date(ea.visit_date) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
@@ -3028,7 +3029,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFMonth24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -3047,7 +3048,7 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth24() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
@@ -3068,8 +3069,8 @@ public class MaternalAnalysisCohortLibrary {
      * @return the indicator
      */
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF24Months() {
-        String sqlQuery = "select le.patient_id from kenyaemr_etl.etl_laboratory_extract le\n" +
-                "  inner join kenyaemr_etl.etl_drug_event de on de.patient_id = le.patient_id\n" +
+        String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
                 "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +

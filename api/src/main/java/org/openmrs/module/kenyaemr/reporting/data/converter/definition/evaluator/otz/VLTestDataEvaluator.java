@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.SecondRegimenSwitchDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.VLTestDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,10 +36,10 @@ public class VLTestDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select otzenr.patient_id,v.latest_vl from kenyaemr_etl.etl_otz_enrollment otzenr\n" +
+        String qry = "select otzenr.patient_id,v.latest_vl from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment otzenr\n" +
                 "join (select le.patient_id, concat_ws('\\r\\n',mid(max(concat(le.visit_date,le.urgency)),11),mid(max(concat(le.visit_date,le.test_result)),11),max(le.visit_date)) as latest_vl,\n" +
                 "             max(le.visit_date) as latest_vl_date\n" +
-                "                         from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "where lab_test in (1305, 856)\n" +
                 "group by le.patient_id)v on v.patient_id = otzenr.patient_id group by otzenr.patient_id  having max(otzenr.visit_date) >= max(v.latest_vl_date);";
 

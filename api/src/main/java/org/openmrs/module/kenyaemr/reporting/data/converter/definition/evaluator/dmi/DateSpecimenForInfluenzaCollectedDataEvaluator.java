@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.DateSpecimenForInfluenzaCollectedDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class DateSpecimenForInfluenzaCollectedDataEvaluator implements PersonDat
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select x.patient_id, x.date_test_requested from kenyaemr_etl.etl_laboratory_extract x\n" +
+        String qry = "select x.patient_id, x.date_test_requested from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "where date(x.date_test_requested) between date(:startDate) and date(:endDate) and x.lab_test in (1000612,1000614,1000615,1000616,1000617,1000613);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

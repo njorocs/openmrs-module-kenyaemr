@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.SpecificCauseOfDeathDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -57,7 +58,7 @@ public class SpecificCauseOfDeathDataEvaluator implements PersonDataEvaluator {
                 "                       when 160160 then 'HIV disease resulting in other conditions including acute HIV infection syndrome or persistent generalized lymphadenopathy or hematological and immunological abnormalities and others'\n" +
                 "                       when 161548 then 'HIV disease resulting in Unspecified HIV disease'\n" +
                 "                       else null end),natural_causes,non_natural_cause)\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Map<Integer, Object> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Object.class, context);

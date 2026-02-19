@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCClinicalNotesDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class ANCClinicalNotesDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
                 " v.encounter_id,\n" +
                 " v.clinical_notes\n" +
-                " from kenyaemr_etl.etl_mch_antenatal_visit v where date(visit_date) between date(:startDate) and date(:endDate);";
+                " from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where date(visit_date) between date(:startDate) and date(:endDate);";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Date startDate = (Date)context.getParameterValue("startDate");

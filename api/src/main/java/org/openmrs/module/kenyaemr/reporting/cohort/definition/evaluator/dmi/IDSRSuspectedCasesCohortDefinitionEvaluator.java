@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.IDSRSuspectedCasesCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -63,10 +64,10 @@ public class IDSRSuspectedCasesCohortDefinitionEvaluator implements CohortDefini
 				"                             ',', 1)\n" +
 				"                 END                   AS fever_duration_from_days,\n" +
 				"          c.complaint_duration\n" +
-				"      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
-				"               inner join kenyaemr_etl.etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
+				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+				"               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
 				"               inner join openmrs.visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
-				"               left join kenyaemr_etl.etl_patient_triage t\n" +
+				"               left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 				"                         on c.patient_id = t.patient_id and\n" +
 				"                            date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"      group by patient_id) a\n" +

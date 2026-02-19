@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCModernFPWithin6WeeksDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,10 +40,10 @@ public class PNCModernFPWithin6WeeksDataEvaluator implements EncounterDataEvalua
                 "    if(v.family_planning_method in\n" +
                 "          (160570, 780, 5279, 1359, 5275, 136163, 5278, 5277, 1472, 190, 1489), 'Yes',\n" +
                 "          if(v.family_planning_method = 162332, 'No', NULL)) as Modern_FP_Within_6Weeks\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "         left join (select d.patient_id,\n" +
                 "                           mid(max(concat(d.visit_date, date(d.date_of_delivery))), 11) as date_of_delivery\n" +
-                "                    from kenyaemr_etl.etl_mchs_delivery d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
                 "                    where d.visit_date <= date(:endDate)\n" +
                 "                    group by d.patient_id) d\n" +
                 "                   on v.patient_id = d.patient_id\n" +

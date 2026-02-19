@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsAssistiveTechnologyDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,7 +43,7 @@ public class SpecialClinicsAssistiveTechnologyDataEvaluator implements Encounter
                 "                (case v.assistive_technology when 1107 then 'None' when 2001249 then 'Inclusive Play Therapy' when 165424 then 'Cognitive/Intellectual' when 2000819 then 'Communication'\n" +
                 "                when 165151 then 'Self Care' when 2000976 then 'Hearing Devices' when 168812 then 'Physical'\n" +
                 "                else '' end) as assistive_technology\n" +
-                "                from kenyaemr_etl.etl_special_clinics v\n" +
+                "                from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "                where date(v.visit_date)  between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "';";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

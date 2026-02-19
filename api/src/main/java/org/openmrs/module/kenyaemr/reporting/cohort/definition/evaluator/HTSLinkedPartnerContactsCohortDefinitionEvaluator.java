@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.HTSLinkedPartnerContactsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,7 +48,7 @@ public class HTSLinkedPartnerContactsCohortDefinitionEvaluator implements Cohort
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select cl.patient_id from kenyaemr_etl.etl_contacts_linked cl where cl.relationship_type =163565 group by cl.patient_id;";
+		String qry="select cl.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_contacts_linked cl where cl.relationship_type =163565 group by cl.patient_id;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

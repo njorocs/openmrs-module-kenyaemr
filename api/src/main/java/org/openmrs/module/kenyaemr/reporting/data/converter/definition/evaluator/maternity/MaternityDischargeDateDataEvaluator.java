@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityDischargeDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,8 +39,8 @@ public class MaternityDischargeDateDataEvaluator implements PersonDataEvaluator 
         String qry = "SELECT\n" +
                 "  d.patient_id,\n" +
                 "  d.discharge_date\n" +
-                "FROM kenyaemr_etl.etl_mchs_discharge d\n" +
-                "INNER JOIN kenyaemr_etl.etl_mchs_delivery v ON v.patient_id = d.patient_id\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_discharge d\n" +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v ON v.patient_id = d.patient_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

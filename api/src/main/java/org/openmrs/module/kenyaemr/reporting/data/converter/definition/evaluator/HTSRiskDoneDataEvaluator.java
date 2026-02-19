@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSRiskDoneDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -35,8 +36,8 @@ public class HTSRiskDoneDataEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select e.encounter_id, 'Yes'\n" +
-                "from  kenyaemr_etl.etl_hts_test e\n" +
-                "inner join kenyaemr_etl.etl_prep_behaviour_risk_assessment et on et.patient_id=e.patient_id\n" +
+                "from  "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test e\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_behaviour_risk_assessment et on et.patient_id=e.patient_id\n" +
                 "where et.voided=0";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

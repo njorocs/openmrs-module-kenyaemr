@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCReferredByDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class VMMCReferredByDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id, case referee when 165650 then 'Self referral' when 5619 then 'Health Care Worker' when 1577 then 'Nurse'when 1555 then 'Community Health Worker'" +
-                " when 163488 then 'Community Health Volunteer' when 1370 then 'HTS Counsellors' when 5622 then other_referee else '' end as referee from kenyaemr_etl.etl_vmmc_enrolment GROUP BY patient_id;";
+                " when 163488 then 'Community Health Volunteer' when 1370 then 'HTS Counsellors' when 5622 then other_referee else '' end as referee from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_enrolment GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

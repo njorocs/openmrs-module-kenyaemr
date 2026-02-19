@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCVisitNumberDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,8 +37,8 @@ public class ANCVisitNumberDataEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select v.encounter_id, coalesce(v.anc_number,d.national_unique_patient_identifier) as anc_number\n" +
-                "       from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "       join kenyaemr_etl.etl_patient_demographics d on v.patient_id = d.patient_id\n" +
+                "       from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id\n" +
                 "       where v.form = 'MCH Antenatal Initial Visit'\n" +
                 "         and v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "       GROUP by v.encounter_id;";
