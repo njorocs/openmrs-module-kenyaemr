@@ -2708,7 +2708,7 @@ public class ETLOldMoh731GreenCardCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select r.person_b as child\n" +
-                "from openmrs.relationship r\n" +
+                "FROM  relationship r\n" +
                 "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d on d.patient_id = r.person_a and r.relationship = 3\n" +
                 "and\n" +
                 "                                         (d.baby_nvp_dispensed = 1\n" +
@@ -2745,7 +2745,7 @@ public class ETLOldMoh731GreenCardCohortLibrary {
 
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery =  "select r.person_b as child\n" +
-                "from openmrs.relationship r\n" +
+                "FROM  relationship r\n" +
                 "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p on p.patient_id = r.person_a and r.relationship = 3\n" +
                 "and\n" +
                 "            (p.baby_nvp_dispensed = 80586\n" +

@@ -49,7 +49,7 @@ public class ClinicianWorkloadCohortDefinitionEvaluator implements VisitQueryEva
 				"                           FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
 				"                           WHERE voided = 0),\n" +
 				"     checked_in AS (SELECT v.visit_id, v.patient_id, v.creator, date(v.date_started) as checkin_date\n" +
-				"                    FROM openmrs.visit v\n" +
+				"                    from visit v\n" +
 				"                             JOIN filtered_patients p ON p.patient_id = v.patient_id\n" +
 				"                    WHERE v.voided = 0\n" +
 				"                      AND date(v.date_started) between date(:startDate) and date(:endDate))\n" +

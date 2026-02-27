@@ -142,7 +142,7 @@ public class Moh505CohortLibrary {
     }
 
     public CohortDefinition patientDeceased(int diagnosis, int patientOutcome) {
-        String sqlQuery = "select d.patient_id from openmrs.encounter_diagnosis d\n" +
+        String sqlQuery = "select d.patient_id FROM  encounter_diagnosis d\n" +
                 "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c on d.patient_id = c.patient_id\n" +
                 "where d.diagnosis_coded = " + diagnosis + " and d.dx_rank = '2' and c.patient_outcome = " + patientOutcome + "\n" +
                 "and date(c.visit_date) between date(:startDate) and date(:endDate);";
@@ -156,7 +156,7 @@ public class Moh505CohortLibrary {
     }
 
     public CohortDefinition malariaTest(int diagnosis, int mRDT) {
-        String sqlQuery = "select ed.patient_id from openmrs.encounter_diagnosis ed\n" +
+        String sqlQuery = "select ed.patient_id FROM  encounter_diagnosis ed\n" +
                 "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le on ed.patient_id = le.patient_id\n" +
                 "where ed.diagnosis_coded = " + diagnosis + " and ed.dx_rank = '2' and le.lab_test = " + mRDT + "\n" +
                 "and date(le.date_test_requested) between date(:startDate) and date(:endDate);";
@@ -170,7 +170,7 @@ public class Moh505CohortLibrary {
     }
 
     public CohortDefinition malariaTestPositive(int diagnosis, int mRDT) {
-        String sqlQuery = "select ed.patient_id from openmrs.encounter_diagnosis ed\n" +
+        String sqlQuery = "select ed.patient_id FROM  encounter_diagnosis ed\n" +
                 "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le on ed.patient_id = le.patient_id\n" +
                 "where ed.diagnosis_coded = " + diagnosis + " and ed.dx_rank = '2' and le.lab_test = " + mRDT + " and le.result_name = 'POSITIVE'\n" +
                 "and date(le.date_test_requested) between date(:startDate) and date(:endDate);";

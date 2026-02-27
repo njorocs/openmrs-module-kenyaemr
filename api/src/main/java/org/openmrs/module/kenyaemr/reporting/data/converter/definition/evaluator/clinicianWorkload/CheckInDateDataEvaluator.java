@@ -46,7 +46,7 @@ public class CheckInDateDataEvaluator implements VisitDataEvaluator {
                 "             v.visit_id,\n" +
                 "             v.patient_id,\n" +
                 "             v.date_started AS checkin_date\n" +
-                "         FROM openmrs.visit v\n" +
+                "         from visit v\n" +
                 "                  JOIN filtered_patients p ON p.patient_id = v.patient_id\n" +
                 "                  JOIN users u ON u.user_id = v.creator\n" +
                 "         WHERE v.voided = 0\n" +

@@ -36,7 +36,7 @@ public class CaseUniqueIdDataEvaluator implements VisitDataEvaluator {
     public EvaluatedVisitData evaluate(VisitDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
-        String qry = "select v.visit_id,v.visit_id from openmrs.visit v where date(v.date_started) between date(:startDate) and date(:endDate) and v.voided = 0;";
+        String qry = "select v.visit_id,v.visit_id from visit v where date(v.date_started) between date(:startDate) and date(:endDate) and v.voided = 0;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

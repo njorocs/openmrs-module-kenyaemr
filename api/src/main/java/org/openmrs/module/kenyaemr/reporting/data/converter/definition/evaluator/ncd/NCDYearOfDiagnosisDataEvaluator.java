@@ -39,7 +39,7 @@ public class NCDYearOfDiagnosisDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
                 "   ed.encounter_id,\n" +
                 "   year(v.diagnosis_date) as year_of_diagnosis\n" +
-                "from openmrs.encounter_diagnosis ed\n" +
+                "FROM  encounter_diagnosis ed\n" +
                 "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment v on v.encounter_id = ed.encounter_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 

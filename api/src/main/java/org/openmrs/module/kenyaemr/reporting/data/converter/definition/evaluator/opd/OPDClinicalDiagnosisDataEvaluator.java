@@ -44,7 +44,7 @@ public class OPDClinicalDiagnosisDataEvaluator implements ObsDataEvaluator {
                 "                           ed.date_created,\n" +
                 "                           ed.dx_rank,\n" +
                 "                           ed.patient_id\n" +
-                "                    from openmrs.encounter_diagnosis ed\n" +
+                "                    FROM  encounter_diagnosis ed\n" +
                 "                             inner join openmrs.concept_name cn\n" +
                 "                                        on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en' and\n" +
                 "                                           cn.concept_name_type = 'FULLY_SPECIFIED' and\n" +
