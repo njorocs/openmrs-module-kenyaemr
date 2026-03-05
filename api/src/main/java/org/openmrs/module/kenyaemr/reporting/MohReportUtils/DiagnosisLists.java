@@ -1797,56 +1797,27 @@ public class DiagnosisLists {
 			DiagnosisConcepts._DiagnosisConcepts.MPSA_7
 		);
 	}
-	public static List<Integer> getTestedMalariaList() {
+	public static List<Integer> getTestedMalariaConcepts() {
 		return Arrays
 			.asList(
 				DiagnosisConcepts._DiagnosisConcepts.TMC_1,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_2,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_3,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_4,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_5,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_6,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_7,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_8,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_9,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_10,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_11,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_12
-
+				DiagnosisConcepts._DiagnosisConcepts.TMC_2
 			);
 	}
-	public static List<Integer> getSuspectedMalariaList() {
-		return Arrays
-			.asList(
-				DiagnosisConcepts._DiagnosisConcepts.SMC_1,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_2,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_3,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_4,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_5,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_6,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_7,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_8,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_9,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_10,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_11,
-				DiagnosisConcepts._DiagnosisConcepts.SMC_12
-			);
-	}
-
+	
 	public static List<Integer> getConfirmedMalariaList() {
 		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.COA_1,
 			DiagnosisConcepts._DiagnosisConcepts.COA_2,
 			DiagnosisConcepts._DiagnosisConcepts.COA_3,
 			DiagnosisConcepts._DiagnosisConcepts.COA_4,
-			DiagnosisConcepts._DiagnosisConcepts.COA_5,
-			DiagnosisConcepts._DiagnosisConcepts.COA_6,
-			DiagnosisConcepts._DiagnosisConcepts.COA_7,
-			DiagnosisConcepts._DiagnosisConcepts.COA_8,
-			DiagnosisConcepts._DiagnosisConcepts.COA_9,
-			DiagnosisConcepts._DiagnosisConcepts.COA_10,
-			DiagnosisConcepts._DiagnosisConcepts.COA_11,
-			DiagnosisConcepts._DiagnosisConcepts.COA_12,
-			DiagnosisConcepts._DiagnosisConcepts.COA_13
+			DiagnosisConcepts._DiagnosisConcepts.COA_5
+		);
+	}
+	
+	//Malaria in pregnancy
+	public static List<Integer> getMalariaInPregnancyList() {
+		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.MPA_1,
+			DiagnosisConcepts._DiagnosisConcepts.MPA_2
 		);
 	}
 
@@ -4267,8 +4238,7 @@ public class DiagnosisLists {
 		allListedDiagnosisForUnder5.addAll(getOtherDisOfRespiratorySystemList());		
 		allListedDiagnosisForUnder5.addAll(getPresumedTuberculosisList());
 		allListedDiagnosisForUnder5.addAll(getAsthmaList());
-		allListedDiagnosisForUnder5.addAll(getConfirmedMalariaList());
-		allListedDiagnosisForUnder5.addAll(getSuspectedMalariaList());		
+		allListedDiagnosisForUnder5.addAll(getConfirmedMalariaList());			
 		allListedDiagnosisForUnder5.addAll(getMalnutritionList());		
 		allListedDiagnosisForUnder5.addAll(getOtherMenigitisList());
 		allListedDiagnosisForUnder5.addAll(getPoliomyelitisList());
@@ -4313,8 +4283,7 @@ public class DiagnosisLists {
 		allListedDiagnosisForUnder5.addAll(getChildHoodCancerist());
 		allListedDiagnosisForUnder5.addAll(getTuberculosisDiagnosisList());
 		allListedDiagnosisForUnder5.addAll(getOverweightList());
-		allListedDiagnosisForUnder5.addAll(getRoadTrafficInjuriesList());
-		allListedDiagnosisForUnder5.addAll(getTestedMalariaList());
+		allListedDiagnosisForUnder5.addAll(getRoadTrafficInjuriesList());		
 		return allListedDiagnosisForUnder5;
 	}
 	public static List<Integer> getAllOtherAbove5DiseasesList() {
@@ -4329,8 +4298,7 @@ public class DiagnosisLists {
 		allListedDiagnosisForAbove5.addAll(getChickenPoxListB());
 		allListedDiagnosisForAbove5.addAll(getMeaslesListB());
 		allListedDiagnosisForAbove5.addAll(getHepatitisListB());
-		allListedDiagnosisForAbove5.addAll(getMumpsListB());
-		allListedDiagnosisForAbove5.addAll(getTestedMalariaList());	
+		allListedDiagnosisForAbove5.addAll(getMumpsListB());		
 		allListedDiagnosisForAbove5.addAll(getUrinaryTractInfectionListB());
 		allListedDiagnosisForAbove5.addAll(getInterstinalwormsListB());
 		allListedDiagnosisForAbove5.addAll(getMalnutritionList());
@@ -4345,7 +4313,6 @@ public class DiagnosisLists {
 		allListedDiagnosisForAbove5.addAll(getMentalDisordersList());
 		allListedDiagnosisForAbove5.addAll(getDentalDisordersList());
 		allListedDiagnosisForAbove5.addAll(getTetanusList());
-		allListedDiagnosisForAbove5.addAll(getSuspectedMalariaList());
 		allListedDiagnosisForAbove5.addAll(getConfirmedMalariaList());		
 		allListedDiagnosisForAbove5.addAll(getTyphoidList());
 		allListedDiagnosisForAbove5.addAll(getAmoebiasis());

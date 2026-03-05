@@ -83,6 +83,12 @@ public class MOH705IndicatorLibrary {
 	public CohortIndicator labTests(List<Integer> labTestList, String age) {
 		return cohortIndicator("Lab Tests", ReportUtils.map(moh705CohortLibrary.labTest(labTestList,age), "startDate=${startDate},endDate=${endDate}"));
 	}
+	/**
+	 * LabTests for Suspected Malaria
+	 */
+	public CohortIndicator labTestForSuspectedMalaria(List<Integer> labTestList, String age) {
+		return cohortIndicator("Lab Tests for Suspected Malaria", ReportUtils.map(moh705CohortLibrary.labTestForSuspectedMalaria(labTestList,age), "startDate=${startDate},endDate=${endDate}"));
+	}
 }
 
 

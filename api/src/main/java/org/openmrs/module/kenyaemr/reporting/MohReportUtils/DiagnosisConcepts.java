@@ -2277,51 +2277,25 @@ public class DiagnosisConcepts {
 		public static final Integer MPSA_7 = 133661;
 
 		//Tested malaria TMC
-		public static final Integer TMC_1 = 152295;
-		public static final Integer TMC_2 = 2002634;
-		public static final Integer TMC_3 = 2002636;
-		public static final Integer TMC_4 = 158379;
-		public static final Integer TMC_5 = 2002639;
-		public static final Integer TMC_6 = 2002641;
-		public static final Integer TMC_7 = 152296;
-		public static final Integer TMC_8 = 2002644;
-		public static final Integer TMC_9 = 2002646;
-		public static final Integer TMC_10 = 116128;
-		public static final Integer TMC_11 = 155686;
-		public static final Integer TMC_12 = 2017917;
+		public static final Integer TMC_1 = 2017917;
+		public static final Integer TMC_2 = 1643;
 
 		//Suspected malaria SMC
-		public static final Integer SMC_1 = 152295;
-		public static final Integer SMC_2 = 2002634;
-		public static final Integer SMC_3 = 2002636;
-		public static final Integer SMC_4 = 158379;
-		public static final Integer SMC_5 = 2002639;
-		public static final Integer SMC_6 = 2002641;
-		public static final Integer SMC_7 = 2002644;
-		public static final Integer SMC_8 = 2002646;
-		public static final Integer SMC_9 = 2002649;
-		public static final Integer SMC_10 = 2002650;
-		public static final Integer SMC_11 = 2002652;
-		public static final Integer SMC_12 = 116128;
+		public static final Integer SMC_1 = 2002652;
+		
 
 		//Confirmed Malaria positive  COA
-
-		public static final Integer COA_1 = 152295;
-		public static final Integer COA_2 = 2002634;
+		public static final Integer COA_1 = 2002649;
+		public static final Integer COA_2 = 2002650;
 		public static final Integer COA_3 = 2002636;
-		public static final Integer COA_4 = 158379;
-		public static final Integer COA_5 = 2002639;
-		public static final Integer COA_6 = 2002641;
-		public static final Integer COA_7 = 152296;
-		public static final Integer COA_8 = 2002644;
-		public static final Integer COA_9 = 2002646;
-		public static final Integer COA_10 = 2002649;
-		public static final Integer COA_11 = 2002650;
-		public static final Integer COA_12 = 2002652;
-		public static final Integer COA_13 = 116128;
+		public static final Integer COA_4 = 2002641;
+		public static final Integer COA_5 = 2002646;		
+	
+		//Malaria in pregnancy positive  MPA
+		public static final Integer MPA_1 = 135361;
+		public static final Integer MPA_2 = 2009200;
 
 		//Malnutrition
-
 		public static final Integer MALA_1 = 2004982;
 		public static final Integer MALA_2 = 2004983;
 		public static final Integer MALA_3 = 2004984;
