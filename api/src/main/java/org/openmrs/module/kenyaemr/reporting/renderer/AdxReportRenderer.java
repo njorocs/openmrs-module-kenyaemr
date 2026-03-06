@@ -58,9 +58,6 @@ public class AdxReportRenderer extends ReportDesignRenderer {
         return "text/xml";
     }
 
-    /**
-     * @see ReportRenderer#render(ReportData, String, OutputStream)
-     */
     public void render(ReportData reportData, String argument, OutputStream out) throws IOException, RenderingException {
 
         DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
@@ -79,9 +76,9 @@ public class AdxReportRenderer extends ReportDesignRenderer {
         Writer w = new OutputStreamWriter(out, "UTF-8");
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         w.write("<adx xmlns=\"urn:ihe:qrph:adx:2015\"\n" +
-                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
-                "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");
+                "     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "     xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
+                "     exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");
 
         for (String dsKey : reportData.getDataSets().keySet()) {
             w.write("<group orgUnit=\"" + mfl + "\" period=\"" + isoDateFormat.format(reportDate)
@@ -100,4 +97,5 @@ public class AdxReportRenderer extends ReportDesignRenderer {
         w.write("</adx>\n");
         w.flush();
     }
+
 }

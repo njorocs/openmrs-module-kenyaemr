@@ -9,14 +9,9 @@
  */
 package org.openmrs.module.kenyaemr.page.controller;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.Encounter;
-import org.openmrs.Location;
 import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.CoreUtils;
 import org.openmrs.module.kenyacore.report.HybridReportDescriptor;
@@ -24,6 +19,7 @@ import org.openmrs.module.kenyacore.report.IndicatorReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
 import org.openmrs.module.kenyaemr.metadata.SecurityMetadata;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.SharedPage;
@@ -37,20 +33,16 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Report overview page
@@ -58,8 +50,6 @@ import java.util.TreeSet;
 @SharedPage
 public class ReportPageController {
 	private AdministrationService admService;
-	public static final String KPIF_MONTHLY_REPORT = "Monthly report";
-	public static final String MOH_731 = "Revised MOH 731";
 
 	public void get(@RequestParam("reportUuid") String reportUuid,
 					@RequestParam(required = false, value = "startDate") Date startDate,
@@ -91,24 +81,21 @@ public class ReportPageController {
 			excelRenderable = true;
 		}
 
-		ObjectNode mappingDetails = null;
-		if (report.getName().equals(KPIF_MONTHLY_REPORT)){
-			mappingDetails = EmrUtils.getDatasetMappingForReport(definition.getName(), admService.getGlobalProperty("kenyakeypop.adx3pmDatasetMapping"));
-		}
-		else if(report.getName().equals(MOH_731)){
-			mappingDetails = EmrUtils.getDatasetMappingForReport(definition.getName(), admService.getGlobalProperty("kenyaemr.adxDatasetMapping"));
-		}
+		ConfigurableAdxGenerationStrategy adxStrategy = new ConfigurableAdxGenerationStrategy();
+		org.openmrs.module.reporting.config.ReportDescriptor reportDescriptor =
+				new org.openmrs.module.reporting.config.ReportDescriptor();
+		reportDescriptor.setName(definition.getName());
+
+		boolean adxConfigured = adxStrategy.canHandle(reportDescriptor);
+
 
 		model.addAttribute("report", report);
 		model.addAttribute("definition", definition);
 		model.addAttribute("isIndicator", isIndicator);
-		model.addAttribute("adxConfigured", mappingDetails != null ? true : false);
+		model.addAttribute("adxConfigured", adxConfigured);
 		model.addAttribute("excelRenderable", excelRenderable);
 		model.addAttribute("returnUrl", returnUrl);
 		model.addAttribute("period", definition.getName().replaceAll("[^0-9]", ""));
-
-
-
 
 		if (isIndicator) {
 			Map<String, String> startDateOptions = new LinkedHashMap<String, String>();

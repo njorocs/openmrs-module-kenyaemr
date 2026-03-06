@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.LocationService;
@@ -26,6 +25,10 @@ import org.openmrs.module.facilityreporting.api.restUtil.FacilityReporting;
 import org.openmrs.module.facilityreporting.api.restUtil.ReportDatasetValueEntryMapper;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
+import org.openmrs.module.kenyaemr.reporting.air.AdxMetadata;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
+import org.openmrs.module.kenyaemr.reporting.renderer.AdxReportRenderer;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
@@ -38,28 +41,34 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.page.FileDownload;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Page for viewing ADX message generated for DHIS2
@@ -72,6 +81,7 @@ public class AdxViewFragmentController {
     protected final Log log = LogFactory.getLog(getClass());
 
     private LocationService locationService;
+    //todo  Update fallback SERVER_ADDRESS & KPIF_SERVER_ADDRESS endpoints before shipping to production
     public String SERVER_ADDRESS = "https://openhimapi.kenyahmis.org/rest/api/IL/MOH_731/test";
     public String KPIF_SERVER_ADDRESS = "https://il.kenyahmis.org:9721/api/3pm/";
     DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
@@ -92,11 +102,7 @@ public class AdxViewFragmentController {
         ReportDescriptor report = reportManager.getReportDescriptor(definition);
         administrationService = Context.getAdministrationService();
 
-        //CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
-
         ReportData reportData = reportService.loadReportData(reportRequest);
-       /* ByteArrayOutputStream outputStream = (ByteArrayOutputStream) buildXmlDocument(reportData);
-        postAdxToIL(outputStream);*/
 
         Date reportStartDate = (Date) reportData.getContext().getParameterValue("startDate");
         Date reportEndDate = (Date) reportData.getContext().getParameterValue("endDate");
@@ -108,431 +114,409 @@ public class AdxViewFragmentController {
         model.addAttribute("adx", render(reportData));
         model.addAttribute("reportName", definition.getName());
         model.addAttribute("returnUrl", returnUrl);
-        if (definition.getName() != null) {
 
-            if (definition.getName().equals(KPIF_MONTHLY_REPORT)) {
-                model.addAttribute("serverAddress", KPIF_SERVER_ADDRESS);
-            } else if (definition.getName().equals(MOH_731)) {
-                model.addAttribute("serverAddress", serverAddress != null ? serverAddress : SERVER_ADDRESS);
-            }
-        }
+        // Determine server address based on report type
+        String defaultServerAddress = determineServerAddress(definition.getName(), serverAddress);
+        model.addAttribute("serverAddress", defaultServerAddress);
+        model.addAttribute("serverAddressLength", defaultServerAddress.length());
         model.addAttribute("serverAddressLength", SERVER_ADDRESS.length());
     }
 
-    public String render(ReportData reportData) throws IOException {
-
-        Date reportDate = (Date) reportData.getContext().getParameterValue("startDate");
-        Date endDate = (Date) reportData.getContext().getParameterValue("endDate");
-        administrationService = Context.getAdministrationService();
-        facilityreportingService = Context.getService(FacilityreportingService.class);
-        locationService = Context.getLocationService();
-        String reportName = reportData.getDefinition().getName();
-
-        Integer locationId = Integer.parseInt(administrationService.getGlobalProperty("kenyaemr.defaultLocation"));
-
-        Location location = locationService.getLocation(locationId);
-        ObjectNode mappingDetails = null;
-
-        if (reportName.equals(MOH_731)) {
-            mappingDetails = EmrUtils.getDatasetMappingForReport(reportName, administrationService.getGlobalProperty("kenyaemr.adxDatasetMapping"));
-        } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
-            mappingDetails = EmrUtils.getDatasetMappingForReport(reportName, administrationService.getGlobalProperty("kenyakeypop.adx3pmDatasetMapping"));
-        }
-
-        String columnPrefix = mappingDetails.get("prefix").getTextValue();
-        String datasetName = null;
-        String indicatorName = null;
-        String mappedIndicatorId = null;
-
-        StringBuilder w = new StringBuilder();
-       // w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        w.append("<adx xmlns=\"urn:ihe:qrph:adx:2015\"\n" +
-                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "xsi:schemaLocation=\"urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd\"\n" +
-                "exported=\"" + isoDateTimeFormat.format(new Date()) + "\">\n");
-
-        for (String dsKey : reportData.getDataSets().keySet()) {
-
-            if (mappingDetails.get("datasets").getElements() != null && reportName.equals(MOH_731)) {
-
-                for (Iterator<JsonNode> it = mappingDetails.get("datasets").iterator(); it.hasNext(); ) {
-                    ObjectNode node = (ObjectNode) it.next();
-                    if (node.get("name").asText().equals(dsKey)) {
-                        datasetName = node.get("dhisName").getTextValue();
-                        break;
-                    }
-                }
-            } else if (mappingDetails.get("datasets").getElements() != null && reportName.equals(KPIF_MONTHLY_REPORT)) {
-
-                for (Iterator<JsonNode> it = mappingDetails.get("datasets").iterator(); it.hasNext(); ) {
-                    ObjectNode node = (ObjectNode) it.next();
-                    if (node.get("name").asText().equals(dsKey)) {
-                        datasetName = node.get("3pmName").getTextValue();
-                        break;
-                    }
-                }
-            }
-
-            if (datasetName == null)
-                continue;
-
-            mappingDetails.get("datasets").getElements();
-
-            w.append("\t").append("<group orgUnit=\"" + getMflCode() + "\" completeDate=\"" + isoDateFormat.format(new Date()) +  "\" period=\"" + isoDateFormat.format(reportDate)
-                    + "/P1M\" dataSet=\"" + datasetName + "\">\n");
-            DataSet dataset = reportData.getDataSets().get(dsKey);
-            List<DataSetColumn> columns = dataset.getMetaData().getColumns();
-
-            for (DataSetRow row : dataset) {
-                for (DataSetColumn column : columns) {
-                    indicatorName = column.getName();
-                    Object value = row.getColumnValue(column);
-
-                    if (reportName.equals(MOH_731) && !"0".equals(value.toString())) {
-                        w.append("\t\t").append( "<dataValue dataElement=\"" + columnPrefix + "" + indicatorName + "\" value=\"" + value + "\"/>\n");
+    private String getDatasetNameForKey(ObjectNode mappingDetails, String dsKey, String reportName) {
+        if (mappingDetails.get("datasets").getElements() != null) {
+            for (Iterator<JsonNode> it = mappingDetails.get("datasets").iterator(); it.hasNext(); ) {
+                ObjectNode node = (ObjectNode) it.next();
+                if (node.get("name").asText().equals(dsKey)) {
+                    if (reportName.equals(MOH_731)) {
+                        return node.get("dhisName").getTextValue();
                     } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
-
-                        if (indicatorName.contains("PWUD"))
-                            continue;
-
-                        mappedIndicatorId = get3PIndicatorId(indicatorName);
-
-                        String[] combos = mappedIndicatorId.split("-");
-
-                        w.append("\t\t").append("<dataValue dataElement=\"" + combos[0] + "\" categoryOptionCombo=\"" + combos[1] + "\" value=\"" + value.toString() + "\"/>\n");
+                        return node.get("3pmName").getTextValue();
                     }
-                }
-            }
-            w.append("</group>\n");
-        }
-        if (reportName.equals(MOH_731)) {
-            for (ReportDatasetValueEntryMapper e : getFaclityReportData(MOH_731_ID, isoDateFormat.format(reportDate), isoDateFormat.format(endDate))) {
-
-                Integer datasetId = Integer.parseInt(e.getDatasetID());
-                FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
-                w.append("\t").append("<group orgUnit=\"" + getMflCode() + "\" period=\"" + isoDateFormat.format(reportDate)
-                        + "/P1M\" dataSetId=\"" + ds.getMapping() + "\">\n");
-                for (DatasetIndicatorDetails row : e.getIndicators()) {
-                    if (row.getValue() != null && !"".equals(row.getValue()) && StringUtils.isNotEmpty(row.getValue())) {
-                        String name = row.getName();
-                        Object value = row.getValue();
-
-                        w.append("\t\t").append("<dataValue dataElement=\"" + columnPrefix + "" + name + "\" value=\"" + value.toString() + "\"/>\n");
-                    }
-                }
-                w.append("</group>\n");
-            }
-        }
-        w.append("</adx>\n");
-        //w.flush();
-        return w.toString();
-
-    }
-
-    public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
-                                         @RequestParam("returnUrl") String returnUrl,
-                                         @SpringBean ReportService reportService) throws ParserConfigurationException, IOException, TransformerException {
-
-        ReportData reportData = reportService.loadReportData(reportRequest);
-        String reportName = reportData.getDefinition().getName();
-
-        administrationService = Context.getAdministrationService();
-        locationService = Context.getLocationService();
-        facilityreportingService = Context.getService(FacilityreportingService.class);
-
-        Date reportDate = (Date) reportData.getContext().getParameterValue("startDate");
-        Date endDate = (Date) reportData.getContext().getParameterValue("endDate");
-
-        ObjectNode mappingDetails = null;
-        String mappedIndicatorId = null;
-
-        if (reportName.equals(MOH_731)) {
-            mappingDetails = EmrUtils.getDatasetMappingForReport(reportName, administrationService.getGlobalProperty("kenyaemr.adxDatasetMapping"));
-        } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
-            mappingDetails = EmrUtils.getDatasetMappingForReport(reportName, administrationService.getGlobalProperty("kenyakeypop.adx3pmDatasetMapping"));
-        }
-
-        String serverAddress = administrationService.getGlobalProperty("ilServer.address");
-        String strClientId = administrationService.getGlobalProperty("dhis.username");
-        String strClientSecret = administrationService.getGlobalProperty("dhis.password");
-        String auth = strClientId + ":" + strClientSecret;
-        String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
-
-        String columnPrefix = null;
-
-        columnPrefix = mappingDetails.get("prefix").getTextValue();
-
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-        Document document = documentBuilder.newDocument();
-
-        Element root = document.createElement("adx");
-        root.setAttribute("xmlns", "urn:ihe:qrph:adx:2015");
-        root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        root.setAttribute("xsi:schemaLocation", "urn:ihe:qrph:adx:2015 ../schema/adx_loose.xsd");
-        root.setAttribute("exported", isoDateTimeFormat.format(new Date()));
-        for (String dsKey : reportData.getDataSets().keySet()) {
-
-            String datasetName = null;
-
-            if (reportName.equals(MOH_731)) {
-                if (mappingDetails.get("datasets").getElements() != null) {
-                    for (Iterator<JsonNode> it = mappingDetails.get("datasets").iterator(); it.hasNext(); ) {
-                        ObjectNode node = (ObjectNode) it.next();
-                        if (node.get("name").asText().equals(dsKey)) {
-                            datasetName = node.get("dhisName").getTextValue();
-                            break;
-                        }
-                    }
-                }
-            } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
-                if (mappingDetails.get("datasets").getElements() != null) {
-                    for (Iterator<JsonNode> it = mappingDetails.get("datasets").iterator(); it.hasNext(); ) {
-                        ObjectNode node = (ObjectNode) it.next();
-                        if (node.get("name").asText().equals(dsKey)) {
-                            datasetName = node.get("3pmName").getTextValue();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (datasetName == null)
-                continue;
-
-            Element eDataset = document.createElement("group");
-            // add group attributes
-            eDataset.setAttribute("orgUnit", getMflCode());
-            eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
-            eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
-            eDataset.setAttribute("dataSet", datasetName);
-
-            DataSet dataset = reportData.getDataSets().get(dsKey);
-            List<DataSetColumn> columns = dataset.getMetaData().getColumns();
-            for (DataSetRow row : dataset) {
-                for (DataSetColumn column : columns) {
-                    String name = column.getName();
-                    Object value = row.getColumnValue(column);
-                    Element dataValue = document.createElement("dataValue");
-                    // add data values
-                    if (reportName.equals(MOH_731) && !"0".equals(value.toString())) {
-                        dataValue.setAttribute("dataElement", columnPrefix.concat(name));
-                        dataValue.setAttribute("value", value.toString());
-                        eDataset.appendChild(dataValue);
-                    }
-                    else if(reportName.equals(KPIF_MONTHLY_REPORT)){
-                        if (name.contains("PWUD"))
-                            continue;
-                        mappedIndicatorId = get3PIndicatorId(name);
-                        String[] combos = mappedIndicatorId.split("-");
-                        dataValue.setAttribute("dataElement", columnPrefix.concat(combos[0]));
-                        dataValue.setAttribute("categoryOptionCombo", columnPrefix.concat(combos[1]));
-                        dataValue.setAttribute("value", value.toString());
-                        eDataset.appendChild(dataValue);
-                    }
-
-                }
-            }
-                root.appendChild(eDataset);
-        }
-
-        // add additional MOH 731 indicators for air
-        if (reportName.equals(MOH_731)) {
-            for (ReportDatasetValueEntryMapper e : getFaclityReportData(MOH_731_ID, isoDateFormat.format(reportDate), isoDateFormat.format(endDate))) {
-                if (e.getDatasetID() != null) {
-
-                    Integer datasetId = Integer.parseInt(e.getDatasetID());
-                    FacilityReportDataset ds = facilityreportingService.getDatasetById(datasetId);
-                    String datasetName = ds.getMapping();
-
-                    Element eDataset = document.createElement("group");
-                    // add group attributes
-                    eDataset.setAttribute("orgUnit", getMflCode());
-                    eDataset.setAttribute("period", isoDateFormat.format(reportDate).concat("/P1M"));
-                    eDataset.setAttribute("completeDate", isoDateFormat.format(new Date()));
-                    eDataset.setAttribute("dataSet", datasetName);
-
-                    for (DatasetIndicatorDetails row : e.getIndicators()) {
-                        if (row.getValue() != null && !"0".equals(row.getValue()) && !"".equals(row.getValue()) && StringUtils.isNotEmpty(row.getValue())) {
-                            String name = row.getName();
-                            Object value = row.getValue();
-                            // add data values
-                            Element dataValue = document.createElement("dataValue");
-                            dataValue.setAttribute("dataElement", columnPrefix.concat(name));
-                            dataValue.setAttribute("value", value.toString());
-                            eDataset.appendChild(dataValue);
-
-                        }
-                    }
-                    root.appendChild(eDataset);
+                    break;
                 }
             }
         }
-       document.appendChild(root);
-
-        // create the xml file
-        //transform the DOM Object to an XML File
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,"yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        DOMSource domSource = new DOMSource(document);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        StreamResult inMemory = new StreamResult(out);
-
-        transformer.transform(domSource, inMemory);
-        if(reportName.equals(MOH_731)){
-        if (serverAddress != null) {
-
-            SERVER_ADDRESS = serverAddress;
-        }
-
-        }
-
-        return postAdxToIL(out, reportName.equals(MOH_731)? SERVER_ADDRESS : KPIF_SERVER_ADDRESS, authentication);
-    }
-
-    private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) throws IOException {
-
-        URL url = new URL(serverAddress);
-
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/adx+xml");
-        con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
-        con.setRequestProperty("Authorization", "Basic " + authentication);
-        con.setRequestProperty("Accept", "*/*");
-        con.setDoOutput(true);
-
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-
-        out.writeBytes(outStream.toString());
-        out.flush();
-        out.close();
-
-        //Get Response
-        int responseCode = con.getResponseCode();
-        String httpResponse = null;
-
-        if (responseCode == HttpURLConnection.HTTP_OK) { //success
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            httpResponse = response.toString();
-
-        }
-        return SimpleObject.create("statusCode", String.valueOf(responseCode), "statusMsg", httpResponse);
-    }
-
-    private SimpleObject getDataFromFacilityReportingModule(ByteArrayOutputStream outStream, String serverAddress) throws IOException {
-
-        URL url = new URL("http://localhost:8080/openmrs/ws/rest/v1/facilityreporting/getreportdata");
-        String params = "{\"REPORTID\":\"1\",\"STARTDATE\":\"2019-01-02\",\"ENDDATE\":\"2019-01-31\",\"ADXORGUNIT\":\"10657\",\"ADXREPORTINGPERIOD\":\"2018-01-01/P1M\"}";
-
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
-        con.setDoOutput(true);
-
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-
-        out.writeBytes(outStream.toString());
-
-        out.flush();
-        out.close();
-
-        //Get Response
-        int responseCode = con.getResponseCode();
-        String httpResponse = null;
-
-        if (responseCode == HttpURLConnection.HTTP_OK) { //success
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            httpResponse = response.toString();
-
-        }
-        return SimpleObject.create("statusCode", String.valueOf(responseCode), "statusMsg", httpResponse);
-    }
-
-    private HttpURLConnection getConnection(URL entries) throws InterruptedException, IOException {
-        int retry = 0;
-        boolean delay = false;
-        do {
-            if (delay) {
-                Thread.sleep(5);
-            }
-            HttpURLConnection con = (HttpURLConnection) entries.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/adx+xml");
-            //con.setRequestProperty("Content-Length", Integer.toString(outStream.size()));
-            con.setDoOutput(true);
-
-            if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
-
-                return con;
-
-            } else if (con.getResponseCode() == HttpURLConnection.HTTP_GATEWAY_TIMEOUT) {
-                //return null;
-                System.out.println("Timeout. Retrying");
-            } else if (con.getResponseCode() == HttpURLConnection.HTTP_UNAVAILABLE) {
-                //return null;
-                System.out.println("Server unavailable");
-            } else {
-                //return null;
-            }
-
-            // we did not succeed with connection (or we would have returned the connection).
-            con.disconnect();
-            // retry
-            retry++;
-            System.out.println("Failed retry " + retry + "/");
-            if (retry == 4) {
-                delay = false;
-            } else {
-                delay = true;
-            }
-
-        } while (retry < 4);
-
         return null;
-
     }
 
-    public SimpleObject saveOrUpdateServerAddress(@RequestParam("newUrl") String newUrl) {
-        administrationService = Context.getAdministrationService();
-        GlobalProperty gp = administrationService.getGlobalPropertyObject("ilServer.address");
+    /**
+     * Writes dataset to StringBuilder
+     */
+    private void writeDataSetToStringBuilder(StringBuilder w, DataSet dataset, String columnPrefix, String reportName) {
+        List<DataSetColumn> columns = dataset.getMetaData().getColumns();
+
+        for (DataSetRow row : dataset) {
+            for (DataSetColumn column : columns) {
+                String indicatorName = column.getName();
+                Object value = row.getColumnValue(column);
+
+                if (reportName.equals(MOH_731)) {
+                    if (value != null && !"0".equals(value.toString()) && StringUtils.isNotEmpty(value.toString())) {
+                        w.append("<dataValue dataElement=\"").append(columnPrefix).append(indicatorName)
+                                .append("\" value=\"").append(escapeXmlValue(value.toString())).append("\"/>\n");
+                    }
+                } else if (reportName.equals(KPIF_MONTHLY_REPORT)) {
+                    if (indicatorName.contains("PWUD")) continue;
+
+                    String mappedIndicatorId = get3PIndicatorId(indicatorName);
+                    if (mappedIndicatorId != null) {
+                        String[] combos = mappedIndicatorId.split("-");
+                        w.append("<dataValue dataElement=\"").append(combos[0])
+                                .append("\" categoryOptionCombo=\"").append(combos[1])
+                                .append("\" value=\"").append(escapeXmlValue(value.toString())).append("\"/>\n");
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Escapes XML special characters in values
+     */
+    private String escapeXmlValue(String value) {
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
+    }
+    /**
+     * Generate ADX content using the configurable renderer
+     * This method is used for both preview display and actual sending
+     */
+    private String generateAdxContent(ReportData reportData) throws IOException {
+        ConfigurableAdxReportRenderer renderer = new ConfigurableAdxReportRenderer();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
-            if (gp != null) {
-                gp.setPropertyValue(newUrl.trim());
-                administrationService.saveGlobalProperty(gp);
-            } else {
-                GlobalProperty globalProperty = new GlobalProperty();
-                globalProperty.setProperty("ilServer.address");
-                globalProperty.setPropertyValue(newUrl.trim());
-            }
+            renderer.render(reportData, null, out);
+            return out.toString("UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error generating ADX content with ConfigurableAdxReportRenderer", e);
+            throw new IOException("Failed to generate ADX content: " + e.getMessage(), e);
         }
-        return SimpleObject.create("statusMgs", "Server address saved successfully");
     }
 
-    protected List<ReportDatasetValueEntryMapper> getFaclityReportData(Integer reportID, String startDate, String endDate) {
+    public String render(ReportData reportData) throws IOException {
+        return generateAdxContent(reportData);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<SimpleObject> buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
+                                                         @RequestParam("returnUrl") String returnUrl,
+                                                         @SpringBean ReportService reportService) throws IOException {
+
+        System.out.println("=== DEBUG: buildXmlDocument method called ===");
+        System.out.println("DEBUG: Request ID: " + reportRequest.getId());
+        System.out.println("DEBUG: Return URL: " + returnUrl);
+
+        log.error("=== buildXmlDocument method called ===");
+        log.error("Request ID: " + reportRequest.getId());
+        log.error("Return URL: " + returnUrl);
+
+        try {
+            ReportData reportData = reportService.loadReportData(reportRequest);
+            String reportName = reportData.getDefinition().getName();
+
+            System.out.println("DEBUG: Building ADX document for report: " + reportName);
+            log.error("Building ADX document for report: " + reportName);
+
+            String adxContent = generateAdxContent(reportData);
+            System.out.println("DEBUG: ADX content generated, length: " + adxContent.length());
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            out.write(adxContent.getBytes("UTF-8"));
+            System.out.println("DEBUG: ADX content written to ByteArrayOutputStream");
+
+            administrationService = Context.getAdministrationService();
+            String strClientId = administrationService.getGlobalProperty("dhis.username");
+            String strClientSecret = administrationService.getGlobalProperty("dhis.password");
+
+            if (strClientId == null || strClientId.isEmpty() || strClientSecret == null || strClientSecret.isEmpty()) {
+                System.out.println("DEBUG: Missing authentication credentials");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(SimpleObject.create(
+                                "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                                "statusMsg", "Missing authentication credentials. Please configure dhis.username and dhis.password global properties."
+                        ));
+            }
+
+            String auth = strClientId + ":" + strClientSecret;
+            String authentication = Base64.getEncoder().encodeToString(auth.getBytes("UTF-8"));
+            System.out.println("DEBUG: Authentication prepared");
+
+            String serverAddress = getCompleteServerAddress(reportData);
+            System.out.println("DEBUG: Server address obtained: " + serverAddress);
+
+            log.error("Complete server address: " + serverAddress);
+            log.error("ADX payload size: " + out.size() + " bytes");
+
+            return postAdxToIL(out, serverAddress, authentication);
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Exception in buildXmlDocument: " + e.getMessage());
+            e.printStackTrace();
+            log.error("Error building/sending ADX document", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(SimpleObject.create(
+                            "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                            "statusMsg", "Failed to build/send ADX document: " + e.getMessage()
+                    ));
+        }
+    }
+
+    private String determineServerAddress(String reportName, String configuredServerAddress) {
+        if (KPIF_MONTHLY_REPORT.equals(reportName)) {
+            return KPIF_SERVER_ADDRESS;
+        } else {
+            // For MOH 731, MOH 743, and other reports, use configured or default server
+            return configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
+        }
+    }
+    /**
+     * Legacy server address determination for fallback
+     */
+    private String determineServerAddressLegacy(String reportName) {
+        administrationService = Context.getAdministrationService();
+        String configuredServerAddress = administrationService.getGlobalProperty("ilServer.address");
+
+        if (KPIF_MONTHLY_REPORT.equals(reportName)) {
+            return KPIF_SERVER_ADDRESS;
+        } else {
+            // For DHIS2 reports, use configured or default server with basic API path
+            String baseUrl = configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
+            if (!baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
+            // Use basic API endpoint without category option combo scheme for fallback
+            return baseUrl + "api/dataValueSets?dataElementIdScheme=code&orgUnitIdScheme=code&dataSetIdScheme=uid";
+        }
+    }
+
+    private ResponseEntity<SimpleObject> postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) {
+        System.out.println("=== DEBUG: postAdxToIL called ===");
+        System.out.println("DEBUG: Server address parameter: " + serverAddress);
+        System.out.println("DEBUG: Payload size: " + outStream.size() + " bytes");
+        System.out.println("DEBUG: Authentication provided: " + (authentication != null && !authentication.isEmpty()));
+
+        HttpURLConnection con = null;
+        try {
+            log.error("=== ADX Posting Details ===");
+            log.error("Target URL: " + serverAddress);
+            log.error("Payload size: " + outStream.size() + " bytes");
+            log.error("Authentication provided: " + (authentication != null && !authentication.isEmpty() ? "Yes (length: " + authentication.length() + ")" : "No"));
+
+            URL url = new URL(serverAddress);
+            System.out.println("DEBUG: Parsed URL - Protocol: " + url.getProtocol() + ", Host: " + url.getHost() + ", Port: " + url.getPort() + ", Path: " + url.getPath());
+            log.error("Parsed URL - Protocol: " + url.getProtocol() + ", Host: " + url.getHost() + ", Port: " + url.getPort() + ", Path: " + url.getPath());
+
+            con = (HttpURLConnection) url.openConnection();
+
+            con.setConnectTimeout(30000);
+            con.setReadTimeout(60000);
+
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/adx+xml");
+            con.setRequestProperty("Authorization", "Basic " + authentication);
+            con.setRequestProperty("Accept", "*/*");
+            con.setRequestProperty("User-Agent", "KenyaEMR-ADX-Client/1.0");
+            con.setDoOutput(true);
+
+            System.out.println("DEBUG: Request headers set successfully");
+            log.error("Request headers set - Content-Type: application/adx+xml, Content-Length: " + outStream.size());
+
+            try (DataOutputStream out = new DataOutputStream(con.getOutputStream())) {
+                out.write(outStream.toByteArray());
+                out.flush();
+                System.out.println("DEBUG: Request payload written successfully");
+                log.error("Request payload written successfully");
+            }
+
+            int responseCode = con.getResponseCode();
+            String responseMessage = con.getResponseMessage();
+
+            System.out.println("DEBUG: HTTP Response: " + responseCode + " - " + responseMessage);
+            log.error("HTTP Response: " + responseCode + " - " + responseMessage);
+
+            String httpResponse;
+            if (responseCode >= 200 && responseCode < 300) {
+                httpResponse = readResponseBody(con.getInputStream(), responseCode, responseMessage);
+                System.out.println("DEBUG: Success response received: " + httpResponse);
+                log.error("Success response received: " + httpResponse);
+            } else {
+                System.out.println("DEBUG: Error response code: " + responseCode);
+                log.error("HTTP Error " + responseCode + " - " + responseMessage);
+
+                InputStream errorStream = con.getErrorStream();
+                if (errorStream != null) {
+                    httpResponse = readResponseBody(errorStream, responseCode, responseMessage);
+                    System.out.println("DEBUG: Error response body: " + httpResponse);
+                    log.error("Error response body (" + responseCode + "): " + httpResponse);
+                } else {
+                    httpResponse = "HTTP " + responseCode + " - " + responseMessage;
+                    System.out.println("DEBUG: No error response body available for HTTP " + responseCode);
+                    log.error("No error response body available for HTTP " + responseCode + " from " + serverAddress);
+                }
+            }
+
+            System.out.println("DEBUG: ADX Posting Complete - returning response entity");
+            log.error("=== ADX Posting Complete ===");
+
+            HttpStatus status = HttpStatus.resolve(responseCode);
+            if (status == null) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
+
+            return ResponseEntity.status(status)
+                    .body(SimpleObject.create(
+                            "statusCode", String.valueOf(responseCode),
+                            "statusMsg", httpResponse
+                    ));
+
+        } catch (UnknownHostException | SocketTimeoutException e) {
+            System.out.println("DEBUG: Network exception in postAdxToIL: " + e.getMessage());
+            e.printStackTrace();
+            log.error("Network error posting to IL server: " + serverAddress, e);
+
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(SimpleObject.create(
+                            "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                            "statusMsg", "Failed to reach IL server: " + e.getMessage()
+                    ));
+        } catch (Exception e) {
+            System.out.println("DEBUG: Exception in postAdxToIL: " + e.getMessage());
+            e.printStackTrace();
+            log.error("Unexpected error posting to IL server: " + serverAddress, e);
+
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(SimpleObject.create(
+                            "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                            "statusMsg", "Failed to post to IL server: " + serverAddress + ". Error: " + e.getMessage()
+                    ));
+        } finally {
+            if (con != null) {
+                con.disconnect();
+                System.out.println("DEBUG: HTTP connection closed");
+                log.debug("HTTP connection closed");
+            }
+        }
+    }
+    private String readResponseBody(InputStream stream, int responseCode, String responseMessage) {
+        if (stream == null) {
+            return "HTTP " + responseCode + " - " + responseMessage;
+        }
+
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            return response.toString();
+        } catch (Exception e) {
+            log.error("Failed to read HTTP response body: " + e.getMessage(), e);
+            return "HTTP " + responseCode + " - " + responseMessage;
+        }
+    }
+    /**
+     * Gets the complete server address with API path and query parameters based on report configuration
+     */
+
+    /**
+     * Gets the complete server address with API path and query parameters based on report configuration
+     */
+    private String getCompleteServerAddress(ReportData reportData) {
+        // Force console output for debugging
+        System.out.println("=== DEBUG: getCompleteServerAddress called ===");
+        log.error("=== DEBUG: getCompleteServerAddress called ==="); // Using ERROR level to ensure it shows
+
+        try {
+            System.out.println("DEBUG: Creating ConfigurableAdxGenerationStrategy");
+
+            // Get the configurable strategy directly
+            ConfigurableAdxGenerationStrategy strategy = new ConfigurableAdxGenerationStrategy();
+
+            System.out.println("DEBUG: Getting ADX metadata for report: " + reportData.getDefinition().getName());
+            log.error("DEBUG: Getting ADX metadata for report: " + reportData.getDefinition().getName());
+
+            // Use the strategy to get ADX metadata which contains the endpoint URL
+            AdxMetadata metadata = strategy.getAdxMetadata(reportData);
+
+            System.out.println("DEBUG: ADX metadata retrieved: " + (metadata != null ? "Success" : "Null"));
+
+            if (metadata != null) {
+                System.out.println("DEBUG: Endpoint URL from metadata: " + metadata.getEndpointUrl());
+                System.out.println("DEBUG: Has field mappings: " + metadata.isHasFieldMappings());
+                log.error("DEBUG: Endpoint URL from metadata: " + metadata.getEndpointUrl());
+                log.error("DEBUG: Has field mappings: " + metadata.isHasFieldMappings());
+
+                if (StringUtils.isNotBlank(metadata.getEndpointUrl())) {
+                    System.out.println("DEBUG: Using endpoint URL from ADX metadata: " + metadata.getEndpointUrl());
+                    log.error("DEBUG: Using endpoint URL from ADX metadata: " + metadata.getEndpointUrl());
+                    return metadata.getEndpointUrl();
+                } else {
+                    System.out.println("DEBUG: Metadata endpoint URL is blank");
+                    log.error("DEBUG: Metadata endpoint URL is blank");
+                }
+            } else {
+                System.out.println("DEBUG: Metadata is null");
+                log.error("DEBUG: Metadata is null");
+            }
+
+            // Fallback to old logic if metadata doesn't provide endpoint URL
+            String fallbackUrl = determineServerAddressLegacy(reportData.getDefinition().getName());
+            System.out.println("DEBUG: Using fallback URL: " + fallbackUrl);
+            log.error("DEBUG: Using fallback URL: " + fallbackUrl);
+            return fallbackUrl;
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Exception in getCompleteServerAddress: " + e.getMessage());
+            System.out.println("DEBUG: Exception stack trace:");
+            e.printStackTrace();
+
+            log.error("Error getting complete server address from ADX metadata", e);
+
+            // Fallback to legacy logic
+            String reportName = reportData.getDefinition().getName();
+            String fallbackUrl = determineServerAddressLegacy(reportName);
+            System.out.println("DEBUG: Exception fallback URL: " + fallbackUrl);
+            log.error("DEBUG: Exception fallback URL: " + fallbackUrl);
+            return fallbackUrl;
+        }
+    }
+    /**
+     * Normalizes server URL to handle common path issues
+     */
+    private String normalizeServerUrl(String serverAddress) {
+        if (serverAddress == null || serverAddress.trim().isEmpty()) {
+            return serverAddress;
+        }
+
+        String normalized = serverAddress.trim();
+
+        // Log the original URL for comparison
+        log.info("Normalizing URL: " + normalized);
+
+        // Don't normalize if it already contains query parameters (complete API endpoint)
+        if (normalized.contains("?")) {
+            log.info("URL already contains query parameters, skipping normalization");
+            return normalized;
+        }
+
+        // Remove duplicate slashes in path (but preserve protocol://)
+        normalized = normalized.replaceAll("(?<!:)//+", "/");
+
+        // Ensure proper protocol
+        if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {
+            normalized = "https://" + normalized;
+            log.info("Added https:// protocol: " + normalized);
+        }
+
+        return normalized;
+    }
+     protected List<ReportDatasetValueEntryMapper> getFaclityReportData(Integer reportID, String startDate, String endDate) {
 
         List<ReportDatasetValueEntryMapper> list = new ArrayList<ReportDatasetValueEntryMapper>();
         if (reportID != 0) {
@@ -572,6 +556,7 @@ public class AdxViewFragmentController {
         }
         return mfl;
     }
+
     //Mappings for KPIF monthly report indicators to 3pm DUIDs/CUIDs
     public static String get3PIndicatorId(String indicatorDisaggr) {
 
@@ -3286,4 +3271,52 @@ public class AdxViewFragmentController {
 
         return map.get(indicatorDisaggr);
     }
+
+
+    protected FileDownload renderAsAdx(ReportDescriptor report, ReportData data) throws IOException {
+        ConfigurableAdxReportRenderer renderer = new ConfigurableAdxReportRenderer();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            renderer.render(data, null, out);
+        } catch (Exception e) {
+            log.error("Error with configurable ADX renderer, falling back to original", e);
+            // Fallback to original renderer
+            AdxReportRenderer fallbackRenderer = new AdxReportRenderer();
+            out.reset();
+            fallbackRenderer.render(data, null, out);
+        }
+
+        // Generate filename based on report name and current date
+        String filename = generateAdxFilename(report, data);
+
+        return new FileDownload(filename, "text/xml", out.toByteArray());
+    }
+
+    private String generateAdxFilename(ReportDescriptor report, ReportData data) {
+        StringBuilder filename = new StringBuilder();
+
+        // Add report name
+        String reportName = report.getName() != null ? report.getName() : "ADX_Report";
+        filename.append(reportName.replaceAll("[^a-zA-Z0-9_-]", "_"));
+
+        // Add date from report context if available
+        if (data.getContext() != null) {
+            Date startDate = (Date) data.getContext().getParameterValue("startDate");
+            if (startDate != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                filename.append("_").append(dateFormat.format(startDate));
+            }
+        }
+
+        // Add timestamp to ensure uniqueness
+        SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        filename.append("_").append(timestampFormat.format(new Date()));
+
+        filename.append(".xml");
+
+        return filename.toString();
+    }
+
 }

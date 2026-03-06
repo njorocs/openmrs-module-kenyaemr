@@ -58,7 +58,7 @@ textarea {
 	<p></p>
 
 	<div id="adxMsg">
-		<textarea> 	${ adx } </textarea>
+		<textarea>${ adx }</textarea>
 	</div>
 	<br/>
 
