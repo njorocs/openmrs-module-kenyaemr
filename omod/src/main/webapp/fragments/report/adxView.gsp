@@ -65,46 +65,124 @@ textarea {
 </div>
 
 <script type="text/javascript">
-    jq = jQuery;
+	jq = jQuery;
 
-    jq(function() {
-        jq("#showStatus").hide();
-        jq("#adxMsg").hide();
-        jq('#post').click(function() {
-            jq("#msgSpan").text("Sending Message to IL Server .....");
-            jq("#showStatus").show();
-            jq("#msg").text("");
+	jq(function() {
+		jq("#showStatus").hide();
+		jq("#adxMsg").hide();
 
-            jq("#post").prop("disabled", true);
-            jq.getJSON('${ ui.actionLink("buildXmlDocument") }', {
-                'request': '${ reportRequest.id }',
-                'returnUrl': '${ returnUrl }'
-            })
-                .success(function(data) {
-                    jq("#showStatus").hide();
-                    jq("#msg").addClass("successText");
-                    jq("#msg").text("Message successfully sent");
-                    jq("#post").prop("disabled", true);
-                })
-                .error(function(xhr, status, err) {
-                    jq("#showStatus").hide();
-                    jq("#msg").addClass("errorText");
-                    jq("#msg").text("There was an error sending the message! Please confirm your network status and try again");
-                    jq("#post").prop("disabled", false);
-                })
+		function formatDhisResponse(statusMsg) {
+			try {
+				var data = (typeof statusMsg === "string") ? JSON.parse(statusMsg) : statusMsg;
 
-        });
+				var status = data.status || data.httpStatus || "Unknown";
+				var message = data.message || "";
+				var summary = "";
 
-        jq('#toggleAdxDiv').click(function() {
+				if (data.response) {
+					var r = data.response;
+					var importStatus = r.status || "";
+					var description = r.description || "";
+					var counts = r.importCount || {};
 
-            jq("#adxMsg").toggle();
-            /*if(jq('#toggleAdxDiv').is(":visible")){
-                //jq('#toggleAdxDiv').text("Hide Message");
-            }else {
-                //jq('#toggleAdxDiv').text("Preview Message");
-            }*/
+					summary += "<b>Status:</b> " + importStatus + "<br/>";
+					if (description) {
+						summary += "<b>Description:</b> " + description + "<br/>";
+					}
+					summary += "<b>Imported:</b> " + (counts.imported || 0)
+							+ " &nbsp;|&nbsp; <b>Updated:</b> " + (counts.updated || 0)
+							+ " &nbsp;|&nbsp; <b>Ignored:</b> " + (counts.ignored || 0)
+							+ " &nbsp;|&nbsp; <b>Deleted:</b> " + (counts.deleted || 0)
+							+ "<br/>";
+
+					if (r.conflicts && r.conflicts.length > 0) {
+						summary += "<br/><b>Conflicts (" + r.conflicts.length + "):</b><ul>";
+						for (var i = 0; i < r.conflicts.length && i < 10; i++) {
+							var c = r.conflicts[i];
+							summary += "<li>" + (c.object || "") + ": " + (c.value || "") + "</li>";
+						}
+						if (r.conflicts.length > 10) {
+							summary += "<li>... and " + (r.conflicts.length - 10) + " more</li>";
+						}
+						summary += "</ul>";
+					}
+				} else {
+					summary = message || statusMsg;
+				}
+
+				return summary;
+			} catch (e) {
+				return statusMsg;
+			}
+		}
+
+		function isSuccessResponse(statusCode, statusMsg) {
+			if (isNaN(statusCode) || statusCode < 200 || statusCode >= 300) {
+				return false;
+			}
+
+			try {
+				var data = (typeof statusMsg === "string") ? JSON.parse(statusMsg) : statusMsg;
+				if (data.response && data.response.status) {
+					return data.response.status === "SUCCESS";
+				}
+			} catch (e) {
+				// not JSON — fall through
+			}
+
+			return true;
+		}
+
+		jq('#post').click(function() {
+			jq("#msgSpan").text("Sending Message to IL Server .....");
+			jq("#showStatus").show();
+			jq("#msg").removeClass("successText errorText").html("");
+
+			jq("#post").prop("disabled", true);
+			jq.ajax({
+				url: '${ ui.actionLink("buildXmlDocument") }',
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					'request': '${ reportRequest.id }'
+				},
+				success: function(data) {
+					jq("#showStatus").hide();
+
+					var statusCode = parseInt(data.statusCode, 10);
+					var statusMsg = data.statusMsg || "";
+
+					jq("#msg").removeClass("successText errorText");
+
+					var formattedMsg = formatDhisResponse(statusMsg);
+
+					if (isSuccessResponse(statusCode, statusMsg)) {
+						jq("#msg").addClass("successText");
+						jq("#msg").html(formattedMsg || "Message successfully sent");
+						jq("#post").prop("disabled", true);
+					} else {
+						jq("#msg").addClass("errorText");
+						jq("#msg").html(formattedMsg || "There was an error sending the message.");
+						jq("#post").prop("disabled", false);
+					}
+				},
+				error: function(xhr, status, err) {
+					jq("#showStatus").hide();
+					jq("#msg").removeClass("successText errorText").addClass("errorText");
+
+					var response = xhr.responseJSON || {};
+					var statusMsg = response.statusMsg || xhr.responseText || err || "There was an error sending the message.";
+
+					jq("#msg").html(formatDhisResponse(statusMsg));
+					jq("#post").prop("disabled", false);
+				}
+			});
 
 		});
 
-    });
+		jq('#toggleAdxDiv').click(function() {
+			jq("#adxMsg").toggle();
+		});
+
+	});
 </script>

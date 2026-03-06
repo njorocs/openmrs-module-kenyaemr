@@ -19,8 +19,6 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.facilityreporting.api.FacilityreportingService;
-import org.openmrs.module.facilityreporting.api.models.FacilityReportDataset;
-import org.openmrs.module.facilityreporting.api.restUtil.DatasetIndicatorDetails;
 import org.openmrs.module.facilityreporting.api.restUtil.FacilityReporting;
 import org.openmrs.module.facilityreporting.api.restUtil.ReportDatasetValueEntryMapper;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
@@ -29,7 +27,6 @@ import org.openmrs.module.kenyaemr.reporting.air.AdxMetadata;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.renderer.AdxReportRenderer;
-import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.reporting.dataset.DataSet;
@@ -45,9 +42,6 @@ import org.openmrs.ui.framework.page.FileDownload;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedReader;
@@ -84,7 +78,6 @@ public class AdxViewFragmentController {
     //todo  Update fallback SERVER_ADDRESS & KPIF_SERVER_ADDRESS endpoints before shipping to production
     public String SERVER_ADDRESS = "https://openhimapi.kenyahmis.org/rest/api/IL/MOH_731/test";
     public String KPIF_SERVER_ADDRESS = "https://il.kenyahmis.org:9721/api/3pm/";
-    DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "Revised MOH 731";
@@ -202,68 +195,53 @@ public class AdxViewFragmentController {
     public String render(ReportData reportData) throws IOException {
         return generateAdxContent(reportData);
     }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<SimpleObject> buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
-                                                         @RequestParam("returnUrl") String returnUrl,
-                                                         @SpringBean ReportService reportService) throws IOException {
-
-        System.out.println("=== DEBUG: buildXmlDocument method called ===");
-        System.out.println("DEBUG: Request ID: " + reportRequest.getId());
-        System.out.println("DEBUG: Return URL: " + returnUrl);
-
-        log.error("=== buildXmlDocument method called ===");
-        log.error("Request ID: " + reportRequest.getId());
-        log.error("Return URL: " + returnUrl);
-
+    public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
+                                         @SpringBean ReportService reportService) {
         try {
+            if (reportRequest == null || reportRequest.getId() == null) {
+                return SimpleObject.create(
+                        "statusCode", String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                        "statusMsg", "Missing or invalid report request."
+                );
+            }
+
+            log.info("Building ADX document for request " + reportRequest.getId());
+
             ReportData reportData = reportService.loadReportData(reportRequest);
-            String reportName = reportData.getDefinition().getName();
-
-            System.out.println("DEBUG: Building ADX document for report: " + reportName);
-            log.error("Building ADX document for report: " + reportName);
-
             String adxContent = generateAdxContent(reportData);
-            System.out.println("DEBUG: ADX content generated, length: " + adxContent.length());
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             out.write(adxContent.getBytes("UTF-8"));
-            System.out.println("DEBUG: ADX content written to ByteArrayOutputStream");
 
             administrationService = Context.getAdministrationService();
-            String strClientId = administrationService.getGlobalProperty("dhis.username");
-            String strClientSecret = administrationService.getGlobalProperty("dhis.password");
+            String clientId = administrationService.getGlobalProperty("dhis.username");
+            String clientSecret = administrationService.getGlobalProperty("dhis.password");
 
-            if (strClientId == null || strClientId.isEmpty() || strClientSecret == null || strClientSecret.isEmpty()) {
-                System.out.println("DEBUG: Missing authentication credentials");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(SimpleObject.create(
-                                "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
-                                "statusMsg", "Missing authentication credentials. Please configure dhis.username and dhis.password global properties."
-                        ));
+            if (StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)) {
+                return SimpleObject.create(
+                        "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                        "statusMsg", "Missing authentication credentials. Please configure dhis.username and dhis.password global properties."
+                );
             }
 
-            String auth = strClientId + ":" + strClientSecret;
+            String auth = clientId + ":" + clientSecret;
             String authentication = Base64.getEncoder().encodeToString(auth.getBytes("UTF-8"));
-            System.out.println("DEBUG: Authentication prepared");
-
             String serverAddress = getCompleteServerAddress(reportData);
-            System.out.println("DEBUG: Server address obtained: " + serverAddress);
 
-            log.error("Complete server address: " + serverAddress);
-            log.error("ADX payload size: " + out.size() + " bytes");
+            log.info("Posting ADX document for request " + reportRequest.getId() + " to " + serverAddress);
+            log.debug("ADX payload size: " + out.size() + " bytes");
 
             return postAdxToIL(out, serverAddress, authentication);
-
-        } catch (Exception e) {
-            System.out.println("DEBUG: Exception in buildXmlDocument: " + e.getMessage());
-            e.printStackTrace();
+        }
+        catch (Exception e) {
             log.error("Error building/sending ADX document", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(SimpleObject.create(
-                            "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
-                            "statusMsg", "Failed to build/send ADX document: " + e.getMessage()
-                    ));
+
+            String message = e.getMessage() != null ? e.getMessage() : "Unexpected error";
+
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                    "statusMsg", "Failed to build/send ADX document: " + message
+            );
         }
     }
 
@@ -295,23 +273,12 @@ public class AdxViewFragmentController {
         }
     }
 
-    private ResponseEntity<SimpleObject> postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) {
-        System.out.println("=== DEBUG: postAdxToIL called ===");
-        System.out.println("DEBUG: Server address parameter: " + serverAddress);
-        System.out.println("DEBUG: Payload size: " + outStream.size() + " bytes");
-        System.out.println("DEBUG: Authentication provided: " + (authentication != null && !authentication.isEmpty()));
-
+    private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) {
         HttpURLConnection con = null;
         try {
-            log.error("=== ADX Posting Details ===");
-            log.error("Target URL: " + serverAddress);
-            log.error("Payload size: " + outStream.size() + " bytes");
-            log.error("Authentication provided: " + (authentication != null && !authentication.isEmpty() ? "Yes (length: " + authentication.length() + ")" : "No"));
+            log.info("Posting ADX to: " + serverAddress + " (" + outStream.size() + " bytes)");
 
             URL url = new URL(serverAddress);
-            System.out.println("DEBUG: Parsed URL - Protocol: " + url.getProtocol() + ", Host: " + url.getHost() + ", Port: " + url.getPort() + ", Path: " + url.getPath());
-            log.error("Parsed URL - Protocol: " + url.getProtocol() + ", Host: " + url.getHost() + ", Port: " + url.getPort() + ", Path: " + url.getPath());
-
             con = (HttpURLConnection) url.openConnection();
 
             con.setConnectTimeout(30000);
@@ -324,82 +291,54 @@ public class AdxViewFragmentController {
             con.setRequestProperty("User-Agent", "KenyaEMR-ADX-Client/1.0");
             con.setDoOutput(true);
 
-            System.out.println("DEBUG: Request headers set successfully");
-            log.error("Request headers set - Content-Type: application/adx+xml, Content-Length: " + outStream.size());
-
             try (DataOutputStream out = new DataOutputStream(con.getOutputStream())) {
                 out.write(outStream.toByteArray());
                 out.flush();
-                System.out.println("DEBUG: Request payload written successfully");
-                log.error("Request payload written successfully");
             }
 
             int responseCode = con.getResponseCode();
             String responseMessage = con.getResponseMessage();
 
-            System.out.println("DEBUG: HTTP Response: " + responseCode + " - " + responseMessage);
-            log.error("HTTP Response: " + responseCode + " - " + responseMessage);
+            log.info("HTTP Response: " + responseCode + " - " + responseMessage);
 
             String httpResponse;
             if (responseCode >= 200 && responseCode < 300) {
                 httpResponse = readResponseBody(con.getInputStream(), responseCode, responseMessage);
-                System.out.println("DEBUG: Success response received: " + httpResponse);
-                log.error("Success response received: " + httpResponse);
+                log.info("Success response: " + httpResponse);
             } else {
-                System.out.println("DEBUG: Error response code: " + responseCode);
-                log.error("HTTP Error " + responseCode + " - " + responseMessage);
+                log.warn("HTTP Error " + responseCode + " - " + responseMessage);
 
                 InputStream errorStream = con.getErrorStream();
                 if (errorStream != null) {
                     httpResponse = readResponseBody(errorStream, responseCode, responseMessage);
-                    System.out.println("DEBUG: Error response body: " + httpResponse);
-                    log.error("Error response body (" + responseCode + "): " + httpResponse);
+                    log.warn("Error response body: " + httpResponse);
                 } else {
                     httpResponse = "HTTP " + responseCode + " - " + responseMessage;
-                    System.out.println("DEBUG: No error response body available for HTTP " + responseCode);
-                    log.error("No error response body available for HTTP " + responseCode + " from " + serverAddress);
                 }
             }
 
-            System.out.println("DEBUG: ADX Posting Complete - returning response entity");
-            log.error("=== ADX Posting Complete ===");
-
-            HttpStatus status = HttpStatus.resolve(responseCode);
-            if (status == null) {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-            }
-
-            return ResponseEntity.status(status)
-                    .body(SimpleObject.create(
-                            "statusCode", String.valueOf(responseCode),
-                            "statusMsg", httpResponse
-                    ));
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(responseCode),
+                    "statusMsg", httpResponse
+            );
 
         } catch (UnknownHostException | SocketTimeoutException e) {
-            System.out.println("DEBUG: Network exception in postAdxToIL: " + e.getMessage());
-            e.printStackTrace();
-            log.error("Network error posting to IL server: " + serverAddress, e);
+            log.error("Network error posting to the server: " + serverAddress, e);
 
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .body(SimpleObject.create(
-                            "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
-                            "statusMsg", "Failed to reach IL server: " + e.getMessage()
-                    ));
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                    "statusMsg", "Failed to reach the server: " + e.getMessage()
+            );
         } catch (Exception e) {
-            System.out.println("DEBUG: Exception in postAdxToIL: " + e.getMessage());
-            e.printStackTrace();
-            log.error("Unexpected error posting to IL server: " + serverAddress, e);
+            log.error("Unexpected error posting to the server: " + serverAddress, e);
 
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .body(SimpleObject.create(
-                            "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
-                            "statusMsg", "Failed to post to IL server: " + serverAddress + ". Error: " + e.getMessage()
-                    ));
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                    "statusMsg", "Failed to post to the server: " + serverAddress + ". Error: " + e.getMessage()
+            );
         } finally {
             if (con != null) {
                 con.disconnect();
-                System.out.println("DEBUG: HTTP connection closed");
-                log.debug("HTTP connection closed");
             }
         }
     }
@@ -423,67 +362,22 @@ public class AdxViewFragmentController {
     /**
      * Gets the complete server address with API path and query parameters based on report configuration
      */
-
-    /**
-     * Gets the complete server address with API path and query parameters based on report configuration
-     */
     private String getCompleteServerAddress(ReportData reportData) {
-        // Force console output for debugging
-        System.out.println("=== DEBUG: getCompleteServerAddress called ===");
-        log.error("=== DEBUG: getCompleteServerAddress called ==="); // Using ERROR level to ensure it shows
-
         try {
-            System.out.println("DEBUG: Creating ConfigurableAdxGenerationStrategy");
-
-            // Get the configurable strategy directly
             ConfigurableAdxGenerationStrategy strategy = new ConfigurableAdxGenerationStrategy();
-
-            System.out.println("DEBUG: Getting ADX metadata for report: " + reportData.getDefinition().getName());
-            log.error("DEBUG: Getting ADX metadata for report: " + reportData.getDefinition().getName());
-
-            // Use the strategy to get ADX metadata which contains the endpoint URL
             AdxMetadata metadata = strategy.getAdxMetadata(reportData);
 
-            System.out.println("DEBUG: ADX metadata retrieved: " + (metadata != null ? "Success" : "Null"));
-
-            if (metadata != null) {
-                System.out.println("DEBUG: Endpoint URL from metadata: " + metadata.getEndpointUrl());
-                System.out.println("DEBUG: Has field mappings: " + metadata.isHasFieldMappings());
-                log.error("DEBUG: Endpoint URL from metadata: " + metadata.getEndpointUrl());
-                log.error("DEBUG: Has field mappings: " + metadata.isHasFieldMappings());
-
-                if (StringUtils.isNotBlank(metadata.getEndpointUrl())) {
-                    System.out.println("DEBUG: Using endpoint URL from ADX metadata: " + metadata.getEndpointUrl());
-                    log.error("DEBUG: Using endpoint URL from ADX metadata: " + metadata.getEndpointUrl());
-                    return metadata.getEndpointUrl();
-                } else {
-                    System.out.println("DEBUG: Metadata endpoint URL is blank");
-                    log.error("DEBUG: Metadata endpoint URL is blank");
-                }
-            } else {
-                System.out.println("DEBUG: Metadata is null");
-                log.error("DEBUG: Metadata is null");
+            if (metadata != null && StringUtils.isNotBlank(metadata.getEndpointUrl())) {
+                log.info("Using endpoint URL from ADX metadata: " + metadata.getEndpointUrl());
+                return metadata.getEndpointUrl();
             }
 
-            // Fallback to old logic if metadata doesn't provide endpoint URL
-            String fallbackUrl = determineServerAddressLegacy(reportData.getDefinition().getName());
-            System.out.println("DEBUG: Using fallback URL: " + fallbackUrl);
-            log.error("DEBUG: Using fallback URL: " + fallbackUrl);
-            return fallbackUrl;
+            log.info("No endpoint URL in ADX metadata, falling back to legacy address");
+            return determineServerAddressLegacy(reportData.getDefinition().getName());
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Exception in getCompleteServerAddress: " + e.getMessage());
-            System.out.println("DEBUG: Exception stack trace:");
-            e.printStackTrace();
-
-            log.error("Error getting complete server address from ADX metadata", e);
-
-            // Fallback to legacy logic
-            String reportName = reportData.getDefinition().getName();
-            String fallbackUrl = determineServerAddressLegacy(reportName);
-            System.out.println("DEBUG: Exception fallback URL: " + fallbackUrl);
-            log.error("DEBUG: Exception fallback URL: " + fallbackUrl);
-            return fallbackUrl;
+            log.error("Error getting server address from ADX metadata", e);
+            return determineServerAddressLegacy(reportData.getDefinition().getName());
         }
     }
     /**
