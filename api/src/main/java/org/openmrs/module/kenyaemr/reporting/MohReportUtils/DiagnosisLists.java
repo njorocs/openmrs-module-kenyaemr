@@ -1801,7 +1801,8 @@ public class DiagnosisLists {
 		return Arrays
 			.asList(
 				DiagnosisConcepts._DiagnosisConcepts.TMC_1,
-				DiagnosisConcepts._DiagnosisConcepts.TMC_2
+				DiagnosisConcepts._DiagnosisConcepts.TMC_2,
+				DiagnosisConcepts._DiagnosisConcepts.TMC_3
 			);
 	}
 	

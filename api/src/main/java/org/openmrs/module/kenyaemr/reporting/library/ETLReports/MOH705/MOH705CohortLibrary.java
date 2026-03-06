@@ -249,16 +249,17 @@ public class MOH705CohortLibrary {
 	public CohortDefinition patientLabTests(List<Integer> labTestList) {
 		String labTest = String.valueOf(labTestList).replaceAll("\\[", "(").replaceAll("\\]",")");
 		String sqlQuery = "select x.patient_id\n" +
-				"from kenyaemr_etl.etl_laboratory_extract x\n" +
-				"         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
-				"         inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
-				"                     from kenyaemr_etl.etl_clinical_encounter v\n" +
-				"                              inner join encounter_diagnosis ed\n" +
-				"                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
-				"                     where v.diagnosis_category = 'New') v\n" +
-				"                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
-				"where x.lab_test in "+labTest+" and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
-				"group by x.patient_id,x.lab_test;";
+			"from kenyaemr_etl.etl_laboratory_extract x\n" +
+			"         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
+			"         inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
+			"                     from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"                              inner join openmrs.encounter_diagnosis ed\n" +
+			"                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
+			"                     where v.diagnosis_category = 'New') v\n" +
+			"                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
+			"where x.lab_test in "+labTest+" and (x.test_result != null or trim(x.test_result) <> '')\n" +
+			"                                       and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
+			"group by x.patient_id,x.lab_test;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsLabTest");
 		cd.setQuery(sqlQuery);
@@ -267,7 +268,6 @@ public class MOH705CohortLibrary {
 		cd.setDescription("Patients lab test");
 		return cd;
 	}
-	
 	/**
 	 * MOH705A and MOH705B
 	 * Tested per age
@@ -286,29 +286,21 @@ public class MOH705CohortLibrary {
 
 	/**
 	 * MOH705 and MOH705B
-	 * Suspected Malaria Tests
+	 * Suspected Malaria Diagnosis
 	 * For Composition
 	 * @return
 	 */
-	public CohortDefinition patientSuspectedMalariaLabTests(List<Integer> labTestList) {
-		String labTest = String.valueOf(labTestList).replaceAll("\\[", "(").replaceAll("\\]",")");
-		String sqlQuery = "select x.patient_id\n" +
-			"from kenyaemr_etl.etl_laboratory_extract x\n" +
-			"         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
-			"         inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
-			"                     from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"                              inner join openmrs.encounter_diagnosis ed\n" +
-			"                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
-			"                     where v.diagnosis_category = 'New') v\n" +
-			"                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
-			"where x.lab_test in "+labTest+"  and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
-			"group by x.patient_id,x.lab_test;";
+	public CohortDefinition suspectedMalariaByDiagnosis() {		
+		String sqlQuery = "select v.patient_id\n" +
+			"         from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"         inner join openmrs.encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
+			"where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
-		cd.setName("patientsLabTestForSuspectedMalaria");
+		cd.setName("patientsDiagnosisForSuspectedMalaria");
 		cd.setQuery(sqlQuery);
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		cd.setDescription("Patients lab test for Suspected Malaria");
+		cd.setDescription("Patients Diagnosis Suspected Malaria");
 		return cd;
 	}
 	
@@ -323,8 +315,9 @@ public class MOH705CohortLibrary {
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
 		cd.addSearch("patientAge", ReportUtils.map(patientAge(age), "startDate=${startDate},endDate=${endDate}"));
-		cd.addSearch("patientSuspectedMalariaLabTests", ReportUtils.map(patientSuspectedMalariaLabTests(labTestList), "startDate=${startDate},endDate=${endDate}"));
-		cd.setCompositionString("patientSuspectedMalariaLabTests AND patientAge");
+		cd.addSearch("patientLabTests", ReportUtils.map(patientLabTests(labTestList), "startDate=${startDate},endDate=${endDate}"));
+		cd.addSearch("suspectedMalariaByDiagnosis", ReportUtils.map(suspectedMalariaByDiagnosis(), "startDate=${startDate},endDate=${endDate}"));
+		cd.setCompositionString("(suspectedMalariaByDiagnosis OR patientLabTests) AND patientAge");
 		return cd;
 	}
 }
