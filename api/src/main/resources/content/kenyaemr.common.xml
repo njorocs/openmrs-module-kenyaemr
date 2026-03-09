@@ -763,7 +763,7 @@
 				<ref bean="kenyaemr.app.counselling" />
 			</set>
 		</property>
-		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.EligibilityToShowATPForms" />
+		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.EligibilityToShowATPFormsAfter5Months" />
 		<property name="icon" value="kenyaui:forms/generic.png" />
 		<property name="htmlform" value="kenyaemr:nutritionFormDoesNotExistOn2x.html" />
 		<property name="order" value="201017" />
@@ -780,7 +780,7 @@
 				<ref bean="kenyaemr.app.counselling" />
 			</set>
 		</property>
-		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.EligibilityToShowATPForms" />
+		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.EligibilityToShowATPFormsAfter5Months" />
 		<property name="icon" value="kenyaui:forms/generic.png" />
 		<property name="htmlform" value="kenyaemr:nutritionFormDoesNotExistOn2x.html" />
 		<property name="order" value="201017" />
