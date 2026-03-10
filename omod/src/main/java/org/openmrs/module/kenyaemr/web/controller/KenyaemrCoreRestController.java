@@ -4586,6 +4586,41 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		return service.executeGet(endpoint, queryString);
 	}
 
+	/**
+	 * Submit Proof of Delivery (POD) to NLMIS
+	 *
+	 * @param request
+	 * @return
+	 */
+	@CrossOrigin(origins = "*", methods = { RequestMethod.POST, RequestMethod.OPTIONS })
+	@RequestMapping(method = RequestMethod.POST, value = "/nlmis/receiving-pods/submit")
+	@ResponseBody
+	public Object submitReceivingPods(HttpServletRequest request) {
+
+		try {
+			StringBuilder payload = new StringBuilder();
+			BufferedReader reader = request.getReader();
+			String line;
+
+			while ((line = reader.readLine()) != null) {
+				payload.append(line);
+			}
+
+			String endpoint = Context.getAdministrationService()
+					.getGlobalProperty("nlmis.receiving.pods.endpoint");
+
+			NlmisHttpClientService service = new NlmisHttpClientService();
+			return service.executePost(endpoint, payload.toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return ResponseEntity.badRequest()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body("{\"status\":\"Error\"}");
+	}
+
 
 
 }

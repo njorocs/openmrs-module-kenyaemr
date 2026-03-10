@@ -570,5 +570,13 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>nlmis.receiving.pods.endpoint</property>
+		<defaultValue>/api/receivingPods</defaultValue>
+		<description>
+		   Endpoint URL to send proof of delivery (POD) notification to NLIMS when an order is received in KenyaEMR.
+		</description>
+	</globalProperty>
+
 </module>
         
