@@ -163,6 +163,11 @@ import java.util.List;
                 AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
                 String datasetName = getDatasetName(datasetMapping, dsKey, reportName);
 
+                // Exclude unmapped datasets for non-MOH 731 reports
+                if (datasetMapping == null && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
                 if (StringUtils.isBlank(datasetName)) {
                     log.warn("Skipping dataset "+dsKey+" because no ADX dataset name could be resolved for report " +reportName);
                     continue;
@@ -447,34 +452,51 @@ import java.util.List;
                 log.warn("Configuration is null, cannot determine if facility dataset should be included");
                 return false;
             }
-
             if (reportName == null || reportName.trim().isEmpty()) {
                 log.warn("Report name is null or empty, cannot determine if facility dataset should be included");
                 return false;
             }
 
-            // Check configuration metadata for explicit facility dataset inclusion flag
-            String includeFacilityDataset = config.getMetadata().get("includeFacilityDataset");
-            if ("true".equalsIgnoreCase(includeFacilityDataset)) {
-                return true;
-            } else if ("false".equalsIgnoreCase(includeFacilityDataset)) {
-                return false;
-            }
+            // For non-MOH 731 reports, ONLY include datasets that are explicitly configured in JSON
+            // This ensures unmapped datasets are excluded for all reports except MOH 731
+            if (!MOH_731_REPORT_NAME.equals(reportName)) {
+                boolean isExplicitlyMapped = isDatasetExplicitlyMapped(config, datasetMapping, reportName);
 
-            // Check if this specific dataset mapping has field mappings
-            AdxConfiguration.AdxDatasetMapping mappingConfig = findDatasetMapping(config, datasetMapping);
-            if (mappingConfig != null && mappingConfig.getFieldMappings() != null && !mappingConfig.getFieldMappings().isEmpty()) {
-                log.debug("Including facility dataset '{}' because it has field mappings");
+                if (!isExplicitlyMapped) {
+                    log.debug("Excluding unmapped facility dataset '" + datasetMapping + "' for report '" + reportName + "'. Only MOH 731 includes unmapped datasets.");
+                    return false;
+                }
+                // If explicitly mapped, include the dataset
                 return true;
             }
 
-            // Fallback logic based on report name
-            return shouldIncludeFacilityDatasetForReport(config, datasetMapping, reportName);
+            // For MOH 731, include all datasets (backward compatibility)
+            return true;
 
         } catch (Exception e) {
             log.error("Error determining if facility dataset should be included for report: " + reportName, e);
             return false;
         }
+    }
+
+    /**
+     * Checks if a dataset is explicitly mapped in the configuration for non-MOH 731 reports
+     */
+    private boolean isDatasetExplicitlyMapped(AdxConfiguration config, String datasetMapping, String reportName) {
+        if (config == null || config.getDatasets() == null || datasetMapping == null) {
+            return false;
+        }
+
+        return config.getDatasets().stream()
+                .anyMatch(mapping -> {
+                    if (datasetMapping.equals(mapping.getName())) {
+                        return true;
+                    }
+                    if (datasetMapping.equals(mapping.getDhisName())) {
+                        return true;
+                    }
+                    return datasetMapping.equals(mapping.get3pmName());
+                });
     }
 
     /**
@@ -616,6 +638,16 @@ import java.util.List;
                     }
                 }
 
+                // Exclude unmapped data elements for non-MOH 731 reports
+                if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
+                // Exclude date elements for non-MOH 731 reports
+                if ("date".equals(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
                 // Special processing for MOH 705A - remove -32 suffix from totals
                 if (("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) &&
                         dataElementName.endsWith("-32")) {
@@ -660,9 +692,7 @@ import java.util.List;
      */
     private String getDatasetName(AdxConfiguration.AdxDatasetMapping datasetMapping, String dsKey, String reportName) {
         if (datasetMapping != null) {
-            if (MOH_731_REPORT_NAME.equals(reportName) || MOH_743_REPORT_NAME.equals(reportName)) {
-                return datasetMapping.getDhisName();
-            } else if (MONTHLY_REPORT_NAME.equals(reportName)) {
+          if (MONTHLY_REPORT_NAME.equals(reportName)) {
                 return datasetMapping.get3pmName();
             } else {
                 // For other reports, use dhisName as default
@@ -867,12 +897,11 @@ import java.util.List;
 
             if (isConfigured) {
                 log.debug("Dataset " + datasetMapping + " is explicitly configured for MOH 731, including");
-                return true;
             } else {
                 // if not explicitly configured, include for MOH 731 (backward compatibility)
                 log.debug("Dataset " + datasetMapping + " not explicitly configured but including for MOH 731 backward compatibility");
-                return true;
             }
+            return true;
         }
 
         // For other reports, use configured mapping

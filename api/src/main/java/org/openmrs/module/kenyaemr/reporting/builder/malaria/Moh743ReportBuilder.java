@@ -54,7 +54,6 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 	private static final Double WEIGHT_1000 = 1000.0;
 
 
-
 	static final List<Integer> RAPID_DIAGNOSTIC_TEST = Arrays.asList(4908);
 	static final List<Integer> ARTEMETHER_LUMEFANTRINE_20_120MG_BLISTER = Arrays.asList(8580, 14009, 14010, 14011, 14018, 14019, 14020, 14021, 14022, 14023, 14024,
 			14025, 14026, 14027, 14028, 14029, 14030, 14031, 14032, 14033, 14034, 14035,
@@ -106,7 +105,6 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 
 				ReportUtils.map(getDataSetDefinition("Rapid Diagnostic Tests", RAPID_DIAGNOSTIC, FACTOR_1, TEST), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 6s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 6s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 12s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 18s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 24s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
@@ -121,15 +119,15 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 				ReportUtils.map(getDataSetDefinition("Artesunate Injection", INJECTABLE_ARTESUNATE, FACTOR_1, VITAL), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("Sulphadoxine Pyrimethamine Tabs", SULPHADOXINE_PYRIMETHAMINE_500_25MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(getDataSetDefinition("LLINs", LONG_LASTING_INSECTICIDAL, FACTOR_1, PIECES), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("PRIM_75MG", PRIMAGUINE_75MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Primaguine 75mg", PRIMAGUINE_75MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(totalPatientsByAgeSuspectedMalaria(), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(patientsTreatedWithAntimalarials(), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(patientsTreatedWithAntiMalarials(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(patientsGivenArtesunateInjection(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(totalPatientsSuspectedMalariaByAge(), "startDate=${startDate},endDate=${endDate}")
 
-
 		);
 	}
+	// This will be skipped by khis payload generator
 	private DataSetDefinition totalPatientsByAgeSuspectedMalaria() {
 		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
 		dsd.setName("SUSPECTED_MALARIA");
@@ -150,12 +148,74 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		return sqlDataSetDefinition;
 	}
 
-	private String convertListToString(List<Integer> drugIds) {
-		return drugIds.stream()
-				.map(String::valueOf)
-				.collect(java.util.stream.Collectors.joining(", "));
+	private DataSetDefinition patientsTreatedWithAntiMalarials() {
+		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
+		dsd.setName("Patients Given an ACT by Weight Band Category");
+		dsd.setDescription("Patients treated with AL, DHAP, or ASPY anti malarial");
+		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		dsd.addColumn("under_5_years_5_to_under_10_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_FIVE, WEIGHT_10, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_5_to_under_10_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_FIVE, WEIGHT_10, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_10_to_under_15_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_10, WEIGHT_15, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_10_to_under_15_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_10, WEIGHT_15, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_15_to_under_20_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_15, WEIGHT_20, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_15_to_under_20_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_15, WEIGHT_20, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_20_to_under_25_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_20, WEIGHT_25, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_20_to_under_25_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_20, WEIGHT_25, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_25_to_under_30_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_25, WEIGHT_30, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_25_to_under_30_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_25, WEIGHT_30, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_30_to_under_35_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_30, WEIGHT_35, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_30_to_under_35_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_30, WEIGHT_35, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_35_to_under_60_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_35, WEIGHT_60, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_35_to_under_60_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_35, WEIGHT_60, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_60_to_under_80_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_60, WEIGHT_80, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_60_to_under_80_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_60, WEIGHT_80, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("under_5_years_80_and_above_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_80, WEIGHT_1000, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("aged_5_years_and_above_80_and_above_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_80, WEIGHT_1000, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		return dsd;
 	}
 
+	private DataSetDefinition patientsGivenArtesunateInjection() {
+		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
+		dsd.setName("INJ_ARTESUNATE");
+		dsd.setDescription("Patients treated with Artesunate Injection");
+		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		dsd.addColumn("20_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_0, WEIGHT_20, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("20_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_0, WEIGHT_20, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("20_50_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_20, WEIGHT_50, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("20_50_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_20, WEIGHT_50, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+		dsd.addColumn("50_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_50, WEIGHT_1000, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
+		dsd.addColumn("50_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_50, WEIGHT_1000, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
+
+		return dsd;
+	}
+
+	private DataSetDefinition totalPatientsSuspectedMalariaByAge() {
+		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
+		dsd.setName("SUSPECTED_MALARIA_AGE");
+		dsd.setDescription("Patients suspected of Malaria by Age");
+		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		dsd.addColumn("MICRO_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,BLOOD_SMEAR,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("MICRO_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,BLOOD_SMEAR,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("MICRO_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,BLOOD_SMEAR,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("MICRO_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,BLOOD_SMEAR,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("RTD_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,RDT,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("RTD_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,RDT,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("RTD_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,RDT,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("RTD_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,RDT,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("RTD_MICRO_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("RTD_MICRO_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
+		dsd.addColumn("RTD_MICRO_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("RTD_MICRO_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
+		dsd.addColumn("RTD_MICRO_LESS_5_INVL", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,NOT_DETECTED), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
+		dsd.addColumn("RTD_MICRO_MORE_5_INVL", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,NOT_DETECTED), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
+//		dsd.addColumn("NOT_TESTED_LESS_FIVE", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsNotTestedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
+//		dsd.addColumn("NOT_TESTED_MORE_FIVE", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsNotTestedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE, POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
+
+		return dsd;
+	}
 
 	private String getMoh743DrugSummary(String drugIds, int factor, int unit) {
 		if (drugIds == null || drugIds.isEmpty()) {
@@ -163,7 +223,6 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		}
 		String query =
 				"SELECT\n" +
-						"    %d AS unit_pack_size,\n" +
 						"    FLOOR(COALESCE(prev_month.closing_balance, 0)) AS opening_balance,\n" +
 						"    FLOOR(COALESCE(COALESCE(curr_receipts.quantity, 0) + COALESCE(opening_balance.quantity, 0), 0)) AS curr_receipts,\n" +
 						"    FLOOR(COALESCE(curr_dispensed.quantity, 0)) AS curr_dispensed,\n" +
@@ -356,75 +415,5 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 
 		return String.format(query, factor, unit, factor, unit, unit, unit, unit, unit, unit, unit, unit, unit, unit, unit);
 	}
-
-	private DataSetDefinition patientsTreatedWithAntimalarials() {
-		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
-		dsd.setName("Patients Given an ACT by Weight Band Category");
-		dsd.setDescription("Patients treated with AL, DHAP, or ASPY anti malarial");
-		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		dsd.addColumn("under_5_years_5_to_under_10_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_FIVE, WEIGHT_10, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_5_to_under_10_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_FIVE, WEIGHT_10, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_10_to_under_15_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_10, WEIGHT_15, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_10_to_under_15_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_10, WEIGHT_15, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_15_to_under_20_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_15, WEIGHT_20, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_15_to_under_20 kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_15, WEIGHT_20, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_20_to_under_25_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_20, WEIGHT_25, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_20_to_under_25_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_20, WEIGHT_25, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_25_to_under_30_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_25, WEIGHT_30, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_25_to_under_30_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_25, WEIGHT_30, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_30_to_under_35_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_30, WEIGHT_35, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_30_to_under_35_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_30, WEIGHT_35, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_35_to_under_60_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_35, WEIGHT_60, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_35_to_under_60_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_35, WEIGHT_60, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_60_to_under_80_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_60, WEIGHT_80, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("ged_5_years_and_above_60_to_under_80_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_60, WEIGHT_80, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("under_5_years_80_and_above_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_80, WEIGHT_1000, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("aged_5_years_and_above_80_and_above_kg", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(WEIGHT_80, WEIGHT_1000, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		return dsd;
-	}
-
-	private DataSetDefinition patientsGivenArtesunateInjection() {
-		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
-		dsd.setName("INJ_ARTESUNATE");
-		dsd.setDescription("Patients treated with Artesunate Injection");
-		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		dsd.addColumn("20_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_0, WEIGHT_20, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("20_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_0, WEIGHT_20, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("20_50_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_20, WEIGHT_50, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("20_50_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_20, WEIGHT_50, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-		dsd.addColumn("50_Under_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_50, WEIGHT_1000, COMPARATIVE_OPERATION_LESS,  AGE_FIVE), indParams), "");
-		dsd.addColumn("50_Over_5", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(WEIGHT_50, WEIGHT_1000, COMPARATIVE_GREATER,  AGE_FIVE), indParams), "");
-
-		return dsd;
-	}
-	private DataSetDefinition totalPatientsSuspectedMalariaByAge() {
-		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
-		dsd.setName("SUSPECTED_MALARIA_AGE");
-		dsd.setDescription("Patients suspected of Malaria by Age");
-		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		dsd.addColumn("MICRO_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,BLOOD_SMEAR,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("MICRO_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,BLOOD_SMEAR,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("MICRO_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,BLOOD_SMEAR,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("MICRO_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,BLOOD_SMEAR,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("RTD_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,RDT,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("RTD_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,RDT,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("RTD_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,RDT,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("RTD_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedMalariaByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,RDT,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("RTD_MICRO_LESS_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("RTD_MICRO_MORE_5_POS", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + POSITIVE + "'"), "");
-		dsd.addColumn("RTD_MICRO_LESS_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("RTD_MICRO_MORE_5_NEG", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,NEGATIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NEGATIVE + "'"), "");
-		dsd.addColumn("RTD_MICRO_LESS_5_INVL", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,NOT_DETECTED), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
-		dsd.addColumn("RTD_MICRO_MORE_5_INVL", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsSuspectedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE,NOT_DETECTED), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
-//		dsd.addColumn("NOT_TESTED_LESS_FIVE", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsNotTestedRDTMICROByAge( COMPARATIVE_OPERATION_LESS,  AGE_FIVE,POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
-//		dsd.addColumn("NOT_TESTED_MORE_FIVE", "", ReportUtils.map(moh743IndicatorLibrary.totalPatientsNotTestedRDTMICROByAge( COMPARATIVE_OPERATION_GREATER,  AGE_FIVE, POSITIVE), "startDate=${startDate},endDate=${endDate},resultName='" + NOT_DETECTED + "'"), "");
-
-		return dsd;
-	}
-
-
 }
 
