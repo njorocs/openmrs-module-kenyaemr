@@ -56,8 +56,6 @@ import java.util.List;
 
     private static final String MOH_731_REPORT_NAME = "Revised MOH 731";
     private static final String MONTHLY_REPORT_NAME = "Monthly report";
-    private static final String MOH_743_REPORT_NAME = "MOH-743 Report";
-    private static final String MOH_711_REPORT_NAME = "MOH 711";
 
     private final DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     private final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -132,7 +130,6 @@ import java.util.List;
             metadata.setEndpointUrl(fallbackEndpoint);
             metadata.setHasFieldMappings(false);
 
-          //  log.warn("Using fallback ADX metadata - EndpointURL: '{}'", fallbackEndpoint);
             return metadata;
         }
     }
@@ -316,7 +313,7 @@ import java.util.List;
                     }
 
                     // Get dataset name for ADX output
-                    String adxDatasetName = getDatasetNameForFacilityData(config, datasetMapping, reportName);
+                    String adxDatasetName = getDatasetNameForFacilityData(config, datasetMapping);
 
                     // Write group start for facility data
                     writer.write("<group orgUnit=\"" + escapeXml(metadata.getOrgUnit()) +
@@ -379,10 +376,8 @@ import java.util.List;
 
                 } catch (NumberFormatException e) {
                     log.error("Invalid dataset ID format: " + entry.getDatasetID(), e);
-                    continue;
                 } catch (Exception e) {
                     log.error("Error processing facility dataset entry with ID: " + entry.getDatasetID(), e);
-                    continue;
                 }
             }
 
@@ -421,26 +416,11 @@ import java.util.List;
                 }
             }
 
-            // Fallback: determine based on report name pattern matching
-            String normalizedReportName = reportName.toLowerCase().trim();
-
-            if (normalizedReportName.contains("731") || normalizedReportName.contains("revised moh 731")) {
-                return 1; // MOH 731 facility ID
-            } else if (normalizedReportName.contains("711") || normalizedReportName.contains("moh 711")) {
-                return 2; // MOH 711 facility ID
-            } else if (normalizedReportName.contains("743") || normalizedReportName.contains("moh-743")) {
-                // Add appropriate facility ID for MOH 743 if needed
-                log.warn("No specific facility ID configured for MOH 743 report, using default");
-                return null;
-            } else {
-                log.warn("Unknown report type, cannot determine facility report ID: " + reportName);
-                return null;
-            }
-
         } catch (Exception e) {
             log.error("Error determining facility report ID for report: " + reportName, e);
             return null;
         }
+        return null;
     }
 
     /**
@@ -502,7 +482,7 @@ import java.util.List;
     /**
      * Gets the appropriate dataset name for facility data based on configuration
      */
-    private String getDatasetNameForFacilityData(AdxConfiguration config, String datasetMapping, String reportName) {
+    private String getDatasetNameForFacilityData(AdxConfiguration config, String datasetMapping) {
         if (config == null || datasetMapping == null) {
             return datasetMapping != null ? datasetMapping : "Unknown";
         }
@@ -516,7 +496,6 @@ import java.util.List;
                 return dhisName.trim();
             }
         }
-
         // Use original dataset mapping as fallback
         return datasetMapping;
     }
@@ -741,8 +720,7 @@ import java.util.List;
             return "https://test.hiskenya.org";
         }
 
-        String trimmedUrl = baseUrl.trim();
-        return trimmedUrl;
+        return baseUrl.trim();
     }
     /**
      * Builds the complete endpoint URL with query parameters based on field mappings
