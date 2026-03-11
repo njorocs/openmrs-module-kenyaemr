@@ -28,6 +28,8 @@ public class EligibleForTelehealthProgramCalculation extends AbstractPatientCalc
 
     private static final Program NCD_PROGRAM = Context.getProgramWorkflowService()
             .getProgramByUuid(NCDMetadata.class);
+    public static final EncounterType ncdInitialType = MetadataUtils.existing(EncounterType.class, NCDMetadata._EncounterType.NCD_INITIAL);
+       public static final Form NCD_INITIAL_FORM = MetadataUtils.existing(Form.class, NCDMetadata._Form.NCD_INITIAL_FORM);
 
     private static final EncounterType NCD_INITIAL = Context.getEncounterWorkflowService()
             .getEncounterTypeByUuid(_EncounterType.NCD_INITIAl);
@@ -37,11 +39,19 @@ public class EligibleForTelehealthProgramCalculation extends AbstractPatientCalc
 
         // Patients enrolled in the NCD program at the evaluation date
         Set<Integer> inProgram = Filters.inProgram(cohort, NCD, context);
-        Set<Integer> inProgram = Filters.EncounterType(NCD_INITIAL, context);
 
         CalculationResultMap ret = new CalculationResultMap();
         for (Integer ptId : cohort) {
-            ret.put(ptId, new BooleanResult(inProgram.contains(ptId), this));
+            boolean eligible = false;
+            Patient patient = patientService.getPatient (ptId);
+
+            Encounter lastncdInitialEnc = EmrUtils.lastEncounter(patient, ncdInitialType, NCD_INITIAL_FORM);
+
+             if (inNCDProgram.contains(ptId) && lastncdInitialEnc != null () ) {
+                eligible = true;
+            }        
+
+            ret.put(ptId, new BooleanResult(eligible, this));
         }
         return ret;
     }
