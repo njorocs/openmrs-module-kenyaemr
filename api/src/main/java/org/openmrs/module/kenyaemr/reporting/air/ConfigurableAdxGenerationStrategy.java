@@ -56,8 +56,6 @@ import java.util.List;
 
     private static final String MOH_731_REPORT_NAME = "Revised MOH 731";
     private static final String MONTHLY_REPORT_NAME = "Monthly report";
-    private static final String MOH_743_REPORT_NAME = "MOH-743 Report";
-    private static final String MOH_711_REPORT_NAME = "MOH 711";
 
     private final DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     private final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -132,7 +130,6 @@ import java.util.List;
             metadata.setEndpointUrl(fallbackEndpoint);
             metadata.setHasFieldMappings(false);
 
-          //  log.warn("Using fallback ADX metadata - EndpointURL: '{}'", fallbackEndpoint);
             return metadata;
         }
     }
@@ -162,6 +159,11 @@ import java.util.List;
             for (String dsKey : reportData.getDataSets().keySet()) {
                 AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
                 String datasetName = getDatasetName(datasetMapping, dsKey, reportName);
+
+                // Exclude unmapped datasets for non-MOH 731 reports
+                if (datasetMapping == null && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
 
                 if (StringUtils.isBlank(datasetName)) {
                     log.warn("Skipping dataset "+dsKey+" because no ADX dataset name could be resolved for report " +reportName);
@@ -311,7 +313,7 @@ import java.util.List;
                     }
 
                     // Get dataset name for ADX output
-                    String adxDatasetName = getDatasetNameForFacilityData(config, datasetMapping, reportName);
+                    String adxDatasetName = getDatasetNameForFacilityData(config, datasetMapping);
 
                     // Write group start for facility data
                     writer.write("<group orgUnit=\"" + escapeXml(metadata.getOrgUnit()) +
@@ -374,10 +376,8 @@ import java.util.List;
 
                 } catch (NumberFormatException e) {
                     log.error("Invalid dataset ID format: " + entry.getDatasetID(), e);
-                    continue;
                 } catch (Exception e) {
                     log.error("Error processing facility dataset entry with ID: " + entry.getDatasetID(), e);
-                    continue;
                 }
             }
 
@@ -416,26 +416,11 @@ import java.util.List;
                 }
             }
 
-            // Fallback: determine based on report name pattern matching
-            String normalizedReportName = reportName.toLowerCase().trim();
-
-            if (normalizedReportName.contains("731") || normalizedReportName.contains("revised moh 731")) {
-                return 1; // MOH 731 facility ID
-            } else if (normalizedReportName.contains("711") || normalizedReportName.contains("moh 711")) {
-                return 2; // MOH 711 facility ID
-            } else if (normalizedReportName.contains("743") || normalizedReportName.contains("moh-743")) {
-                // Add appropriate facility ID for MOH 743 if needed
-                log.warn("No specific facility ID configured for MOH 743 report, using default");
-                return null;
-            } else {
-                log.warn("Unknown report type, cannot determine facility report ID: " + reportName);
-                return null;
-            }
-
         } catch (Exception e) {
             log.error("Error determining facility report ID for report: " + reportName, e);
             return null;
         }
+        return null;
     }
 
     /**
@@ -447,29 +432,26 @@ import java.util.List;
                 log.warn("Configuration is null, cannot determine if facility dataset should be included");
                 return false;
             }
-
             if (reportName == null || reportName.trim().isEmpty()) {
                 log.warn("Report name is null or empty, cannot determine if facility dataset should be included");
                 return false;
             }
 
-            // Check configuration metadata for explicit facility dataset inclusion flag
-            String includeFacilityDataset = config.getMetadata().get("includeFacilityDataset");
-            if ("true".equalsIgnoreCase(includeFacilityDataset)) {
-                return true;
-            } else if ("false".equalsIgnoreCase(includeFacilityDataset)) {
-                return false;
-            }
+            // For non-MOH 731 reports, ONLY include datasets that are explicitly configured in JSON
+            // This ensures unmapped datasets are excluded for all reports except MOH 731
+            if (!MOH_731_REPORT_NAME.equals(reportName)) {
+                boolean isExplicitlyMapped = isDatasetExplicitlyMapped(config, datasetMapping, reportName);
 
-            // Check if this specific dataset mapping has field mappings
-            AdxConfiguration.AdxDatasetMapping mappingConfig = findDatasetMapping(config, datasetMapping);
-            if (mappingConfig != null && mappingConfig.getFieldMappings() != null && !mappingConfig.getFieldMappings().isEmpty()) {
-                log.debug("Including facility dataset '{}' because it has field mappings");
+                if (!isExplicitlyMapped) {
+                    log.debug("Excluding unmapped facility dataset '" + datasetMapping + "' for report '" + reportName + "'. Only MOH 731 includes unmapped datasets.");
+                    return false;
+                }
+                // If explicitly mapped, include the dataset
                 return true;
             }
 
-            // Fallback logic based on report name
-            return shouldIncludeFacilityDatasetForReport(config, datasetMapping, reportName);
+            // For MOH 731, include all datasets (backward compatibility)
+            return true;
 
         } catch (Exception e) {
             log.error("Error determining if facility dataset should be included for report: " + reportName, e);
@@ -478,9 +460,29 @@ import java.util.List;
     }
 
     /**
+     * Checks if a dataset is explicitly mapped in the configuration for non-MOH 731 reports
+     */
+    private boolean isDatasetExplicitlyMapped(AdxConfiguration config, String datasetMapping, String reportName) {
+        if (config == null || config.getDatasets() == null || datasetMapping == null) {
+            return false;
+        }
+
+        return config.getDatasets().stream()
+                .anyMatch(mapping -> {
+                    if (datasetMapping.equals(mapping.getName())) {
+                        return true;
+                    }
+                    if (datasetMapping.equals(mapping.getDhisName())) {
+                        return true;
+                    }
+                    return datasetMapping.equals(mapping.get3pmName());
+                });
+    }
+
+    /**
      * Gets the appropriate dataset name for facility data based on configuration
      */
-    private String getDatasetNameForFacilityData(AdxConfiguration config, String datasetMapping, String reportName) {
+    private String getDatasetNameForFacilityData(AdxConfiguration config, String datasetMapping) {
         if (config == null || datasetMapping == null) {
             return datasetMapping != null ? datasetMapping : "Unknown";
         }
@@ -494,7 +496,6 @@ import java.util.List;
                 return dhisName.trim();
             }
         }
-
         // Use original dataset mapping as fallback
         return datasetMapping;
     }
@@ -616,6 +617,16 @@ import java.util.List;
                     }
                 }
 
+                // Exclude unmapped data elements for non-MOH 731 reports
+                if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
+                // Exclude date elements for non-MOH 731 reports
+                if ("date".equals(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
                 // Special processing for MOH 705A - remove -32 suffix from totals
                 if (("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) &&
                         dataElementName.endsWith("-32")) {
@@ -660,9 +671,7 @@ import java.util.List;
      */
     private String getDatasetName(AdxConfiguration.AdxDatasetMapping datasetMapping, String dsKey, String reportName) {
         if (datasetMapping != null) {
-            if (MOH_731_REPORT_NAME.equals(reportName) || MOH_743_REPORT_NAME.equals(reportName)) {
-                return datasetMapping.getDhisName();
-            } else if (MONTHLY_REPORT_NAME.equals(reportName)) {
+          if (MONTHLY_REPORT_NAME.equals(reportName)) {
                 return datasetMapping.get3pmName();
             } else {
                 // For other reports, use dhisName as default
@@ -711,8 +720,7 @@ import java.util.List;
             return "https://test.hiskenya.org";
         }
 
-        String trimmedUrl = baseUrl.trim();
-        return trimmedUrl;
+        return baseUrl.trim();
     }
     /**
      * Builds the complete endpoint URL with query parameters based on field mappings
@@ -867,12 +875,11 @@ import java.util.List;
 
             if (isConfigured) {
                 log.debug("Dataset " + datasetMapping + " is explicitly configured for MOH 731, including");
-                return true;
             } else {
                 // if not explicitly configured, include for MOH 731 (backward compatibility)
                 log.debug("Dataset " + datasetMapping + " not explicitly configured but including for MOH 731 backward compatibility");
-                return true;
             }
+            return true;
         }
 
         // For other reports, use configured mapping
