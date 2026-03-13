@@ -109,6 +109,10 @@
 				<ref bean="kenyaemr.etl.common.report.Moh731KDoD.old"/>
 				<ref bean="kenyaemr.etl.common.report.datim"/>
 				<ref bean="kenyaemr.hiv.report.htsRegister"/>
+				<ref bean="kenyaemr.hiv.report.atpDisclosureReadinessRegister"/>
+				<ref bean="kenyaemr.hiv.report.atpTakingChargeTrackingRegister"/>
+				<ref bean="kenyaemr.hiv.report.atpTransitionReadinessRegister"/>
+				<ref bean="kenyaemr.hiv.report.atpDisclosureTrackingRegister"/>
 				<ref bean="kenyaemr.hiv.report.htsConfirmationRegister"/>
 				<ref bean="kenyaemr.hiv.report.htsLinkageRegister"/>
 				<ref bean="kenyaemr.common.report.recordedDeceased" />
@@ -976,6 +980,54 @@
 			</set></property>
 		<property name="template" value="kenyaemr:hts/hts_linkage_template.xls" />
 		<property name="repeatingSection" value="sheet:1,row:7,dataset:HTSInformation" />
+	</bean>
+
+	<bean id="kenyaemr.hiv.report.atpDisclosureReadinessRegister" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="78076ab0-ebeb-4475-a65b-fb835fc6a046" />
+		<property name="name" value="ATP Disclosure Readiness Register" />
+		<property name="description" value="Register for ATP Disclosure Readiness" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set></property>
+		<property name="template" value="kenyaemr:atp/atp_disclosure_readiness_register_template.xls" />
+		<property name="repeatingSection" value="sheet:1,row:7,dataset:ATPDisclosureReadinessInformation" />
+	</bean>
+
+	<bean id="kenyaemr.hiv.report.atpTakingChargeTrackingRegister" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="3a9ba012-8ff3-4f32-b1ba-06d83681ab0f" />
+		<property name="name" value="ATP Taking Charge Tracking Register" />
+		<property name="description" value="Register for ATP Taking Charge Tracking" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set></property>
+		<property name="template" value="kenyaemr:atp/atp_taking_charge_tracking_register_template.xls" />
+		<property name="repeatingSection" value="sheet:1,row:7,dataset:ATPTakingChargeTrackingInformation" />
+	</bean>
+
+	<bean id="kenyaemr.hiv.report.atpTransitionReadinessRegister" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="2f37b11e-4e6a-4708-9cc2-5ee03b9bec09" />
+		<property name="name" value="ATP Transition Readiness Register" />
+		<property name="description" value="Register for ATP Transition Readiness" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set></property>
+		<property name="template" value="kenyaemr:atp/atp_transition_readiness_register_template.xls" />
+		<property name="repeatingSection" value="sheet:1,row:7,dataset:ATPTransitionReadinessInformation" />
+	</bean>
+
+	<bean id="kenyaemr.hiv.report.atpDisclosureTrackingRegister" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+		<property name="targetUuid" value="f7948479-a203-4b16-838a-48200712e40f" />
+		<property name="name" value="ATP Disclosure Tracking Register" />
+		<property name="description" value="Register for ATP Disclosure Tracking" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set></property>
+		<property name="template" value="kenyaemr:atp/atp_disclosure_tracking_register_template.xls" />
+		<property name="repeatingSection" value="sheet:1,row:7,dataset:ATPDisclosureTrackingInformation" />
 	</bean>
 
 	<bean id="kenyaemr.hiv.report.htsPositiveCLientsNotLinkedToCare" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
