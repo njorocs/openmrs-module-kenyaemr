@@ -39,8 +39,8 @@ public class FPClientsRecievingPostpartumEvaluator implements EncounterDataEvalu
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
 
         String qry = "SELECT v.encounter_id,  cn.name AS receiving_postpartum_fp " +
-                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v LEFT JOIN openmrs.concept c ON c.concept_id = v.receiving_postpartum_fp " +
-                "LEFT JOIN openmrs.concept_name cn  ON cn.concept_id = c.concept_id  AND cn.locale = 'en' " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v LEFT JOIN concept c ON c.concept_id = v.receiving_postpartum_fp " +
+                "LEFT JOIN concept_name cn  ON cn.concept_id = c.concept_id  AND cn.locale = 'en' " +
                 " AND cn.concept_name_type = 'FULLY_SPECIFIED' WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
 

@@ -118,7 +118,7 @@ String sqlQuery = "select x.patient_id\n" +
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id,v.visit_date" +
                 "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v" +
-                "    inner join openmrs.encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2" +
+                "    inner JOIN encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2" +
                 "    where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("totalPatientsNotTestedMalaria");
         cd.setQuery(sqlQuery);
@@ -136,7 +136,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
                 "         inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
                 "                     from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
-                "                              inner join openmrs.encounter_diagnosis ed\n" +
+                "                              inner JOIN encounter_diagnosis ed\n" +
                 "                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
                 "                     where v.diagnosis_category = 'New') v\n" +
                 "                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +

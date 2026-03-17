@@ -38,7 +38,7 @@ public class FPReasonsforLARCEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry = "SELECT v.encounter_id, cn.name AS reasons_for_larc_removal " +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
-                "JOIN openmrs.concept_name cn " +
+                "JOIN concept_name cn " +
                 "    ON cn.concept_id = v.reasons_for_larc_removal " +
                 "    AND cn.locale = 'en' " +
                 "    AND cn.voided = 0 " +

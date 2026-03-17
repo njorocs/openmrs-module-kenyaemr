@@ -45,7 +45,7 @@ public class FPVSCEvaluator implements EncounterDataEvaluator {
                 "        ELSE NULL\n" +
                 "    END AS contraceptive_dispensed\n" +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
-                "INNER JOIN openmrs.person p ON f.patient_id = p.person_id\n" +
+                "INNER JOIN person p ON f.patient_id = p.person_id\n" +
                 "WHERE f.contraceptive_dispensed IN (1472, 1489)\n" +
                 "    AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    AND f.voided = 0;\n";

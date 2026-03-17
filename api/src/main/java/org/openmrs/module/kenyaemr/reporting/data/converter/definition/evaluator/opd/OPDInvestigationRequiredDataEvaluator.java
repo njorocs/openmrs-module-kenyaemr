@@ -44,7 +44,7 @@ public class OPDInvestigationRequiredDataEvaluator implements ObsDataEvaluator {
                 "                           ed.dx_rank,\n" +
                 "                           ed.patient_id\n" +
                 "                    FROM  encounter_diagnosis ed\n" +
-                "                             inner join openmrs.concept_name cn\n" +
+                "                             inner JOIN concept_name cn\n" +
                 "                                        on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en' and\n" +
                 "                                           cn.concept_name_type = 'FULLY_SPECIFIED' and\n" +
                 "                                           ed.dx_rank = 1\n" +

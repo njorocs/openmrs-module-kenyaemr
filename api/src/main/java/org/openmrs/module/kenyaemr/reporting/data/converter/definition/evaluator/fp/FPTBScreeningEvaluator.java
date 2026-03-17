@@ -45,7 +45,7 @@ public class FPTBScreeningEvaluator implements EncounterDataEvaluator {
                         "       WHERE ts.patient_id = f.patient_id " +
                         "         AND DATE(ts.visit_date) <= DATE(f.visit_date)" +
                         "  ) " +
-                        "JOIN openmrs.concept_name c " +
+                        "JOIN concept_name c " +
                         "  ON t.resulting_tb_status = c.concept_id " +
                         "WHERE c.locale = 'en' AND c.locale_preferred = 1 " +
                         "  AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)";

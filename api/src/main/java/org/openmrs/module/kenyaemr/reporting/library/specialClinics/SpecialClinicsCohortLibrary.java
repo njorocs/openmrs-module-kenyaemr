@@ -213,11 +213,11 @@ public class SpecialClinicsCohortLibrary {
         String sqlQuery = "SELECT v.patient_id, " +
                 "m.name AS paymentType " +
                 "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v " +
-                "LEFT JOIN openmrs.cashier_bill t " +
+                "LEFT JOIN cashier_bill t " +
                 "    ON v.patient_id = t.patient_id " +
-                "LEFT JOIN openmrs.cashier_bill_payment tp " +
+                "LEFT JOIN cashier_bill_payment tp " +
                 "    ON t.bill_id = tp.bill_id " +
-                "LEFT JOIN openmrs.cashier_payment_mode m " +
+                "LEFT JOIN cashier_payment_mode m " +
                 "    ON tp.payment_mode_id = m.payment_mode_id " +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) " +
                 "AND v.special_clinic_form_uuid = '" + specialClinic + "' " +
@@ -236,11 +236,11 @@ public class SpecialClinicsCohortLibrary {
 
         String sqlQuery = " SELECT v.patient_id, tp.amount AS amountPaid\n" +
                 "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
-                "LEFT JOIN openmrs.cashier_bill t\n" +
+                "LEFT JOIN cashier_bill t\n" +
                 "    ON v.patient_id = t.patient_id\n" +
-                "LEFT JOIN openmrs.cashier_bill_payment tp\n" +
+                "LEFT JOIN cashier_bill_payment tp\n" +
                 "    ON t.bill_id = tp.bill_id\n" +
-                "LEFT JOIN openmrs.cashier_payment_mode m\n" +
+                "LEFT JOIN cashier_payment_mode m\n" +
                 "    ON tp.payment_mode_id = m.payment_mode_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "  AND v.special_clinic_form_uuid = '" + specialClinic + "'\n" +

@@ -40,11 +40,11 @@ public class SpecialClinicsPaymentMethodsDataEvaluator implements EncounterDataE
 
         String qry = "SELECT v.encounter_id, GROUP_CONCAT(m.name SEPARATOR ', ') AS payment_mode\n" +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
-                "LEFT JOIN openmrs.cashier_bill t \n" +
+                "LEFT JOIN cashier_bill t \n" +
                 "    ON v.patient_id = t.patient_id\n" +
-                "LEFT JOIN openmrs.cashier_bill_payment tp \n" +
+                "LEFT JOIN cashier_bill_payment tp \n" +
                 "    ON t.bill_id = tp.bill_id\n" +
-                "LEFT JOIN openmrs.cashier_payment_mode m \n" +
+                "LEFT JOIN cashier_payment_mode m \n" +
                 "    ON tp.payment_mode_id = m.payment_mode_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "AND v.special_clinic_form_uuid = '" + specialClinic + "'\n" +

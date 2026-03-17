@@ -40,9 +40,9 @@ public class FPCycleBeadsGivenEvaluator implements EncounterDataEvaluator {
                 "SELECT v.encounter_id, " +
                         "       cn.name AS circle_beads_given " +
                         "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
-                        "LEFT JOIN openmrs.concept c " +
+                        "LEFT JOIN concept c " +
                         "       ON c.concept_id = v.circle_beads_given " +
-                        "LEFT JOIN openmrs.concept_name cn " +
+                        "LEFT JOIN concept_name cn " +
                         "       ON cn.concept_id = c.concept_id " +
                         "      AND cn.locale = 'en' " +
                         "      AND cn.concept_name_type = 'FULLY_SPECIFIED' " +

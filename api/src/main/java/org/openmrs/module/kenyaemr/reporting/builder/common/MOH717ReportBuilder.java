@@ -1082,7 +1082,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1134,7 +1134,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1188,7 +1188,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1243,7 +1243,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1341,7 +1341,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
 
         sqlDataSetDefinition.setSqlQuery("select CAST(COUNT(ifnull(bed_id, 0)) AS SIGNED) as number_of_beds\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select m.bed_id, location_id, t.bed_type_id, t.name\n" +
                 "                     from bed_location_map m\n" +
                 "                              inner join bed d on m.bed_id = d.bed_id\n" +
@@ -1366,7 +1366,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
 
         sqlDataSetDefinition.setSqlQuery("select CAST(COUNT(ifnull(bed_id, 0)) AS SIGNED) as number_of_beds\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select m.bed_id, location_id, t.bed_type_id, t.name\n" +
                 "                     from bed_location_map m\n" +
                 "                              inner join bed d on m.bed_id = d.bed_id\n" +

@@ -39,13 +39,13 @@ public class SpecialClinicsAmountPaidDataEvaluator implements EncounterDataEvalu
         String specialClinic = cohortDefinition.getSpecialClinic();
         String qry = "SELECT v.encounter_id, tp.amount AS amount\n" +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
-                "LEFT JOIN openmrs.cashier_bill t \n" +
+                "LEFT JOIN cashier_bill t \n" +
                 "    ON v.patient_id = t.patient_id \n" +
                 "    AND DATE(t.date_created) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
-                "LEFT JOIN openmrs.cashier_bill_payment tp \n" +
+                "LEFT JOIN cashier_bill_payment tp \n" +
                 "    ON t.bill_id = tp.bill_id \n" +
                 "    AND DATE(tp.date_created) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
-                "LEFT JOIN openmrs.cashier_payment_mode m \n" +
+                "LEFT JOIN cashier_payment_mode m \n" +
                 "    ON tp.payment_mode_id = m.payment_mode_id \n" +
                 "    AND DATE(m.date_created) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +

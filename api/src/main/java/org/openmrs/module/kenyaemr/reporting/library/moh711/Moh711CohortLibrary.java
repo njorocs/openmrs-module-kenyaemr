@@ -1356,7 +1356,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select r.person_b as child\n" +
                 "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
-                "         inner join openmrs.relationship r\n" +
+                "         inner JOIN relationship r\n" +
                 "                    on ld.patient_id = r.person_a\n" +
                 "                        and r.relationship = 3\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +

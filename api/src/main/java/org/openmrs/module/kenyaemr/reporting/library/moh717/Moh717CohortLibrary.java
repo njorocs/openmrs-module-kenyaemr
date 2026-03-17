@@ -443,7 +443,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -459,7 +459,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -484,7 +484,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -500,7 +500,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -525,7 +525,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -541,7 +541,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,d.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id, d.discharge_status\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -557,7 +557,7 @@ public class Moh717CohortLibrary {
             sql.addParameter(new Parameter("endDate", "End Date", Date.class));
             sql.setQuery("select b.encounter_id\n" +
                     "from location_tag_map ltm\n" +
-                    "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                    "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                     "         inner join (select p.patient_id,a.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id\n" +
                     "                     from bed_patient_assignment_map p\n" +
                     "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +
@@ -576,7 +576,7 @@ public class Moh717CohortLibrary {
         sql.addParameter(new Parameter("endDate", "End Date", Date.class));
         sql.setQuery("select b.encounter_id\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select p.patient_id,a.encounter_id, p.bed_id, p.date_started, p.date_stopped, m.location_id\n" +
                 "                     from bed_patient_assignment_map p\n" +
                 "                              inner join bed_location_map m on p.bed_id = m.bed_id\n" +

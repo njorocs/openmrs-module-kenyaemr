@@ -39,7 +39,7 @@ public class DiagnosisCaseIdDataEvaluator implements VisitDataEvaluator {
 
         String qry = "select e.visit_id, GROUP_CONCAT(DISTINCT d.diagnosis_coded) as diagnosis\n" +
                 "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
-                "         inner join openmrs.encounter_diagnosis d\n" +
+                "         inner JOIN encounter_diagnosis d\n" +
                 "                    on e.encounter_id = d.encounter_id and d.dx_rank = 2 and d.voided = 0\n" +
                 "where e.visit_date between date(:startDate) and date(:endDate) GROUP BY e.visit_id;";
 

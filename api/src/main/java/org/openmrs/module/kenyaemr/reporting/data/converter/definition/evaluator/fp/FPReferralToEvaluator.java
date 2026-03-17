@@ -38,7 +38,7 @@ public class FPReferralToEvaluator implements EncounterDataEvaluator {
 
         String qry = "SELECT v.encounter_id, cn.name AS referred_to " +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
-                "JOIN openmrs.concept_name cn " +
+                "JOIN concept_name cn " +
                 "  ON v.referred_to = cn.concept_id " +
                 " AND cn.locale = 'en' " +
                 " AND cn.locale_preferred = 1 " +

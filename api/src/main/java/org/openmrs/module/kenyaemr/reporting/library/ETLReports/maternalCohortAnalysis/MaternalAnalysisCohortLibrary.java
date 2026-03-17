@@ -603,7 +603,7 @@ public class MaternalAnalysisCohortLibrary {
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth3() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "having count(le.patient_id) >1;";
@@ -625,7 +625,7 @@ public class MaternalAnalysisCohortLibrary {
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF3Months() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
                 "      and date(de.date_discontinued) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 10 month)\n" +
@@ -1404,7 +1404,7 @@ public class MaternalAnalysisCohortLibrary {
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth6() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "having count(le.patient_id) >1;";
@@ -1426,7 +1426,7 @@ public class MaternalAnalysisCohortLibrary {
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF6Months() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
                 "      and date(de.date_discontinued) between date_sub(date(:startDate) , interval 1 year) and date_sub(date(:endDate) , interval 7 month)\n" +
@@ -2206,7 +2206,7 @@ public class MaternalAnalysisCohortLibrary {
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth12() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "having count(le.patient_id) >1;";
@@ -2228,7 +2228,7 @@ public class MaternalAnalysisCohortLibrary {
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF12Months() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
                 "      and date(de.date_discontinued) between date_sub(date(:startDate) , interval 1 year) and date(:endDate)\n" +
@@ -3049,7 +3049,7 @@ public class MaternalAnalysisCohortLibrary {
      */
     public CohortDefinition vlResultsMoreThan1000WithSTFAndRepeatVlMonth24() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "having count(le.patient_id) >1;";
@@ -3071,7 +3071,7 @@ public class MaternalAnalysisCohortLibrary {
     public CohortDefinition switchedRegimenLineAfterConfirmedSTF24Months() {
         String sqlQuery = "select le.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on de.patient_id = le.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =le.order_id\n" +
+                "  inner JOIN orders o on o.order_id =le.order_id\n" +
                 "where le.lab_test = 856 and le.test_result >= 1000 and le.order_reason in(843,163523)\n" +
                 "      and date(le.date_test_requested) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +
                 "      and date(de.date_discontinued) between date_sub(date(:startDate) , interval 2 year) and date(:endDate)\n" +

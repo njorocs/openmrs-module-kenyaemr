@@ -93,7 +93,7 @@ public class Moh505CohortLibrary {
                 "                       on a.patient_id = e.patient_id and date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "             left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                       on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate) and t.temperature >= 38\n" +
-                "             join openmrs.visit v\n" +
+                "             JOIN visit v\n" +
                 "                  on a.patient_id = v.patient_id and (v.visit_type_id = 3 or v.visit_type_id = 1) or e.patient_outcome = 1654\n" +
                 "where e.patient_id is not null or t.patient_id is not null;";
         cd.setName("SARI");
@@ -118,7 +118,7 @@ public class Moh505CohortLibrary {
                 "                       on a.patient_id = e.patient_id and date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "             left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                       on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate) and t.temperature >= 38\n" +
-                "             join openmrs.visit v\n" +
+                "             JOIN visit v\n" +
                 "                  on a.patient_id = v.patient_id and (v.visit_type_id = 3 or v.visit_type_id = 1) or e.patient_outcome = 1654\n" +
                 "where (e.patient_outcome = " + patientOutcome + " and e.patient_id is not null) or t.patient_id is not null;";
         cd.setName("SARI Deaths");

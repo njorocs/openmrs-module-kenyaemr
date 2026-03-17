@@ -552,8 +552,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
                 "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
@@ -598,8 +598,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -648,8 +648,8 @@ public class ETLOtzCohortLibrary {
                 "        from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "                inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "                inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "                inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "                inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "        where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "              and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "              and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -699,8 +699,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -750,8 +750,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -801,8 +801,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -852,8 +852,8 @@ public class ETLOtzCohortLibrary {
                 "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
                 "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -898,7 +898,7 @@ public class ETLOtzCohortLibrary {
                 "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test in (1305, 856)  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -927,7 +927,7 @@ public class ETLOtzCohortLibrary {
                 "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test = 856  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -956,7 +956,7 @@ public class ETLOtzCohortLibrary {
                 "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test in (1305, 856)  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -985,7 +985,7 @@ public class ETLOtzCohortLibrary {
                 "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "    where lab_test in (1305, 856)  and visit_date between  date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "  ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                "  inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 "where vl_result.order_id is not null\n" +
                 "      and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "      and o.order_reason in(843,163523)\n" +
@@ -1013,7 +1013,7 @@ public class ETLOtzCohortLibrary {
                 "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "    where lab_test = 1305  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "  ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                "  inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 "where vl_result.order_id is not null\n" +
                 "      and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "      and o.order_reason in(843,163523)\n" +

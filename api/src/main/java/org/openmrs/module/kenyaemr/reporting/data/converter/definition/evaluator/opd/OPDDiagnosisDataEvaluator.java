@@ -44,7 +44,7 @@ public class OPDDiagnosisDataEvaluator implements EncounterDataEvaluator {
 			"            inner join (select\n" +
 			"                            cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
 			"                        FROM  encounter_diagnosis ed\n" +
-			"                                 inner join openmrs.concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
+			"                                 inner JOIN concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
 			"                                     and date(ed.date_created) between date(:startDate) and date(:endDate)\n" +
 			") con on v.encounter_id = con.encounter_id and date(v.visit_Date) between date(:startDate) and date(:endDate)\n" +
 			"UNION\n" +
@@ -55,7 +55,7 @@ public class OPDDiagnosisDataEvaluator implements EncounterDataEvaluator {
 			"         inner join (select\n" +
 			"                         cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
 			"                     FROM  encounter_diagnosis ed\n" +
-			"                              inner join openmrs.concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
+			"                              inner JOIN concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
 			"                         and date(ed.date_created) between date(:startDate) and date(:endDate)\n" +
 			") con on sc.encounter_id = con.encounter_id and date(sc.visit_Date) between date(:startDate) and date(:endDate);";
 

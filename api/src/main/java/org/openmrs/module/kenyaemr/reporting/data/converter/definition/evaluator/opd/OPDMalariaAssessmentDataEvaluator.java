@@ -46,7 +46,7 @@ public class OPDMalariaAssessmentDataEvaluator implements EncounterDataEvaluator
 			"               if(x.lab_test in (2017917) and x.test_result = 703, 5,''))))) as malaria\n" +
 			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x ON v.patient_id = x.patient_id AND date(x.visit_date) between date(:startDate) and date(:endDate)\n" +
-			"         LEFT JOIN openmrs.encounter_diagnosis ed ON v.patient_id = ed.patient_id and date(ed.date_created)between date(:startDate) and date(:endDate)\n" +
+			"         LEFT JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id and date(ed.date_created)between date(:startDate) and date(:endDate)\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

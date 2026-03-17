@@ -39,7 +39,7 @@ public class PresentingComplaintsDataEvaluator implements PersonDataEvaluator {
         String qry = "select a.patient_id,a.complaint\n" +
 			" from (select patient_id, cn.name as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
 			"       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
-			"                inner join openmrs.concept_name cn on cn.concept_id = c.complaint and cn.locale = 'en'\n" +
+			"                inner JOIN concept_name cn on cn.concept_id = c.complaint and cn.locale = 'en'\n" +
 			"       where c.complaint = 143264\n" +
 			"         and c.complaint_duration < 10\n" +
 			"         and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +

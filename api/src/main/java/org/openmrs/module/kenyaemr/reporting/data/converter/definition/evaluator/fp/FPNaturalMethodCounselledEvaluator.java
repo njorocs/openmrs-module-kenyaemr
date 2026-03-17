@@ -40,7 +40,7 @@ public class FPNaturalMethodCounselledEvaluator implements EncounterDataEvaluato
         String qry =
                 "SELECT v.encounter_id, cn.name AS counselled_on_natural_fp " +
                         "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
-                        "LEFT JOIN openmrs.concept_name cn " +
+                        "LEFT JOIN concept_name cn " +
                         "       ON v.counselled_on_natural_fp = cn.concept_id " +
                         "       AND cn.locale = 'en' " +
                         "       AND cn.voided = 0 " +

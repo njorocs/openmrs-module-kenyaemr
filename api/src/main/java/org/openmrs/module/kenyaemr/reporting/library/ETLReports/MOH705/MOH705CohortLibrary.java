@@ -293,7 +293,7 @@ public class MOH705CohortLibrary {
 	public CohortDefinition suspectedMalariaByDiagnosis() {
 		String sqlQuery = "select v.patient_id\n" +
 			"         from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
-			"         inner join openmrs.encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
+			"         inner JOIN encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
 			"where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsDiagnosisForSuspectedMalaria");

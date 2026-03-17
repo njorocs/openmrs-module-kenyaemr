@@ -126,8 +126,8 @@ public class SpecialClinicsAllergyAndIntoleranceDataEvaluator implements Encount
                 "       sc.patient_id,\n" +
                 "       GROUP_CONCAT(DISTINCT n.name SEPARATOR ',') AS allergy_intolerance\n" +
                 "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc\n" +
-                "INNER JOIN openmrs.allergy a on sc.patient_id = a.patient_id\n" +
-                "         INNER JOIN openmrs.concept_name n\n" +
+                "INNER JOIN allergy a on sc.patient_id = a.patient_id\n" +
+                "         INNER JOIN concept_name n\n" +
                 "                    ON a.coded_allergen = n.concept_id\n" +
                 "                        AND n.locale = 'en'\n" +
                 "WHERE n.concept_name_type = 'FULLY_SPECIFIED'\n" +

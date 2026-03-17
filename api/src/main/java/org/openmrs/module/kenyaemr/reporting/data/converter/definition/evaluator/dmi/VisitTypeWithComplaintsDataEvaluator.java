@@ -42,7 +42,7 @@ public class VisitTypeWithComplaintsDataEvaluator implements PersonDataEvaluator
                 "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
-                "         join openmrs.visit v\n" +
+                "         JOIN visit v\n" +
                 "              on a.patient_id = v.patient_id and date(a.visit_date) = date(v.date_started)\n" +
                 "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "              on a.patient_id = t.patient_id and date(t.visit_date) = date(v.date_started)\n" +

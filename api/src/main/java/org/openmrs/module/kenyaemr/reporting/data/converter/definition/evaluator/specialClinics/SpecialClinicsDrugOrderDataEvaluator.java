@@ -40,9 +40,9 @@ public class SpecialClinicsDrugOrderDataEvaluator implements EncounterDataEvalua
 
         String qry = "SELECT v.encounter_id, cn.name AS drug_name\n" +
                 "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
-                "INNER JOIN openmrs.orders o ON v.patient_id = o.patient_id\n" +
+                "INNER JOIN orders o ON v.patient_id = o.patient_id\n" +
                 "   AND DATE(o.date_created)  BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
-                "   INNER JOIN openmrs.concept_name cn ON o.concept_id = cn.concept_id\n" +
+                "   INNER JOIN concept_name cn ON o.concept_id = cn.concept_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "AND v.special_clinic_form_uuid =  '" + specialClinic + "'\n" +
                 "GROUP BY v.encounter_id;";

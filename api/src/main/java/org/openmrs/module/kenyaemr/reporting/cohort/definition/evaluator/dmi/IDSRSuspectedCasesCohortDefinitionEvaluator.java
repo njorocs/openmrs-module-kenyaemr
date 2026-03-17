@@ -66,7 +66,7 @@ public class IDSRSuspectedCasesCohortDefinitionEvaluator implements CohortDefini
 				"          c.complaint_duration\n" +
 				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
-				"               inner join openmrs.visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
+				"               inner JOIN visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
 				"               left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 				"                         on c.patient_id = t.patient_id and\n" +
 				"                            date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
