@@ -83,7 +83,7 @@
 				<ref bean="kenyaemr.app.chart" />
 			</set>
 		</property>
-		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.ncd.EligibleForTelehealthConsultationCalculation" />
+		<property name="showIfCalculation" value="org.openmrs.module.kenyaemr.calculation.library.ncd.EligibleForTeleHealthConsultationFormCalculation" />
 		<property name="icon" value="kenyaui:forms/generic.png" />
 		<property name="htmlform" value="kenyaemr:ncd/formDoesNotExistOn2x.html" />
 	</bean>

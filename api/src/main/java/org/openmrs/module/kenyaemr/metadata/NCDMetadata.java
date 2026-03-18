@@ -40,7 +40,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 		public static final String NCD_INITIAL_FORM = "c4994dd7-f2b6-4c28-bdc7-8b1d9d2a6a97";
 		public static final String NCD_FOLLOWUP_FORM = "3e1057da-f130-44d9-b2bb-53e039b953c6";
 		public static final String NCD_DISCONTINUATION_FORM = "63182d28-a23f-4d14-b48e-38077bbd8ed2";
-		public static final String TELEHEATH_CONSULTATION_FORM = "32875d86-5f93-40ac-96f0-1dd0db6f8dc3";
+		public static final String TELEHEALTH_CONSULTATION_FORM = "32875d86-5f93-40ac-96f0-1dd0db6f8dc3";
 	}
 
 
