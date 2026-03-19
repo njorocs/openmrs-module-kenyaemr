@@ -35,6 +35,7 @@ public class FhirOrganizationAdapter implements FacilityStatusAdapter {
 
             statusMap.put("shaFacilityId", resource.optString("id", "--"));
 
+            // Extensions
             JSONArray extensions = resource.optJSONArray("extension");
             if (extensions != null) {
                 for (int i = 0; i < extensions.length(); i++) {
@@ -59,6 +60,8 @@ public class FhirOrganizationAdapter implements FacilityStatusAdapter {
                     }
                 }
             }
+
+            // Identifiers
             JSONArray identifiers = resource.optJSONArray("identifier");
             if (identifiers != null) {
                 for (int i = 0; i < identifiers.length(); i++) {

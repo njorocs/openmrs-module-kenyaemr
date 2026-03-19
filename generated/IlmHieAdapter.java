@@ -30,6 +30,7 @@ public class IlmHieAdapter implements FacilityStatusAdapter {
 
             JSONObject f = array.getJSONObject(0);
 
+            // Core identity
             statusMap.put("registrationNumber", f.optString("registrationNumber", "--"));
             statusMap.put("officialName", f.optString("officialName", "--"));
             statusMap.put("facilityType", f.optString("facilityType", "--"));
@@ -38,14 +39,20 @@ public class IlmHieAdapter implements FacilityStatusAdapter {
             statusMap.put("isHub", String.valueOf(f.optBoolean("isHub", false)));
             statusMap.put("fidCode", f.optString("fidCode", "--"));
             statusMap.put("facilityRegistryCode", f.optString("frCode", "--"));
+
+            // License
             statusMap.put("facilityLicenseStatus", f.optString("facilityLicenseStatus", "--"));
             statusMap.put("shaFacilityLicenseNumber", f.optString("licenseNumber", "--"));
             statusMap.put("facilityLicenseStartDate", f.optString("facilityLicenseStartDate", "--"));
             statusMap.put("shaFacilityExpiryDate", f.optString("facilityLicenseEndDate", "--"));
             statusMap.put("regulatoryBody", f.optString("regulatoryBody", "--").toUpperCase());
+
+            // SHA contract
             statusMap.put("shaContractStatus", f.optString("shaContractStatus", "--"));
             statusMap.put("shaContractStartDate", f.optString("shaConstractStartDate", "--"));
             statusMap.put("shaContractEndDate", f.optString("shaConstractEndDate", "--"));
+
+            // Operational status — SHA preferred, fall back to regulatory
             JSONObject shaOps = f.optJSONObject("SHAOperationStatus");
             JSONObject regOps = f.optJSONObject("regulatoryOperationalStatus");
             String ops = "--";
@@ -55,11 +62,17 @@ public class IlmHieAdapter implements FacilityStatusAdapter {
                 ops = regOps.optString("operationalStatus", "--");
             }
             statusMap.put("operationalStatus", ops);
+
+            // Contact
             statusMap.put("facilityPhoneNumber", f.optString("facilityPhoneNumber", "--"));
             statusMap.put("facilityEmail", f.optString("facilityEmail", "--"));
+
+            // Administrator
             statusMap.put("facilityAdministratorName", f.optString("facilityAdministratorName", "--"));
             statusMap.put("facilityAdministratorPhone", f.optString("facilityAdministratorPhone", "--"));
             statusMap.put("facilityAdministratorEmail", f.optString("facilityAdministratorEmail", "--"));
+
+            // Address
             JSONObject address = f.optJSONObject("address");
             if (address != null) {
                 statusMap.put("county", address.optString("county", "--"));
@@ -70,6 +83,8 @@ public class IlmHieAdapter implements FacilityStatusAdapter {
                 statusMap.put("latitude", address.optString("latitude", "--"));
                 statusMap.put("longitude", address.optString("longitude", "--"));
             }
+
+            // Bed occupancy
             JSONObject beds = f.optJSONObject("bedOccupancy");
             if (beds != null) {
                 statusMap.put("totalBeds", String.valueOf(beds.optInt("totalBeds", 0)));
@@ -78,9 +93,15 @@ public class IlmHieAdapter implements FacilityStatusAdapter {
                 statusMap.put("hduBeds", String.valueOf(beds.optInt("hduBeds", 0)));
                 statusMap.put("dialysisBeds", String.valueOf(beds.optInt("dialysisBeds", 0)));
             }
+
+            // SHA contracted services — serialize as JSON string for frontend
             JSONArray services = f.optJSONArray("shaContractedServices");
             statusMap.put("shaContractedServices", services != null ? services.toString() : "[]");
+
+            // mflCode not in HIE response
             statusMap.put("mflCode", "--");
+
+            // Legacy field aliases expected by existing frontend
             statusMap.put("approved", f.optString("facilityLicenseStatus", "--"));
             statusMap.put("shaFacilityId", f.optString("fidCode", "--"));
 
