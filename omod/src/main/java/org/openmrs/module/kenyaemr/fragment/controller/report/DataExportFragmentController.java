@@ -23,6 +23,7 @@ import org.openmrs.module.facilityreporting.api.restUtil.FacilityReporting;
 import org.openmrs.module.facilityreporting.api.restUtil.ReportDatasetValueEntryMapper;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
+import org.openmrs.module.kenyaemr.reporting.air.AdxConfiguration;
 import org.openmrs.module.kenyaemr.reporting.air.AdxMetadata;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
@@ -64,10 +65,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 /**
  * Page for viewing ADX message generated for DHIS2
  */
-public class AdxViewFragmentController {
+public class DataExportFragmentController {
 
     private AdministrationService administrationService;
     private FacilityreportingService facilityreportingService;
@@ -79,8 +82,10 @@ public class AdxViewFragmentController {
     public String SERVER_ADDRESS = "https://openhimapi.kenyahmis.org/rest/api/IL/MOH_731/test";
     public String KPIF_SERVER_ADDRESS = "https://il.kenyahmis.org:9721/api/3pm/";
     DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    DateFormat periodFormat = new SimpleDateFormat("yyyyMM");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "Revised MOH 731";
+    private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
                     @RequestParam("returnUrl") String returnUrl,
@@ -104,15 +109,39 @@ public class AdxViewFragmentController {
         model.addAttribute("endDate", isoDateFormat.format(reportEndDate));
         model.addAttribute("startDate", isoDateFormat.format(reportStartDate));
         model.addAttribute("reportRequest", reportRequest);
-        model.addAttribute("adx", render(reportData));
+
+        String outputFormat = detectOutputFormat(reportData);
+        String payload = generatePayload(reportData, outputFormat);
+
+        model.addAttribute("adx", payload);
         model.addAttribute("reportName", definition.getName());
         model.addAttribute("returnUrl", returnUrl);
+        model.addAttribute("outputFormat", outputFormat);
 
-        // Determine server address based on report type
         String defaultServerAddress = determineServerAddress(definition.getName(), serverAddress);
         model.addAttribute("serverAddress", defaultServerAddress);
         model.addAttribute("serverAddressLength", defaultServerAddress.length());
-        model.addAttribute("serverAddressLength", SERVER_ADDRESS.length());
+    }
+
+    private String detectOutputFormat(ReportData reportData) {
+        try {
+            ConfigurableAdxGenerationStrategy strategy = new ConfigurableAdxGenerationStrategy();
+            AdxConfiguration config = strategy.getConfigurationForReport(reportData.getDefinition().getName());
+            if (config != null && StringUtils.isNotBlank(config.getOutputFormat())) {
+                return config.getOutputFormat();
+            }
+        } catch (Exception e) {
+            log.warn("Could not detect output format for report: " + reportData.getDefinition().getName(), e);
+        }
+        return "xml";
+    }
+
+    private String generatePayload(ReportData reportData, String outputFormat) throws IOException {
+        if ("json".equalsIgnoreCase(outputFormat)) {
+            return generateJsonPayload(reportData);
+        } else {
+            return generateAdxContent(reportData);
+        }
     }
 
     private String getDatasetNameForKey(ObjectNode mappingDetails, String dsKey, String reportName) {
@@ -195,6 +224,37 @@ public class AdxViewFragmentController {
     public String render(ReportData reportData) throws IOException {
         return generateAdxContent(reportData);
     }
+    public SimpleObject buildDocument(@RequestParam("request") ReportRequest reportRequest,
+                                      @SpringBean ReportService reportService) {
+        try {
+            if (reportRequest == null || reportRequest.getId() == null) {
+                return SimpleObject.create(
+                        "statusCode", String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                        "statusMsg", "Missing or invalid report request."
+                );
+            }
+
+            ReportData reportData = reportService.loadReportData(reportRequest);
+            String outputFormat = detectOutputFormat(reportData);
+
+            log.info("Building document for request " + reportRequest.getId() + " with format: " + outputFormat);
+
+            if ("json".equalsIgnoreCase(outputFormat)) {
+                return buildJsonDocument(reportRequest, reportService);
+            } else {
+                return buildXmlDocument(reportRequest, reportService);
+            }
+        }
+        catch (Exception e) {
+            log.error("Error building document", e);
+            String message = e.getMessage() != null ? e.getMessage() : "Unexpected error";
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                    "statusMsg", "Failed to build document: " + message
+            );
+        }
+    }
+
     public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
                                          @SpringBean ReportService reportService) {
         try {
@@ -245,13 +305,254 @@ public class AdxViewFragmentController {
         }
     }
 
-    private String determineServerAddress(String reportName, String configuredServerAddress) {
-        if (KPIF_MONTHLY_REPORT.equals(reportName)) {
-            return KPIF_SERVER_ADDRESS;
-        } else {
-            // For MOH 731, MOH 743, and other reports, use configured or default server
-            return configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
+    public String generateJsonPayload(ReportData reportData) throws IOException {
+        Date reportDate = (Date) reportData.getContext().getParameterValue("startDate");
+        if (reportDate == null) {
+            reportDate = new Date();
         }
+
+        String mflCode = getMflCode();
+
+        ConfigurableAdxGenerationStrategy strategy = new ConfigurableAdxGenerationStrategy();
+        AdxConfiguration config = null;
+        try {
+            config = strategy.getConfigurationForReport(reportData.getDefinition().getName());
+        } catch (Exception e) {
+            log.warn("Could not load configuration for report: " + reportData.getDefinition().getName(), e);
+        }
+
+        String datasetUid = "";
+        List<String> dataValueLines = new ArrayList<String>();
+
+        for (String dsKey : reportData.getDataSets().keySet()) {
+            DataSet dataset = reportData.getDataSets().get(dsKey);
+            List<DataSetColumn> columns = dataset.getMetaData().getColumns();
+            String dsDefinitionName = dataset.getDefinition().getName();
+
+            if (config != null) {
+                AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
+                if (datasetMapping != null) {
+                    datasetUid = datasetMapping.getDhisName() != null ? datasetMapping.getDhisName() : "";
+                }
+            }
+
+            for (DataSetRow row : dataset) {
+                for (DataSetColumn column : columns) {
+                    String columnName = column.getName();
+                    Object value = row.getColumnValue(column);
+
+                    if (value == null || "0".equals(value.toString()) || StringUtils.isBlank(value.toString())) {
+                        continue;
+                    }
+
+                    String mappingKey = columnName;
+                    if ("MOH-743 Report".equals(reportData.getDefinition().getName())) {
+                        String compositeKey = dsDefinitionName + "." + columnName;
+                        if (config != null && findDatasetMapping(config, dsKey) != null
+                                && findDatasetMapping(config, dsKey).getFieldMappings() != null
+                                && findDatasetMapping(config, dsKey).getFieldMappings().containsKey(compositeKey)) {
+                            mappingKey = compositeKey;
+                        }
+                    }
+
+                    String dataElementValue = mappingKey;
+                    String categoryOptionCombo = null;
+
+                    if (config != null) {
+                        AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
+                        if (datasetMapping != null && datasetMapping.getFieldMappings() != null
+                                && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
+                            String mappedValue = datasetMapping.getFieldMappings().get(mappingKey);
+                            if (mappedValue.contains("|")) {
+                                String[] parts = mappedValue.split("\\|");
+                                dataElementValue = parts[0];
+                                categoryOptionCombo = parts[1];
+                            } else {
+                                dataElementValue = mappedValue;
+                            }
+                        } else if (datasetMapping != null && datasetMapping.getFieldMappings() != null
+                                && !datasetMapping.getFieldMappings().containsKey(mappingKey)
+                                && !"Revised MOH 731".equals(reportData.getDefinition().getName())) {
+                            continue;
+                        }
+                    }
+
+                    if ("date".equals(mappingKey) && !"Revised MOH 731".equals(reportData.getDefinition().getName())) {
+                        continue;
+                    }
+
+                    StringBuilder dv = new StringBuilder();
+                    dv.append("{\"dataElement\":\"").append(escapeJson(dataElementValue)).append("\",");
+                    if (categoryOptionCombo != null && !categoryOptionCombo.isEmpty()) {
+                        dv.append("\"categoryOptionCombo\":\"").append(escapeJson(categoryOptionCombo)).append("\",");
+                    }
+                    dv.append("\"value\":\"").append(escapeJson(value.toString())).append("\"}");
+                    dataValueLines.add(dv.toString());
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        sb.append("\"orgUnit\":\"").append(escapeJson(mflCode != null ? mflCode : "")).append("\",\n");
+        sb.append("\"completeDate\":\"").append(isoDateFormat.format(new Date())).append("\",\n");
+        sb.append("\"period\":\"").append(periodFormat.format(reportDate)).append("\",\n");
+        sb.append("\"dataSet\":\"").append(escapeJson(datasetUid)).append("\",\n");
+        sb.append("\"dataValues\":[\n");
+        sb.append(String.join(",\n", dataValueLines));
+        sb.append("\n]\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
+
+    private AdxConfiguration.AdxDatasetMapping findDatasetMapping(AdxConfiguration config, String datasetName) {
+        if (config == null || config.getDatasets() == null) {
+            return null;
+        }
+        
+        for (AdxConfiguration.AdxDatasetMapping mapping : config.getDatasets()) {
+            if (mapping.getName() != null && mapping.getName().equals(datasetName)) {
+                return mapping;
+            }
+        }
+        return null;
+    }
+
+    public SimpleObject buildJsonDocument(@RequestParam("request") ReportRequest reportRequest,
+                                          @SpringBean ReportService reportService) {
+        try {
+            if (reportRequest == null || reportRequest.getId() == null) {
+                return SimpleObject.create(
+                        "statusCode", String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                        "statusMsg", "Missing or invalid report request."
+                );
+            }
+
+            log.info("Building JSON document for request " + reportRequest.getId());
+
+            ReportData reportData = reportService.loadReportData(reportRequest);
+            String jsonContent = generateJsonPayload(reportData);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            out.write(jsonContent.getBytes("UTF-8"));
+
+            administrationService = Context.getAdministrationService();
+            String clientId = administrationService.getGlobalProperty("dhis.username");
+            String clientSecret = administrationService.getGlobalProperty("dhis.password");
+
+            if (StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)) {
+                return SimpleObject.create(
+                        "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                        "statusMsg", "Missing authentication credentials. Please configure dhis.username and dhis.password global properties."
+                );
+            }
+
+            String auth = clientId + ":" + clientSecret;
+            String authentication = Base64.getEncoder().encodeToString(auth.getBytes("UTF-8"));
+            String serverAddress = getCompleteServerAddress(reportData);
+
+            log.info("Posting JSON document for request " + reportRequest.getId() + " to " + serverAddress);
+            log.debug("JSON payload size: " + out.size() + " bytes");
+
+            return postJsonToKhis(out, serverAddress, authentication);
+        }
+        catch (Exception e) {
+            log.error("Error building/sending JSON document", e);
+
+            String message = e.getMessage() != null ? e.getMessage() : "Unexpected error";
+
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                    "statusMsg", "Failed to build/send JSON document: " + message
+            );
+        }
+    }
+
+    private SimpleObject postJsonToKhis(ByteArrayOutputStream outStream, String serverAddress, String authentication) {
+        HttpURLConnection con = null;
+        try {
+            log.info("Posting JSON to KHIS: " + serverAddress + " (" + outStream.size() + " bytes)");
+
+            URL url = new URL(serverAddress);
+            con = (HttpURLConnection) url.openConnection();
+
+            con.setConnectTimeout(30000);
+            con.setReadTimeout(60000);
+
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Authorization", "Basic " + authentication);
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("User-Agent", "KenyaEMR-KHIS-Client/1.0");
+            con.setDoOutput(true);
+
+            try (DataOutputStream out = new DataOutputStream(con.getOutputStream())) {
+                out.write(outStream.toByteArray());
+                out.flush();
+            }
+
+            int responseCode = con.getResponseCode();
+            String responseMessage = con.getResponseMessage();
+
+            log.info("HTTP Response: " + responseCode + " - " + responseMessage);
+
+            String httpResponse;
+            if (responseCode >= 200 && responseCode < 300) {
+                httpResponse = readResponseBody(con.getInputStream(), responseCode, responseMessage);
+                log.info("Success response: " + httpResponse);
+            } else {
+                log.warn("HTTP Error " + responseCode + " - " + responseMessage);
+
+                InputStream errorStream = con.getErrorStream();
+                if (errorStream != null) {
+                    httpResponse = readResponseBody(errorStream, responseCode, responseMessage);
+                    log.warn("Error response body: " + httpResponse);
+                } else {
+                    httpResponse = "HTTP " + responseCode + " - " + responseMessage;
+                }
+            }
+
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(responseCode),
+                    "statusMsg", httpResponse
+            );
+
+        } catch (UnknownHostException | SocketTimeoutException e) {
+            log.error("Network error posting to KHIS server: " + serverAddress, e);
+
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                    "statusMsg", "Failed to reach the KHIS server: " + e.getMessage()
+            );
+        } catch (Exception e) {
+            log.error("Unexpected error posting to KHIS server: " + serverAddress, e);
+
+            return SimpleObject.create(
+                    "statusCode", String.valueOf(HttpStatus.BAD_GATEWAY.value()),
+                    "statusMsg", "Failed to post to KHIS server: " + serverAddress + ". Error: " + e.getMessage()
+            );
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
+    }
+
+    public String renderJson(ReportData reportData) throws IOException {
+        return generateJsonPayload(reportData);
+    }
+
+    private String determineServerAddress(String reportName, String configuredServerAddress) {
+        return configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
     }
     /**
      * Legacy server address determination for fallback
@@ -259,18 +560,11 @@ public class AdxViewFragmentController {
     private String determineServerAddressLegacy(String reportName) {
         administrationService = Context.getAdministrationService();
         String configuredServerAddress = administrationService.getGlobalProperty("ilServer.address");
-
-        if (KPIF_MONTHLY_REPORT.equals(reportName)) {
-            return KPIF_SERVER_ADDRESS;
-        } else {
-            // For DHIS2 reports, use configured or default server with basic API path
-            String baseUrl = configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
-            if (!baseUrl.endsWith("/")) {
-                baseUrl += "/";
-            }
-            // Use basic API endpoint without category option combo scheme for fallback
-            return baseUrl + "api/dataValueSets?dataElementIdScheme=code&orgUnitIdScheme=code&dataSetIdScheme=uid";
+        String baseUrl = configuredServerAddress != null ? configuredServerAddress : SERVER_ADDRESS;
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
         }
+        return baseUrl + "api/dataValueSets?dataElementIdScheme=code&orgUnitIdScheme=code&dataSetIdScheme=uid";
     }
 
     private SimpleObject postAdxToIL(ByteArrayOutputStream outStream, String serverAddress, String authentication) {
@@ -429,8 +723,9 @@ public class AdxViewFragmentController {
     String getMflCode() {
         String mfl = "";
         Integer locationId;
-        String locationProperty = administrationService.getGlobalProperty("kenyaemr.defaultLocation");
-        String GP_MFL_CODE = Context.getAdministrationService().getGlobalProperty("facility.mflcode");
+        AdministrationService adminService = Context.getAdministrationService();
+        String locationProperty = adminService.getGlobalProperty("kenyaemr.defaultLocation");
+        String GP_MFL_CODE = adminService.getGlobalProperty("facility.mflcode");
         if (GP_MFL_CODE != null && !GP_MFL_CODE.isEmpty()) {
             mfl = GP_MFL_CODE;
         } else if (locationProperty != null && !locationProperty.isEmpty()) {

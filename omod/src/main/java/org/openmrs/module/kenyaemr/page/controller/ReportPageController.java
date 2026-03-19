@@ -19,6 +19,7 @@ import org.openmrs.module.kenyacore.report.IndicatorReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
 import org.openmrs.module.kenyaemr.metadata.SecurityMetadata;
+import org.openmrs.module.kenyaemr.reporting.air.AdxConfiguration;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
@@ -87,6 +88,15 @@ public class ReportPageController {
 		reportDescriptor.setName(definition.getName());
 
 		boolean adxConfigured = adxStrategy.canHandle(reportDescriptor);
+		String outputFormat = "adx";
+		String formatLabel = "Other Format";
+		if (adxConfigured) {
+			AdxConfiguration config = adxStrategy.getConfigurationForReport(definition.getName());
+			if (config != null && "json".equalsIgnoreCase(config.getOutputFormat())) {
+				outputFormat = "json";
+				formatLabel = "JSON";
+			}
+		}
 
 
 		model.addAttribute("report", report);
@@ -94,6 +104,8 @@ public class ReportPageController {
 		model.addAttribute("isIndicator", isIndicator);
 		model.addAttribute("adxConfigured", adxConfigured);
 		model.addAttribute("excelRenderable", excelRenderable);
+		model.addAttribute("outputFormat", outputFormat);
+		model.addAttribute("formatLabel", formatLabel);
 		model.addAttribute("returnUrl", returnUrl);
 		model.addAttribute("period", definition.getName().replaceAll("[^0-9]", ""));
 

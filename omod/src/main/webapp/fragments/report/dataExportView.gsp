@@ -13,13 +13,13 @@ textarea {
 	.successText {
 		color: dodgerblue;
 		font-weight: bold;
-		font-size: 18px;
+		font-size: 14px;
 		font-family: Monaco,Andale Mono,Courier New,monospace;
 	}
 
 	.errorText {
 		color: red;
-		font-size: 18px;
+		font-size: 14px;
 		font-weight: bold;
 		font-family: Monaco,Andale Mono,Courier New,monospace;
 	}
@@ -32,7 +32,7 @@ textarea {
 </div>
 <div class="ke-page-content">
 
-	<h2>ADX Message for ${ reportName }</h2>
+	<h2>${ outputFormat == 'json' ? 'JSON' : 'ADX' } Message for ${ reportName }</h2>
 	<fieldset>
 		<legend>Reporting Date</legend>
 		<br/>
@@ -58,7 +58,7 @@ textarea {
 	<p></p>
 
 	<div id="adxMsg">
-		<textarea>${ adx }</textarea>
+		<textarea ${ outputFormat == 'json' ? 'style="background: white; color: black;"' : '' }>${ adx }</textarea>
 	</div>
 	<br/>
 
@@ -140,7 +140,7 @@ textarea {
 
 			jq("#post").prop("disabled", true);
 			jq.ajax({
-				url: '${ ui.actionLink("buildXmlDocument") }',
+				url: '${ ui.actionLink("buildDocument") }',
 				type: 'POST',
 				dataType: 'json',
 				data: {

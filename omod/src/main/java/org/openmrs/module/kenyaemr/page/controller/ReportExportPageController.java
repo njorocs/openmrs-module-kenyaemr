@@ -20,6 +20,7 @@ import org.openmrs.module.kenyacore.report.ReportManager;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemr.reporting.renderer.AdxReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.renderer.MergedCsvReportRenderer;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableJsonReportRenderer;
 import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.SharedPage;
@@ -58,6 +59,7 @@ public class ReportExportPageController {
 	private static final String EXPORT_TYPE_EXCEL = "excel";
 	private static final String EXPORT_TYPE_CSV = "csv";
 	private static final String EXPORT_TYPE_ADX = "adx";
+	private static final String EXPORT_TYPE_JSON = "json";
 
 	/**
 	 * Exports report data as the given type
@@ -85,6 +87,9 @@ public class ReportExportPageController {
 		}
 		else if (EXPORT_TYPE_ADX.equals(type)) {
 			return renderAsAdx(report, reportData);
+		}
+		else if (EXPORT_TYPE_JSON.equals(type)) {
+			return renderAsJson(report, reportData);
 		}
 		else {
 			throw new RuntimeException("Unrecognised export type: " + type);
@@ -238,6 +243,15 @@ public class ReportExportPageController {
 		renderer.render(data, null, out);
 
 		return new FileDownload(getDownloadFilename(report.getTarget(), data.getContext(), "xml"), ContentType.XML.getContentType(), out.toByteArray());
+	}
+
+	protected FileDownload renderAsJson(ReportDescriptor report, ReportData data) throws IOException {
+		ReportRenderer renderer = new ConfigurableJsonReportRenderer();
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		renderer.render(data, null, out);
+
+		return new FileDownload(getDownloadFilename(report.getTarget(), data.getContext(), "json"), "application/json", out.toByteArray());
 	}
 
 	/**
