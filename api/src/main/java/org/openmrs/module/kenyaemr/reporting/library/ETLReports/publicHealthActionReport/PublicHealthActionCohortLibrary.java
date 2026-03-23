@@ -43,7 +43,7 @@ public class PublicHealthActionCohortLibrary {
                 "             if(mid(max(concat(b.visit_date, b.lab_test)), 11) = 856, mid(max(concat(b.visit_date, b.test_result)), 11),\n" +
                 "                if(\n" +
                 "                                mid(max(concat(b.visit_date, b.lab_test)), 11) = 1305 and\n" +
-                "                                mid(max(concat(visit_date, test_result)), 11) = 1302, 'LDL', '')) as vl_result,\n" +
+                "                                mid(max(concat(visit_date, test_result)), 11) in (1306,1302), 'LDL', '')) as vl_result,\n" +
                 "             mid(max(concat(b.visit_date, b.urgency)), 11)                                        as urgency\n" +
                 "      from (select x.patient_id  as patient_id,\n" +
                 "                   x.visit_date  as visit_date,\n" +
@@ -213,7 +213,7 @@ public class PublicHealthActionCohortLibrary {
                 "             mid(max(concat(b.visit_date, b.lab_test)), 11)                          as lab_test,\n" +
                 "             if(mid(max(concat(b.visit_date, b.lab_test)), 11) = 856, mid(max(concat(b.visit_date, b.test_result)), 11),\n" +
                 "                if(mid(max(concat(b.visit_date, b.lab_test)), 11) = 1305 and\n" +
-                "                   mid(max(concat(visit_date, test_result)), 11) = 1302, \"LDL\", \"\")) as vl_result,\n" +
+                "                   mid(max(concat(visit_date, test_result)), 11) in (1306,1302), \"LDL\", \"\")) as vl_result,\n" +
                 "             mid(max(concat(b.visit_date, b.urgency)), 11)                           as urgency\n" +
                 "      from (select x.patient_id  as patient_id,\n" +
                 "                   x.visit_date  as visit_date,\n" +
@@ -862,25 +862,26 @@ public class PublicHealthActionCohortLibrary {
     public CohortDefinition unsuppressedWithoutEACs() {
         String sqlQuery = "SELECT vl.patient_id as vl_unsuppressed_without_eac_numerator\n" +
                 "FROM (\n" +
+                "         -- Get latest VL results ≥ 200 within the period\n" +
                 "         SELECT x.patient_id,\n" +
-                "                COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) as vl_effective_date,\n" +
-                "                COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
+                "                x.date_test_result_received,\n" +
+                "                vl_result,\n" +
+                "                x.previous_date_test_result_received,\n" +
+                "                x.previous_date_test_requested,\n" +
+                "                x.previous_test_result,\n" +
+                "                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+                "                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
                 "         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
                 "         WHERE x.lab_test = 856\n" +
                 "           AND x.order_reason NOT IN (2001236, 162080)\n" +
-                "           AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-                "           AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date)\n" +
-                "             BETWEEN DATE_SUB(DATE_SUB(date(:endDate), INTERVAL 14 DAY), INTERVAL DATEDIFF(date(:endDate),date(:startDate)) DAY)\n" +
-                "             AND DATE_SUB(date(:endDate), INTERVAL 14 DAY)\n" +
-                "     ) vl\n" +
-                "WHERE NOT EXISTS (\n" +
-                "    -- Exclude patients who received EAC after high VL\n" +
-                "    SELECT 1\n" +
-                "    FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
-                "    WHERE e.patient_id = vl.patient_id\n" +
-                "      AND e.visit_date > vl.vl_effective_date\n" +
-                "      AND e.visit_date <= DATE(:endDate)\n" +
-                ");";
+                "           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+                "           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+                "             BETWEEN DATE(:startDate) AND DATE(:endDate)) vl\n" +
+                "WHERE NOT EXISTS ( SELECT 1\n" +
+                "                   FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
+                "                   WHERE e.patient_id = vl.patient_id\n" +
+                "                     AND e.visit_date > vl.vl_effective_result_date\n" +
+                "                     AND e.visit_date <= DATE(:endDate));";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("allSuppressedWithoutEACs");
         cd.setQuery(sqlQuery);
@@ -957,7 +958,7 @@ public class PublicHealthActionCohortLibrary {
                 "                                        3\n" +
                 "                                           )\n" +
                 "                                           OR\n" +
-                "                                       (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+                "                                       (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
                 "                                         t.effective_vl_result < 200)\n" +
                 "                                           AND\n" +
                 "                                        TIMESTAMPDIFF(MONTH, t.effective_date_requested, t.latest_hiv_followup_visit) >=\n" +
@@ -965,7 +966,7 @@ public class PublicHealthActionCohortLibrary {
                 "                                           AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
                 "                                           )\n" +
                 "                                           OR\n" +
-                "                                       (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+                "                                       (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
                 "                                         t.effective_vl_result < 200)\n" +
                 "                                           AND\n" +
                 "                                        TIMESTAMPDIFF(MONTH, t.effective_date_requested, t.latest_hiv_followup_visit) >=\n" +
@@ -979,7 +980,7 @@ public class PublicHealthActionCohortLibrary {
                 "                                           AND (t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
                 "                                               AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
                 "                                                                 t.latest_hiv_followup_visit) >= 6)\n" +
-                "                                           AND ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+                "                                           AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
                 "                                                (t.effective_vl_result < 200))\n" +
                 "                                           )\n" +
                 "                                       ) THEN 'Invalid'\n" +

@@ -296,7 +296,7 @@ public class FacilityDashboardUtil {
 				"            where date(visit_date) <= date('" + endDate + "')\n" +
 				"              and program_name = 'HIV'\n" +
 				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"      where fup.visit_date <= date('" + endDate + "')\n" +
+				"      where fup.visit_date between date('" +startDate+ "') and date('" + endDate + "')\n" +
 				"      group by patient_id\n" +
 				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
 				"         and (\n" +
@@ -355,13 +355,13 @@ public class FacilityDashboardUtil {
 				"                             )\n" +
 				"                             OR\n" +
 				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+				"                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
 				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
 				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
 				"                             )\n" +
 				"                             OR\n" +
 				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+				"                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
 				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 12\n" +
 				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
 				"                             )\n" +
@@ -373,7 +373,7 @@ public class FacilityDashboardUtil {
 				"                                 t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
 				"                                     AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
 				"                                 )\n" +
-				"                                 AND ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                 AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                      (t.effective_vl_result < 200))\n" +
 				"                             )\n" +
 				"                         )\n" +
@@ -494,7 +494,7 @@ public class FacilityDashboardUtil {
 				"                                                             3\n" +
 				"                                                                )\n" +
 				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                                              t.effective_vl_result < 200)\n" +
 				"                                                                AND\n" +
 				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
@@ -504,7 +504,7 @@ public class FacilityDashboardUtil {
 				"                                                             TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
 				"                                                                )\n" +
 				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                                              t.effective_vl_result < 200)\n" +
 				"                                                                AND\n" +
 				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
@@ -522,7 +522,7 @@ public class FacilityDashboardUtil {
 				"                                                                    AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
 				"                                                                                      t.latest_hiv_followup_visit) >= 6)\n" +
 				"                                                                AND\n" +
-				"                                                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                                              (t.effective_vl_result < 200))\n" +
 				"                                                                )\n" +
 				"                                                            ) THEN 'Invalid'\n" +
@@ -585,18 +585,20 @@ public class FacilityDashboardUtil {
 			(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
 		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_denominator\n" +
-				"FROM (\n" +
-				"    -- Get latest VL results ≥ 200 within the period\n" +
-				"    SELECT x.patient_id, \n" +
-				"           COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) AS vl_effective_date,\n" +
-				"           COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
-				"    FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
-				"    WHERE x.lab_test = 856\n" +
-				"      AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"      AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"      AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) \n" +
-				"          BETWEEN DATE_SUB(DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY), INTERVAL DATEDIFF(date('" +endDate + "'),date('" +startDate + "')) DAY)\n" +
-				"          AND DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY)\n" +
+				"FROM (SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE('" +startDate+ "') AND DATE('" +endDate + "')\n" +
 				") vl\n" +
 				"INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -661,17 +663,20 @@ public class FacilityDashboardUtil {
 		long days = getNumberOfDays(startDate, endDate);
 		String getVirallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_without_eac_numerator\n" +
 				"FROM (\n" +
-				"    -- Same VL logic as denominator with all required fields\n" +
-				"    SELECT x.patient_id, \n" +
-				"           COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) as vl_effective_date,\n" +
-				"           COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
-				"    FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
-				"    WHERE x.lab_test = 856\n" +
-				"      AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"      AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"      AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) \n" +
-				"          BETWEEN DATE_SUB(DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY), INTERVAL DATEDIFF(date('" +endDate + "'),date('" +startDate + "')) DAY)\n" +
-				"          AND DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY)\n" +
+				"    SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE('" +startDate+ "') AND DATE('" +endDate + "')\n" +
 				") vl\n" +
 				"INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -1236,7 +1241,7 @@ public class FacilityDashboardUtil {
 				"                                     3\n" +
 				"                                        )\n" +
 				"                                        OR\n" +
-				"                                    (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                    (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                      t.effective_vl_result < 200)\n" +
 				"                                        AND\n" +
 				"                                     TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
@@ -1246,7 +1251,7 @@ public class FacilityDashboardUtil {
 				"                                     TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
 				"                                        )\n" +
 				"                                        OR\n" +
-				"                                    (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                    (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                      t.effective_vl_result < 200)\n" +
 				"                                        AND\n" +
 				"                                     TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
@@ -1264,7 +1269,7 @@ public class FacilityDashboardUtil {
 				"                                            AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
 				"                                                              t.latest_hiv_followup_visit) >= 6)\n" +
 				"                                        AND\n" +
-				"                                     ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                     ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                      (t.effective_vl_result < 200))\n" +
 				"                                        )\n" +
 				"                                    ) THEN 'Invalid'\n" +
@@ -1351,15 +1356,20 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyVirallyUnsuppressedWithoutEAC(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String virallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_without_eac_numerator, DATE(vl.vl_effective_date) as results_date\n" +
+		String virallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_without_eac_numerator, DATE(vl.vl_effective_result_date) as results_date\n" +
 				"FROM (SELECT x.patient_id,\n" +
-				"                COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) as vl_effective_date,\n" +
-				"                COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
 				"         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
 				"         WHERE x.lab_test = 856\n" +
 				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"           AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"           AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
 				"             BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
 				"             AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
 				"     ) vl\n" +
@@ -1628,13 +1638,13 @@ public class FacilityDashboardUtil {
 				"                                         )\n" +
 				"                                         OR\n" +
 				"                                     (\n" +
-				"                                         ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+				"                                         ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
 				"                                             AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 6\n" +
 				"                                             AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
 				"                                         )\n" +
 				"                                         OR\n" +
 				"                                     (\n" +
-				"                                         ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+				"                                         ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
 				"                                             AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 12\n" +
 				"                                             AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
 				"                                         )\n" +
@@ -1646,7 +1656,7 @@ public class FacilityDashboardUtil {
 				"                                             t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
 				"                                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 6\n" +
 				"                                             )\n" +
-				"                                             AND ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
+				"                                             AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
 				"                                                  (t.effective_vl_result < 200))\n" +
 				"                                         )\n" +
 				"                                     )\n" +
@@ -1693,17 +1703,20 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyVirallyUnsuppressed(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_denominator, DATE(vl_effective_date)\n" +
-				"FROM (\n" +
-				"         -- Get latest VL results ≥ 200 within the period\n" +
-				"         SELECT x.patient_id,\n" +
-				"                COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) AS vl_effective_date,\n" +
-				"                COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
+		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_denominator, DATE(vl_effective_result_date)\n" +
+				"FROM (SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
 				"         FROM kenyaemr_etl.etl_viral_load_validity_tracker x\n" +
 				"         WHERE x.lab_test = 856\n" +
 				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"           AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"           AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
 				"             BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
 				"             AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
 				"     ) vl\n" +
