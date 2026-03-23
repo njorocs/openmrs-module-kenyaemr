@@ -47,6 +47,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 /**
  * Configurable ADX generation strategy that reads configuration from global properties
  */
@@ -56,6 +59,8 @@ import java.util.List;
 
     private static final String MOH_731_REPORT_NAME = "Revised MOH 731";
     private static final String MONTHLY_REPORT_NAME = "Monthly report";
+    private static final String OUTPUT_FORMAT_XML = "xml";
+    private static final String OUTPUT_FORMAT_JSON = "json";
 
     private final DateFormat isoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
     private final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -790,7 +795,7 @@ import java.util.List;
     /**
      * Searches both DHIS2 and 3PM global properties for report configuration
      */
-    private AdxConfiguration getConfigurationForReport(String reportName) {
+    public AdxConfiguration getConfigurationForReport(String reportName) {
         try {
             // First check DHIS2 ADX mapping
             String dhisConfigJson = EmrUtils.getGlobalPropertyValue(EmrConstants.GP_DHIS2_DATASET_MAPPING);
@@ -976,5 +981,266 @@ import java.util.List;
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&apos;");
+    }
+
+    public String getOutputFormat(ReportData reportData) {
+        try {
+            String reportName = reportData.getDefinition().getName();
+            AdxConfiguration config = getConfigurationForReport(reportName);
+            if (config != null && StringUtils.isNotBlank(config.getOutputFormat())) {
+                return config.getOutputFormat();
+            }
+        } catch (Exception e) {
+            log.error("Error getting output format for report", e);
+        }
+        return OUTPUT_FORMAT_JSON;
+    }
+
+    public boolean isJsonFormat(ReportData reportData) {
+        return OUTPUT_FORMAT_JSON.equalsIgnoreCase(getOutputFormat(reportData));
+    }
+
+    public void writeJsonDataElements(Writer writer, ReportData reportData) throws IOException {
+        try {
+            Date reportDate = (Date) reportData.getContext().getParameterValue("startDate");
+            Date endDate = (Date) reportData.getContext().getParameterValue("endDate");
+            String reportName = reportData.getDefinition().getName();
+
+            AdxMetadata metadata = getAdxMetadata(reportData);
+            AdxConfiguration config = getConfigurationForReport(reportName);
+
+            if (config == null) {
+                log.warn("No configuration found for report: " + reportName + ", using default behavior");
+            }
+
+            if (reportDate == null) {
+                reportDate = new Date();
+            }
+            if (endDate == null) {
+                endDate = new Date();
+            }
+
+            ObjectNode rootNode = objectMapper.createObjectNode();
+
+            String datasetUid = "";
+            String adxDatasetName = "";
+
+            for (String dsKey : reportData.getDataSets().keySet()) {
+                AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
+                adxDatasetName = getDatasetName(datasetMapping, dsKey, reportName);
+
+                if (StringUtils.isNotBlank(adxDatasetName)) {
+                    datasetUid = adxDatasetName;
+                    break;
+                }
+            }
+
+            rootNode.put("dataSet", datasetUid);
+            rootNode.put("completeDate", isoDateFormat.format(new Date()));
+            rootNode.put("period", new SimpleDateFormat("yyyyMM").format(reportDate));
+            rootNode.put("orgUnit", metadata.getOrgUnit());
+
+            ArrayNode dataValuesArray = objectMapper.createArrayNode();
+
+            for (String dsKey : reportData.getDataSets().keySet()) {
+                AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
+                String datasetName = getDatasetName(datasetMapping, dsKey, reportName);
+
+                if (StringUtils.isBlank(datasetName)) {
+                    continue;
+                }
+
+                writeJsonDataSet(dataValuesArray, reportData.getDataSets().get(dsKey),
+                        datasetMapping, reportData, config, datasetName);
+            }
+
+            if (config != null && reportDate != null && endDate != null) {
+                writeFacilityReportingJsonData(dataValuesArray, reportDate, endDate, metadata, config, reportName);
+            }
+
+            rootNode.put("dataValues", dataValuesArray);
+
+            writer.write(objectMapper.writeValueAsString(rootNode));
+
+        } catch (Exception e) {
+            log.error("Error writing JSON data elements for report: " +
+                    (reportData.getDefinition() != null ? reportData.getDefinition().getName() : "Unknown"), e);
+            throw new IOException("Error writing JSON data elements: " + e.getMessage(), e);
+        }
+    }
+
+    private void writeJsonDataSet(ArrayNode dataValuesArray, DataSet dataset, AdxConfiguration.AdxDatasetMapping datasetMapping,
+                                  ReportData reportData, AdxConfiguration config, String datasetName) throws IOException {
+        List<DataSetColumn> columns = dataset.getMetaData().getColumns();
+        String reportName = reportData.getDefinition().getName();
+        String dsDefinitionName = dataset.getDefinition().getName();
+
+        for (DataSetRow row : dataset) {
+            for (DataSetColumn column : columns) {
+                String columnName = column.getName();
+
+                if (datasetMapping != null && datasetMapping.getExcludeColumns().contains(columnName)) {
+                    continue;
+                }
+
+                if ("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) {
+                    if (!columnName.endsWith("-32")) {
+                        continue;
+                    }
+                }
+
+                if ("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) {
+                    if (!columnName.endsWith("-32")) {
+                        continue;
+                    }
+                }
+
+                Object value = row.getColumnValue(column);
+
+                if (value == null || "0".equals(value.toString()) || StringUtils.isBlank(value.toString())) {
+                    continue;
+                }
+
+                String mappingKey = columnName;
+                if ("MOH-743 Report".equals(reportName)) {
+                    String compositeKey = dsDefinitionName + "." + columnName;
+                    if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(compositeKey)) {
+                        mappingKey = compositeKey;
+                    }
+                }
+
+                String dataElementName = mappingKey;
+                String categoryOptionCombo = null;
+
+                if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
+                    String mappedValue = datasetMapping.getFieldMappings().get(mappingKey);
+                    if (mappedValue.contains("|")) {
+                        String[] parts = mappedValue.split("\\|");
+                        dataElementName = parts[0];
+                        categoryOptionCombo = parts[1];
+                    } else {
+                        dataElementName = mappedValue;
+                    }
+                }
+
+                if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
+                if ("date".equals(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
+                    continue;
+                }
+
+                if (("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) &&
+                        dataElementName.endsWith("-32")) {
+                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
+                }
+
+                if (("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) &&
+                        dataElementName.endsWith("-32")) {
+                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
+                }
+
+                String valueStr = value.toString();
+                if (datasetMapping != null && datasetMapping.getTransformations().containsKey(mappingKey)) {
+                    valueStr = applyTransformation(valueStr, datasetMapping.getTransformations().get(mappingKey));
+                }
+
+                String prefix = getColumnPrefix(config);
+                if (prefix != null && !prefix.isEmpty()) {
+                    dataElementName = prefix + dataElementName;
+                }
+
+                ObjectNode dataValue = objectMapper.createObjectNode();
+                dataValue.put("dataElement", dataElementName);
+                if (categoryOptionCombo != null && !categoryOptionCombo.isEmpty()) {
+                    dataValue.put("categoryOptionCombo", categoryOptionCombo);
+                }
+                dataValue.put("value", valueStr);
+                dataValuesArray.add(dataValue);
+            }
+        }
+    }
+
+    private void writeFacilityReportingJsonData(ArrayNode dataValuesArray, Date reportDate, Date endDate,
+                                               AdxMetadata metadata, AdxConfiguration config, String reportName) throws IOException {
+        Integer facilityReportId = getFacilityReportIdForReport(reportName);
+        if (facilityReportId == null) {
+            log.info("No facility reporting configured for report: " + reportName);
+            return;
+        }
+
+        try {
+            FacilityreportingService facilityreportingService = Context.getService(FacilityreportingService.class);
+            if (facilityreportingService == null) {
+                log.error("FacilityreportingService is not available");
+                return;
+            }
+
+            String startDateStr = isoDateFormat.format(reportDate);
+            String endDateStr = isoDateFormat.format(endDate);
+
+            List<ReportDatasetValueEntryMapper> facilityData = getFacilityReportData(
+                    facilityReportId, startDateStr, endDateStr);
+
+            if (facilityData == null || facilityData.isEmpty()) {
+                log.info("No facility data found for report: " + reportName + " between " +
+                        startDateStr + " and " + endDateStr);
+                return;
+            }
+
+            for (ReportDatasetValueEntryMapper entry : facilityData) {
+                if (entry == null || entry.getDatasetID() == null || entry.getDatasetID().trim().isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    Integer datasetId = Integer.parseInt(entry.getDatasetID().trim());
+                    FacilityReportDataset dataset = facilityreportingService.getDatasetById(datasetId);
+
+                    if (dataset == null) {
+                        continue;
+                    }
+
+                    String datasetMapping = dataset.getMapping();
+                    if (datasetMapping == null || datasetMapping.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    if (!shouldIncludeFacilityDataset(config, datasetMapping, reportName)) {
+                        continue;
+                    }
+
+                    if (entry.getIndicators() != null && !entry.getIndicators().isEmpty()) {
+                        for (DatasetIndicatorDetails indicator : entry.getIndicators()) {
+                            if (indicator == null || !isValidIndicatorValue(indicator.getValue())) {
+                                continue;
+                            }
+
+                            String indicatorName = indicator.getName();
+                            if (indicatorName == null || indicatorName.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            String elementName = buildElementName(config, indicatorName.trim());
+                            String value = transformIndicatorValue(config, indicator.getValue());
+
+                            ObjectNode dataValue = objectMapper.createObjectNode();
+                            dataValue.put("dataElement", elementName);
+                            dataValue.put("value", value);
+                            dataValuesArray.add(dataValue);
+                        }
+                    }
+
+                } catch (NumberFormatException e) {
+                    log.error("Invalid dataset ID format: " + entry.getDatasetID(), e);
+                } catch (Exception e) {
+                    log.error("Error processing facility dataset entry with ID: " + entry.getDatasetID(), e);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error writing facility reporting JSON data for " + reportName, e);
+        }
     }
 }
