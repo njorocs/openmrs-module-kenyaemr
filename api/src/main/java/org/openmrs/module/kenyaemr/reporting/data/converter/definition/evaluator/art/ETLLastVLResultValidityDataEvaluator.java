@@ -58,12 +58,12 @@ public class ETLLastVLResultValidityDataEvaluator implements PersonDataEvaluator
                 "                AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, :endDate) >= 3\n" +
                 "                ) -- Unsuppressed VL\n" +
                 "                OR\n" +
-                "            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+                "            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
                 "                AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, :endDate) >= 6\n" +
                 "                AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
                 "                ) -- 0-24 with last suppressed VL\n" +
                 "                OR\n" +
-                "            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
+                "            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
                 "                AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, :endDate) >= 12\n" +
                 "                AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
                 "                ) -- > 24 with last suppressed VL\n" +
@@ -71,7 +71,7 @@ public class ETLLastVLResultValidityDataEvaluator implements PersonDataEvaluator
                 "            ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
                 "                AND TIMESTAMPDIFF(MONTH, t.date_started_art, :endDate) >= 3\n" +
                 "                AND (t.order_reason IN (159882, 1434, 2001237, 163718) AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, :endDate) >= 6)\n" +
-                "                AND ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR (t.effective_vl_result < 200))\n" +
+                "                AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR (t.effective_vl_result < 200))\n" +
                 "                ) -- PG & BF after baseline < 200\n" +
                 "            ) THEN 'Invalid'\n" +
                 "        ELSE 'Valid'\n" +
