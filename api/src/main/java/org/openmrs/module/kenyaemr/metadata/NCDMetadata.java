@@ -32,7 +32,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 	public static final class _EncounterType {
 		public static final String NCD_INITIAL = "dfcbe5d0-1afb-48a0-8f1e-5e5988b11f15";
 		public static final String NCD_FOLLOWUP = "b402d094-bff3-4b31-b167-82426b4e3e28";
-		public static final String TELEHEATH_CONSULTATION = "d91cd0b0-64dc-4680-b942-0848315a8d91";
+		public static final String TELEHEALTH_CONSULTATION = "d91cd0b0-64dc-4680-b942-0848315a8d91";
 		public static final String NCD_DISCONTINUATION = "c31d1a11-f0a5-4a64-817d-25e5134f2e37";
 	}
 
