@@ -61,7 +61,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 	public void install() {
 		install(encounterType("NCD Enrollment", "Enrolment into NCD", _EncounterType.NCD_INITIAL));
 		install(encounterType("NCD Followup", "NCD followup encounter", _EncounterType.NCD_FOLLOWUP));
-		install(encounterType("Telehealth Consultation", "Telehealth consultation encounter", _EncounterType.TELEHEATH_CONSULTATION));
+		install(encounterType("Telehealth Consultation", "Telehealth consultation encounter", _EncounterType.TELEHEALTH_CONSULTATION));
 		install(encounterType("NCD Discontinuation", "NCD program discontinuation encounter", _EncounterType.NCD_DISCONTINUATION));
 
 		boolean installForms = shouldInstallForms();
@@ -72,7 +72,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 			install(form("NCD Initial Form", null, _EncounterType.NCD_INITIAL, "1", _Form.NCD_INITIAL_FORM));
 			install(form("NCD Followup Form", null, _EncounterType.NCD_FOLLOWUP, "1", _Form.NCD_FOLLOWUP_FORM));
 			install(form("NCD Discontinuation Form", null, _EncounterType.NCD_DISCONTINUATION, "1", _Form.NCD_DISCONTINUATION_FORM));
-			install(form("Telehealth Consultation Form", null, _EncounterType.TELEHEATH_CONSULTATION, "1", _Form.TELEHEALTH_CONSULTATION_FORM));
+			install(form("Telehealth Consultation Form", null, _EncounterType.TELEHEALTH_CONSULTATION, "1", _Form.TELEHEALTH_CONSULTATION_FORM));
 		} else {
 			logger.info("=== NCDMetadata: SKIPPING form installation because shouldInstallForms() returned false ===");
 		}
