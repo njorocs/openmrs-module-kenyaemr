@@ -30,6 +30,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 	private static final Logger logger = LoggerFactory.getLogger(NCDMetadata.class);
 
 	public static final class _EncounterType {
+		public static final String NCD_ENROLLMENT = "c2ac3cc4-0f6d-47de-b9a0-4c52b2fca33d";
 		public static final String NCD_INITIAL = "dfcbe5d0-1afb-48a0-8f1e-5e5988b11f15";
 		public static final String NCD_FOLLOWUP = "b402d094-bff3-4b31-b167-82426b4e3e28";
 		public static final String TELEHEALTH_CONSULTATION = "d91cd0b0-64dc-4680-b942-0848315a8d91";
@@ -59,7 +60,8 @@ public class NCDMetadata extends AbstractMetadataBundle {
 	 */
 	@Override
 	public void install() {
-		install(encounterType("NCD Enrollment", "Enrolment into NCD", _EncounterType.NCD_INITIAL));
+		install(encounterType("NCD Enrollment", "Enrolment into NCD", _EncounterType.NCD_ENROLLMENT));
+		install(encounterType("NCD Initial", "Initial form for NCD", _EncounterType.NCD_INITIAL));
 		install(encounterType("NCD Followup", "NCD followup encounter", _EncounterType.NCD_FOLLOWUP));
 		install(encounterType("Telehealth Consultation", "Telehealth consultation encounter", _EncounterType.TELEHEALTH_CONSULTATION));
 		install(encounterType("NCD Discontinuation", "NCD program discontinuation encounter", _EncounterType.NCD_DISCONTINUATION));
@@ -68,7 +70,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 		
 		if (installForms) {
 			logger.info("=== NCDMetadata: Installing forms because shouldInstallForms() returned true ===");
-			install(form("NCD Enrollment Form", null, _EncounterType.NCD_INITIAL, "1", _Form.NCD_ENROLLMENT_FORM));
+			install(form("NCD Enrollment Form", null, _EncounterType.NCD_ENROLLMENT, "1", _Form.NCD_ENROLLMENT_FORM));
 			install(form("NCD Initial Form", null, _EncounterType.NCD_INITIAL, "1", _Form.NCD_INITIAL_FORM));
 			install(form("NCD Followup Form", null, _EncounterType.NCD_FOLLOWUP, "1", _Form.NCD_FOLLOWUP_FORM));
 			install(form("NCD Discontinuation Form", null, _EncounterType.NCD_DISCONTINUATION, "1", _Form.NCD_DISCONTINUATION_FORM));
