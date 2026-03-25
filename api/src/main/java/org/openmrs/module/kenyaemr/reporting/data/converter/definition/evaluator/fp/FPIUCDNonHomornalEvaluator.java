@@ -43,9 +43,9 @@ public class FPIUCDNonHomornalEvaluator implements EncounterDataEvaluator {
                         "FROM " +
                         "    "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp " +
                         "JOIN " +
-                        "    openmrs.concept c ON fp.contraceptive_dispensed = c.concept_id " +
+                        "    concept c ON fp.contraceptive_dispensed = c.concept_id " +
                         "JOIN " +
-                        "    openmrs.concept_name cn ON c.concept_id = cn.concept_id " +
+                        "    concept_name cn ON c.concept_id = cn.concept_id " +
                         "WHERE " +
                         "    cn.locale = 'en' " +
                         "    AND cn.voided = 0 " +
