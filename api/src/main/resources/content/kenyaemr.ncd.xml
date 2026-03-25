@@ -23,6 +23,7 @@
 		<property name="visitForms">
 			<set>
 				<ref bean="kenyaemr.ncd.form.followup" />
+				<ref bean="kenyaemr.ncd.form.telehealth" />
 			</set>
 		</property>
 		<property name="reports">
