@@ -10,13 +10,16 @@
 
 package org.openmrs.module.kenyaemr.nmlis;
 
-
 import org.openmrs.api.context.Context;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import java.io.*;
 import java.net.URL;
 
@@ -40,6 +43,34 @@ public class NlmisHttpClientService {
 		return baseUrl + endpoint;
 	}
 
+	private HttpsURLConnection openConnection(String urlString) throws Exception {
+		URL url = new URL(urlString);
+		HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+		// Trust all certificates
+		TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+
+					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+		};
+
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
+		con.setSSLSocketFactory(sc.getSocketFactory());
+		con.setHostnameVerifier((hostname, session) -> true);
+
+		return con;
+	}
+
 	/**
 	 * Generic GET Executor
 	 */
@@ -49,9 +80,7 @@ public class NlmisHttpClientService {
 
 		try {
 			String completeUrl = buildUrl(endpoint);
-			URL url = new URL(completeUrl);
-
-			con = (HttpsURLConnection) url.openConnection();
+			con = openConnection(completeUrl);
 			con.setRequestMethod("GET");
 			con.setRequestProperty("Authorization", "Bearer " + getToken());
 			con.setRequestProperty("Accept", "application/json");
@@ -82,10 +111,7 @@ public class NlmisHttpClientService {
 			if (queryString != null && !queryString.trim().isEmpty()) {
 				completeUrl += "?" + queryString;
 			}
-
-			URL url = new URL(completeUrl);
-
-			con = (HttpsURLConnection) url.openConnection();
+			con = openConnection(completeUrl);
 			con.setRequestMethod("GET");
 			con.setRequestProperty("Authorization", "Bearer " + getToken());
 			con.setRequestProperty("Accept", "application/json");
@@ -112,9 +138,8 @@ public class NlmisHttpClientService {
 
 		try {
 			String completeUrl = buildUrl(endpoint);
-			URL url = new URL(completeUrl);
 
-			con = (HttpsURLConnection) url.openConnection();
+			con = openConnection(completeUrl);
 			con.setRequestMethod("POST");
 			con.setDoOutput(true);
 			con.setRequestProperty("Authorization", "Bearer " + getToken());
