@@ -287,138 +287,6 @@ public class FacilityDashboardUtil {
 				"               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
 				"               left join kenyaemr_etl.etl_drug_event de\n" +
 				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"                            date(de.date_started) <= date('" + endDate + "')\n" +
-				"               left outer JOIN\n" +
-				"           (select patient_id,\n" +
-				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"            from kenyaemr_etl.etl_patient_program_discontinuation\n" +
-				"            where date(visit_date) <= date('" + endDate + "')\n" +
-				"              and program_name = 'HIV'\n" +
-				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"      where fup.visit_date between date('" +startDate+ "') and date('" + endDate + "')\n" +
-				"      group by patient_id\n" +
-				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"         and (\n" +
-				"          (\n" +
-				"              (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
-				"               ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"                d.effective_disc_date is null))\n" +
-				"                  and\n" +
-				"              (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"               disc_patient is null)\n" +
-				"              )\n" +
-				"          )) e\n" +
-				"         INNER JOIN (SELECT t.patient_id\n" +
-				"                     FROM (SELECT v.*,\n" +
-				"                                  d.DOB,\n" +
-				"                                  -- Substitution Logic: If current is null and requested is later than base/previous, use previous\n" +
-				"                                  IF(\n" +
-				"                                          v.vl_result IS NULL\n" +
-				"                                              AND v.date_test_result_received IS NULL\n" +
-				"                                              AND v.date_test_requested >\n" +
-				"                                                  GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                           COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                  ),\n" +
-				"                                          v.previous_test_result,\n" +
-				"                                          v.vl_result\n" +
-				"                                  ) AS effective_vl_result,\n" +
-				"                                  IF(\n" +
-				"                                          v.vl_result IS NULL\n" +
-				"                                              AND v.date_test_result_received IS NULL\n" +
-				"                                              AND v.date_test_requested >\n" +
-				"                                                  GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                           COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                  ),\n" +
-				"                                          v.previous_date_test_requested,\n" +
-				"                                          v.date_test_requested\n" +
-				"                                  ) AS effective_date_requested\n" +
-				"                           FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-				"                                    INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                                               ON v.patient_id = d.patient_id\n" +
-				"                           WHERE v.date_test_requested <= '" + endDate + "') t\n" +
-				"                     WHERE (\n" +
-				"                         (TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3 AND\n" +
-				"                          t.base_viral_load_test_result IS NULL) -- First VL new on ART\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3\n" +
-				"                                 AND\n" +
-				"                             (t.effective_vl_result IS NOT NULL AND t.effective_date_requested < '" + endDate + "')\n" +
-				"                                 AND (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 3\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
-				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 12\n" +
-				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3\n" +
-				"                                 AND (\n" +
-				"                                 t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                     AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
-				"                                 )\n" +
-				"                                 AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                      (t.effective_vl_result < 200))\n" +
-				"                             )\n" +
-				"                         )\n" +
-				"                       AND NOT (\n" +
-				"                         t.vl_result IS NULL\n" +
-				"                             AND t.date_test_result_received IS NULL\n" +
-				"                             AND t.base_viral_load_test_result IS NULL\n" +
-				"                             AND t.previous_test_result IS NULL\n" +
-				"                         )) b on e.patient_id = b.patient_id;";
-
-		try {
-			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-			return (Long) Context.getAdministrationService().executeSQL(eligibleForVlQuery, true).get(0).get(0);
-		} finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		}
-	}
-
-	/**
-	 * This query counts the number of patients eligible for viral load testing
-	 * who have not taken a sample (numerator) during a recent visit to the facility.
-	 *
-	 * @param startDate the start date in "dd/MM/yyyy" format
-	 * @param endDate   the end date in "dd/MM/yyyy" format
-	 * @return the number of eligible patients for viral load testing who have not
-	 *         taken a sample
-	 */
-	public static Long getEligibleForVlSampleNotTaken(String startDate, String endDate) {
-		long days = getNumberOfDays(startDate, endDate);
-		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken\n" +
-				"from (select fup.visit_date,\n" +
-				"             fup.patient_id,\n" +
-				"             max(e.visit_date)                                                      as enroll_date,\n" +
-				"             greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"             greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"                      ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"             d.patient_id                                                           as disc_patient,\n" +
-				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"             max(d.visit_date)                                                      as date_discontinued,\n" +
-				"             de.patient_id                                                          as started_on_drugs\n" +
-				"      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"               left join kenyaemr_etl.etl_drug_event de\n" +
-				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
 				"                            date(de.date_started) <= '" + endDate + "'\n" +
 				"               left outer JOIN\n" +
 				"           (select patient_id,\n" +
@@ -441,128 +309,73 @@ public class FacilityDashboardUtil {
 				"               disc_patient is null)\n" +
 				"              )\n" +
 				"          )) e\n" +
-				"         INNER JOIN (WITH vl_enriched AS (SELECT v.*,\n" +
-				"                                                 d.DOB,\n" +
-				"                                                 IF(\n" +
-				"                                                         v.vl_result IS NULL\n" +
-				"                                                             AND v.date_test_result_received IS NULL\n" +
-				"                                                             AND v.date_test_requested > GREATEST(\n" +
-				"                                                                 COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                 COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                                         ),\n" +
-				"                                                         v.previous_test_result,\n" +
-				"                                                         v.vl_result\n" +
-				"                                                 ) AS effective_vl_result,\n" +
-				"                                                 IF(\n" +
-				"                                                         v.vl_result IS NULL\n" +
-				"                                                             AND v.date_test_result_received IS NULL\n" +
-				"                                                             AND v.date_test_requested > GREATEST(\n" +
-				"                                                                 COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                 COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                                         ),\n" +
-				"                                                         v.previous_date_test_requested,\n" +
-				"                                                         v.date_test_requested\n" +
-				"                                                 ) AS effective_date_requested\n" +
-				"                                          FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-				"                                                   INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                                                              ON v.patient_id = d.patient_id\n" +
-				"                                          WHERE v.date_test_requested IS NOT NULL),\n" +
-				"                          vl_with_status AS (SELECT t.*,\n" +
-				"                                                    TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                  t.latest_hiv_followup_visit) fup_minus_effective_test_date,\n" +
-				"                                                    CASE\n" +
-				"                                                        WHEN t.vl_result IS NULL AND t.date_test_result_received IS NULL\n" +
-				"                                                            THEN 'Pending'\n" +
-				"                                                        WHEN (\n" +
-				"                                                            (TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3 AND\n" +
-				"                                                             t.base_viral_load_test_result IS NULL)\n" +
-				"                                                                OR\n" +
-				"                                                            ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3\n" +
-				"                                                                AND (t.effective_vl_result IS NOT NULL)\n" +
-				"                                                                AND\n" +
-				"                                                             (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             3\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                                              t.effective_vl_result < 200)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             6\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                                              t.effective_vl_result < 200)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             12\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3\n" +
-				"                                                                AND (t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                                                    AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                                      t.latest_hiv_followup_visit) >= 6)\n" +
-				"                                                                AND\n" +
-				"                                                             ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                                              (t.effective_vl_result < 200))\n" +
-				"                                                                )\n" +
-				"                                                            ) THEN 'Invalid'\n" +
-				"                                                        ELSE 'Valid'\n" +
-				"                                                        END AS                                 vl_status\n" +
-				"                                             FROM vl_enriched t),\n" +
-				"                          latest_any_request AS (\n" +
-				"                              /* Latest VL request overall (used only to exclude “latest is pending”) */\n" +
-				"                              SELECT q.*\n" +
-				"                              FROM (SELECT x.patient_id,\n" +
-				"                                           x.date_test_requested,\n" +
-				"                                           x.vl_status,\n" +
-				"                                           ROW_NUMBER() OVER (\n" +
-				"                                               PARTITION BY x.patient_id\n" +
-				"                                               ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                                               ) AS rn,\n" +
-				"                                           x.fup_minus_effective_test_date\n" +
-				"                                    FROM vl_with_status x) q\n" +
-				"                              WHERE q.rn = 1),\n" +
-				"                          latest_non_pending AS (\n" +
-				"                              /* Last non-pending VL row (this is the “last VL” we care about for this cohort) */\n" +
-				"                              SELECT q.*\n" +
-				"                              FROM (SELECT x.*,\n" +
-				"                                           ROW_NUMBER() OVER (\n" +
-				"                                               PARTITION BY x.patient_id\n" +
-				"                                               ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                                               ) AS rn\n" +
-				"                                    FROM vl_with_status x\n" +
-				"                                    WHERE x.vl_status <> 'Pending') q\n" +
-				"                              WHERE q.rn = 1)\n" +
-				"                     SELECT lnp.patient_id\n" +
-				"                     FROM latest_non_pending lnp\n" +
-				"                              INNER JOIN latest_any_request lar\n" +
-				"                                         ON lar.patient_id = lnp.patient_id\n" +
-				"                     WHERE lnp.vl_status = 'Invalid'\n" +
-				"                       AND lnp.latest_hiv_followup_visit IS NOT NULL\n" +
-				"                       AND lnp.latest_hiv_followup_visit > lnp.date_test_requested\n" +
-				"                         /* critical exclusion: if the latest request is pending, do NOT count them */\n" +
-				"                       AND lar.vl_status <> 'Pending'\n" +
-				"                     ORDER BY lnp.patient_id) b on e.patient_id = b.patient_id;";
+				"         INNER JOIN (select t.patient_id\n" +
+				"                     from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                     where t.vl_due_date <= DATE('" + endDate + "') and t.latest_hiv_followup_visit between '" + startDate + "' and '" + endDate + "') b on e.patient_id = b.patient_id;";
+
+		try {
+			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+			return (Long) Context.getAdministrationService().executeSQL(eligibleForVlQuery, true).get(0).get(0);
+		} finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		}
+	}
+
+	/**
+	 * This query counts the number of patients eligible for viral load testing
+	 * who have not taken a sample (numerator) during a recent visit to the facility.
+	 *
+	 * @param startDate the start date in "dd/MM/yyyy" format
+	 * @param endDate   the end date in "dd/MM/yyyy" format
+	 * @return the number of eligible patients for viral load testing who have not
+	 *         taken a sample
+	 */
+	public static Long getEligibleForVlSampleNotTaken(String startDate, String endDate) {
+		long days = getNumberOfDays(startDate, endDate);
+		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken\n" +
+				"from (select fup.visit_date,\n" +
+				"      fup.patient_id,\n" +
+				"      max(e.visit_date)                                                      as enroll_date,\n" +
+				"      greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"      greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"               ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"      d.patient_id                                                           as disc_patient,\n" +
+				"      d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"      max(d.visit_date)                                                      as date_discontinued,\n" +
+				"      de.patient_id                                                          as started_on_drugs\n" +
+				"      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+				"        join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"        join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"        left join kenyaemr_etl.etl_drug_event de\n" +
+				"                  on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                     date(de.date_started) <= '" + endDate + "'\n" +
+				"        left outer JOIN\n" +
+				"    (select patient_id,\n" +
+				"            coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"            max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"     from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"     where date(visit_date) <= date('" + endDate + "')\n" +
+				"       and program_name = 'HIV'\n" +
+				"     group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"      where fup.visit_date BETWEEN date('" + startDate + "') AND date('" + endDate + "')\n" +
+				"      group by patient_id\n" +
+				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"  and (\n" +
+				"   (\n" +
+				"       (timestampdiff(DAY, date(latest_tca), '" + endDate + "') <= 30 and\n" +
+				"        ((date(d.effective_disc_date) > '" + endDate + "' or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"         d.effective_disc_date is null))\n" +
+				"           and\n" +
+				"       (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"        disc_patient is null)\n" +
+				"       )\n" +
+				"   )) e\n" +
+				"  INNER JOIN (SELECT t.patient_id\n" +
+				"                              FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                              WHERE t.latest_hiv_followup_visit BETWEEN DATE('" + startDate + "') AND DATE('" + endDate + "') AND t.vl_due_date IS NOT NULL\n" +
+				"                                AND t.vl_due_date <= DATE('" + endDate + "')\n" +
+				"                                AND t.latest_hiv_followup_visit >= t.vl_due_date\n" +
+				"                                AND (t.date_test_requested IS NULL OR t.date_test_requested < t.latest_hiv_followup_visit)) b on e.patient_id = b.patient_id;";
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -725,7 +538,7 @@ public class FacilityDashboardUtil {
 				"    SELECT 1\n" +
 				"    FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
 				"    WHERE e.patient_id = vl.patient_id\n" +
-				"      AND e.visit_date > vl.vl_effective_date\n" +
+				"      AND e.visit_date > vl.vl_effective_result_date\n" +
 				"      AND e.visit_date <= DATE('" +endDate + "')\n" +
 				");";
 
@@ -1152,166 +965,52 @@ public class FacilityDashboardUtil {
 		long days = getNumberOfDays(startDate, endDate);
 		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken, e.visit_date as visit_date\n" +
 				"from (select fup.visit_date,\n" +
-				"     fup.patient_id,\n" +
-				"     max(e.visit_date)                                                      as enroll_date,\n" +
-				"     greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"     greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"              ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"     d.patient_id                                                           as disc_patient,\n" +
-				"     d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"     max(d.visit_date)                                                      as date_discontinued,\n" +
-				"     de.patient_id                                                          as started_on_drugs\n" +
-				"from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"       join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"       join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"       left join kenyaemr_etl.etl_drug_event de\n" +
-				"                 on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"                    date(de.date_started) <= CURRENT_DATE\n" +
-				"       left outer JOIN\n" +
-				"   (select patient_id,\n" +
-				"           coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"           max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"    from kenyaemr_etl.etl_patient_program_discontinuation\n" +
-				"    where date(visit_date) <= CURRENT_DATE\n" +
-				"      and program_name = 'HIV'\n" +
-				"    group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"where fup.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
-				"group by patient_id\n" +
-				"having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				" and (\n" +
-				"  (\n" +
-				"      (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30 and\n" +
-				"       ((date(d.effective_disc_date) > CURRENT_DATE or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"        d.effective_disc_date is null))\n" +
-				"          and\n" +
-				"      (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"       disc_patient is null)\n" +
-				"      )\n" +
-				"  )) e\n" +
-				"INNER JOIN (WITH vl_enriched AS (SELECT v.*,\n" +
-				"                         d.DOB,\n" +
-				"                         IF(\n" +
-				"                                 v.vl_result IS NULL\n" +
-				"                                     AND v.date_test_result_received IS NULL\n" +
-				"                                     AND v.date_test_requested > GREATEST(\n" +
-				"                                         COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                         COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                 ),\n" +
-				"                                 v.previous_test_result,\n" +
-				"                                 v.vl_result\n" +
-				"                         ) AS effective_vl_result,\n" +
-				"                         IF(\n" +
-				"                                 v.vl_result IS NULL\n" +
-				"                                     AND v.date_test_result_received IS NULL\n" +
-				"                                     AND v.date_test_requested > GREATEST(\n" +
-				"                                         COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                         COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                 ),\n" +
-				"                                 v.previous_date_test_requested,\n" +
-				"                                 v.date_test_requested\n" +
-				"                         ) AS effective_date_requested\n" +
-				"                  FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-				"                           INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                                      ON v.patient_id = d.patient_id\n" +
-				"                  WHERE v.date_test_requested IS NOT NULL),\n" +
-				"  vl_with_status AS (SELECT t.*,\n" +
-				"                            TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                          t.latest_hiv_followup_visit) fup_minus_effective_test_date,\n" +
-				"                            CASE\n" +
-				"                                WHEN t.vl_result IS NULL AND t.date_test_result_received IS NULL\n" +
-				"                                    THEN 'Pending'\n" +
-				"                                WHEN (\n" +
-				"                                    (TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                   t.latest_hiv_followup_visit) >= 3 AND\n" +
-				"                                     t.base_viral_load_test_result IS NULL)\n" +
-				"                                        OR\n" +
-				"                                    ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                   t.latest_hiv_followup_visit) >= 3\n" +
-				"                                        AND (t.effective_vl_result IS NOT NULL)\n" +
-				"                                        AND\n" +
-				"                                     (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                                        )\n" +
-				"                                        OR\n" +
-				"                                    (t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                   t.latest_hiv_followup_visit) >=\n" +
-				"                                     3\n" +
-				"                                        )\n" +
-				"                                        OR\n" +
-				"                                    (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                      t.effective_vl_result < 200)\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                   t.latest_hiv_followup_visit) >=\n" +
-				"                                     6\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                                        )\n" +
-				"                                        OR\n" +
-				"                                    (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                      t.effective_vl_result < 200)\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                   t.latest_hiv_followup_visit) >=\n" +
-				"                                     12\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                                        )\n" +
-				"                                        OR\n" +
-				"                                    ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                        AND\n" +
-				"                                     TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                   t.latest_hiv_followup_visit) >= 3\n" +
-				"                                        AND (t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                            AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                              t.latest_hiv_followup_visit) >= 6)\n" +
-				"                                        AND\n" +
-				"                                     ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                      (t.effective_vl_result < 200))\n" +
-				"                                        )\n" +
-				"                                    ) THEN 'Invalid'\n" +
-				"                                ELSE 'Valid'\n" +
-				"                                END AS                                 vl_status\n" +
-				"                     FROM vl_enriched t),\n" +
-				"  latest_any_request AS (\n" +
-				"      /* Latest VL request overall (used only to exclude “latest is pending”) */\n" +
-				"      SELECT q.*\n" +
-				"      FROM (SELECT x.patient_id,\n" +
-				"                   x.date_test_requested,\n" +
-				"                   x.vl_status,\n" +
-				"                   ROW_NUMBER() OVER (\n" +
-				"                       PARTITION BY x.patient_id\n" +
-				"                       ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                       ) AS rn,\n" +
-				"                   x.fup_minus_effective_test_date\n" +
-				"            FROM vl_with_status x) q\n" +
-				"      WHERE q.rn = 1),\n" +
-				"  latest_non_pending AS (\n" +
-				"      /* Last non-pending VL row (this is the “last VL” we care about for this cohort) */\n" +
-				"      SELECT q.*\n" +
-				"      FROM (SELECT x.*,\n" +
-				"                   ROW_NUMBER() OVER (\n" +
-				"                       PARTITION BY x.patient_id\n" +
-				"                       ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                       ) AS rn\n" +
-				"            FROM vl_with_status x\n" +
-				"            WHERE x.vl_status <> 'Pending') q\n" +
-				"      WHERE q.rn = 1)\n" +
-				"SELECT lnp.patient_id\n" +
-				"FROM latest_non_pending lnp\n" +
-				"      INNER JOIN latest_any_request lar\n" +
-				"                 ON lar.patient_id = lnp.patient_id\n" +
-				"WHERE lnp.vl_status = 'Invalid'\n" +
-				"AND lnp.latest_hiv_followup_visit IS NOT NULL\n" +
-				"AND lnp.latest_hiv_followup_visit > lnp.date_test_requested\n" +
-				" /* critical exclusion: if the latest request is pending, do NOT count them */\n" +
-				"AND lar.vl_status <> 'Pending'\n" +
-				"ORDER BY lnp.patient_id) b on e.patient_id = b.patient_id\n" +
+				"         fup.patient_id,\n" +
+				"         max(e.visit_date)                                                      as enroll_date,\n" +
+				"         greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"         greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                  ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"         d.patient_id                                                           as disc_patient,\n" +
+				"         d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"         max(d.visit_date)                                                      as date_discontinued,\n" +
+				"         de.patient_id                                                          as started_on_drugs\n" +
+				"  from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+				"           join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"           join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"           left join kenyaemr_etl.etl_drug_event de\n" +
+				"                     on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                        date(de.date_started) <= date('" + endDate + "')\n" +
+				"           left outer JOIN\n" +
+				"       (select patient_id,\n" +
+				"               coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"               max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"        from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"        where date(visit_date) <= date('" + endDate + "')\n" +
+				"          and program_name = 'HIV'\n" +
+				"        group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"  where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"  group by patient_id\n" +
+				"  having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"     and (\n" +
+				"      (\n" +
+				"          (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
+				"           ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"            d.effective_disc_date is null))\n" +
+				"              and\n" +
+				"          (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"           disc_patient is null)\n" +
+				"          )\n" +
+				"      )) e\n" +
+				"     INNER JOIN (SELECT t.patient_id\n" +
+				"                 FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                 WHERE t.latest_hiv_followup_visit BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"                   AND t.vl_due_date IS NOT NULL\n" +
+				"                   AND t.vl_due_date <= date('" + endDate + "')\n" +
+				"                   AND t.latest_hiv_followup_visit >= t.vl_due_date\n" +
+				"                   AND (t.date_test_requested IS NULL OR t.date_test_requested < t.latest_hiv_followup_visit)\n" +
+				"                 ORDER BY patient_id) b on e.patient_id = b.patient_id\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
-				"ORDER BY DATE(e.visit_date) ASC;";
+				"ORDER BY DATE(e.visit_date);";
 		return getSimpleObject(eligibleForVlSampleNotTakenQuery);
 	}
 
@@ -1420,7 +1119,7 @@ public class FacilityDashboardUtil {
 				"    SELECT 1\n" +
 				"    FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
 				"    WHERE e.patient_id = vl.patient_id\n" +
-				"      AND e.visit_date > vl.vl_effective_date\n" +
+				"      AND e.visit_date > vl.vl_effective_result_date\n" +
 				"      AND e.visit_date <= CURRENT_DATE\n" +
 				")\n" +
 				"GROUP BY DATE(results_date)\n" +
@@ -1555,119 +1254,52 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyEligibleForVl(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String eligibleForVlQuery = "select COUNT(DISTINCT(b.patient_id)) as eligible_for_vl, e.visit_date as visit_date\n" +
+		String eligibleForVlQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken, e.visit_date as visit_date\n" +
 				"from (select fup.visit_date,\n" +
 				"             fup.patient_id,\n" +
-				"               max(e.visit_date)                                                                as enroll_date,\n" +
-				"               greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00'))           as latest_vis_date,\n" +
-				"               greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"                        ifnull(max(d.visit_date), '0000-00-00'))                                as latest_tca,\n" +
-				"               d.patient_id                                                                     as disc_patient,\n" +
-				"               d.effective_disc_date                                                            as effective_disc_date,\n" +
-				"               max(d.visit_date)                                                                as date_discontinued,\n" +
-				"               de.patient_id                                                   as started_on_drugs\n" +
-				"        from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"                 join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"                 join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-				"                 left join kenyaemr_etl.etl_drug_event de\n" +
-				"                           on e.patient_id = de.patient_id and de.program = 'HIV' and date(de.date_started) <= CURRENT_DATE\n" +
-				"                 left outer JOIN\n" +
-				"             (select patient_id,\n" +
-				"                     coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"                     max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"              from kenyaemr_etl.etl_patient_program_discontinuation\n" +
-				"              where date(visit_date) <= CURRENT_DATE\n" +
-				"                and program_name = 'HIV'\n" +
-				"              group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"        where fup.visit_date <= CURRENT_DATE\n" +
-				"        group by patient_id\n" +
-				"        having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"           and (\n" +
-				"            (\n" +
-				"                (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30 and\n" +
-				"                 ((date(d.effective_disc_date) > CURRENT_DATE or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"                  d.effective_disc_date is null))\n" +
-				"                    and\n" +
-				"                (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"                 disc_patient is null)\n" +
-				"                )\n" +
-				"            )) e\n" +
-				"                     INNER JOIN (SELECT t.patient_id\n" +
-				"                                 FROM (SELECT v.*,\n" +
-				"                                              d.DOB,\n" +
-				"                                              -- Substitution Logic: If current is null and requested is later than base/previous, use previous\n" +
-				"                                              IF(\n" +
-				"                                                      v.vl_result IS NULL\n" +
-				"                                                          AND v.date_test_result_received IS NULL\n" +
-				"                                                          AND v.date_test_requested >\n" +
-				"                                                              GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                       COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                              ),\n" +
-				"                                                      v.previous_test_result,\n" +
-				"                                                      v.vl_result\n" +
-				"                                              ) AS effective_vl_result,\n" +
-				"                                              IF(\n" +
-				"                                                      v.vl_result IS NULL\n" +
-				"                                                          AND v.date_test_result_received IS NULL\n" +
-				"                                                          AND v.date_test_requested >\n" +
-				"                                                              GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                       COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                              ),\n" +
-				"                                                      v.previous_date_test_requested,\n" +
-				"                                                      v.date_test_requested\n" +
-				"                                              ) AS effective_date_requested\n" +
-				"                                       FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-				"                                                INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                                                           ON v.patient_id = d.patient_id\n" +
-				"                                       WHERE v.date_test_requested <= CURRENT_DATE) t\n" +
-				"                                 WHERE (\n" +
-				"                                     (TIMESTAMPDIFF(MONTH, t.date_started_art, CURRENT_DATE) >= 3 AND\n" +
-				"                                      t.base_viral_load_test_result IS NULL) -- First VL new on ART\n" +
-				"                                         OR\n" +
-				"                                     (\n" +
-				"                                         (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                             AND TIMESTAMPDIFF(MONTH, t.date_started_art, CURRENT_DATE) >= 3\n" +
-				"                                             AND\n" +
-				"                                         (t.effective_vl_result IS NOT NULL AND t.effective_date_requested < CURRENT_DATE)\n" +
-				"                                             AND (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                                         )\n" +
-				"                                         OR\n" +
-				"                                     (\n" +
-				"                                         t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                             AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 3\n" +
-				"                                         )\n" +
-				"                                         OR\n" +
-				"                                     (\n" +
-				"                                         ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
-				"                                             AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 6\n" +
-				"                                             AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                                         )\n" +
-				"                                         OR\n" +
-				"                                     (\n" +
-				"                                         ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR t.effective_vl_result < 200)\n" +
-				"                                             AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 12\n" +
-				"                                             AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                                         )\n" +
-				"                                         OR\n" +
-				"                                     (\n" +
-				"                                         (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                             AND TIMESTAMPDIFF(MONTH, t.date_started_art, CURRENT_DATE) >= 3\n" +
-				"                                             AND (\n" +
-				"                                             t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, CURRENT_DATE) >= 6\n" +
-				"                                             )\n" +
-				"                                             AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-				"                                                  (t.effective_vl_result < 200))\n" +
-				"                                         )\n" +
-				"                                     )\n" +
-				"                                   AND NOT (\n" +
-				"                                     t.vl_result IS NULL\n" +
-				"                                         AND t.date_test_result_received IS NULL\n" +
-				"                                         AND t.base_viral_load_test_result IS NULL\n" +
-				"                                         AND t.previous_test_result IS NULL\n" +
-				"                                     )) b on e.patient_id = b.patient_id\n" +
+				"             max(e.visit_date)                                                      as enroll_date,\n" +
+				"             greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"             greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                      ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"             d.patient_id                                                           as disc_patient,\n" +
+				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"             max(d.visit_date)                                                      as date_discontinued,\n" +
+				"             de.patient_id                                                          as started_on_drugs\n" +
+				"      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
+				"               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"               left join kenyaemr_etl.etl_drug_event de\n" +
+				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                            date(de.date_started) <= date('" + endDate + "')\n" +
+				"               left outer JOIN\n" +
+				"           (select patient_id,\n" +
+				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"            from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"            where date(visit_date) <= date('" + endDate + "')\n" +
+				"              and program_name = 'HIV'\n" +
+				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"      where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"      group by patient_id\n" +
+				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"         and (\n" +
+				"          (\n" +
+				"              (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
+				"               ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"                d.effective_disc_date is null))\n" +
+				"                  and\n" +
+				"              (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"               disc_patient is null)\n" +
+				"              )\n" +
+				"          )) e\n" +
+				"         INNER JOIN (select t.patient_id\n" +
+				"                     from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                     where t.vl_due_date <= date('" + endDate + "')\n" +
+				"                       and t.latest_hiv_followup_visit BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"                     ORDER BY t.patient_id) b\n" +
+				"                    on e.patient_id = b.patient_id\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
-				"order by DATE(e.visit_date);";
+				"ORDER BY DATE(e.visit_date) ASC;";
 
 		return getSimpleObject(eligibleForVlQuery);
 	}
@@ -1762,8 +1394,8 @@ public class FacilityDashboardUtil {
 				"                 )\n" +
 				"         ) t\n" +
 				") active ON vl.patient_id = active.patient_id\n" +
-				"GROUP BY DATE(vl_effective_date)\n" +
-				"ORDER BY DATE(vl_effective_date) ASC;";
+				"GROUP BY DATE(vl_effective_result_date)\n" +
+				"ORDER BY DATE(vl_effective_result_date) ASC;";
 		return getSimpleObject(getVirallyUnsuppressedQuery);
 	}
 

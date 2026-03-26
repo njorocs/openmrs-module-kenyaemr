@@ -75,28 +75,7 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
 				"               inner join kenyaemr_etl.etl_viral_load_validity_tracker vt on vt.patient_id = fup.patient_id\n" +
 				"      where fup.visit_date <= date(:endDate)\n" +
-				"        and ((vt.vl_result >= 200 and timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 3)\n" +
-				"          OR (timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) between 0 and 24 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"              timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 6)\n" +
-				"          OR (timestampdiff(MONTH, vt.date_started_art, date(:endDate)) >= 3 and vt.vl_result is null and\n" +
-				"              vt.previous_test_result is null and vt.base_viral_load_test_result is null)\n" +
-				"          OR (TIMESTAMPDIFF(MONTH, date(vt.date_started_art), date(:endDate)) >= 3 and\n" +
-				"              (vt.breastfeeding_status = 1065 or vt.pregnancy_status = 1065) and\n" +
-				"              (vt.latest_hiv_followup_visit > vt.date_test_requested OR vt.date_test_requested is null))\n" +
-				"          OR (timestampdiff(MONTH, vt.date_test_requested, date(:endDate)) >= 6 and\n" +
-				"              timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) between 0 and 24 and\n" +
-				"              timestampdiff(MONTH, vt.date_started_art, date(:endDate)) >= 3 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)))\n" +
-				"          OR (timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) > 24 and\n" +
-				"              TIMESTAMPDIFF(MONTH, date(vt.date_started_art), date(:endDate)) >= 3 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"              timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 12)\n" +
-				"          OR (vt.pregnancy_status = 1065 or vt.breastfeeding_status = 1065 and\n" +
-				"                                            ((vt.lab_test = 856 and vt.vl_result < 200) OR\n" +
-				"                                             (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"                                            vt.previous_order_reason in (1434, 159882))\n" +
-				"                 and timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 6)\n" +
+				"        and vt.vl_due_date <= date(:endDate)\n" +
 				"      group by patient_id\n" +
 				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
 				"         and (\n" +
