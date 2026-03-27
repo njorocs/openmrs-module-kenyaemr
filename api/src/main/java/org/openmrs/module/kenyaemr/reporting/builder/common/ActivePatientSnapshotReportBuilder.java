@@ -129,6 +129,10 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         lastVLDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         ETLLastVLResultValidityDataDefinition lastVLResultValidityDataDefinition = new ETLLastVLResultValidityDataDefinition();
         lastVLResultValidityDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        ETLLastVLResultDateDataDefinition lastVLResultDateDataDefinition = new ETLLastVLResultDateDataDefinition();
+        lastVLResultDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        ETLVLDueDateDataDefinition vlDueDateDataDefinition = new ETLVLDueDateDataDefinition();
+        vlDueDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         ETLStabilityDataDefinition stabilityDataDefinition = new ETLStabilityDataDefinition();
         stabilityDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         ETLLastVisitDateDataDefinition lastVisitDateDataDefinition = new ETLLastVisitDateDataDefinition();
@@ -222,7 +226,9 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         dsd.addColumn("Last VL Result",  lastVlResultDataDefinition, "endDate=${endDate}");
         dsd.addColumn("VL Validility", lastVLResultValidityDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Last VL Justification", eTLLastVLJustificationDataDefinition,"endDate=${endDate}");
-        dsd.addColumn("Last VL Date", lastVLDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
+        dsd.addColumn("Last VL Order Date", lastVLDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
+        dsd.addColumn("Last VL Result Date", lastVLDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
+        dsd.addColumn("VL Due Date", vlDueDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
         dsd.addColumn("Active in PMTCT",activeInMchDataDefinition, "startDate=${startDate},endDate=${endDate}");
         dsd.addColumn("Active in OVC", activeInOvcDataDefinition,"endDate=${endDate}",new ActiveInProgramConverter());
         dsd.addColumn("Active in OTZ", activeInOtzDataDefinition, "endDate=${endDate}",new ActiveInProgramConverter());
