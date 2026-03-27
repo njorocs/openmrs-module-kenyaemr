@@ -910,117 +910,11 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition eligibleForVLSampleNotTakenZeroGracePeriod() {
-        String sqlQuery = "WITH vl_enriched AS (SELECT v.*,\n" +
-                "                            d.DOB,\n" +
-                "                            IF(\n" +
-                "                                    v.vl_result IS NULL\n" +
-                "                                        AND v.date_test_result_received IS NULL\n" +
-                "                                        AND v.date_test_requested > GREATEST(\n" +
-                "                                            COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-                "                                            COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-                "                                                                    ),\n" +
-                "                                    v.previous_test_result,\n" +
-                "                                    v.vl_result\n" +
-                "                            ) AS effective_vl_result,\n" +
-                "                            IF(\n" +
-                "                                    v.vl_result IS NULL\n" +
-                "                                        AND v.date_test_result_received IS NULL\n" +
-                "                                        AND v.date_test_requested > GREATEST(\n" +
-                "                                            COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-                "                                            COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-                "                                                                    ),\n" +
-                "                                    v.previous_date_test_requested,\n" +
-                "                                    v.date_test_requested\n" +
-                "                            ) AS effective_date_requested\n" +
-                "                     FROM kenyaemr_etl.etl_viral_load_validity_tracker v\n" +
-                "                              INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-                "                                         ON v.patient_id = d.patient_id\n" +
-                "                     WHERE v.date_test_requested IS NOT NULL),\n" +
-                "     vl_with_status AS (SELECT t.*,\n" +
-                "                               TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-                "                                             t.latest_hiv_followup_visit) fup_minus_effective_test_date,\n" +
-                "                               CASE\n" +
-                "                                   WHEN t.vl_result IS NULL AND t.date_test_result_received IS NULL THEN 'Pending'\n" +
-                "                                   WHEN (\n" +
-                "                                       (TIMESTAMPDIFF(MONTH, t.date_started_art, t.latest_hiv_followup_visit) >= 3 AND\n" +
-                "                                        t.base_viral_load_test_result IS NULL)\n" +
-                "                                           OR\n" +
-                "                                       ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-                "                                           AND\n" +
-                "                                        TIMESTAMPDIFF(MONTH, t.date_started_art, t.latest_hiv_followup_visit) >= 3\n" +
-                "                                           AND (t.effective_vl_result IS NOT NULL)\n" +
-                "                                           AND (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-                "                                           )\n" +
-                "                                           OR\n" +
-                "                                       (t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-                "                                           AND\n" +
-                "                                        TIMESTAMPDIFF(MONTH, t.effective_date_requested, t.latest_hiv_followup_visit) >=\n" +
-                "                                        3\n" +
-                "                                           )\n" +
-                "                                           OR\n" +
-                "                                       (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-                "                                         t.effective_vl_result < 200)\n" +
-                "                                           AND\n" +
-                "                                        TIMESTAMPDIFF(MONTH, t.effective_date_requested, t.latest_hiv_followup_visit) >=\n" +
-                "                                        6\n" +
-                "                                           AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-                "                                           )\n" +
-                "                                           OR\n" +
-                "                                       (((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-                "                                         t.effective_vl_result < 200)\n" +
-                "                                           AND\n" +
-                "                                        TIMESTAMPDIFF(MONTH, t.effective_date_requested, t.latest_hiv_followup_visit) >=\n" +
-                "                                        12\n" +
-                "                                           AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-                "                                           )\n" +
-                "                                           OR\n" +
-                "                                       ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-                "                                           AND\n" +
-                "                                        TIMESTAMPDIFF(MONTH, t.date_started_art, t.latest_hiv_followup_visit) >= 3\n" +
-                "                                           AND (t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-                "                                               AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-                "                                                                 t.latest_hiv_followup_visit) >= 6)\n" +
-                "                                           AND ((t.lab_test = 1305 AND t.effective_vl_result in (1306,1302)) OR\n" +
-                "                                                (t.effective_vl_result < 200))\n" +
-                "                                           )\n" +
-                "                                       ) THEN 'Invalid'\n" +
-                "                                   ELSE 'Valid'\n" +
-                "                                   END AS                                 vl_status\n" +
-                "                        FROM vl_enriched t),\n" +
-                "     latest_any_request AS (\n" +
-                "         /* Latest VL request overall (used only to exclude “latest is pending”) */\n" +
-                "         SELECT q.*\n" +
-                "         FROM (SELECT x.patient_id,\n" +
-                "                      x.date_test_requested,\n" +
-                "                      x.vl_status,\n" +
-                "                      ROW_NUMBER() OVER (\n" +
-                "                          PARTITION BY x.patient_id\n" +
-                "                          ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-                "                          ) AS rn,\n" +
-                "                      x.fup_minus_effective_test_date\n" +
-                "               FROM vl_with_status x) q\n" +
-                "         WHERE q.rn = 1),\n" +
-                "     latest_non_pending AS (\n" +
-                "         /* Last non-pending VL row (this is the “last VL” we care about for this cohort) */\n" +
-                "         SELECT q.*\n" +
-                "         FROM (SELECT x.*,\n" +
-                "                      ROW_NUMBER() OVER (\n" +
-                "                          PARTITION BY x.patient_id\n" +
-                "                          ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-                "                          ) AS rn\n" +
-                "               FROM vl_with_status x\n" +
-                "               WHERE x.vl_status <> 'Pending') q\n" +
-                "         WHERE q.rn = 1)\n" +
-                "SELECT lnp.patient_id\n" +
-                "FROM latest_non_pending lnp\n" +
-                "         INNER JOIN latest_any_request lar\n" +
-                "                    ON lar.patient_id = lnp.patient_id\n" +
-                "WHERE lnp.vl_status = 'Invalid'\n" +
-                "  AND lnp.latest_hiv_followup_visit IS NOT NULL\n" +
-                "  AND lnp.latest_hiv_followup_visit > lnp.date_test_requested\n" +
-                "    /* critical exclusion: if the latest request is pending, do NOT count them */\n" +
-                "  AND lar.vl_status <> 'Pending'\n" +
-                "ORDER BY lnp.patient_id;";
+        String sqlQuery = "select r.patient_id, r.latest_hiv_followup_visit, r.vl_due_date, r.date_test_requested, r.vl_result\n" +
+                "                     from kenyaemr_etl.etl_viral_load_validity_tracker r\n" +
+                "                     where r.latest_hiv_followup_visit BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "                       AND r.latest_hiv_followup_visit >= r.vl_due_date\n" +
+                "                       AND (r.date_test_requested IS NULL OR r.date_test_requested <> r.latest_hiv_followup_visit)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("eligibleForVLSampleNotTakenZeroGracePeriod");
         cd.setQuery(sqlQuery);
@@ -1324,7 +1218,7 @@ public class PublicHealthActionCohortLibrary {
                 "                                        having latest_disc_date <= date(:endDate)) d\n" +
                 "                                       on e.patient_id = d.disc_patient\n" +
                 "                    group by e.patient_id\n" +
-                "                    having timestampdiff(DAY, date(latest_appointment_date), date(:endDate)) <= 7\n" +
+                "                    having timestampdiff(DAY, date(latest_appointment_date), date(:endDate)) >= 7\n" +
                 "                       and date(latest_appointment_date) >= date(latest_visit_date)\n" +
                 "                       and ((latest_enrollment_date >= d.latest_disc_date\n" +
                 "                        and latest_appointment_date > d.latest_disc_date) or d.disc_patient is null)) b\n" +
