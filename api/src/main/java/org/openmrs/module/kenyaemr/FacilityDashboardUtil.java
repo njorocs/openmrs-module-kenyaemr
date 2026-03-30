@@ -686,22 +686,22 @@ public class FacilityDashboardUtil {
 				"FROM ((SELECT av.patient_id,av.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mch_antenatal_visit av\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
-				"       WHERE av.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND av.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mchs_delivery d\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
-				"       WHERE d.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE d.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND d.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT p.patient_id, p.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mch_postnatal_visit p\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
-				"       WHERE p.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE p.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND p.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT t.patient_id, t.visit_date\n" +
@@ -709,17 +709,17 @@ public class FacilityDashboardUtil {
 				"                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id\n" +
 				"           AND t.final_test_result = 'Positive'\n" +
 				"           AND t.voided = 0\n" +
-				"           AND t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE)) a\n" +
+				"           AND t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"')) a\n" +
 				"         LEFT JOIN\n" +
 				"     (SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
 				"      FROM kenyaemr_etl.etl_hts_referral_and_linkage l\n" +
-				"      WHERE date(l.visit_date) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"      WHERE date(l.visit_date) BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"      GROUP BY l.patient_id) l ON a.patient_id = l.patient_id\n" +
 				"         LEFT JOIN (SELECT e.patient_id\n" +
 				"                    FROM kenyaemr_etl.etl_drug_event e\n" +
-				"                    WHERE e.program = 'HIV' and COALESCE(date(e.date_started),date(e.visit_date)) <= CURRENT_DATE) e\n" +
+				"                    WHERE e.program = 'HIV' and COALESCE(date(e.date_started),date(e.visit_date)) <= '" + endDate +"') e\n" +
 				"                   ON e.patient_id = a.patient_id\n" +
 				"where (e.patient_id is null and l.art_start_date is null)\n" +
 				"            group by date(visit_date)\n" +
@@ -751,7 +751,7 @@ public class FacilityDashboardUtil {
 				"    l.visit_date\n" +
 				"    FROM kenyaemr_etl.etl_hts_linkage_tracing l\n" +
 				"             inner join kenyaemr_etl.etl_patient_demographics a on l.patient_id = a.patient_id\n" +
-				"    WHERE date(l.visit_date) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"    WHERE date(l.visit_date) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"group by date(visit_date),grouped_tracing_status\n" +
 				"order by date(visit_date) ASC;";
 		return getSimpleObject(hivPositiveMonthlyNotLinkedPatients);
@@ -779,7 +779,7 @@ public class FacilityDashboardUtil {
 				"                                  t.final_test_result,\n" +
 				"                                  t.hts_entry_point\n" +
 				"                           FROM kenyaemr_etl.etl_hts_test t\n" +
-				"                           where t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"                           where t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"                             AND t.final_test_result = 'Negative') t\n" +
 				"                          ON s.patient_id = t.patient_id\n" +
 				"                              -- enforce order: screening must be before (or same day as) HTS test\n" +
@@ -791,7 +791,7 @@ public class FacilityDashboardUtil {
 				"                          ON d.patient_id = s.patient_id\n" +
 				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
 				"        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-				"        AND s.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"        AND s.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"        AND d.Gender = 'F'\n" +
 				"-- enforce: all three events occur within the same 3-day window\n" +
 				"        AND TIMESTAMPDIFF(\n" +
@@ -817,24 +817,24 @@ public class FacilityDashboardUtil {
 				"                                 max(f.visit_date)                                      as latest_fup_date,\n" +
 				"                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
 				"                          from kenyaemr_etl.etl_prep_followup f\n" +
-				"                          where f.visit_date <= CURRENT_DATE\n" +
+				"                          where f.visit_date <= '" + endDate +"'\n" +
 				"                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
 				"                             left join (select r.patient_id,\n" +
 				"                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
 				"                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
 				"                                        from kenyaemr_etl.etl_prep_monthly_refill r\n" +
-				"                                        where r.visit_date <= CURRENT_DATE\n" +
+				"                                        where r.visit_date <= '" + endDate +"'\n" +
 				"                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
 				"                             left join (select patient_id                                               as disc_patient,\n" +
 				"                                               max(d.visit_date)                                        as latest_disc_date,\n" +
 				"                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
 				"                                        from kenyaemr_etl.etl_prep_discontinuation d\n" +
-				"                                        where d.visit_date <= CURRENT_DATE\n" +
+				"                                        where d.visit_date <= '" + endDate +"'\n" +
 				"                                        group by patient_id\n" +
-				"                                        having latest_disc_date <= CURRENT_DATE) d\n" +
+				"                                        having latest_disc_date <= '" + endDate +"') d\n" +
 				"                                       on e.patient_id = d.disc_patient\n" +
 				"                    group by e.patient_id\n" +
-				"                    having timestampdiff(DAY, date(latest_appointment_date), CURRENT_DATE) <= 7\n" +
+				"                    having timestampdiff(DAY, date(latest_appointment_date), '" + endDate +"') <= 7\n" +
 				"                       and date(latest_appointment_date) >= date(latest_visit_date)\n" +
 				"                       and ((latest_enrollment_date >= d.latest_disc_date\n" +
 				"                        and latest_appointment_date > d.latest_disc_date) or d.disc_patient is null)) b\n" +
@@ -942,9 +942,9 @@ public class FacilityDashboardUtil {
 				"         INNER JOIN kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
 				"         LEFT JOIN(SELECT x.patient_id week6pcr, x.test_result as week6results\n" +
 				"                   FROM kenyaemr_etl.etl_laboratory_extract x\n" +
-				"                   WHERE x.lab_test = 1030 and x.date_test_requested <= CURRENT_DATE) t ON e.patient_id = t.week6pcr\n" +
-				"WHERE d.hei_no is not null AND d.DOB between DATE_SUB(CURRENT_DATE, INTERVAL 8 WEEK) AND\n" +
-				"    DATE_SUB(date(CURRENT_DATE), INTERVAL 6 WEEK)\n" +
+				"                   WHERE x.lab_test = 1030 and x.date_test_requested <= '" + endDate +"') t ON e.patient_id = t.week6pcr\n" +
+				"WHERE d.hei_no is not null AND d.DOB between DATE_SUB('" + endDate +"', INTERVAL 8 WEEK) AND\n" +
+				"    DATE_SUB(date('" + endDate +"'), INTERVAL 6 WEEK)\n" +
 				"  AND t.week6results IS NULL\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date) ASC;";
@@ -1030,12 +1030,12 @@ public class FacilityDashboardUtil {
 				"FROM kenyaemr_etl.etl_hei_enrollment e\n" +
 				"         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
 				"                     LEFT JOIN (select o.patient_id,o.hiv_status_at_exit from kenyaemr_etl.etl_hei_enrollment o where o.encounter_type = 'MCHCS_HEI_COMPLETION'\n" +
-				"                                and o.visit_date <= CURRENT_DATE) o on o.patient_id = e.patient_id\n" +
+				"                                and o.visit_date <= '" + endDate +"') o on o.patient_id = e.patient_id\n" +
 				"                     left join kenyaemr_etl.etl_patient_program_discontinuation c\n" +
 				"                               on e.patient_id = c.patient_id and c.program_name in ('MCH Child HEI','MCH Child')\n" +
 				"                     left join kenyaemr_etl.etl_hts_test t on t.patient_id = e.patient_id\n" +
 				"WHERE d.hei_no is not null\n" +
-				"  AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"  AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"  AND (c.discontinuation_reason is null and o.hiv_status_at_exit is null and t.final_test_result is null)\n" +
 				"GROUP BY date\n" +
 				"ORDER BY date;";
@@ -1069,8 +1069,8 @@ public class FacilityDashboardUtil {
 				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
 				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
-				"             BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
-				"             AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
+				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -1090,22 +1090,22 @@ public class FacilityDashboardUtil {
 				"                      JOIN kenyaemr_etl.etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
 				"                      LEFT JOIN kenyaemr_etl.etl_drug_event de ON e.patient_id = de.patient_id\n" +
 				"                 AND de.program = 'HIV'\n" +
-				"                 AND date(de.date_started) <= CURRENT_DATE\n" +
+				"                 AND date(de.date_started) <= '" + endDate +"'\n" +
 				"                      LEFT OUTER JOIN (\n" +
 				"                 SELECT patient_id,\n" +
 				"                        coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
 				"                        max(date(effective_discontinuation_date)) as effective_disc_date\n" +
 				"                 FROM kenyaemr_etl.etl_patient_program_discontinuation\n" +
-				"                 WHERE date(visit_date) <= CURRENT_DATE\n" +
+				"                 WHERE date(visit_date) <= '" + endDate +"'\n" +
 				"                   AND program_name = 'HIV'\n" +
 				"                 GROUP BY patient_id\n" +
 				"             ) d ON d.patient_id = fup.patient_id\n" +
-				"             WHERE fup.visit_date <= CURRENT_DATE\n" +
+				"             WHERE fup.visit_date <= '" + endDate +"'\n" +
 				"             GROUP BY patient_id\n" +
 				"             HAVING (started_on_drugs IS NOT NULL AND started_on_drugs <> '')\n" +
 				"                AND (\n" +
-				"                 (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30\n" +
-				"                     AND ((date(d.effective_disc_date) > CURRENT_DATE\n" +
+				"                 (timestampdiff(DAY, date(latest_tca), '" + endDate +"') <= 30\n" +
+				"                     AND ((date(d.effective_disc_date) > '" + endDate +"'\n" +
 				"                         OR date(enroll_date) > date(d.effective_disc_date))\n" +
 				"                         OR d.effective_disc_date IS NULL))\n" +
 				"                     AND (date(latest_vis_date) >= date(date_discontinued)\n" +
@@ -1120,7 +1120,7 @@ public class FacilityDashboardUtil {
 				"    FROM kenyaemr_etl.etl_enhanced_adherence e\n" +
 				"    WHERE e.patient_id = vl.patient_id\n" +
 				"      AND e.visit_date > vl.vl_effective_result_date\n" +
-				"      AND e.visit_date <= CURRENT_DATE\n" +
+				"      AND e.visit_date <= '" + endDate +"'\n" +
 				")\n" +
 				"GROUP BY DATE(results_date)\n" +
 				"ORDER BY DATE(results_date) ASC;";
@@ -1142,19 +1142,19 @@ public class FacilityDashboardUtil {
 				"FROM ((SELECT av.patient_id, av.encounter_id, av.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mch_antenatal_visit av\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics a on av.patient_id = a.patient_id\n" +
-				"       WHERE av.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND av.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.encounter_id, d.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mchs_delivery d\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = d.patient_id\n" +
-				"       WHERE d.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE d.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND d.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT p.patient_id, p.encounter_id, p.visit_date\n" +
 				"       FROM kenyaemr_etl.etl_mch_postnatal_visit p\n" +
 				"                inner join kenyaemr_etl.etl_patient_demographics d on p.patient_id = d.patient_id\n" +
-				"       WHERE p.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE p.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND p.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT t.patient_id, t.encounter_id, t.visit_date\n" +
@@ -1162,14 +1162,14 @@ public class FacilityDashboardUtil {
 				"                inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id \n" +
 				"         AND t.final_test_result = 'Positive'\n" +
 				"         AND t.voided = 0\n" +
-				"         AND t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE)\n" +
+				"         AND t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"')\n" +
 				"                      UNION\n" +
 				"       (SELECT l.patient_id, l.encounter_id, COALESCE(l.date_test_requested,l.visit_date) as visit_date\n" +
 				"                   FROM kenyaemr_etl.etl_laboratory_extract l\n" +
 				"                            inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = l.patient_id\n" +
 				"                   WHERE l.lab_test = 1030 AND l.test_result = 703\n" +
-				"                     AND l.date_test_requested BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE)) a\n" +
-				"where date(a.visit_date) >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
+				"                     AND l.date_test_requested BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"')) a\n" +
+				"where date(a.visit_date) >= DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
 				"group by date(visit_date)\n" +
 				"order by date(visit_date) ASC;";
 
@@ -1196,7 +1196,7 @@ public class FacilityDashboardUtil {
 				"                            t.final_test_result,\n" +
 				"                            t.hts_entry_point\n" +
 				"                     FROM kenyaemr_etl.etl_hts_test t\n" +
-				"                     where t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"                     where t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"                       AND t.final_test_result = 'Negative') t\n" +
 				"                    ON s.patient_id = t.patient_id\n" +
 				"                        -- enforce order: screening must be before (or same day as) HTS test\n" +
@@ -1208,7 +1208,7 @@ public class FacilityDashboardUtil {
 				"                    ON d.patient_id = s.patient_id\n" +
 				"WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
 				"  AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-				"  AND s.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"  AND s.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"  AND d.Gender = 'F'\n" +
 				"-- enforce: all three events occur within the same 3-day window\n" +
 				"  AND TIMESTAMPDIFF(\n" +
@@ -1236,7 +1236,8 @@ public class FacilityDashboardUtil {
 		String getHeiEightWeeksOldQuery = "SELECT COUNT(DISTINCT(e.patient_id)) AS hei, e.visit_date as visit_date\n" +
 				"FROM kenyaemr_etl.etl_hei_enrollment e\n" +
 				"         INNER JOIN kenyaemr_etl.etl_patient_demographics d on e.patient_id = d.patient_id\n" +
-				"WHERE d.hei_no is not null AND TIMESTAMPDIFF(WEEK, d.DOB, DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)) = 8\n" +
+
+				"WHERE d.hei_no is not null AND TIMESTAMPDIFF(WEEK, d.DOB, DATE_SUB('" + endDate +"', INTERVAL 30 DAY)) = 8\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date) ASC;";
 
@@ -1318,7 +1319,7 @@ public class FacilityDashboardUtil {
 		String hei24MonthsOldQuery = "SELECT COUNT(DISTINCT(e.patient_id)) AS hei_24_months, DATE_ADD(d.dob, INTERVAL 24 MONTH) AS date\n" +
 				"FROM kenyaemr_etl.etl_hei_enrollment e\n" +
 				"         INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
-				"WHERE d.hei_no is not null AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n"+
+				"WHERE d.hei_no is not null AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n"+
 				"GROUP BY DATE(date)\n" +
 				"ORDER BY DATE(date) ASC;";
 		return getSimpleObject(hei24MonthsOldQuery);
@@ -1349,8 +1350,8 @@ public class FacilityDashboardUtil {
 				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
 				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
-				"             BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
-				"             AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
+				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -1370,22 +1371,22 @@ public class FacilityDashboardUtil {
 				"                      JOIN kenyaemr_etl.etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
 				"                      LEFT JOIN kenyaemr_etl.etl_drug_event de ON e.patient_id = de.patient_id\n" +
 				"                 AND de.program = 'HIV'\n" +
-				"                 AND date(de.date_started) <= CURRENT_DATE\n" +
+				"                 AND date(de.date_started) <= '" + endDate +"'\n" +
 				"                      LEFT OUTER JOIN (\n" +
 				"                 SELECT patient_id,\n" +
 				"                        coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
 				"                        max(date(effective_discontinuation_date)) as effective_disc_date\n" +
 				"                 FROM kenyaemr_etl.etl_patient_program_discontinuation\n" +
-				"                 WHERE date(visit_date) <= CURRENT_DATE\n" +
+				"                 WHERE date(visit_date) <= '" + endDate +"'\n" +
 				"                   AND program_name = 'HIV'\n" +
 				"                 GROUP BY patient_id\n" +
 				"             ) d ON d.patient_id = fup.patient_id\n" +
-				"             WHERE fup.visit_date <= CURRENT_DATE\n" +
+				"             WHERE fup.visit_date <= '" + endDate +"'\n" +
 				"             GROUP BY patient_id\n" +
 				"             HAVING (started_on_drugs IS NOT NULL AND started_on_drugs <> '')\n" +
 				"                AND (\n" +
-				"                 (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30\n" +
-				"                     AND ((date(d.effective_disc_date) > CURRENT_DATE\n" +
+				"                 (timestampdiff(DAY, date(latest_tca), '" + endDate +"') <= 30\n" +
+				"                     AND ((date(d.effective_disc_date) > '" + endDate +"'\n" +
 				"                         OR date(enroll_date) > date(d.effective_disc_date))\n" +
 				"                         OR d.effective_disc_date IS NULL))\n" +
 				"                     AND (date(latest_vis_date) >= date(date_discontinued)\n" +
