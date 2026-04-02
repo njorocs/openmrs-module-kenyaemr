@@ -38,7 +38,7 @@ public class Moh731MatIndicatorLibrary {
 	 * @return the indicator
 	 */
 	public CohortIndicator matAllNumberInducted() {
-		return cohortIndicator("Individuals Inducted in MAT", map(moh731MatCohorts.matAllNumberInducted(), "startDate=${startDate},endDate=${endDate}"));
+		return cohortIndicator("Individuals Inducted in MAT", map(moh731MatCohorts.matNumberInducted(), "startDate=${startDate},endDate=${endDate}"));
 	}
 
 	/**

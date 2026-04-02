@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Report builder for ETL MOH 731
+ * Report builder for ETL MOH 731-6 MAT
  */
 @Component
 @Builds({"kenyaemr.etl.common.report.matReport"})
@@ -108,15 +108,12 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
         );
     }
 
-//    @Override
-//    protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor, ReportDefinition reportDefinition) {
-//        return Arrays.asList(
-//                ReportUtils.map(hivTestingAndCouselingDatasetDefinition(), "startDate=${startDate},endDate=${endDate}"),
-//                ReportUtils.map(pmtctDataSet(), "startDate=${startDate},endDate=${endDate}"),
-//                ReportUtils.map(careAndTreatmentDataSet(), "startDate=${startDate},endDate=${endDate}"),
-//                ReportUtils.map(voluntaryMaleCircumcisionDatasetDefinition(), "startDate=${startDate},endDate=${endDate}")
-//        );
-//    }
+    @Override
+    protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor, ReportDefinition reportDefinition) {
+        return Arrays.asList(
+                ReportUtils.map(matDatasetDefinition(), "startDate=${startDate},endDate=${endDate}")
+        );
+    }
       /**
      * Creates the dataset for section #1
      * : hiv testing and counseling

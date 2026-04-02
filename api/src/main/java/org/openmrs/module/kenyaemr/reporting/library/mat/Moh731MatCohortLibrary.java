@@ -35,23 +35,40 @@ import java.util.Date;
 @Component
 public class Moh731MatCohortLibrary {
 	/**
-	 * HIV testing cohort includes those who tested during the reporting period excluding pmtct clients
-	 * Composed using htsALLNumberTested AND NOT testedPmtct
+	 * MAT cohort includes those who were inducted on Medically Assisted Therapy (MAT)
+	 * Composed using matALLNumberInducted
 	 *
 	 * @return
 	 */
 	public CohortDefinition matAllNumberInducted() {
-		String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_hts_test t inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id where test_type = 1 and\n" +
-				"    t.final_test_result in ('Positive','Negative') and t.voided = 0 and t.visit_date between date (:startDate) and date (:endDate)\n" +
+		String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_mat_intial_registrations t \n" +
+				"inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = t.patient_id \n" +
+				"    where t.voided = 0 and t.visit_date between date (:startDate) and date (:endDate)\n" +
 				"    group by t.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
-		cd.setName("htsNumberTested");
+		cd.setName("matNumberInducted");
 		cd.setQuery(sqlQuery);
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		cd.setDescription("Hiv Number Tested");
+		cd.setDescription("MAT Number Inducted");
 		return cd;
 	}
+
+	/**
+	 * MAT cohort includes those who were inducted on Medically Assisted Therapy (MAT)
+	 * Composed using matAllNumberInducted
+	 *
+	 * @return
+	 */
+	public CohortDefinition matNumberInducted() {
+		CompositionCohortDefinition cd = new CompositionCohortDefinition();
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cd.addSearch("matAllNumberInducted", ReportUtils.map(matAllNumberInducted(), "startDate=${startDate},endDate=${endDate}"));
+		cd.setCompositionString("matAllNumberInducted");
+		return cd;
+	}
+
 //	public CohortDefinition hivEnrollment(){
 //		SqlCohortDefinition cd = new SqlCohortDefinition();
 //		String sqlQuery = "select  e.patient_id " +
