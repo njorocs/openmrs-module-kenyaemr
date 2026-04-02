@@ -24,6 +24,8 @@ import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
+import liquibase.pro.packaged.p;
+
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
 
 
@@ -307,7 +309,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PNS_PATIENT_CONTACT_LIVING_WITH_PATIENT = "35a08d84-9f80-4991-92b4-c4ae5903536e";
 		public static final String PNS_PATIENT_CONTACT_REGISTRATION_SOURCE = "7c94bd35-fba7-4ef7-96f5-29c89a318fcf";
 		public static final String PNS_PATIENT_CONTACT_IPV_OUTCOME = "49c543c2-a72a-4b0a-8cca-39c375c0726f";
-
+    	public static final String NEXT_OF_KIN_NATIONAL_ID = "73d34479-2f9e-4de3-a5e6-1f79a17459bb";
 	}
 
 	public static final class _Provider {
@@ -883,8 +885,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(visitType("Inpatient", "Visit where the patient is admitted to the hospital", _VisitType.INPATIENT));
 		install(visitType("Casualty/Emergency", "Visit where the patient is admitted to the casualty/emergency department", _VisitType.CASUALTY));
 		install(visitType("Mortuary", "Visit where the body is admitted to the Mortuary", _VisitType.MORTUARY));
-		uninstall(possible(PersonAttributeType.class, "73d34479-2f9e-4de3-a5e6-1f79a17459bb"),
-				"Became patient identifier"); // National ID attribute type
+		install(personAttributeType("Next of kin national ID", "National ID of patient's next of kin",
+        String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
 
 		//Retiring Lab results form
 		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"), "Form deprecated with introduction of Lab orders");
