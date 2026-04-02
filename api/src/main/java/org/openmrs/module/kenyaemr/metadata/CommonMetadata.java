@@ -24,8 +24,6 @@ import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
-import liquibase.pro.packaged.p;
-
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
 
 
