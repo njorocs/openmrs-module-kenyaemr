@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRiskEvaluationDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -24,10 +24,10 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Evaluates LastRiskCategorizationDataDefinition
+ * Evaluates LastRtcRiskScoreDataDefinition
  */
-@Handler(supports= LastRiskEvaluationDateDataDefinition.class, order=50)
-public class LastRiskEvaluationDateDataEvaluator implements PersonDataEvaluator {
+@Handler(supports= LastRtcRiskScoreDataDefinition.class, order=50)
+public class LastRtcRiskScoreDataEvaluator implements PersonDataEvaluator {
 
     @Autowired
     private EvaluationService evaluationService;
@@ -36,9 +36,9 @@ public class LastRiskEvaluationDateDataEvaluator implements PersonDataEvaluator 
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select ml.patient_id,\n" +
-			"       mid(max(concat(ml.date_created ,NULLIF(concat(date(ml.evaluation_date)),'0000-00-00'))),20) as evaluation_date\n" +
-			"from kenyaemr_ml_patient_risk_score ml where date(ml.date_created) <= date(:endDate)\n" +
-			"GROUP BY ml.patient_id;";
+			"       mid(max(concat(ml.date_created ,concat(ml.rtc_risk_score ))),20) as risk_score\n" +
+			"        from kenyaemr_ml_patient_risk_score ml where date(ml.date_created) <= date(:endDate)\n" +
+			"        GROUP BY ml.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

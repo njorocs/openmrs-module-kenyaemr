@@ -30,7 +30,6 @@ import org.openmrs.module.kenyaemr.reporting.calculation.converter.SimpleResultD
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ActivePatientsSnapshotCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.ActiveInProgramConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.BooleanResultsConverter;
-import org.openmrs.module.kenyaemr.reporting.data.converter.CalculationResultConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.TBScreeningConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ActivePatientsPopulationTypeDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MFLCodeDataDefinition;
@@ -194,6 +193,9 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         ARTCacxScreeningDateDataDefinition cacxScreeningDateDataDefinition = new ARTCacxScreeningDateDataDefinition();
         cacxScreeningDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         cacxScreeningDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        LastRtcRiskScoreDataDefinition rtcRiskScoreDataDefinition = new LastRtcRiskScoreDataDefinition();
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         DataConverter formatter = new ObjectFormatter("{familyName}, {givenName}");
         DataDefinition nameDef = new ConvertedPersonDataDefinition("name", new PreferredNameDataDefinition(), formatter);
         dsd.addColumn("MFL Code", new MFLCodeDataDefinition(), "");
@@ -255,6 +257,7 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         dsd.addColumn("Last risk score", lastRiskScoreDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Risk categorization", lastRiskCategorizationDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Evaluation date", lastRiskEvaluationDateDataDefinition, "endDate=${endDate}");
+		dsd.addColumn("RTC Risk Score", rtcRiskScoreDataDefinition, "endDate=${endDate}");
 
         return dsd;
     }

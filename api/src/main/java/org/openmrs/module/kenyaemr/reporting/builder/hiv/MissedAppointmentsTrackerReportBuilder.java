@@ -24,6 +24,7 @@ import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculati
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MissedAppointmentsDuringPeriodCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentTypeNotHonouredDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCaseManagerDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDaysMissedDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentEffectiveDiscontinuationDateDataDefinition;
@@ -170,6 +171,10 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		discontinuationDate.addParameter(new Parameter("endDate", "End Date", Date.class));
 		discontinuationDate.addParameter(new Parameter("startDate", "Start Date", Date.class));
 
+		LastRtcRiskScoreDataDefinition rtcRiskScoreDataDefinition = new LastRtcRiskScoreDataDefinition();
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
 		dsd.addColumn("Name", nameDef, "");
 		dsd.addColumn("id", new PatientIdDataDefinition(), "");
 		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), "", new BirthdateConverter(DATE_FORMAT));
@@ -193,6 +198,8 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		dsd.addColumn("Effective Discontinuation Date", discontinuationDate, paramMapping, new DateConverter(DATE_FORMAT));
 		dsd.addColumn("RTC Date", rtcDate, paramMapping, new DateConverter(DATE_FORMAT)); // first visit after missed appointment
 		dsd.addColumn("Case Manager", etlCaseManagerDataDefinition, paramMapping, null);
+		dsd.addColumn("RTC Risk Score", rtcRiskScoreDataDefinition, paramMapping, null);
+
 
 		MissedAppointmentsDuringPeriodCohortDefinition cd = new MissedAppointmentsDuringPeriodCohortDefinition();
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
