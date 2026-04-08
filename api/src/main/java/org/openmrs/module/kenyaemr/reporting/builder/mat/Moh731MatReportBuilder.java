@@ -26,9 +26,13 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDate;
+
+import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 
 /**
  * Report builder for ETL MOH 731-6 MAT
@@ -76,8 +80,10 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
     ColumnParameters f10_to_19 = new ColumnParameters(null, "10-19, Female", "gender=F|age=10-19");
     ColumnParameters m_20_to_24 = new ColumnParameters(null, "20-24, Male", "gender=M|age=20-24");
     ColumnParameters f_20_to_24 = new ColumnParameters(null, "20-24, Female", "gender=F|age=20-24");
-    ColumnParameters m_25_and_above = new ColumnParameters(null, "25+, Male", "gender=M|age=25+");
-    ColumnParameters f_25_and_above = new ColumnParameters(null, "25+, Female", "gender=F|age=25+");
+    ColumnParameters m_25_to_29 = new ColumnParameters(null, "25-29, Male", "gender=M|age=25-29");
+    ColumnParameters f_25_to_29 = new ColumnParameters(null, "25-29, Female", "gender=F|age=25-29");
+    ColumnParameters m_30_and_above = new ColumnParameters(null, "30+, Male", "gender=M|age=30+");
+    ColumnParameters f_30_and_above = new ColumnParameters(null, "30+, Female", "gender=F|age=30+");
     ColumnParameters males = new ColumnParameters(null, "Male", "gender=M");
     ColumnParameters females = new ColumnParameters(null, "Female", "gender=F");
 
@@ -89,7 +95,7 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
 
     List<ColumnParameters> allAgeDisaggregation = Arrays.asList(
             maleInfants, femaleInfants, m_1_to_4,  f_1_to_4, m_5_to_9, f_5_to_9, m_10_to_14, f_10_to_14,m_15_to_19, f_15_to_19,
-            m_20_to_24, f_20_to_24, m_25_and_above, f_25_and_above);
+            m_20_to_24, f_20_to_24, m_25_to_29, f_25_to_29, m_30_and_above, f_30_and_above);
 
     List<ColumnParameters> vmmcDisaggregation = Arrays.asList(
             boys_0_to_60_days, boys_61_days_to_9_years, m_10_to_14, male_15_and_above);
@@ -129,10 +135,34 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
         cohortDsd.addDimension("gender", ReportUtils.map(commonDimensions.gender()));
         String indParams = "startDate=${startDate},endDate=${endDate}";
 
-       //1.1 Ever Inducted
-        EmrReportingUtils.addRow(cohortDsd, "Ever Enrolled In Mat", "", ReportUtils.map(moh731MatIndicators.matAllNumberInducted(), indParams), genderDisaggregation, Arrays.asList("19", "20"));
+       // 1.0 EVER INDUCTED
+        EmrReportingUtils.addRow(cohortDsd, "Ever Enrolled In Mat", "", ReportUtils.map(moh731MatIndicators.matAllNumberInducted(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
-//        cohortDsd.addColumn("HV01-01", "Tested (M)", ReportUtils.map(moh731GreenCardIndicators.htsTestsMales(), indParams),"");
+        // 1.1 MAT INDUCTION WITHIN THE REPORTING PERIOD
+        EmrReportingUtils.addRow(cohortDsd,  "Newly Enrolled In Mat in Reporting period", "", ReportUtils.map(moh731MatIndicators.matNumberInductedInReportingPeriod(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+
+        // MAT Methadone, MAT Buprenorphine
+        EmrReportingUtils.addRow(cohortDsd,  "Number currently on Methadone", "", ReportUtils.map(moh731MatIndicators.matNumberOnMethadone(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number currently on Buprenorphine", "", ReportUtils.map(moh731MatIndicators.matNumberOnBuprenorphine(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number currently on Methadone in Transit", "", ReportUtils.map(moh731MatIndicators.matNumberOnMethadoneInTransit(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number currently on Buprenorphine in Transit", "", ReportUtils.map(moh731MatIndicators.matNumberOnBuprenorphineInTransit(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // weaned off mat
+        EmrReportingUtils.addRow(cohortDsd, "Weaned off Methadone", "", ReportUtils.map(moh731MatIndicators.matNumberWeanedOffMethadone(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Weaned off Buprenorphine", "", ReportUtils.map(moh731MatIndicators.matNumberWeanedOffBuprenorphine(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.2 Overdose MAT clients
+        EmrReportingUtils.addRow(cohortDsd,  "Experienced Overdose in Reporting period", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceOverdose(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.3 interventions
+        EmrReportingUtils.addRow(cohortDsd,  "Number Received Psychosocial Interventions", "", ReportUtils.map(moh731MatIndicators.matNumberReceivedInterventions(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Supported with Reintegration", "", ReportUtils.map(moh731MatIndicators.matNumberSupportedWithReintegration(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        //2.4 Violence prevention and Support
+        EmrReportingUtils.addRow(cohortDsd,  "Number Experienced Sexual Violence", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceViolence(), "typeOfViolence=126582," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Experienced Physical Violence", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceViolence(), "typeOfViolence=158358," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Experienced Emotional/Pyschological Violence", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceViolence(), "typeOfViolence=118688," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number received support", "", ReportUtils.map(moh731MatIndicators.matNumberReceivedViolenceSupport(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
 
         return cohortDsd;

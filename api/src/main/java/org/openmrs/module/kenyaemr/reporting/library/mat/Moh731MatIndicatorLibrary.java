@@ -25,7 +25,7 @@ import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
 /**
- * Indicators specific to the MOH731 report
+ * Indicators specific to the MOH731 MAT report
  */
 @Component
 public class Moh731MatIndicatorLibrary {
@@ -34,17 +34,101 @@ public class Moh731MatIndicatorLibrary {
 	private Moh731MatCohortLibrary moh731MatCohorts;
 
 	/**
-	 * Number of patients currently in care (includes transfers)
+	 * Number of all patients currently in MAT
 	 * @return the indicator
 	 */
 	public CohortIndicator matAllNumberInducted() {
-		return cohortIndicator("Individuals Inducted in MAT", map(moh731MatCohorts.matNumberInducted(), "startDate=${startDate},endDate=${endDate}"));
+		return cohortIndicator("Individuals Ever Inducted in MAT", map(moh731MatCohorts.matNumberInducted(), "startDate=${startDate},endDate=${endDate}"));
 	}
 
 	/**
-	 * Number of patients who are ART revisits
+	 * Number of patients who are inducted in MAT in reporting period
 	 * @return the indicator
 	 */
+    public CohortIndicator matNumberInductedInReportingPeriod() {
+        return cohortIndicator("Individuals Inducted in MAT in reporting period", map(moh731MatCohorts.matNumberInductedInReportingPeriod(), "startDate=${startDate},endDate=${endDate}"));
+    }
+
+	/**
+	 * Number of patients who are inducted in MAT on methadone
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberOnMethadone() {
+		return cohortIndicator("MAT enrolled Clients on Buprenorphine", map(moh731MatCohorts.matNumberOnMethadone(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT on Buprenorphine
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberOnBuprenorphine() {
+		return cohortIndicator("MAT enrolled Clients on Buprenorphine", map(moh731MatCohorts.matNumberOnBuprenorphine(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT on methadone and in transit
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberOnMethadoneInTransit() {
+		return cohortIndicator("MAT enrolled Clients on Methadone and in transit", map(moh731MatCohorts.matNumberOnMethadoneInTransit(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT on Buprenorphine in transit
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberOnBuprenorphineInTransit() {
+		return cohortIndicator("MAT enrolled Clients on Buprenorphine and in transit", map(moh731MatCohorts.matNumberOnBuprenorphineInTransit(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT Weaned off methadone
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberWeanedOffMethadone() {
+		return cohortIndicator("MAT enrolled Clients on Buprenorphine and in transit", map(moh731MatCohorts.matNumberWeanedOffMethadone(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT Weaned off Buprenorphine
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberWeanedOffBuprenorphine() {
+		return cohortIndicator("MAT enrolled Clients on Buprenorphine and in transit", map(moh731MatCohorts.matNumberWeanedOffBuprenorphine(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT experienced overdose
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberExperienceOverdose() {
+		return cohortIndicator("MAT enrolled Clients experienced overdose", map(moh731MatCohorts.matNumberExperienceOverdose(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT received intervention
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberReceivedInterventions() {
+		return cohortIndicator("MAT enrolled Clients received Psychosocial Interventions", map(moh731MatCohorts.matNumberReceivedInterventions(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT reintegrated
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberSupportedWithReintegration() {
+		return cohortIndicator("MAT enrolled Clients Supported with Reintegration", map(moh731MatCohorts.matNumberSupportedWithReintegration(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 * Number of patients who are inducted in MAT experience GBV
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberExperienceViolence() {
+		CohortIndicator ci =  cohortIndicator("MAT enrolled Clients experience violence", map(moh731MatCohorts.matNumberExperienceViolence(), "typeOfViolence=${typeOfViolence},startDate=${startDate},endDate=${endDate}"));
+		ci.addParameter(new Parameter("typeOfViolence", "Type Of Violence", String.class));
+
+		return ci;
+	}
+	/**
+	 * Number of patients who are inducted in MAT given GBV support
+	 * @return the indicator
+	 */
+	public CohortIndicator matNumberReceivedViolenceSupport() {
+		return cohortIndicator("MAT enrolled Clients given violence support", map(moh731MatCohorts.matNumberReceivedViolenceSupport(), "startDate=${startDate},endDate=${endDate}"));
+	}
 //	public CohortIndicator revisitsArt() {
 //		return cohortIndicator("Revisits ART", ReportUtils.map(moh731MatCohorts.revisitsArt(), "fromDate=${startDate},toDate=${endDate}"));
 //	}
