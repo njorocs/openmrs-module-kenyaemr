@@ -912,9 +912,10 @@ public class PublicHealthActionCohortLibrary {
     public CohortDefinition eligibleForVLSampleNotTakenZeroGracePeriod() {
         String sqlQuery = "select r.patient_id\n" +
                 "                     from kenyaemr_etl.etl_viral_load_validity_tracker r\n" +
-                "                     where r.latest_hiv_followup_visit BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "                     where r.latest_hiv_followup_visit BETWEEN DATE(:startDate) AND DATE(:endDate) AND r.vl_due_date IS NOT NULL\n" +
+                "                       AND r.vl_due_date <= DATE(:endDate)\n" +
                 "                       AND r.latest_hiv_followup_visit >= r.vl_due_date\n" +
-                "                       AND (r.date_test_requested IS NULL OR r.date_test_requested <> r.latest_hiv_followup_visit)";
+                "                       AND (r.date_test_requested IS NULL OR r.date_test_requested < r.latest_hiv_followup_visit)";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("eligibleForVLSampleNotTakenZeroGracePeriod");
         cd.setQuery(sqlQuery);

@@ -268,8 +268,11 @@ public class FacilityDashboardUtil {
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-			return (Long) Context.getAdministrationService().executeSQL(pregnantPostPartumNotPrepLinkedQuery, true)
-					.get(0).get(0);
+			List<List<Object>> result = Context.getAdministrationService().executeSQL(pregnantPostPartumNotPrepLinkedQuery, true);
+			if (result != null && !result.isEmpty() && result.get(0) != null && !result.get(0).isEmpty()) {
+				return ((Number) result.get(0).get(0)).longValue();
+			}
+			return 0L;
 		} finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		}
