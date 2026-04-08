@@ -9,14 +9,10 @@
  */
 package org.openmrs.module.kenyaemr.converter.simplifier;
 
-import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.simplifier.AbstractSimplifier;
-import org.openmrs.module.reporting.dataset.DataSet;
-import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
-import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +55,8 @@ public class ReportRequestSimplifier extends AbstractSimplifier<ReportRequest> {
 		ret.put("finished", request.getStatus().equals(ReportRequest.Status.COMPLETED) || request.getStatus().equals(ReportRequest.Status.FAILED));
 		ret.put("timeTaken", timeTaken != null ? kenyaui.formatDuration(timeTaken) : null);
 		ret.put("parameters", getDate(request));
-		ret.put("hasData", getReportData(request));
-		ret.put("hasDataSet", getReportDataSet(request));
+		ret.put("hasData", request.getStatus().equals(ReportRequest.Status.COMPLETED));
+		ret.put("hasDataSet", request.getStatus().equals(ReportRequest.Status.COMPLETED));
 		return ret;
 	}
 
@@ -91,35 +87,5 @@ public class ReportRequestSimplifier extends AbstractSimplifier<ReportRequest> {
 		}
 
 		return mappings;
-	}
-
-	public boolean getReportData(ReportRequest request) {
-		boolean hasData = false;
-		ReportService reportService = Context.getService(ReportService.class);
-		ReportData reportData = reportService.loadReportData(request);
-		if(reportData != null){
-			hasData = true;
-		}
-
-		return hasData;
-	}
-
-	public boolean getReportDataSet(ReportRequest request) {
-		boolean hasDataSet = false;
-		ReportService reportService = Context.getService(ReportService.class);
-		ReportData reportData = reportService.loadReportData(request);
-		if(reportData != null && reportData.getDataSets().size() > 0){
-			for(Map.Entry<String, DataSet> dataSetEntry : reportData.getDataSets().entrySet()){
-				if(dataSetEntry.getValue() != null){
-					DataSet dataSetRows = dataSetEntry.getValue();
-					if(dataSetRows.getMetaData().getColumnCount() > 0){
-						hasDataSet = true;
-					}
-				}
-			}
-
-		}
-
-		return hasDataSet;
 	}
 }

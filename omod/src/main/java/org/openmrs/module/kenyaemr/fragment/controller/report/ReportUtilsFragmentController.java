@@ -181,6 +181,36 @@ public class ReportUtilsFragmentController {
 	}
 
 	/**
+	 * Gets the in-progress (processing) requests for the given report
+	 * @param reportUuid the report definition UUID
+	 * @param ui the UI utils
+	 * @param reportService the report service
+	 * @return a map of request id to request for in-progress requests
+	 */
+	public HashMap<Integer, ReportRequest> getInProgressRequests(@RequestParam(value = "reportUuid", required = false) String reportUuid,
+										  UiUtils ui,
+										  @SpringBean ReportService reportService) {
+
+		List<ReportRequest> requests = fetchRequests(reportUuid, false, reportService);
+
+		// Filter to only in-progress requests
+		CollectionUtils.filter(requests, new Predicate() {
+			@Override
+			public boolean evaluate(Object obj) {
+				ReportRequest request = (ReportRequest) obj;
+				return ReportRequest.Status.PROCESSING.equals(request.getStatus());
+			}
+		});
+
+		HashMap<Integer, ReportRequest> inProgressMap = new HashMap<Integer, ReportRequest>();
+		for (ReportRequest request : requests) {
+			inProgressMap.put(request.getId(), request);
+		}
+
+		return inProgressMap;
+	}
+
+	/**
 	 * Helper method to fetch report requests
 	 * @param reportUuid the report definition UUID (optional)
 	 * @param finishedOnly only finished requests (completed or failed)
