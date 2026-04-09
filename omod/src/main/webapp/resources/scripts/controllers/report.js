@@ -16,6 +16,7 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 
 	$scope.queued = [];
 	$scope.finished = [];
+	$scope.inProgress = {};
 
 	/**
 	 * Initializes the controller
@@ -45,6 +46,11 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 					$timeout($scope.refresh, 5000);
 				}
 			});
+
+		$http.get(ui.fragmentActionLink('kenyaemr', 'report/reportUtils', 'getInProgressRequests', { reportUuid: $scope.reportUuid })).
+			success(function(data) {
+				$scope.inProgress = data;
+			});
 	};
 
 	/**
@@ -53,7 +59,7 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 	 */
 	$scope.requestReport = function(reportParams) {
 		var params = { appId: $scope.appId, reportUuid: $scope.reportUuid };
-		angular.extend(params, reportParams); // Add report parameters
+		angular.extend(params, reportParams);
 
 		$http.post(ui.fragmentActionLink('kenyaemr', 'report/reportUtils', 'requestReport', params))
 			.success(defaultSuccessHandler)
@@ -63,7 +69,6 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 
 	/**
 	 * Cancels a report request
-	 * @param reportUuid the report definition UUID
 	 */
 	$scope.cancelRequest = function(requestId) {
 		kenyaui.openConfirmDialog({
@@ -79,7 +84,6 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 
 	/**
 	 * Navigates to view report data page
-	 * @param requestId the report request id
 	 */
 	$scope.viewReportData = function(requestId) {
 		ui.navigate('kenyaemr', 'reportView', { appId: $scope.appId, request: requestId, returnUrl: location.href });
@@ -87,8 +91,6 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 
 	/**
 	 * Initiates download of exported report data
-	 * @param requestId the report request id
-	 * @param type the export type
 	 */
 	$scope.exportReportData = function(requestId, type) {
 		ui.navigate('kenyaemr', 'reportExport', { appId: $scope.appId, request: requestId, type: type });
@@ -96,7 +98,6 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 
 	/**
 	 * Displays a dialog showing a request error
-	 * @param requestId the request id
 	 */
 	$scope.viewReportError = function(requestId) {
 		var contentUrl = ui.pageLink('kenyaemr', 'dialog/reportErrorDialog', { appId: $scope.appId, request: requestId });
@@ -104,8 +105,15 @@ kenyaemrApp.controller('ReportController', ['$scope', '$http', '$timeout', funct
 	};
 
     $scope.viewAdxData = function(requestId) {
-        ui.navigate('kenyaemr', 'reports/adxViewHome', { appId: $scope.appId, request: requestId, returnUrl: location.href });
+        ui.navigate('kenyaemr', 'reports/dataExportHome', { appId: $scope.appId, request: requestId, returnUrl: location.href });
     };
+
+	/**
+	 * Check if report is being generated on server
+	 */
+	$scope.isGenerating = function(requestId) {
+		return $scope.inProgress[requestId] !== undefined;
+	};
 
 	var defaultSuccessHandler = function(data) {
 		kenyaui.notifySuccess(data.message);

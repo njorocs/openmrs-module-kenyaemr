@@ -63,20 +63,23 @@
 					<td>{{ request.requestDate | keDateTime }}</td>
 					<td>{{ request.requestedBy.person.name}}</td>
 					<td>{{ request.report.name }}_{{ request.parameters.startDate | keDateShort }}</td>
-					<td>{{ request.status }}</td>
+					<td>
+						<span ng-if="isGenerating(request.id)" class="ke-label-info">Generating report...</span>
+						<span ng-if="!isGenerating(request.id)">{{ request.status }}</span>
+					</td>
 					<td>{{ request.timeTaken || '--:--:--' }}</td>
 					<td style="text-align: right">
 						<div ng-if="request.status == 'COMPLETED' && request.hasData ">
 							<table class="ke-table-vertical">
 								<tr>
 									<td>
-										<a href="#" ng-click="viewReportData(request.id)">
+										<a href="#" ng-click="viewReportData(request.id)" class="ke-action-link">
 											<img src="${ ui.resourceLink("kenyaui", "images/glyphs/view.png") }" class="ke-glyph" /> View
 										</a>
 									</td>
 									<td>
 										<div ng-if="request.hasDataSet">
-											<a href="#" ng-click="exportReportData(request.id, 'csv')">
+											<a href="#" ng-click="exportReportData(request.id, 'csv')" class="ke-action-link">
 												<img src="${ ui.resourceLink("kenyaui", "images/glyphs/csv.png") }" class="ke-glyph" /> CSV
 											</a>
 										</div>
@@ -84,7 +87,7 @@
 									<td>
 										<div ng-if="request.hasDataSet">
 											<% if (excelRenderable){ %>
-											<a href="#" ng-click="exportReportData(request.id , 'excel')">
+											<a href="#" ng-click="exportReportData(request.id , 'excel')" class="ke-action-link">
 												<img src="${ ui.resourceLink("kenyaui", "images/glyphs/excel.png") }" class="ke-glyph" /> Excel
 											</a>
 											<% } %>
@@ -93,7 +96,7 @@
 									<td>
 										<div ng-if="request.hasDataSet">
 											<% if (adxConfigured){ %>
-											<a href="#" ng-click="viewAdxData(request.id)">
+											<a href="#" ng-click="viewAdxData(request.id)" class="ke-action-link">
 												<img src="${ ui.resourceLink("kenyaui", "images/glyphs/csv.png") }" class="ke-glyph" /> ${ formatLabel }
 											</a>
 											<% } %>

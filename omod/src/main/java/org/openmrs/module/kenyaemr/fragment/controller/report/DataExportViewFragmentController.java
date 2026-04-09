@@ -70,7 +70,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 /**
  * Page for viewing ADX message generated for DHIS2
  */
-public class DataExportFragmentController {
+public class DataExportViewFragmentController {
 
     private AdministrationService administrationService;
     private FacilityreportingService facilityreportingService;
