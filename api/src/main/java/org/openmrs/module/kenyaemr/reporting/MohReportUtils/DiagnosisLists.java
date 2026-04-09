@@ -23,6 +23,11 @@ public class DiagnosisLists {
 
 
 
+	public static List<Integer> getDiarrheaWithNoDehydrationDiagnosisList() {
+		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.DWSOD_1,
+			DiagnosisConcepts._DiagnosisConcepts.DWSOD_2);
+
+	}
 
 	public static List<Integer> getDiarrheaWithSomeDehydrationDiagnosisList() {
 		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.DWSOD_1,
@@ -82,6 +87,22 @@ public class DiagnosisLists {
 		);
 	}
 
+	public static List<Integer> getUpperPeadRespiratoryTractInfectionsList() {
+		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.URTI_1,
+			DiagnosisConcepts._DiagnosisConcepts.URTI_2,
+			DiagnosisConcepts._DiagnosisConcepts.URTI_3,
+			DiagnosisConcepts._DiagnosisConcepts.URTI_4,
+			DiagnosisConcepts._DiagnosisConcepts.URTI_5,
+			DiagnosisConcepts._DiagnosisConcepts.URTI_6
+			);
+	}
+
+	public static List<Integer> getLowerPeadRespiratoryTractInfectionsList() {
+		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.LRTI_1,
+			DiagnosisConcepts._DiagnosisConcepts.LRTI_2,
+			DiagnosisConcepts._DiagnosisConcepts.LRTI_3
+		);
+	}
 	public static List<Integer> getUpperRespiratoryTractInfectionsList() {
 		return Arrays.asList(DiagnosisConcepts._DiagnosisConcepts.URC_1,
 			DiagnosisConcepts._DiagnosisConcepts.URC_2,
@@ -143,7 +164,10 @@ public class DiagnosisLists {
 			DiagnosisConcepts._DiagnosisConcepts.URC_58,
 			DiagnosisConcepts._DiagnosisConcepts.URC_59,
 			DiagnosisConcepts._DiagnosisConcepts.URC_60,
-			DiagnosisConcepts._DiagnosisConcepts.URC_61
+			DiagnosisConcepts._DiagnosisConcepts.URC_61,
+			DiagnosisConcepts._DiagnosisConcepts.URC_62,
+			DiagnosisConcepts._DiagnosisConcepts.URC_63,
+			DiagnosisConcepts._DiagnosisConcepts.URC_64
 		);
 	}
 
@@ -277,11 +301,7 @@ public class DiagnosisLists {
 			DiagnosisConcepts._DiagnosisConcepts.AM_3,
 			DiagnosisConcepts._DiagnosisConcepts.AM_4,
 			DiagnosisConcepts._DiagnosisConcepts.AM_5,
-			DiagnosisConcepts._DiagnosisConcepts.AM_6,
-			DiagnosisConcepts._DiagnosisConcepts.AM_7,
-			DiagnosisConcepts._DiagnosisConcepts.AM_8,
-			DiagnosisConcepts._DiagnosisConcepts.AM_9
-
+			DiagnosisConcepts._DiagnosisConcepts.AM_6
 		);
 	}
 

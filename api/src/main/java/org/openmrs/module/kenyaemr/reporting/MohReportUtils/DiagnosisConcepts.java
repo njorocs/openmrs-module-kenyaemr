@@ -23,8 +23,8 @@ public class DiagnosisConcepts {
 		//MOH705A
 
 		//Diarrhoea with no dehydration
-		public static final Integer DWSOD_1 = 142412;
-		public static final Integer DWSOD_2 = 142630;
+		public static final Integer DWSOD_1 = 2019918;
+		public static final Integer DWSOD_2 = 139753;
 
 		//Diarrhoea with severe dehydration
 		public static final Integer DWSD_1 = 2007117;
@@ -69,6 +69,20 @@ public class DiagnosisConcepts {
 		public static final Integer SP_8 = 150584;
 		public static final Integer SP_9 = 2005970;
 		public static final Integer SP_10 = 143772;
+
+		//Upper Pead Respiratory Tract Infections
+		public static final Integer URTI_1 = 2011131;
+		public static final Integer URTI_2 = 2011133;
+		public static final Integer URTI_3 = 2011134;
+		public static final Integer URTI_4 = 2011135;
+		public static final Integer URTI_5 = 2011136;
+		public static final Integer URTI_6 = 2017557;
+
+		//Lower Pead Respiratory Tract Infections
+		public static final Integer LRTI_1 = 2005873;
+		public static final Integer LRTI_2 = 2005875;
+		public static final Integer LRTI_3 = 2017815;
+		
 
 		//Upper Respiratory Tract Infections
 		public static final Integer URC_1 = 106;
@@ -132,6 +146,9 @@ public class DiagnosisConcepts {
 		public static final Integer URC_59 = 2011134;
 		public static final Integer URC_60 = 2011135;
 		public static final Integer URC_61 = 2011136;
+		public static final Integer URC_62 = 2013711;
+		public static final Integer URC_63 = 2013715;
+		public static final Integer URC_64 = 2011117;
 
 
 		//Lower Respiratory Tract Infections
