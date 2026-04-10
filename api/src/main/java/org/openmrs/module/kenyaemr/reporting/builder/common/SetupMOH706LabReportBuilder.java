@@ -49,6 +49,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  URINE_ANALYSIS_BACTERIA = 165561;
 	static final int  PARASITOLOGY_MALARIA_BS = 2017901;
 	static final int  PARASITOLOGY_MALARIA_RAPID = 1643;
+	static final int  PARASITOLOGY_MALARIA_PCR = 2032282;
 	static final int  PARASITOLOGY_TAENIA_SPP = 1000453;
 	static final int  PARASITOLOGY_HNANA = 1000454;
 	static final int  PARASITOLOGY_HOOKWORM = 1000456;
@@ -133,6 +134,8 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  ONE_128 = 163622;
 	static final int  ONE_256 = 163623;
 	static final int  GREATER_ONE_572 = 163624;	
+	static final int  MPS_SEEN = 2032341;	
+	static final int  DETECTED = 1301;	
 
 
     @Autowired
@@ -181,13 +184,14 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
         cohortDsd.addColumn("UABP", "1.10 Bacteria Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_BACTERIA, Arrays.asList(SEEN)), indParam), "");
 
         //PARASITOLOGY
-		//TODO: BS for malaria is text based changes to coded
         ReportingUtils.addRow(cohortDsd, "BST", "Parasitology - Malaria test totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_BS), indParam), ReportAddonUtils.getAgeUnderOver5Columns());
-        ReportingUtils.addRow(cohortDsd, "BSP", "Parasitology - Malaria test positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_BS, Arrays.asList(POSITIVE)),indParam), ReportAddonUtils.getAgeUnderOver5Columns());
+        ReportingUtils.addRow(cohortDsd, "BSP", "Parasitology - Malaria test positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_BS, Arrays.asList(POSITIVE,MPS_SEEN)),indParam), ReportAddonUtils.getAgeUnderOver5Columns());
 
+		cohortDsd.addColumn("BSPC", "3.0 Malaria PCR Tests totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_PCR), indParam), "");
+        cohortDsd.addColumn("BSPCP", "3.0 Malaria PCR Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_PCR, Arrays.asList(DETECTED)), indParam), "");
 		cohortDsd.addColumn("BSRT", "3.3 Malaria Rapid Diagnostic Tests totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_RAPID), indParam), "");
-        cohortDsd.addColumn("BSRTP", "3.3 Malaria Rapid Diagnostic Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_RAPID, Arrays.asList(POSITIVE)), indParam), "");
-        cohortDsd.addColumn("TSPPT", "3.4 Taenia SPP Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TAENIA_SPP), indParam), "");
+		cohortDsd.addColumn("BSRTP", "3.3 Malaria Rapid Diagnostic Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_RAPID, Arrays.asList(POSITIVE)), indParam), "");
+		cohortDsd.addColumn("TSPPT", "3.4 Taenia SPP Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TAENIA_SPP), indParam), "");
         cohortDsd.addColumn("TSPPP", "3.4 Taenia SPP Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TAENIA_SPP, Arrays.asList(PRESENT)), indParam), "");
         cohortDsd.addColumn("HNNT", "3.5 Hymenolepis nana Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HNANA), indParam), "");
         cohortDsd.addColumn("HNNP", "3.5 Hymenolepis nana Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HNANA, Arrays.asList(PRESENT)), indParam), "");
