@@ -821,6 +821,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				String.class, null, false, 4.5, _PersonAttributeType.PNS_PATIENT_CONTACT_REGISTRATION_SOURCE));
 		install(personAttributeType("Contact IPV Outcome", "Contact IPV Outcome",
 				String.class, null, false, 4.5, _PersonAttributeType.PNS_PATIENT_CONTACT_IPV_OUTCOME));
+		install(personAttributeType("Next of kin national ID", "National ID of patient's next of kin",
+        String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
 
 		// Provider attribute types.
 		install(providerAttributeType("Primary Facility", "Default facility for a provider", LocationDatatype.class, "",
@@ -883,8 +885,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(visitType("Inpatient", "Visit where the patient is admitted to the hospital", _VisitType.INPATIENT));
 		install(visitType("Casualty/Emergency", "Visit where the patient is admitted to the casualty/emergency department", _VisitType.CASUALTY));
 		install(visitType("Mortuary", "Visit where the body is admitted to the Mortuary", _VisitType.MORTUARY));
-		install(personAttributeType("Next of kin national ID", "National ID of patient's next of kin",
-        String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
 
 		//Retiring Lab results form
 		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"), "Form deprecated with introduction of Lab orders");
