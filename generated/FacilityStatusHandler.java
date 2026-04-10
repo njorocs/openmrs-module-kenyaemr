@@ -56,6 +56,11 @@ public class FacilityStatusHandler extends DataHandler {
         return null;
     }
 
+    /**
+     * Calls the DHA HIE middleware facility search endpoint.
+     * Base URL GP: kenyaemr.sha.facilityregistry.get.api
+     * Auth: mediator client_credentials via kenyaemr.sha.jwt.auth.mode = mediator
+     */
     public static ResponseEntity<String> getFacilityStatus() throws IOException {
         String bearerToken = DataHandler.getBearerToken();
         if (bearerToken == null || bearerToken.isEmpty()) {
@@ -102,6 +107,11 @@ public class FacilityStatusHandler extends DataHandler {
         }
     }
 
+    /**
+     * Fetches facility status and routes to the correct adapter based on response shape:
+     *   "[" → IlmHieAdapter          (new DHA HIE middleware — JSON array)
+     *   "{" → FhirOrganizationAdapter (legacy FHIR bundle — JSON object)
+     */
     private static ResponseEntity<String> extractFacilityStatus() throws IOException {
         ResponseEntity<String> apiResponse = getFacilityStatus();
         String body = apiResponse.getBody();
