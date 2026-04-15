@@ -23,7 +23,7 @@ jobs:
           sudo chown -R cicd:cicd openmrs-module-kenyaemr
           git config --global --add safe.directory /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemr
           cd /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemr
-          git clone -b master https://github.com/Palladium-hub/openmrs-module-kenyaemr.git .
+          https://${{ secrets.CICD_TOKEN }}@github.com/Palladium-hub/openmrs-module-kenyaemr.git .
           git status
           mvn license:format
           sudo mvn clean install -DskipTests
