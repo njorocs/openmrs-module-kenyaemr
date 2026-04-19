@@ -137,22 +137,47 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
 
        // 1.0 EVER INDUCTED
         EmrReportingUtils.addRow(cohortDsd, "Ever Enrolled In Mat", "", ReportUtils.map(moh731MatIndicators.matAllNumberInducted(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd, "Total Ever Weaned off MAT", "", ReportUtils.map(moh731MatIndicators.matAllNumberInducted(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
         // 1.1 MAT INDUCTION WITHIN THE REPORTING PERIOD
         EmrReportingUtils.addRow(cohortDsd,  "Newly Enrolled In Mat in Reporting period", "", ReportUtils.map(moh731MatIndicators.matNumberInductedInReportingPeriod(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
 
-        // MAT Methadone, MAT Buprenorphine
+        // 1.2 Currently on MAT Methadone 1.3 Currently on MAT(Buprenorphine)
         EmrReportingUtils.addRow(cohortDsd,  "Number currently on Methadone", "", ReportUtils.map(moh731MatIndicators.matNumberOnMethadone(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
         EmrReportingUtils.addRow(cohortDsd,  "Number currently on Buprenorphine", "", ReportUtils.map(moh731MatIndicators.matNumberOnBuprenorphine(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
         EmrReportingUtils.addRow(cohortDsd,  "Number currently on Methadone in Transit", "", ReportUtils.map(moh731MatIndicators.matNumberOnMethadoneInTransit(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
         EmrReportingUtils.addRow(cohortDsd,  "Number currently on Buprenorphine in Transit", "", ReportUtils.map(moh731MatIndicators.matNumberOnBuprenorphineInTransit(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
-        // weaned off mat
+        // 1.4 WEANING OFF
         EmrReportingUtils.addRow(cohortDsd, "Weaned off Methadone", "", ReportUtils.map(moh731MatIndicators.matNumberWeanedOffMethadone(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
         EmrReportingUtils.addRow(cohortDsd,  "Weaned off Buprenorphine", "", ReportUtils.map(moh731MatIndicators.matNumberWeanedOffBuprenorphine(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
+        // 1.5 MAT INTERUPTIONS
+        EmrReportingUtils.addRow(cohortDsd, "Number Discontinued MAT", "", ReportUtils.map(moh731MatIndicators.matNumberDiscontinued(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients who have died", "", ReportUtils.map(moh731MatIndicators.matNumberDied(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd, "Number missing more than 5 consecutive doses", "", ReportUtils.map(moh731MatIndicators.matNumberMissingDosage(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd, "Number of clients LTFU", "", ReportUtils.map(moh731MatIndicators.matNumberLTFU(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 1.6 HIV TESTING
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients tested for HIV", "", ReportUtils.map(moh731MatIndicators.matNumberTestedHIV(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        // 1.7 MAT Clients New-HIV Positive
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients HIV Positive", "", ReportUtils.map(moh731MatIndicators.matNumberHIVpositive(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        // 1.8 Number of MAT Clients Started on ART both offsite & Onsite
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients Started on ART", "", ReportUtils.map(moh731MatIndicators.matNumberStartedART(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        // 1.9 Number of MAT clients with Known HIV Positive Status
+        EmrReportingUtils.addRow(cohortDsd,  "Total Number of Active MAT clients HIV Positive", "", ReportUtils.map(moh731MatIndicators.matNumberTotalHIVpositive(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+        // 2.0 Total Number of MAT Clients Currently on ART both offsite and onsite
+        EmrReportingUtils.addRow(cohortDsd,  "Total MAT Clients Currently on ART", "", ReportUtils.map(moh731MatIndicators.matNumberTotalStartedART(), indParams), allAgeDisaggregation, Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13","14","15","16"));
+
+        // 2.1 Viral load tracking MAT Clients
+        EmrReportingUtils.addRow(cohortDsd,  "Viral load result in the last 12 months", "", ReportUtils.map(moh731MatIndicators.matNumberViralLoadResult(), indParams),  genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Suppressed lt 200 copies", "", ReportUtils.map(moh731MatIndicators.matNumberViralLoadResultLt200(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Suppressed lt 50 copies", "", ReportUtils.map(moh731MatIndicators.matNumberViralLoadResultLt50(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
         // 2.2 Overdose MAT clients
         EmrReportingUtils.addRow(cohortDsd,  "Experienced Overdose in Reporting period", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceOverdose(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Received naloxone", "", ReportUtils.map(moh731MatIndicators.matNumberReceivedNaloxone(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Deaths due to overdose", "", ReportUtils.map(moh731MatIndicators.matNumberOverdoseDeaths(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
 
         // 2.3 interventions
         EmrReportingUtils.addRow(cohortDsd,  "Number Received Psychosocial Interventions", "", ReportUtils.map(moh731MatIndicators.matNumberReceivedInterventions(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
@@ -163,6 +188,55 @@ public class Moh731MatReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(cohortDsd,  "Number Experienced Physical Violence", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceViolence(), "typeOfViolence=158358," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
         EmrReportingUtils.addRow(cohortDsd,  "Number Experienced Emotional/Pyschological Violence", "", ReportUtils.map(moh731MatIndicators.matNumberExperienceViolence(), "typeOfViolence=118688," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
         EmrReportingUtils.addRow(cohortDsd,  "Number received support", "", ReportUtils.map(moh731MatIndicators.matNumberReceivedViolenceSupport(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.5 Mental Health
+        EmrReportingUtils.addRow(cohortDsd,  "Number Screened for Mental Health", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedMH(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Diagnosed MH", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedMH(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Treated within the Facility MH", "", ReportUtils.map(moh731MatIndicators.matNumberTreatedWithinFacilityMH(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.6 STI  MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Screened STI", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedSTI(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Diagnosed with STI", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedSTI(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Treated STI", "", ReportUtils.map(moh731MatIndicators.matNumberTreatedSTI(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.7 HCV (Hepatitis C) MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Screened HCV", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedHCV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Positive HCV", "", ReportUtils.map(moh731MatIndicators.matNumberPositiveHCV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Positive HCV(Confirmatory PCR Test)", "", ReportUtils.map(moh731MatIndicators.matNumberPositiveHCVConfirmatoryPCRtest(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Treated HCV", "", ReportUtils.map(moh731MatIndicators.matNumberTreatedHCV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Total Number Currently on HCV Treatment", "", ReportUtils.map(moh731MatIndicators.matTotalNumberTreatedHCV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.7 HBV (Hepatitis B) MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Screened HBV", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedHBV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Negative HBV", "", ReportUtils.map(moh731MatIndicators.matNumberNegativeHBV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Negative HBV Vaccinated", "", ReportUtils.map(moh731MatIndicators.matNumberNegativeHBVvaccinated(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Positive HBV", "", ReportUtils.map(moh731MatIndicators.matNumberPositiveHBV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Positive HBV(Confirmatory PCR Test)", "", ReportUtils.map(moh731MatIndicators.matNumberPositiveHBVConfirmatoryPCRtest(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Treated HBV", "", ReportUtils.map(moh731MatIndicators.matNumberTreatedHBV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Total Number Currently on HBV Treatment", "", ReportUtils.map(moh731MatIndicators.matTotalNumberTreatedHBV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 2.9 TB MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Screened TB", "", ReportUtils.map(moh731MatIndicators.matNumberScreenedTB(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Diagnosed TB", "", ReportUtils.map(moh731MatIndicators.matNumberDiagnosedTB(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Started TB RX", "", ReportUtils.map(moh731MatIndicators.matNumberStartedTBRX(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Started TPT", "", ReportUtils.map(moh731MatIndicators.matNumberStartedTPT(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number of TB clients HIV positive", "", ReportUtils.map(moh731MatIndicators.matTotalNumberTBclientsHIVpositive(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Total number of TB Clients on HAART", "", ReportUtils.map(moh731MatIndicators.matTotalNumberTBClientsOnHAART(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 3.0 PrEP MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Initiated PrEP", "", ReportUtils.map(moh731MatIndicators.matNumberInitiatedPrep(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Testing HIV_positive while on PrEP", "", ReportUtils.map(moh731MatIndicators.matNumberHIVPositiveOnPrEP(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number of PrEP users diagnosed with STIs", "", ReportUtils.map(moh731MatIndicators.matNumberPrEPClientDiagnosedSTIs(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 3.1 PEP MAT
+        EmrReportingUtils.addRow(cohortDsd,  "Number Exposed to HIV", "", ReportUtils.map(moh731MatIndicators.matNumberExposedToHIV(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number Receive PEP <72hrs", "", ReportUtils.map(moh731MatIndicators.matNumberReceivePEPlt72hrs(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
+        // 4.0 Nutrition support
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients SAM Severe", "", ReportUtils.map(moh731MatIndicators.matNumberMATClientsSAM(), "nutritionalStatus=163302," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number of MAT Clients SAM Moderate", "", ReportUtils.map(moh731MatIndicators.matNumberMATClientsSAM(), "nutritionalStatus=163303," + indParams), genderDisaggregation, Arrays.asList("01", "02"));
+        EmrReportingUtils.addRow(cohortDsd,  "Number initiated on nutrition support", "", ReportUtils.map(moh731MatIndicators.matNumberInitiatedNutritionSupport(), indParams), genderDisaggregation, Arrays.asList("01", "02"));
+
 
 
         return cohortDsd;
