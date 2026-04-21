@@ -95,7 +95,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_mat_cessation cess on t.patient_id = cess.patient_id \n" +
 				"  where t.voided = 0 and (cle.methadone_induction > 0 or cle.buprenorphine_induction > 0 ) \n" +
 				" and cess.weaned_off_methadone ='1065' \n" +
-				" and cess.visit_date between date(:startDate) and date(:endDate) \n" +
+				" and DATE(cess.visit_date) between date(:startDate) and date(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsWeanedOff");
@@ -125,7 +125,7 @@ public class Moh731MatCohortLibrary {
     public CohortDefinition matClientsInductedInReportingPeriod() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				" where cle.voided = 0 and (cle.buprenorphine_induction > 0 or cle.methadone_induction > 0) \n" +
-				" and cle.visit_date between date(:startDate) and date(:endDate) \n" +
+				" and DATE(cle.visit_date) between date(:startDate) and date(:endDate) \n" +
 				" group by cle.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("matClientsInductedInReportingPeriod");
@@ -155,7 +155,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matClientsOnMethadone() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"    where cle.voided = 0 and cle.methadone_induction > 0 \n" +
-				" and cle.visit_date between date(:startDate) and date(:endDate)\n" +
+				" and DATE(cle.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsOnMethadone");
@@ -180,8 +180,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"inner join kenyaemr_etl.etl_mat_transit tr on cle.patient_id = tr.patient_id \n" +
 				"    where cle.voided = 0 and tr.on_transit='167060' and cle.methadone_induction > 0 \n" +
-				" 	and tr.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
-				" 	and tr.date_time_last_given between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" 	and DATE(tr.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsOnMethadoneInTransit");
@@ -211,7 +210,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matClientsOnBuprenorphine() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"    where cle.voided = 0 and cle.buprenorphine_induction > 0 \n" +
-				" and cle.visit_date between date(:startDate) and date(:endDate)\n" +
+				" and DATE(cle.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsOnBuprenorphine");
@@ -237,8 +236,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"inner join kenyaemr_etl.etl_mat_transit tr on cle.patient_id = tr.patient_id \n" +
 				"    where cle.voided = 0 and tr.on_transit='167060' and cle.buprenorphine_induction > 0 \n" +
-				" 	and tr.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
-				" 	and tr.date_time_last_given between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" 	and DATE(tr.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsOnBuprenorphineInTransit");
@@ -269,7 +267,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"inner join kenyaemr_etl.etl_mat_cessation cess on cle.patient_id = cess.patient_id \n" +
 				"  where cle.voided = 0 and cle.methadone_induction > 0 and cess.weaned_off_methadone ='1065' \n" +
-				" and cess.visit_date between date (:startDate) and date (:endDate)\n" +
+				" and DATE(cess.visit_date) between date (:startDate) and date (:endDate)\n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsWeanedOffMethadone");
@@ -294,7 +292,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"inner join kenyaemr_etl.etl_mat_cessation cess on cle.patient_id = cess.patient_id \n" +
 				"  where cle.voided = 0 and cle.buprenorphine_induction > 0 and cess.weaned_off_methadone ='1065' \n" +
-				" and cess.visit_date between date (:startDate) and date (:endDate)\n" +
+				" and DATE(cess.visit_date) between date (:startDate) and date (:endDate)\n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsWeanedOffBuprenorphine");
@@ -324,7 +322,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matClientDiscontinued() {
 		String sqlQuery = "select disc.patient_id from kenyaemr_etl.etl_mat_discontinuation disc \n" +
 				"where disc.voided = 0  \n" +
-				" and disc.visit_date between date (:startDate) and date (:endDate)\n" +
+				" and DATE(disc.visit_date) between date (:startDate) and date (:endDate)\n" +
 				"    group by disc.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientDiscontinued");
@@ -372,7 +370,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matClientsMissingDoses() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"where cle.voided = 0 and (cle.methadone_induction < 0 or cle.buprenorphine_induction < 0) \n" +
-				" and cle.visit_date between date (:startDate) and date (:endDate)\n" +
+				" and DATE(cle.visit_date) between date (:startDate) and date (:endDate)\n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsMissingDoses");
@@ -394,9 +392,14 @@ public class Moh731MatCohortLibrary {
 	}
 
 	public CohortDefinition matClientsLTFU() {
-		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
-				"where cle.voided = 0 and (cle.methadone_induction < 0 or cle.buprenorphine_induction < 0) \n" +
-				" and cle.visit_date between date (:startDate) and date (:endDate)\n" +
+		String sqlQuery = "select drug.patient_id from kenyaemr_etl.etl_drug_order drug  \n" +
+				"where drug.voided = 0  \n" +
+				"AND (drug.drug_name like '%Buprenorphine%'  \n" +
+				"or drug.drug_name like '%Methadone%') \n" +
+				"group by drug.patient_id \n" +
+				"HAVING  \n" +
+				"    MAX(drug.visit_date) < DATE((:startDate)) \n" +
+				"    AND MAX(drug.visit_date) < (DATE((:endDate)) - INTERVAL 30 DAY); \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsLTFU");
@@ -656,7 +659,7 @@ public class Moh731MatCohortLibrary {
 				"FROM kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"WHERE cle.has_drug_use_history = '1065'  \n" +
 				"AND cle.experienced_overdose = '1065' \n" +
-				"AND cle.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
+				"AND DATE(cle.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberExperienceOverdose");
 		cd.setQuery(sqlQuery);
@@ -680,7 +683,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select od.client_id from kenyaemr_etl.etl_overdose_reporting od  \n" +
 				"where od.voided = 0  \n" +
 				"and od.naloxone_provided='1065' \n" +
-				" and  od.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				" and  DATE(od.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by od.client_id;" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberReceivedNaloxone");
@@ -739,7 +742,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberReceivedInterventions() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"  where cle.voided = 0 and cle.psychosocial_support in (160050, 165163) \n" +
-				" and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberReceivedInterventions");
@@ -764,7 +767,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberSupportedWithReintegration() {
 		String sqlQuery = "select ps.patient_id from kenyaemr_etl.etl_mat_psychosocial_intake_and_followup ps \n" +
 				"  where ps.voided = 0 and ps.reintegrated_back='1065' \n" +
-				" and ps.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(ps.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by ps.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberSupportedWithReintegration");
@@ -794,7 +797,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberExperienceViolence() {
 		String sqlQuery = "select ps.patient_id from kenyaemr_etl.etl_mat_psychosocial_intake_and_followup ps \n" +
 				"  where ps.voided = 0 and ps.type_of_gbv_experienced=:typeOfViolence \n" +
-				" and ps.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(ps.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by ps.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberExperienceViolence");
@@ -820,7 +823,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberReceivedViolenceSupport() {
 		String sqlQuery = "select ps.patient_id from kenyaemr_etl.etl_mat_psychosocial_intake_and_followup ps \n" +
 				"  where ps.voided = 0 and ps.type_of_gbv_experienced is not null and ps.received_violence_support is not null \n" +
-				" and ps.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(ps.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by ps.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberExperienceViolence");
@@ -850,7 +853,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberScreenedMH() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"  where cle.voided = 0 and cle.is_suffering_mental_disorder != 1107  \n" +
-				" and cle.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberScreenedMH");
@@ -874,7 +877,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberTreatedWithinFacilityMH() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"  where cle.voided = 0 and cle.treating_mental_disorder = 135795  \n" +
-				" and cle.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberTreatedWithinFacilityMH");
@@ -904,7 +907,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberScreenedSTI() {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"  where cle.voided = 0 and cle.diagnosed_illnesses = 1065 and cle.has_disease_type= 165098 \n" +
-				" and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberScreenedSTI");
@@ -929,7 +932,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select cle.patient_id from kenyaemr_etl.etl_mat_clinical_encounter cle \n" +
 				"  where cle.voided = 0 and cle.diagnosed_illnesses = 1065 and cle.has_disease_type= 165098 \n" +
 				"  AND cle.treated_disease is not null \n" +
-				" and cle.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberTreatedSTI");
@@ -961,7 +964,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_C_screened = '703'   \n" +
 				"and lab.result_test_name='Hepatitis C viral antigen measurement' \n" +
-				"and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberScreenedHCV");
@@ -987,7 +990,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_C_screened = '703'   \n" +
 				"and lab.result_test_name='Hepatitis C viral antigen measurement' and lab.test_result=1228 \n" +
-				"and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberPositiveHCV");
@@ -1013,7 +1016,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_C_screened = '703'   \n" +
 				"and lab.set_member_conceptId=167786 and lab.test_result=1301 \n" +
-				"and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberPositiveHCVConfirmatoryPCRtest");
@@ -1040,7 +1043,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_C_treated = '1065'   \n" +
 				"and lab.result_test_name='Hepatitis C viral antigen measurement' and lab.test_result=1228 \n" +
-				"and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberTreatedHCV");
@@ -1066,7 +1069,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_C_treated = '1065'   \n" +
 				"and lab.result_test_name='Hepatitis C viral antigen measurement' and lab.test_result=1228 \n" +
-				"and cle.visit_date <= DATE(:endDate) \n" +
+				"and DATE(cle.visit_date) <= DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matTotalNumberTreatedHCV");
@@ -1098,7 +1101,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_B_screened = '703'   \n" +
 				"and lab.result_test_name='Hepatitis B Surface Antigen Test' \n" +
-				"and lab.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(lab.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberScreenedHBV");
@@ -1124,7 +1127,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_B_screened = '703'   \n" +
 				"and lab.result_test_name='Hepatitis B Surface Antigen Test' and lab.test_result=664 \n" +
-				"and lab.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(lab.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberNegativeHBV");
@@ -1149,7 +1152,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select imm.patient_id from kenyaemr_etl.etl_immunization imm \n" +
 				"where imm.DPT_Hep_B_Hib_1 != '' and imm.DPT_Hep_B_Hib_2 != '' and imm.DPT_Hep_B_Hib_3 != ''  \n" +
 				"and imm.fully_immunized=1 \n" +
-				"and imm.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(imm.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by imm.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberNegativeHBVvaccinated");
@@ -1176,7 +1179,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_B_screened = '703'   \n" +
 				"and lab.result_test_name='Hepatitis B Surface Antigen Test' and lab.test_result=703 \n" +
-				"and lab.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(lab.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberPositiveHBV");
@@ -1201,7 +1204,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"where cle.voided = 0 and cle.hepatitis_B_screened = '703'   \n" +
 				"and lab.set_member_conceptId=2032394 and lab.test_result=1301\n" +
-				"and lab.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(lab.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberPositiveHBVConfirmatoryPCRtest");
@@ -1228,7 +1231,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"  where cle.voided = 0 and cle.hepatitis_B_treated =1065 \n" +
 				" and lab.result_test_name='Hepatitis B Surface Antigen Test' and lab.test_result=703 \n" +
-				" and cle.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberTreatedHBV");
@@ -1254,7 +1257,7 @@ public class Moh731MatCohortLibrary {
 				"inner join kenyaemr_etl.etl_laboratory_extract lab on cle.patient_id = lab.patient_id  \n" +
 				"  where cle.voided = 0 and cle.hepatitis_B_treated =1065 \n" +
 				" and lab.result_test_name='Hepatitis B Surface Antigen Test' and lab.test_result=703 \n" +
-				" and cle.visit_date <= DATE(:endDate) \n" +
+				" and DATE(cle.visit_date) <= DATE(:endDate) \n" +
 				"    group by cle.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matTotalNumberTreatedHBV");
@@ -1285,7 +1288,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select tbs.patient_id from kenyaemr_etl.etl_tb_follow_up_visit tb \n" +
 				"inner join kenyaemr_etl.etl_tb_screening tbs on tb.patient_id = tbs.patient_id  \n" +
 				"where tbs.resulting_tb_status is not NULL or tbs.resulting_tb_status= 160737 \n" +
-				"and tbs.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(tbs.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by tbs.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberScreenedTB");
@@ -1310,7 +1313,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select tbs.patient_id from kenyaemr_etl.etl_tb_follow_up_visit tb \n" +
 				"inner join kenyaemr_etl.etl_tb_screening tbs on tb.patient_id = tbs.patient_id   \n" +
 				"where tbs.resulting_tb_status=1662 \n" +
-				"and tbs.visit_date between DATE(:startDate) AND DATE(:endDate);";
+				"and DATE(tbs.visit_date) between DATE(:startDate) AND DATE(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("clientsDiagnosedWithTB");
 		cd.setQuery(sqlQuery);
@@ -1357,7 +1360,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition clientsStartedTPT() {
 		String sqlQuery ="select tpt.patient_id from kenyaemr_etl.etl_ipt_initiation tpt  \n" +
 				"where tpt.voided = 0 \n" +
-				"and tpt.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
+				"and DATE(tpt.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberStartedTPT");
 		cd.setQuery(sqlQuery);
@@ -1377,33 +1380,6 @@ public class Moh731MatCohortLibrary {
 		return cd;
 	}
 
-//	public CohortDefinition matAllTotalNumberTBclientsHIVpositive() {
-//		String sqlQuery ="select pos.patient_id from \n" +
-//				"(SELECT tbe.patient_id \n" +
-//				"FROM kenyaemr_etl.etl_tb_enrollment tbe \n" +
-//				"where DATE(tbe.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
-//				"UNION \n" +
-//				"SELECT hiv.patient_id \n" +
-//				"FROM kenyaemr_etl.etl_hiv_enrollment hiv \n" +
-//				"WHERE DATE(hiv.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
-//				"UNION \n" +
-//				"SELECT ht.patient_id \n" +
-//				"FROM kenyaemr_etl.etl_hts_test ht \n" +
-//				"WHERE  ht.final_test_result='Positive' and ht.test_type=1 \n" +
-//				"and DATE(ht.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
-//				") pos \n" +
-//				"join kenyaemr_etl.etl_patient_demographics d on pos.patient_id=d.patient_id \n" +
-//				"join kenyaemr_etl.etl_mat_intial_registrations t on pos.patient_id = t.patient_id  \n" +
-//				"where date(t.visit_date) <= date(:endDate) \n" +
-//				"group by pos.patient_id;";
-//		SqlCohortDefinition cd = new SqlCohortDefinition();
-//		cd.setName("matTotalNumberTBclientsHIVpositive");
-//		cd.setQuery(sqlQuery);
-//		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-//		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-//		cd.setDescription("MAT Number TB client HIV positive");
-//		return cd;
-//	}
 	public CohortDefinition clientsTBEnrolled() {
 		String sqlQuery ="SELECT tbe.patient_id \n" +
 				"    FROM kenyaemr_etl.etl_tb_enrollment tbe \n" +
@@ -1452,19 +1428,6 @@ public class Moh731MatCohortLibrary {
 		return cd;
 	}
 
-//	public CohortDefinition clientsTBEnrolled() {
-//		String sqlQuery = " select tbe.patient_id from kenyaemr_etl.etl_tb_enrollment tbe  \n" +
-//				"where tbe.voided = 0  \n" +
-//				"and tbe.visit_date between  DATE(:startDate) AND DATE(:endDate);";
-//		SqlCohortDefinition cd = new SqlCohortDefinition();
-//		cd.setName("clientsTBEnrolled");
-//		cd.setQuery(sqlQuery);
-//		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-//		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-//		cd.setDescription("Number of TB enrolled clients");
-//		return cd;
-//	}
-
 	public CohortDefinition matTotalNumberTBClientsOnHAART() {
 		CompositionCohortDefinition cd = new CompositionCohortDefinition();
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1487,7 +1450,7 @@ public class Moh731MatCohortLibrary {
 	public CohortDefinition matAllNumberInitiatedPrep() {
 		String sqlQuery = "select prep.patient_id from kenyaemr_etl.etl_prep_enrolment prep \n" +
 				"where prep.voided = 0  \n" +
-				"and prep.visit_date between DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(prep.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by prep.patient_id;" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberInitiatedPrep");
@@ -1512,7 +1475,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select prep.patient_id from kenyaemr_etl.etl_prep_enrolment prep \n" +
 				"inner join kenyaemr_etl.etl_hts_test ts on prep.patient_id = ts.patient_id  \n" +
 				"where prep.voided = 0 and ts.final_test_result='Positive' and ts.test_type =1 \n" +
-				"and ts.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(ts.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by prep.patient_id; ";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matAllNumberHIVPositiveOnPrEP");
@@ -1538,7 +1501,7 @@ public class Moh731MatCohortLibrary {
 				"where prep.voided = 0 and fo.sti_screened='Yes' and  \n" +
 				"(fo.genital_ulcer_disease='GUD' or vaginal_discharge='' or cervical_discharge='CD'  \n" +
 				"or urethral_discharge='UD' or anal_discharge='AD') \n" +
-				"and fo.visit_date between  DATE(:startDate) AND DATE(:endDate) \n" +
+				"and DATE(fo.visit_date) between  DATE(:startDate) AND DATE(:endDate) \n" +
 				"group by prep.patient_id;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberPrEPClientDiagnosedSTIs");
@@ -1663,7 +1626,7 @@ public class Moh731MatCohortLibrary {
 		String sqlQuery = "select sc.patient_id from kenyaemr_etl.etl_special_clinics sc \n" +
 				"inner join kenyaemr_etl.etl_patient_triage tr on sc.patient_id = tr.patient_id \n" +
 				"where sc.nutritional_intervention=1065 \n" +
-				"and sc.visit_date between  DATE(:startDate) AND DATE(:endDate);" ;
+				"and DATE(sc.visit_date) between  DATE(:startDate) AND DATE(:endDate);" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberInitiatedNutritionSupport");
 		cd.setQuery(sqlQuery);
