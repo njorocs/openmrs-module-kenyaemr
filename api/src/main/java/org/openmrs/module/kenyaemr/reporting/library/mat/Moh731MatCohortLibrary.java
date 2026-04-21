@@ -399,8 +399,7 @@ public class Moh731MatCohortLibrary {
 				"group by drug.patient_id \n" +
 				"HAVING  \n" +
 				"    MAX(drug.visit_date) < DATE((:startDate)) \n" +
-				"    AND MAX(drug.visit_date) < (DATE((:endDate)) - INTERVAL 30 DAY); \n" +
-				"    group by cle.patient_id;";
+				"    AND MAX(drug.visit_date) < (DATE((:endDate)) - INTERVAL 30 DAY); \n" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsLTFU");
 		cd.setQuery(sqlQuery);
