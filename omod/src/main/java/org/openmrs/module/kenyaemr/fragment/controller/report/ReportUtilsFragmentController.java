@@ -61,44 +61,73 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Requests a report evaluation
-	 * @param reportUuid the report definition UUID
+	 * 
+	 * @param reportUuid    the report definition UUID
 	 * @param reportManager the report manager
 	 * @return the report request id
 	 */
 	@SharedAction
 	public Object requestReport(@RequestParam("reportUuid") String reportUuid,
-							    UiUtils ui,
-							    @SpringBean KenyaUiUtils kenyaui,
-							    @SpringBean FragmentActionRequest actionRequest,
-							    @SpringBean ReportManager reportManager,
-							    @SpringBean ReportService reportService,
-							    @SpringBean ReportDefinitionService definitionService) throws ParseException {
+			UiUtils ui,
+			@SpringBean KenyaUiUtils kenyaui,
+			@SpringBean FragmentActionRequest actionRequest,
+			@SpringBean ReportManager reportManager,
+			@SpringBean ReportService reportService,
+			@SpringBean ReportDefinitionService definitionService) throws ParseException {
 
+		// Step 1: Look up descriptor from in-memory registry
+		ReportDescriptor report = reportManager.getReportDescriptorByUuid(reportUuid);
+		if (report == null) {
+			return new FailureResult("No report descriptor found for UUID: " + reportUuid);
+		}
+
+		// Step 2: Load definition from DB
 		ReportDefinition definition = definitionService.getDefinitionByUuid(reportUuid);
-		ReportDescriptor report = reportManager.getReportDescriptor(definition);
 
+		// Step 3: If not in DB, build on demand AND save it so queueReport() can
+		// store the report_definition_uuid correctly. reporting 2.1.0's
+		// MappedDefinitionType requires the definition to be persisted before
+		// a ReportRequest referencing it can be saved.
+		if (definition == null) {
+			log.warn("Definition not found in DB for report: " + reportUuid
+					+ ". Building and saving on demand.");
+			definition = reportManager.buildReportDefinition(report);
+
+			if (definition == null) {
+				return new FailureResult("Could not build definition for: " + report.getName());
+			}
+
+			// Save so reporting 2.1.0 can resolve report_definition_uuid on queueReport()
+			try {
+				definition = definitionService.saveDefinition(definition);
+				log.info("Saved on-demand definition for report: " + report.getName());
+			} catch (Exception e) {
+				log.error("Failed to save on-demand definition for report: "
+						+ report.getName(), e);
+				return new FailureResult("Could not save report definition: " + e.getMessage());
+			}
+		}
+
+		// Step 4: Access check
 		CoreUtils.checkAccess(report, kenyaui.getCurrentApp(actionRequest));
 
 		Collection<String> missingParameters = new ArrayList<String>();
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
 
-		// Match incoming parameters in the request to report parameters
 		for (Parameter parameter : definition.getParameters()) {
 			String submitted = actionRequest.getParameter("param[" + parameter.getName() + "]");
-
-			Object converted = StringUtils.isNotEmpty(submitted) ? ui.convert(submitted, parameter.getType()) : parameter.getDefaultValue();
-
+			Object converted = StringUtils.isNotEmpty(submitted)
+					? ui.convert(submitted, parameter.getType())
+					: parameter.getDefaultValue();
 			if (converted == null) {
 				missingParameters.add(parameter.getName());
 			}
-
 			parameterValues.put(parameter.getName(), converted);
 		}
 
 		if (missingParameters.size() > 0) {
 			return new FailureResult("Missing report parameters");
 		}
-
 
 		Mapped<ReportDefinition> mappedDefinition = new Mapped<ReportDefinition>(definition, parameterValues);
 
@@ -119,14 +148,15 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Cancels the given report request
+	 * 
 	 * @param request the report request
-	 * @param ui the UI utils
+	 * @param ui      the UI utils
 	 * @return the result
 	 */
 	@AppAction(EmrConstants.APP_ADMIN)
 	public Object cancelRequest(@RequestParam("requestId") ReportRequest request,
-									  UiUtils ui,
-									  @SpringBean ReportService reportService) {
+			UiUtils ui,
+			@SpringBean ReportService reportService) {
 
 		boolean cancelable = ReportRequest.Status.REQUESTED.equals(request.getStatus())
 				|| ReportRequest.Status.PROCESSING.equals(request.getStatus());
@@ -141,14 +171,15 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Gets the finished (failed or completed) requests for the given report
-	 * @param reportUuid the report definition UUID
-	 * @param ui the UI utils
+	 * 
+	 * @param reportUuid    the report definition UUID
+	 * @param ui            the UI utils
 	 * @param reportService the report service
 	 * @return the simplified requests
 	 */
 	public SimpleObject[] getFinishedRequests(@RequestParam(value = "reportUuid", required = false) String reportUuid,
-									  UiUtils ui,
-									  @SpringBean ReportService reportService) {
+			UiUtils ui,
+			@SpringBean ReportService reportService) {
 
 		List<ReportRequest> requests = fetchRequests(reportUuid, true, reportService);
 
@@ -157,14 +188,15 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Gets the queued requests for the given report
-	 * @param reportUuid the report definition UUID
-	 * @param ui the UI utils
+	 * 
+	 * @param reportUuid    the report definition UUID
+	 * @param ui            the UI utils
 	 * @param reportService the report service
 	 * @return the simplified requests
 	 */
 	public SimpleObject[] getQueuedRequests(@RequestParam(value = "reportUuid", required = false) String reportUuid,
-											   UiUtils ui,
-											   @SpringBean ReportService reportService) {
+			UiUtils ui,
+			@SpringBean ReportService reportService) {
 
 		List<ReportRequest> requests = fetchRequests(reportUuid, false, reportService);
 
@@ -173,7 +205,8 @@ public class ReportUtilsFragmentController {
 			@Override
 			public boolean evaluate(Object obj) {
 				ReportRequest request = (ReportRequest) obj;
-				return !(ReportRequest.Status.COMPLETED.equals(request.getStatus()) || ReportRequest.Status.FAILED.equals(request.getStatus()));
+				return !(ReportRequest.Status.COMPLETED.equals(request.getStatus())
+						|| ReportRequest.Status.FAILED.equals(request.getStatus()));
 			}
 		});
 
@@ -182,14 +215,16 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Gets the in-progress (processing) requests for the given report
-	 * @param reportUuid the report definition UUID
-	 * @param ui the UI utils
+	 * 
+	 * @param reportUuid    the report definition UUID
+	 * @param ui            the UI utils
 	 * @param reportService the report service
 	 * @return a map of request id to request for in-progress requests
 	 */
-	public HashMap<Integer, ReportRequest> getInProgressRequests(@RequestParam(value = "reportUuid", required = false) String reportUuid,
-										  UiUtils ui,
-										  @SpringBean ReportService reportService) {
+	public HashMap<Integer, ReportRequest> getInProgressRequests(
+			@RequestParam(value = "reportUuid", required = false) String reportUuid,
+			UiUtils ui,
+			@SpringBean ReportService reportService) {
 
 		List<ReportRequest> requests = fetchRequests(reportUuid, false, reportService);
 
@@ -212,8 +247,9 @@ public class ReportUtilsFragmentController {
 
 	/**
 	 * Helper method to fetch report requests
-	 * @param reportUuid the report definition UUID (optional)
-	 * @param finishedOnly only finished requests (completed or failed)
+	 * 
+	 * @param reportUuid    the report definition UUID (optional)
+	 * @param finishedOnly  only finished requests (completed or failed)
 	 * @param reportService the report service
 	 * @return the report requests
 	 */
@@ -227,7 +263,8 @@ public class ReportUtilsFragmentController {
 		}
 
 		List<ReportRequest> requests = (finishedOnly)
-				? reportService.getReportRequests(definition, null, null, ReportRequest.Status.COMPLETED, ReportRequest.Status.FAILED)
+				? reportService.getReportRequests(definition, null, null, ReportRequest.Status.COMPLETED,
+						ReportRequest.Status.FAILED)
 				: reportService.getReportRequests(definition, null, null);
 
 		// Sort by requested date desc (more sane than the default sorting)
