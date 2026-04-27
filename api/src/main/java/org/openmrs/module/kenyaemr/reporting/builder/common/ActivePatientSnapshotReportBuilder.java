@@ -196,6 +196,12 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         LastRtcRiskScoreDataDefinition rtcRiskScoreDataDefinition = new LastRtcRiskScoreDataDefinition();
 		rtcRiskScoreDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 		rtcRiskScoreDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        LastRtcRiskScoreEvaluationDateDataDefinition rtcRiskScoreEvaluationDateDataDefinition = new LastRtcRiskScoreEvaluationDateDataDefinition();
+        rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        LastRtcRiskScoreCategoryDataDefinition rtcRiskScoreCategoryDataDefinition = new LastRtcRiskScoreCategoryDataDefinition();
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         DataConverter formatter = new ObjectFormatter("{familyName}, {givenName}");
         DataDefinition nameDef = new ConvertedPersonDataDefinition("name", new PreferredNameDataDefinition(), formatter);
         dsd.addColumn("MFL Code", new MFLCodeDataDefinition(), "");
@@ -258,6 +264,8 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         dsd.addColumn("Risk categorization", lastRiskCategorizationDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Evaluation date", lastRiskEvaluationDateDataDefinition, "endDate=${endDate}");
 		dsd.addColumn("RTC Risk Score", rtcRiskScoreDataDefinition, "endDate=${endDate}");
+        dsd.addColumn("RTC Risk Score Category", rtcRiskScoreCategoryDataDefinition, "endDate=${endDate}");
+        dsd.addColumn("RTC Risk Score Evaluation Date", rtcRiskScoreEvaluationDateDataDefinition, "endDate=${endDate}");
 
         return dsd;
     }

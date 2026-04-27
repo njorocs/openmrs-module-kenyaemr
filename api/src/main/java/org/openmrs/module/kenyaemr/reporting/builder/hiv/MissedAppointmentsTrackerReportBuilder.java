@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.builder.hiv;
 
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.logic.op.Last;
 import org.openmrs.module.kenyacore.report.HybridReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportUtils;
@@ -24,7 +25,9 @@ import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculati
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MissedAppointmentsDuringPeriodCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentTypeNotHonouredDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCaseManagerDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreCategoryDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreEvaluationDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDaysMissedDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentEffectiveDiscontinuationDateDataDefinition;
@@ -175,6 +178,14 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		rtcRiskScoreDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 		rtcRiskScoreDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
 
+		LastRtcRiskScoreCategoryDataDefinition rtcRiskScoreCategoryDataDefinition = new LastRtcRiskScoreCategoryDataDefinition();
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
+		LastRtcRiskScoreEvaluationDateDataDefinition rtcRiskScoreEvaluationDateDataDefinition = new LastRtcRiskScoreEvaluationDateDataDefinition();
+		rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
 		dsd.addColumn("Name", nameDef, "");
 		dsd.addColumn("id", new PatientIdDataDefinition(), "");
 		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), "", new BirthdateConverter(DATE_FORMAT));
@@ -199,7 +210,8 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		dsd.addColumn("RTC Date", rtcDate, paramMapping, new DateConverter(DATE_FORMAT)); // first visit after missed appointment
 		dsd.addColumn("Case Manager", etlCaseManagerDataDefinition, paramMapping, null);
 		dsd.addColumn("RTC Risk Score", rtcRiskScoreDataDefinition, paramMapping, null);
-
+		dsd.addColumn("RTC Risk Score Category", rtcRiskScoreCategoryDataDefinition, paramMapping, null);
+		dsd.addColumn("RTC Risk Score Category Evaluator", rtcRiskScoreEvaluationDateDataDefinition, paramMapping, null);
 
 		MissedAppointmentsDuringPeriodCohortDefinition cd = new MissedAppointmentsDuringPeriodCohortDefinition();
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
