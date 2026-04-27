@@ -63,8 +63,26 @@ public class ReportPageController {
 					@SpringBean ReportService reportService,
 					@SpringBean ReportDefinitionService definitionService) throws Exception {
 
+		ReportDescriptor report = reportManager.getReportDescriptorByUuid(reportUuid);
+		if (report == null) {
+			throw new IllegalArgumentException(
+					"No report descriptor registered for UUID: " + reportUuid +
+							". Ensure the report is configured in a ReportConfiguration bean " +
+							"and the module loaded without errors.");
+		}
+
+	
 		ReportDefinition definition = definitionService.getDefinitionByUuid(reportUuid);
-		ReportDescriptor report = reportManager.getReportDescriptor(definition);
+		if (definition == null) {
+			definition = reportManager.buildReportDefinition(report);
+		}
+
+		if (definition == null) {
+			throw new IllegalStateException(
+					"Could not load or build a report definition for: " + report.getName() +
+							" (UUID: " + reportUuid + "). No builder is registered for this report.");
+		}
+
 		admService = Context.getAdministrationService();
 		CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
 		User loggedInUser = Context.getUserContext().getAuthenticatedUser();
