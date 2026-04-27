@@ -141,6 +141,7 @@
 				<ref bean="kenyaemr.common.report.duplicateNUPI"/>
 				<ref bean="kenyaemr.common.report.caseReports" />
 				<ref bean="kenyaemr.etl.common.report.caseSurveillance" />
+				<ref bean="kenyaemr.etl.common.report.matReport"/>
 			</set>
 		</property>
 		<property name="ehrReports">
@@ -1390,6 +1391,16 @@
 		<property name="repeatingSection" value="sheet:1,row:6,dataset:MOH416" />
 	</bean>
 
+	<bean id="kenyaemr.etl.common.report.matReport" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
+		<property name="targetUuid" value="83154608-2fb8-43d8-ab9e-d91f3a3e003f" />
+		<property name="name" value="MOH 731-6 MAT Report" />
+		<property name="description" value="Summary Reporting tool for Medically Assisted Therapy (MAT)" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set></property>
+		<property name="template" value="kenyaemr:moh731_6_mat.xls" />
+	</bean>
 
 
 
