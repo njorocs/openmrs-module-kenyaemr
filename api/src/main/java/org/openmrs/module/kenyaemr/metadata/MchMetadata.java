@@ -24,6 +24,7 @@ import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.form;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.patientIdentifierType;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.program;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * MCH metadata bundle
@@ -132,7 +133,6 @@ public class MchMetadata extends AbstractMetadataBundle {
 				null, null, null,
 				LocationBehavior.NOT_USED, false, _PatientIdentifierType.CWC_NUMBER));
 
-		install(program("Child Welfare Clinic", "Treatment for children", Dictionary.MATERNAL_AND_CHILD_HEALTH_PROGRAM, _Program.MCHCS));
 
 		///////////////////////////// MCH mother services ////////////////////////////////
 
@@ -176,9 +176,15 @@ public class MchMetadata extends AbstractMetadataBundle {
 		}
         //We will not install the MCH mother services program as it is retired through initializer.
 		//install(program("MCH - Mother Services", "Treatment for mothers", Dictionary.MATERNAL_AND_CHILD_HEALTH_PROGRAM, _Program.MCHMS));
-		install(program("Antenatal Care", "", Dictionary.ANTENATAL_PROGRAM, _Program.ANTENATAL_CARE));
-		install(program("Postnatal Care", "", Dictionary.POSTNATAL_PROGRAM, _Program.POSTNATAL_CARE));
-		install(program("Family Planning", "", Dictionary.FAMILY_PLANNING_PROGRAM, _Program.FAMILY_PLANNING));
-		install(program("Pre-Conception Care", "", Dictionary.PRE_CONCEPTION_PROGRAM, _Program.PRE_CONCEPTION_CARE));
+		boolean installPrograms = shouldInstallPrograms();
+
+		if (installPrograms) {
+			install(program("Antenatal Care", "", Dictionary.ANTENATAL_PROGRAM, _Program.ANTENATAL_CARE));
+			install(program("Postnatal Care", "", Dictionary.POSTNATAL_PROGRAM, _Program.POSTNATAL_CARE));
+			install(program("Family Planning", "", Dictionary.FAMILY_PLANNING_PROGRAM, _Program.FAMILY_PLANNING));
+			install(program("Pre-Conception Care", "", Dictionary.PRE_CONCEPTION_PROGRAM, _Program.PRE_CONCEPTION_CARE));
+			install(program("Child Welfare Clinic", "Treatment for children", Dictionary.MATERNAL_AND_CHILD_HEALTH_PROGRAM, _Program.MCHCS));
+
+		}
 	}
 }

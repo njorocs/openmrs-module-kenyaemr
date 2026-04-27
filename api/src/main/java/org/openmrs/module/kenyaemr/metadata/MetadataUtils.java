@@ -14,6 +14,8 @@ import org.openmrs.api.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 /**
  * Utility class for metadata operations
  */
@@ -25,6 +27,8 @@ public class MetadataUtils {
 	 * Global property key for enabling/disabling form installation
 	 */
 	public static final String GP_ENABLE_FORMS = "kenyaemr.enable.forms";
+	public static final String GP_ENABLE_PROGRAMS = "kenyaemr.enable.programs";
+	public static final String GP_ENABLE_RELATIONSHIP_TYPES = "kenyaemr.enable.relationship.types";
 
 	/**
 	 * Private constructor to prevent instantiation of utility class
@@ -68,6 +72,74 @@ public class MetadataUtils {
 			return shouldInstall;
 		} catch (Exception e) {
 			logger.error("Exception occurred while checking GP_ENABLE_FORMS: {}", e.getMessage(), e);
+			logger.error("Defaulting to true due to exception");
+			return true;
+		}
+	}
+
+	public static boolean shouldInstallPrograms() {
+		logger.info("=== shouldInstallPrograms() method called ===");
+		
+		try {
+			AdministrationService administrationService = Context.getAdministrationService();
+			if (administrationService == null) {
+				logger.error("AdministrationService is null! Cannot check GP_ENABLE_PROGRAMS. Defaulting to true.");
+				return true;
+			}
+			
+			logger.info("AdministrationService retrieved successfully. Checking global property: {}", GP_ENABLE_PROGRAMS);
+			String propertyValue = administrationService.getGlobalProperty(GP_ENABLE_PROGRAMS);
+			
+			logger.info("Checking GP_ENABLE_PROGRAMS ({}): raw value = '{}'", GP_ENABLE_PROGRAMS, propertyValue);
+			
+			if (propertyValue == null || propertyValue.trim().isEmpty()) {
+				// Default to true if property doesn't exist (backward compatibility)
+				logger.info("GP_ENABLE_PROGRAMS is null or empty, defaulting to true (backward compatibility)");
+				return true;
+			}
+			
+			String trimmedValue = propertyValue.trim();
+			boolean shouldInstall = trimmedValue.equalsIgnoreCase("true");
+			
+			logger.info("GP_ENABLE_PROGRAMS trimmed value = '{}', shouldInstallPrograms = {}", trimmedValue, shouldInstall);
+			
+			return shouldInstall;
+		} catch (Exception e) {
+			logger.error("Exception occurred while checking GP_ENABLE_PROGRAMS: {}", e.getMessage(), e);
+			logger.error("Defaulting to true due to exception");
+			return true;
+		}
+	}
+
+	public static boolean shouldInstallRelationshipTypes() {
+		logger.info("=== shouldInstallRelationshipTypes() method called ===");
+		
+		try {
+			AdministrationService administrationService = Context.getAdministrationService();
+			if (administrationService == null) {
+				logger.error("AdministrationService is null! Cannot check GP_ENABLE_RELATIONSHIP_TYPES. Defaulting to true.");
+				return true;
+			}
+			
+			logger.info("AdministrationService retrieved successfully. Checking global property: {}", GP_ENABLE_RELATIONSHIP_TYPES);
+			String propertyValue = administrationService.getGlobalProperty(GP_ENABLE_RELATIONSHIP_TYPES);
+			
+			logger.info("Checking GP_ENABLE_RELATIONSHIP_TYPES ({}): raw value = '{}'", GP_ENABLE_RELATIONSHIP_TYPES, propertyValue);
+			
+			if (propertyValue == null || propertyValue.trim().isEmpty()) {
+				// Default to true if property doesn't exist (backward compatibility)
+				logger.info("GP_ENABLE_RELATIONSHIP_TYPES is null or empty, defaulting to true (backward compatibility)");
+				return true;
+			}
+			
+			String trimmedValue = propertyValue.trim();
+			boolean shouldInstall = trimmedValue.equalsIgnoreCase("true");
+			
+			logger.info("GP_ENABLE_RELATIONSHIP_TYPES trimmed value = '{}', shouldInstallRelationshipTypes = {}", trimmedValue, shouldInstall);
+			
+			return shouldInstall;
+		} catch (Exception e) {
+			logger.error("Exception occurred while checking GP_ENABLE_RELATIONSHIP_TYPES: {}", e.getMessage(), e);
 			logger.error("Defaulting to true due to exception");
 			return true;
 		}

@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.metadata;
 
-import org.openmrs.module.kenyaemr.Metadata;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.openmrs.module.metadatadeploy.bundle.Requires;
 import org.springframework.stereotype.Component;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * OTZ metadata bundle
@@ -78,9 +78,11 @@ public class NCDMetadata extends AbstractMetadataBundle {
 		} else {
 			logger.info("=== NCDMetadata: SKIPPING form installation because shouldInstallForms() returned false ===");
 		}
+		boolean installPrograms = shouldInstallPrograms();
 
-		install(program("NCD", "NCD program", _Concept.NCD, _Program.NCD));
-
+		if (installPrograms) {
+			install(program("NCD", "NCD program", _Concept.NCD, _Program.NCD));
+		}
 
 	}
 }

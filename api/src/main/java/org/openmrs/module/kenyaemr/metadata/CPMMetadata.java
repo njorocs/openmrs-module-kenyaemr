@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
+
 
 /**
  * CPM metadata bundle
@@ -53,8 +55,10 @@ public class CPMMetadata extends AbstractMetadataBundle {
 	 */
 	@Override
 	public void install() {
-
-		install(program("CPM", "Community Pharmacy Model", Dictionary.CPM_PROGRAM, _Program.CPM));
+		boolean installPrograms = shouldInstallPrograms();
+		if(installPrograms) {
+			install(program("CPM", "Community Pharmacy Model", Dictionary.CPM_PROGRAM, _Program.CPM));
+		}
 		install(encounterType("CPM Enrollment Encounter", "CPM Enrollment Encounter", _EncounterType.CPM_ENROLLMENT_ENCOUNTER));
 		install(encounterType("CPM Referral Encounter", "CPM Referral Encounter", _EncounterType.CPM_REFERRAL_ENCOUNTER));
 		install(encounterType("CPM Discontinuation Encounter", "CPM Discontinuation Encounter", _EncounterType.CPM_DISCONTINUATION_ENCOUNTER));		

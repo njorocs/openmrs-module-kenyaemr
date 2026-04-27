@@ -24,9 +24,11 @@ import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
+
+
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
-
-
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallRelationshipTypes;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,7 +364,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 	 */
 	@Override
 	public void install() {
-        install(program("Nutrition", "Nutrition program",Dictionary.NUTRITION_PROGRAM, _Program.NUTRITION));
+		boolean installPrograms = shouldInstallPrograms();
+		if(installPrograms) {
+			install(program("Nutrition", "Nutrition program",Dictionary.NUTRITION_PROGRAM, _Program.NUTRITION));
+		}
 
 		install(encounterType("Consultation", "Collection of clinical data during the main consultation",
 				_EncounterType.CONSULTATION));
@@ -847,20 +852,26 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			_ProviderAttributeType.PROVIDER_PASSPORT_NUMBER));
 		install(providerAttributeType("Provider unique identifier", "Provider unique identifier", FreeTextDatatype.class, "", 0, 1,
 			_ProviderAttributeType.PROVIDER_UNIQUE_IDENTIFIER));
+		boolean installRelationshipTypes = shouldInstallRelationshipTypes();
+		if (installRelationshipTypes) {
 
-		install(relationshipType("Guardian", "Dependant", "One that guards, watches over, or protects",
-				_RelationshipType.GUARDIAN_DEPENDANT));
-		install(relationshipType("Spouse", "Spouse",
-				"A spouse is a partner in a marriage, civil union, domestic partnership or common-law marriage a male spouse is a husband and a female spouse is a wife",
-				_RelationshipType.SPOUSE));
-		install(relationshipType("Partner", "Partner",
-				"Someone I had sex with for fun without commitment to a relationship", _RelationshipType.PARTNER));
-		install(relationshipType("Co-wife", "Co-wife", "Female member spouse in a polygamist household",
-				_RelationshipType.CO_WIFE));
-		install(relationshipType("SNS", "SNS", "Social Network Strategy", _RelationshipType.SNS));
-		install(relationshipType("Case manager", "Client", "Case manager", _RelationshipType.CASE_MANAGER));
-		install(relationshipType("Primary caregiver", "Primary caregiver", "Primary caregiver",
-				_RelationshipType.CARE_GIVER));
+			install(relationshipType("Guardian", "Dependant", "One that guards, watches over, or protects",
+					_RelationshipType.GUARDIAN_DEPENDANT));
+			install(relationshipType("Spouse", "Spouse",
+					"A spouse is a partner in a marriage, civil union, domestic partnership or common-law marriage a male spouse is a husband and a female spouse is a wife",
+					_RelationshipType.SPOUSE));
+			install(relationshipType("Partner", "Partner",
+					"Someone I had sex with for fun without commitment to a relationship", _RelationshipType.PARTNER));
+			install(relationshipType("Co-wife", "Co-wife", "Female member spouse in a polygamist household",
+					_RelationshipType.CO_WIFE));
+			install(relationshipType("SNS", "SNS", "Social Network Strategy", _RelationshipType.SNS));
+			install(relationshipType("Case manager", "Client", "Case manager", _RelationshipType.CASE_MANAGER));
+			install(relationshipType("Primary caregiver", "Primary caregiver", "Primary caregiver",
+					_RelationshipType.CARE_GIVER));
+
+		} else {
+			logger.info("=== SKIPPING relationship type installation because shouldInstallRelationshipTypes() returned false ===");
+		}
 
 		install(visitAttributeType("Source form", "The form whose submission created the visit",
 				FormDatatype.class, null, 0, 1, _VisitAttributeType.SOURCE_FORM));
