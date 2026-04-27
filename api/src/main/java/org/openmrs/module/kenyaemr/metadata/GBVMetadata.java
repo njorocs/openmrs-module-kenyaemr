@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * GBV metadata bundle
@@ -79,9 +80,12 @@ public class GBVMetadata extends AbstractMetadataBundle {
 	 */
 	@Override
 	public void install() {
+		boolean installPrograms = shouldInstallPrograms();
 
-		install(program("Violence screening", "Violence Treatment Program", _Concept.GBV_TREATMENT,
-			_Program.GBV_TREATMENT));
+		if (installPrograms) {
+			install(program("Violence screening", "Violence Treatment Program", _Concept.GBV_TREATMENT,
+				_Program.GBV_TREATMENT));
+		}
 		install(encounterType("Violence Enrollment Encounter", "Violence Enrollment Encounter", _EncounterType.GBV_ENROLLMENT_ENCOUNTER));
 		install(encounterType("Violence Trauma Counselling Encounter", "Violence Trauma Counselling Encounter", _EncounterType.GBV_TRAUMA_COUNSELLING_ENCOUNTER));
 		install(encounterType("Violence Discontinuation Encounter", "Violence Discontinuation Encounter", _EncounterType.GBV_DISCONTINUATION_ENCOUNTER));

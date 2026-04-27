@@ -511,12 +511,29 @@
 	</globalProperty>
 
 	<globalProperty>
-	<property>kenyaemr.enable.forms</property>
-	<defaultValue>true</defaultValue>
-	<description>
-		Defines whether to enable forms installation, default is true. This is used to enable/disable forms installation during module installation.
-	</description>
+		<property>kenyaemr.enable.forms</property>
+		<defaultValue>true</defaultValue>
+		<description>
+		Defines whether to enable forms installation via metadata deploy module, default is true. This is used to enable/disable forms installation during module installation.
+		</description>
 	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.enable.programs</property>
+		<defaultValue>true</defaultValue>
+		<description>
+		Defines whether to enable programs installation via metadata deploy module, default is true. This is used to enable/disable programs installation during module installation.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.enable.relationship.types</property>
+		<defaultValue>true</defaultValue>
+		<description>
+		Defines whether to enable relationship types installation via metadata deploy module, default is true. This is used to enable/disable relationship types installation during module installation.
+		</description>
+	</globalProperty>
+
 	<globalProperty>
 		<property>nlmis.base.url</property>
 		<defaultValue>https://integration-layer.apeiro-digital.com/endPoint</defaultValue>
