@@ -38,7 +38,12 @@ public class ETLVLDueDateDataEvaluator implements PersonDataEvaluator {
         String qry = "select t.patient_id,\n" +
                 "       t.vl_due_date\n" +
                 "from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-                "where t.latest_hiv_followup_visit <= DATE(:endDate);";
+                "inner join (\n" +
+                "    select patient_id, max(visit_date) as latest_visit_date\n" +
+                "    from kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    where visit_date <= date(:endDate)\n" +
+                "    group by patient_id\n" +
+                ") latest on latest.patient_id = t.patient_id and latest.latest_visit_date = t.visit_date";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

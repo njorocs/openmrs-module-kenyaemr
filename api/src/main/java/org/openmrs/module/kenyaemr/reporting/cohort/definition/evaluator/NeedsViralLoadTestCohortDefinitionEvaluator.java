@@ -73,9 +73,18 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"            where date(visit_date) <= date(:endDate)\n" +
 				"              and program_name = 'HIV'\n" +
 				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"               inner join kenyaemr_etl.etl_viral_load_validity_tracker vt on vt.patient_id = fup.patient_id\n" +
+				"                      inner join (SELECT t.patient_id\n" +
+				"                  FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                      INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"                      FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"                      WHERE visit_date <= DATE(:endDate)\n" +
+				"                      GROUP BY patient_id) latest\n" +
+				"                  ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"                  WHERE t.vl_due_date IS NOT NULL\n" +
+				"                    AND t.vl_due_date <= DATE(:endDate)\n" +
+				"                    AND t.visit_date >= t.vl_due_date\n" +
+				"                    AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) vt on fup.patient_id = vt.patient_id\n" +
 				"      where fup.visit_date <= date(:endDate)\n" +
-				"        and vt.vl_due_date <= date(:endDate)\n" +
 				"      group by patient_id\n" +
 				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
 				"         and (\n" +

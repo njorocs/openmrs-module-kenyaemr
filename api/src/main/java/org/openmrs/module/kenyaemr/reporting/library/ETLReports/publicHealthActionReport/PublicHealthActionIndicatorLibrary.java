@@ -134,13 +134,7 @@ public class PublicHealthActionIndicatorLibrary {
     public CohortIndicator hei24MonthsUndocumentedOutcomeCs() {
         return cohortIndicator("HEIs 24 Months with undocumented Outcome", ReportUtils.map(cohortLibrary.hei24MonthsUndocumentedOutcomeCs(), "startDate=${startDate},endDate=${endDate}"));
     }
-	/**
-	 * Number of Pregnant and postpartum women at high risk (ML-based) not linked to PrEP
-	 * @return the indicator
-	 */
-	public CohortIndicator pregnantPostPartumNotLinkedToPrep() {
-		return cohortIndicator("Pregnant and postpartum women at high risk (ML-based) not linked to PrEP", ReportUtils.map(cohortLibrary.pregnantPostPartumNotLinkedToPrep(), "startDate=${startDate},endDate=${endDate}"));
-	}
+
     /**
      * Number of adolescents not in OTZ
      * @return the indicator
@@ -226,6 +220,6 @@ public class PublicHealthActionIndicatorLibrary {
         return cohortIndicator("HEI turning 6-8 weeks without DNA PCR test", ReportUtils.map(cohortLibrary.heiSixToEightWeeksMissingPCRTestsCs(), "startDate=${startDate},endDate=${endDate}"));
     }
     public CohortIndicator pregnantPostPartumNotLinkedToPrepCs() {
-        return cohortIndicator("HEI turning 6-8 weeks without DNA PCR test", ReportUtils.map(cohortLibrary.pregnantPostPartumNotLinkedToPrepCs(), "startDate=${startDate},endDate=${endDate}"));
+        return cohortIndicator("Pregnant or BF at high risk not linked to PrEP", ReportUtils.map(cohortLibrary.pregnantPostPartumNotLinkedToPrepCs(), "startDate=${startDate},endDate=${endDate}"));
     }
 }

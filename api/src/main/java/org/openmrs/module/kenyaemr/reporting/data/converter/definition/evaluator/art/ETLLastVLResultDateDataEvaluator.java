@@ -35,11 +35,14 @@ public class ETLLastVLResultDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select t.patient_id,\n" +
-                "       COALESCE(t.date_test_result_received, t.previous_date_test_result_received,\n" +
-                "                t.base_viral_load_test_date) as latest_result_date\n" +
-                "from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-                "where t.latest_hiv_followup_visit <= DATE(:endDate);";
+        String qry = "SELECT t.patient_id, t.date_test_result_received\n" +
+                "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+                "         INNER JOIN (\n" +
+                "    SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    WHERE visit_date <= DATE(:endDate)\n" +
+                "    GROUP BY patient_id\n" +
+                ") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

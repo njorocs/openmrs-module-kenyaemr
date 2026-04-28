@@ -154,9 +154,6 @@ public class FacilityDashboardUtil {
 				"                          ON t.patient_id = s.patient_id\n" +
 				"                              -- enforce order: screening must be before (or same day as) HTS test\n" +
 				"                              AND s.visit_date <= t.visit_date\n" +
-				"               INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-				"                          ON r.patient_id = s.patient_id\n" +
-				"                              AND r.willing_to_take_prep = 'Yes'\n" +
 				"               INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
 				"                          ON d.patient_id = s.patient_id\n" +
 				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
@@ -166,8 +163,8 @@ public class FacilityDashboardUtil {
 				"        -- enforce: all three events occur within the same 3-day window\n" +
 				"        AND TIMESTAMPDIFF(\n" +
 				"                    DAY,\n" +
-				"                    LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"                    GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
+				"                    LEAST(s.visit_date, t.visit_date),\n" +
+				"                    GREATEST(s.visit_date, t.visit_date)\n" +
 				"            ) <= 3";
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -187,83 +184,80 @@ public class FacilityDashboardUtil {
 	public static Long getPregnantPostpartumNotInPrep(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
 		String pregnantPostPartumNotPrepLinkedQuery = "SELECT COUNT(DISTINCT(a.patient_id)) AS high_risk_not_on_PrEP\n" +
-				"FROM (\n" +
-				"         SELECT s.patient_id\n" +
-				"         FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
-				"                  INNER JOIN (\n" +
-				"             SELECT patient_id, final_test_result, visit_date\n" +
-				"             FROM kenyaemr_etl.etl_hts_test\n" +
-				"             WHERE visit_date BETWEEN date('" + startDate + "') AND date('" + endDate + "')\n" +
-				"               AND final_test_result = 'Negative'\n" +
-				"         ) t ON t.patient_id = s.patient_id\n" +
-				"             AND s.visit_date <= t.visit_date\n" +
-				"                  INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-				"                             ON r.patient_id = s.patient_id\n" +
-				"                                 AND r.willing_to_take_prep = 'Yes'\n" +
-				"                  INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                             ON d.patient_id = s.patient_id\n" +
-				"         WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
-				"           AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-				"           AND s.visit_date BETWEEN date('" + startDate + "') AND date('" + endDate + "')\n" +
-				"           AND d.Gender = 'F'\n" +
-				"           AND TIMESTAMPDIFF(\n" +
-				"                       DAY,\n" +
-				"                       LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"                       GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
-				"               ) <= 3\n" +
-				"     ) a\n" +
-				"         LEFT JOIN (\n" +
-				"    SELECT e.patient_id,\n" +
-				"           MAX(e.visit_date) AS latest_enrollment_date,\n" +
-				"           f.latest_fup_date,\n" +
-				"           f.latest_fup_app_date,\n" +
-				"           r.latest_refill_visit_date,\n" +
-				"           r.latest_refill_app_date,\n" +
-				"           d.latest_disc_date\n" +
-				"    FROM kenyaemr_etl.etl_prep_enrolment e\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_fup_date,\n" +
-				"               MID(MAX(CONCAT(visit_date, appointment_date)), 11) AS latest_fup_app_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_followup\n" +
-				"        WHERE visit_date <= date('" + endDate + "')\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) f ON e.patient_id = f.patient_id\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_refill_visit_date,\n" +
-				"               MID(MAX(CONCAT(visit_date, next_appointment)), 11) AS latest_refill_app_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_monthly_refill\n" +
-				"        WHERE visit_date <= date('" + endDate + "')\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) r ON e.patient_id = r.patient_id\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_disc_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_discontinuation\n" +
-				"        WHERE visit_date <= date('" + endDate + "')\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) d ON e.patient_id = d.patient_id\n" +
-				"    GROUP BY e.patient_id\n" +
-				"    HAVING\n" +
-				"        -- Case 1: Newly enrolled within reporting period, no followup/refill yet = IN PrEP\n" +
-				"        (\n" +
-				"            MAX(e.visit_date) BETWEEN date('" + startDate + "') AND date('" + endDate + "')\n" +
-				"                AND (f.latest_fup_date IS NULL OR f.latest_fup_date < MAX(e.visit_date))\n" +
-				"                AND (r.latest_refill_visit_date IS NULL OR r.latest_refill_visit_date < MAX(e.visit_date))\n" +
-				"                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-				"            )\n" +
-				"        -- Case 2: Previously enrolled, latest visit occurred, and appointment not missed by >7 days = IN PrEP\n" +
-				"        OR\n" +
-				"        (\n" +
-				"            GREATEST(IFNULL(f.latest_fup_date, '0000-00-00'), IFNULL(r.latest_refill_visit_date, '0000-00-00')) >= MAX(e.visit_date)\n" +
-				"                AND TIMESTAMPDIFF(DAY,\n" +
-				"                                  GREATEST(IFNULL(f.latest_fup_app_date, '0000-00-00'), IFNULL(r.latest_refill_app_date, '0000-00-00')),\n" +
-				"                                  date('" + endDate + "')\n" +
-				"                    ) <= 7\n" +
-				"                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-				"            )\n" +
-				") b ON a.patient_id = b.patient_id\n" +
+				"  FROM (SELECT s.patient_id\n" +
+				"             FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
+				"                      INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
+				"                                  FROM kenyaemr_etl.etl_hts_test t\n" +
+				"                                  WHERE t.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
+				"                                    AND t.final_test_result = 'Negative') t\n" +
+				"                                 ON t.patient_id = s.patient_id\n" +
+				"                                     AND s.visit_date <= t.visit_date\n" +
+				"                      INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+				"                                 ON d.patient_id = s.patient_id\n" +
+				"             WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
+				"               AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
+				"               AND s.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
+				"               AND d.Gender = 'F'\n" +
+				"               AND TIMESTAMPDIFF(\n" +
+				"                           DAY,\n" +
+				"                           LEAST(s.visit_date, t.visit_date),\n" +
+				"                           GREATEST(s.visit_date, t.visit_date)\n" +
+				"                   ) <= 3) a\n" +
+				"    LEFT JOIN (select e.patient_id,\n" +
+				"                                          max(e.visit_date)                                           as latest_enrollment_date,\n" +
+				"                                          f.latest_fup_date,\n" +
+				"                                          greatest(ifnull(f.latest_fup_app_date, '1900-01-01'),\n" +
+				"                                                   ifnull(latest_refill_app_date, '1900-01-01'))      as latest_appointment_date,\n" +
+				"                                          greatest(ifnull(latest_fup_date, '1900-01-01'),\n" +
+				"                                                   ifnull(latest_refill_visit_date, '1900-01-01'))   as latest_visit_date,\n" +
+				"                                          r.latest_refill_visit_date,\n" +
+				"                                          f.latest_fup_app_date,\n" +
+				"                                          r.latest_refill_app_date,\n" +
+				"                                          d.latest_disc_date,\n" +
+				"                                          d.disc_patient\n" +
+				"                                   from kenyaemr_etl.etl_prep_enrolment e\n" +
+				"                                            left join\n" +
+				"                                        (select f.patient_id,\n" +
+				"                                                max(f.visit_date)                                      as latest_fup_date,\n" +
+				"                                                mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
+				"                                         from kenyaemr_etl.etl_prep_followup f\n" +
+				"                                         where f.visit_date <= date('" + endDate + "')\n" +
+				"                                         group by f.patient_id) f on e.patient_id = f.patient_id\n" +
+				"                                            left join (select r.patient_id,\n" +
+				"                                                              max(r.visit_date)                                      as latest_refill_visit_date,\n" +
+				"                                                              mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
+				"                                                       from kenyaemr_etl.etl_prep_monthly_refill r\n" +
+				"                                                       where r.visit_date <= date('" + endDate + "')\n" +
+				"                                                       group by r.patient_id) r on e.patient_id = r.patient_id\n" +
+				"                                            left join (select patient_id                                               as disc_patient,\n" +
+				"                                                              max(d.visit_date)                                        as latest_disc_date,\n" +
+				"                                                              mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
+				"                                                       from kenyaemr_etl.etl_prep_discontinuation d\n" +
+				"                                                       where d.visit_date <= date('" + endDate + "')\n" +
+				"                                                       group by patient_id\n" +
+				"                                                       having latest_disc_date <= date('" + endDate + "')) d\n" +
+				"                                                      on e.patient_id = d.disc_patient\n" +
+				"                                   group by e.patient_id\n" +
+				"                                   having (\n" +
+				"                                       latest_appointment_date IS NOT NULL\n" +
+				"                                           AND latest_appointment_date != '1900-01-01'\n" +
+				"                                           AND timestampdiff(DAY, date(latest_appointment_date), date('" + endDate + "')) <= 7\n" +
+				"                                           AND date(latest_appointment_date) >= date(latest_visit_date)\n" +
+				"                                           AND (\n" +
+				"                                           (latest_enrollment_date >= d.latest_disc_date AND latest_appointment_date > d.latest_disc_date)\n" +
+				"                                               OR d.disc_patient IS NULL\n" +
+				"                                           )\n" +
+				"                                       )\n" +
+				"                                       OR (\n" +
+				"                                       timestampdiff(DAY, latest_enrollment_date, DATE('" + endDate + "')) BETWEEN 0 AND 30\n" +
+				"                                           AND d.disc_patient IS NULL\n" +
+				"                                       )\n" +
+				"                                       OR (\n" +
+				"                                       latest_appointment_date IS NULL\n" +
+				"                                           AND (latest_visit_date IS NULL OR latest_visit_date = '1900-01-01')\n" +
+				"                                           AND d.disc_patient IS NULL\n" +
+				"                                       )) b\n" +
+				"ON a.patient_id = b.patient_id\n" +
 				"WHERE b.patient_id IS NULL;";
 
 		try {
@@ -326,8 +320,14 @@ public class FacilityDashboardUtil {
 				"              )\n" +
 				"          )) e\n" +
 				"         INNER JOIN (select t.patient_id\n" +
-				"                     from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-				"                     where t.vl_due_date <= DATE('" + endDate + "') and t.latest_hiv_followup_visit between '" + startDate + "' and '" + endDate + "') b on e.patient_id = b.patient_id;";
+				"from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"inner join (\n" +
+				"    select patient_id, max(visit_date) as latest_visit_date\n" +
+				"    from kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"    where visit_date between date('"+startDate+"') and date('"+endDate+"')\n" +
+				"    group by patient_id\n" +
+				") latest on latest.patient_id = t.patient_id and latest.latest_visit_date = t.visit_date\n" +
+				"where t.vl_due_date <= date('"+endDate+"')) b on e.patient_id = b.patient_id;";
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -387,11 +387,16 @@ public class FacilityDashboardUtil {
 				"       )\n" +
 				"   )) e\n" +
 				"  INNER JOIN (SELECT t.patient_id\n" +
-				"                              FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-				"                              WHERE t.latest_hiv_followup_visit BETWEEN DATE('" + startDate + "') AND DATE('" + endDate + "') AND t.vl_due_date IS NOT NULL\n" +
-				"                                AND t.vl_due_date <= DATE('" + endDate + "')\n" +
-				"                                AND t.latest_hiv_followup_visit >= t.vl_due_date\n" +
-				"                                AND (t.date_test_requested IS NULL OR t.date_test_requested < t.latest_hiv_followup_visit)) b on e.patient_id = b.patient_id;";
+				"	FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"         INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"                     FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"                     WHERE visit_date BETWEEN DATE('"+startDate+"') AND DATE('"+endDate+"')\n" +
+				"                     GROUP BY patient_id) latest\n" +
+				"                    ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"	WHERE t.vl_due_date IS NOT NULL\n" +
+				"  	AND t.vl_due_date <= DATE('"+endDate+"')\n" +
+				"  	AND t.visit_date >= t.vl_due_date\n" +
+				"  	AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) b on e.patient_id = b.patient_id;";
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -788,86 +793,84 @@ public class FacilityDashboardUtil {
 	public static SimpleObject getMonthlyHighRiskPBFWNotOnPrep(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
 		String highRiskPBFWNotOnPrepQuery = "SELECT DISTINCT COUNT(DISTINCT (a.patient_id)) as high_risk_not_on_PrEP, a.visit_date as visit_date\n" +
-				"FROM (\n" +
-				"         SELECT s.patient_id,s.visit_date\n" +
-				"         FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
-				"                  INNER JOIN (\n" +
-				"             SELECT patient_id, final_test_result, visit_date\n" +
-				"             FROM kenyaemr_etl.etl_hts_test\n" +
-				"             WHERE visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
-				"               AND final_test_result = 'Negative'\n" +
-				"         ) t ON t.patient_id = s.patient_id\n" +
-				"             AND s.visit_date <= t.visit_date\n" +
-				"                  INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-				"                             ON r.patient_id = s.patient_id\n" +
-				"                                 AND r.willing_to_take_prep = 'Yes'\n" +
-				"                  INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-				"                             ON d.patient_id = s.patient_id\n" +
-				"         WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
-				"           AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-				"           AND s.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
-				"           AND d.Gender = 'F'\n" +
-				"           AND TIMESTAMPDIFF(\n" +
-				"                       DAY,\n" +
-				"                       LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"                       GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
-				"               ) <= 3\n" +
-				"     ) a\n" +
-				"         LEFT JOIN (\n" +
-				"    SELECT e.patient_id,\n" +
-				"           MAX(e.visit_date) AS latest_enrollment_date,\n" +
-				"           f.latest_fup_date,\n" +
-				"           f.latest_fup_app_date,\n" +
-				"           r.latest_refill_visit_date,\n" +
-				"           r.latest_refill_app_date,\n" +
-				"           d.latest_disc_date\n" +
-				"    FROM kenyaemr_etl.etl_prep_enrolment e\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_fup_date,\n" +
-				"               MID(MAX(CONCAT(visit_date, appointment_date)), 11) AS latest_fup_app_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_followup\n" +
-				"        WHERE visit_date <= '" + endDate +"'\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) f ON e.patient_id = f.patient_id\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_refill_visit_date,\n" +
-				"               MID(MAX(CONCAT(visit_date, next_appointment)), 11) AS latest_refill_app_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_monthly_refill\n" +
-				"        WHERE visit_date <= '" + endDate +"'\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) r ON e.patient_id = r.patient_id\n" +
-				"             LEFT JOIN (\n" +
-				"        SELECT patient_id,\n" +
-				"               MAX(visit_date) AS latest_disc_date\n" +
-				"        FROM kenyaemr_etl.etl_prep_discontinuation\n" +
-				"        WHERE visit_date <= '" + endDate +"'\n" +
-				"        GROUP BY patient_id\n" +
-				"    ) d ON e.patient_id = d.patient_id\n" +
-				"    GROUP BY e.patient_id\n" +
-				"    HAVING\n" +
-				"        -- Case 1: Newly enrolled within reporting period, no followup/refill yet = IN PrEP\n" +
-				"        (\n" +
-				"            MAX(e.visit_date) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
-				"                AND (f.latest_fup_date IS NULL OR f.latest_fup_date < MAX(e.visit_date))\n" +
-				"                AND (r.latest_refill_visit_date IS NULL OR r.latest_refill_visit_date < MAX(e.visit_date))\n" +
-				"                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-				"            )\n" +
-				"        -- Case 2: Previously enrolled, latest visit occurred, and appointment not missed by >7 days = IN PrEP\n" +
-				"        OR\n" +
-				"        (\n" +
-				"            GREATEST(IFNULL(f.latest_fup_date, '0000-00-00'), IFNULL(r.latest_refill_visit_date, '0000-00-00')) >= MAX(e.visit_date)\n" +
-				"                AND TIMESTAMPDIFF(DAY,\n" +
-				"                                  GREATEST(IFNULL(f.latest_fup_app_date, '0000-00-00'), IFNULL(r.latest_refill_app_date, '0000-00-00')),\n" +
-				"                                  '" + endDate +"'\n" +
-				"                    ) <= 7\n" +
-				"                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-				"            )\n" +
-				") b ON a.patient_id = b.patient_id\n" +
+				"FROM (SELECT s.patient_id, s.visit_date\n" +
+				"      FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
+				"               INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
+				"                           FROM kenyaemr_etl.etl_hts_test t\n" +
+				"                           WHERE t.visit_date BETWEEN DATE_SUB(DATE('" + endDate + "'), INTERVAL 30 DAY) AND DATE('" + endDate + "')\n" +
+				"                             AND t.final_test_result = 'Negative') t\n" +
+				"                          ON t.patient_id = s.patient_id\n" +
+				"                              AND s.visit_date <= t.visit_date\n" +
+				"               INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+				"                          ON d.patient_id = s.patient_id\n" +
+				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
+				"        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
+				"        AND s.visit_date BETWEEN DATE_SUB(DATE('" + endDate + "'), INTERVAL 30 DAY) AND DATE('" + endDate + "')\n" +
+				"        AND d.Gender = 'F'\n" +
+				"        AND TIMESTAMPDIFF(\n" +
+				"                    DAY,\n" +
+				"                    LEAST(s.visit_date, t.visit_date),\n" +
+				"                    GREATEST(s.visit_date, t.visit_date)\n" +
+				"            ) <= 3) a\n" +
+				"         LEFT JOIN (select e.patient_id,\n" +
+				"                           max(e.visit_date)                                        as latest_enrollment_date,\n" +
+				"                           f.latest_fup_date,\n" +
+				"                           greatest(ifnull(f.latest_fup_app_date, '1900-01-01'),\n" +
+				"                                    ifnull(latest_refill_app_date, '1900-01-01'))   as latest_appointment_date,\n" +
+				"                           greatest(ifnull(latest_fup_date, '1900-01-01'),\n" +
+				"                                    ifnull(latest_refill_visit_date, '1900-01-01')) as latest_visit_date,\n" +
+				"                           r.latest_refill_visit_date,\n" +
+				"                           f.latest_fup_app_date,\n" +
+				"                           r.latest_refill_app_date,\n" +
+				"                           d.latest_disc_date,\n" +
+				"                           d.disc_patient\n" +
+				"                    from kenyaemr_etl.etl_prep_enrolment e\n" +
+				"                             left join\n" +
+				"                         (select f.patient_id,\n" +
+				"                                 max(f.visit_date)                                      as latest_fup_date,\n" +
+				"                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
+				"                          from kenyaemr_etl.etl_prep_followup f\n" +
+				"                          where f.visit_date <= date('" + endDate + "')\n" +
+				"                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
+				"                             left join (select r.patient_id,\n" +
+				"                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
+				"                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
+				"                                        from kenyaemr_etl.etl_prep_monthly_refill r\n" +
+				"                                        where r.visit_date <= date('" + endDate + "')\n" +
+				"                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
+				"                             left join (select patient_id                                               as disc_patient,\n" +
+				"                                               max(d.visit_date)                                        as latest_disc_date,\n" +
+				"                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
+				"                                        from kenyaemr_etl.etl_prep_discontinuation d\n" +
+				"                                        where d.visit_date <= date('" + endDate + "')\n" +
+				"                                        group by patient_id\n" +
+				"                                        having latest_disc_date <= date('" + endDate + "')) d\n" +
+				"                                       on e.patient_id = d.disc_patient\n" +
+				"                    group by e.patient_id\n" +
+				"                    having (\n" +
+				"                        latest_appointment_date IS NOT NULL\n" +
+				"                            AND latest_appointment_date != '1900-01-01'\n" +
+				"                            AND timestampdiff(DAY, date(latest_appointment_date), date('" + endDate + "')) <= 7\n" +
+				"                            AND date(latest_appointment_date) >= date(latest_visit_date)\n" +
+				"                            AND (\n" +
+				"                            (latest_enrollment_date >= d.latest_disc_date AND\n" +
+				"                             latest_appointment_date > d.latest_disc_date)\n" +
+				"                                OR d.disc_patient IS NULL\n" +
+				"                            )\n" +
+				"                        )\n" +
+				"                        OR (\n" +
+				"                        timestampdiff(DAY, latest_enrollment_date, DATE('" + endDate + "')) BETWEEN 0 AND 30\n" +
+				"                            AND d.disc_patient IS NULL\n" +
+				"                        )\n" +
+				"                        OR (\n" +
+				"                        latest_appointment_date IS NULL\n" +
+				"                            AND (latest_visit_date IS NULL OR latest_visit_date = '1900-01-01')\n" +
+				"                            AND d.disc_patient IS NULL\n" +
+				"                        )) b\n" +
+				"                   ON a.patient_id = b.patient_id\n" +
 				"WHERE b.patient_id IS NULL\n" +
-				"    group by date(a.visit_date)\n" +
-				"order by date(a.visit_date)";
+				"group by date(a.visit_date)\n" +
+				"order by date(a.visit_date);";
 
 		return getSimpleObject(highRiskPBFWNotOnPrepQuery);
 	}
@@ -1014,7 +1017,7 @@ public class FacilityDashboardUtil {
 				"        where date(visit_date) <= date('" + endDate + "')\n" +
 				"          and program_name = 'HIV'\n" +
 				"        group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"  where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"  where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
 				"  group by patient_id\n" +
 				"  having (started_on_drugs is not null and started_on_drugs <> '')\n" +
 				"     and (\n" +
@@ -1028,13 +1031,17 @@ public class FacilityDashboardUtil {
 				"          )\n" +
 				"      )) e\n" +
 				"     INNER JOIN (SELECT t.patient_id\n" +
-				"                 FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-				"                 WHERE t.latest_hiv_followup_visit BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
-				"                   AND t.vl_due_date IS NOT NULL\n" +
-				"                   AND t.vl_due_date <= date('" + endDate + "')\n" +
-				"                   AND t.latest_hiv_followup_visit >= t.vl_due_date\n" +
-				"                   AND (t.date_test_requested IS NULL OR t.date_test_requested < t.latest_hiv_followup_visit)\n" +
-				"                 ORDER BY patient_id) b on e.patient_id = b.patient_id\n" +
+				"FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"INNER JOIN (\n" +
+				"   SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"   FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"   WHERE visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
+				"   GROUP BY patient_id\n" +
+				") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"WHERE t.vl_due_date IS NOT NULL\n" +
+				" AND t.vl_due_date <= DATE('" + endDate + "')\n" +
+				" AND t.visit_date >= t.vl_due_date\n" +
+				" AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) b on e.patient_id = b.patient_id\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date);";
 		return getSimpleObject(eligibleForVlSampleNotTakenQuery);
@@ -1227,20 +1234,17 @@ public class FacilityDashboardUtil {
 				"                    ON s.patient_id = t.patient_id\n" +
 				"                        -- enforce order: screening must be before (or same day as) HTS test\n" +
 				"                        AND s.visit_date <= t.visit_date\n" +
-				"         INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-				"                    ON r.patient_id = s.patient_id\n" +
-				"                        AND r.willing_to_take_prep = 'Yes'\n" +
 				"         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
 				"                    ON d.patient_id = s.patient_id\n" +
 				"WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
 				"  AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
 				"  AND s.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"  AND d.Gender = 'F'\n" +
-				"-- enforce: all three events occur within the same 3-day window\n" +
+				"-- enforce: all two events occur within the same 3-day window\n" +
 				"  AND TIMESTAMPDIFF(\n" +
 				"              DAY,\n" +
-				"              LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"              GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
+				"              LEAST(s.visit_date, t.visit_date),\n" +
+				"              GREATEST(s.visit_date, t.visit_date)\n" +
 				"      ) <= 3\n" +
 				"GROUP BY DATE(s.visit_date)\n" +
 				"ORDER BY DATE(s.visit_date) ASC;";
@@ -1319,11 +1323,16 @@ public class FacilityDashboardUtil {
 				"               disc_patient is null)\n" +
 				"              )\n" +
 				"          )) e\n" +
-				"         INNER JOIN (select t.patient_id\n" +
-				"                     from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-				"                     where t.vl_due_date <= date('" + endDate + "')\n" +
-				"                       and t.latest_hiv_followup_visit BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
-				"                     ORDER BY t.patient_id) b\n" +
+				"         INNER JOIN (" +
+				"select t.patient_id\n" +
+				"from kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"inner join (\n" +
+				"    select patient_id, max(visit_date) as latest_visit_date\n" +
+				"    from kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"    where visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
+				"    group by patient_id\n" +
+				") latest on latest.patient_id = t.patient_id and latest.latest_visit_date = t.visit_date\n" +
+				"where t.vl_due_date <= date('"+endDate+"')) b\n" +
 				"                    on e.patient_id = b.patient_id\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date) ASC;";
