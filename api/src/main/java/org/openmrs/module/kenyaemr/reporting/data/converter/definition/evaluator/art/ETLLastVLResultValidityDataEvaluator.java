@@ -36,12 +36,19 @@ public class ETLLastVLResultValidityDataEvaluator implements PersonDataEvaluator
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "SELECT t.patient_id,\n" +
-                "       case\n" +
-                "           when DATE(:endDate) >= t.vl_due_date THEN 'Invalid'\n" +
-                "           WHEN t.vl_due_date IS NULL THEN 'Pending Results'\n" +
-                "           ELSE 'Valid' END as vl_status\n" +
+                "       CASE\n" +
+                "           WHEN DATE(:endDate) > t.vl_due_date THEN 'Invalid'\n" +
+                "           WHEN t.vl_due_date IS NULL           THEN 'Pending Results'\n" +
+                "           ELSE 'Valid'\n" +
+                "       END AS vl_status\n" +
                 "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-                "WHERE t.latest_hiv_followup_visit <= DATE(:endDate);";
+                "INNER JOIN (\n" +
+                "    SELECT patient_id, MAX(visit_date) AS latest_visit\n" +
+                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    WHERE visit_date <= DATE(:endDate)\n" +
+                "    GROUP BY patient_id\n" +
+                ") lv ON lv.patient_id = t.patient_id\n" +
+                "     AND lv.latest_visit = t.visit_date;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

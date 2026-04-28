@@ -35,11 +35,14 @@ public class ETLLastVLResultDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id,\n" +
-                "       mid(max(concat(date(visit_date),result_name)),11) as vl_result\n" +
-                "from kenyaemr_etl.etl_laboratory_extract\n" +
-                "where date(visit_date) <= date(:endDate) and lab_test in (1305, 856) and result_name is not null\n" +
-                "GROUP BY patient_id;";
+        String qry = "SELECT t.patient_id, if(t.lab_test = 856, t.vl_result, if(t.lab_test = 1305 and t.vl_result in (1302,1306), 'LDL', NULL)) AS vl_result\n" +
+                "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+                "         INNER JOIN (\n" +
+                "    SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    WHERE visit_date <= DATE(:endDate)\n" +
+                "    GROUP BY patient_id\n" +
+                ") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

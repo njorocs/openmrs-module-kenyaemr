@@ -229,7 +229,7 @@ public class ActivePatientSnapshotReportBuilder extends AbstractHybridReportBuil
         dsd.addColumn("VL Validility", lastVLResultValidityDataDefinition, "endDate=${endDate}");
         dsd.addColumn("Last VL Justification", eTLLastVLJustificationDataDefinition,"endDate=${endDate}");
         dsd.addColumn("Last VL Order Date", lastVLDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
-        dsd.addColumn("Last VL Result Date", lastVLDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
+        dsd.addColumn("Last VL Result Date", lastVLResultDateDataDefinition, "endDate=${endDate}");
         dsd.addColumn("VL Due Date", vlDueDateDataDefinition, "endDate=${endDate}", new DateConverter(DATE_FORMAT));
         dsd.addColumn("Active in PMTCT",activeInMchDataDefinition, "startDate=${startDate},endDate=${endDate}");
         dsd.addColumn("Active in OVC", activeInOvcDataDefinition,"endDate=${endDate}",new ActiveInProgramConverter());

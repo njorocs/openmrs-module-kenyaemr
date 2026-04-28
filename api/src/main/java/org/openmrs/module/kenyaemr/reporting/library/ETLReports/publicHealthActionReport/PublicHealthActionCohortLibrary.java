@@ -910,12 +910,17 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition eligibleForVLSampleNotTakenZeroGracePeriod() {
-        String sqlQuery = "select r.patient_id\n" +
-                "                     from kenyaemr_etl.etl_viral_load_validity_tracker r\n" +
-                "                     where r.latest_hiv_followup_visit BETWEEN DATE(:startDate) AND DATE(:endDate) AND r.vl_due_date IS NOT NULL\n" +
-                "                       AND r.vl_due_date <= DATE(:endDate)\n" +
-                "                       AND r.latest_hiv_followup_visit >= r.vl_due_date\n" +
-                "                       AND (r.date_test_requested IS NULL OR r.date_test_requested < r.latest_hiv_followup_visit)";
+        String sqlQuery = "SELECT t.patient_id\n" +
+                "               FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+                "                        INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+                "                                    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "                                    WHERE visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "                                    GROUP BY patient_id) latest\n" +
+                "                                   ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+                "               WHERE t.vl_due_date IS NOT NULL\n" +
+                "                 AND t.vl_due_date <= DATE(:endDate)\n" +
+                "                 AND t.visit_date >= t.vl_due_date\n" +
+                "                 AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("eligibleForVLSampleNotTakenZeroGracePeriod");
         cd.setQuery(sqlQuery);
@@ -1084,98 +1089,7 @@ public class PublicHealthActionCohortLibrary {
         cd.setDescription("HEIs 24 Months with undocumented Outcome");
         return cd;
     }
-	/**
-	 * Number of Pregnant and postpartum women at high risk (ML-based) not linked to PrEP
-	 * @return
-	 */
-	public CohortDefinition pregnantPostPartumNotLinkedToPrep() {
-		String sqlQuery = "SELECT a.patient_id\n" +
-                "FROM (\n" +
-                "         SELECT s.patient_id\n" +
-                "         FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
-                "                  INNER JOIN (\n" +
-                "             SELECT patient_id, final_test_result, visit_date\n" +
-                "             FROM kenyaemr_etl.etl_hts_test\n" +
-                "             WHERE visit_date BETWEEN :startDate AND :endDate\n" +
-                "               AND final_test_result = 'Negative'\n" +
-                "         ) t ON t.patient_id = s.patient_id\n" +
-                "             AND s.visit_date <= t.visit_date\n" +
-                "                  INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-                "                             ON r.patient_id = s.patient_id\n" +
-                "                                 AND r.willing_to_take_prep = 'Yes'\n" +
-                "                  INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
-                "                             ON d.patient_id = s.patient_id\n" +
-                "         WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
-                "           AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-                "           AND s.visit_date BETWEEN :startDate AND :endDate\n" +
-                "           AND d.Gender = 'F'\n" +
-                "           AND TIMESTAMPDIFF(\n" +
-                "                       DAY,\n" +
-                "                       LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-                "                       GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
-                "               ) <= 3\n" +
-                "     ) a\n" +
-                "         LEFT JOIN (\n" +
-                "    SELECT e.patient_id,\n" +
-                "           MAX(e.visit_date) AS latest_enrollment_date,\n" +
-                "           f.latest_fup_date,\n" +
-                "           f.latest_fup_app_date,\n" +
-                "           r.latest_refill_visit_date,\n" +
-                "           r.latest_refill_app_date,\n" +
-                "           d.latest_disc_date\n" +
-                "    FROM kenyaemr_etl.etl_prep_enrolment e\n" +
-                "             LEFT JOIN (\n" +
-                "        SELECT patient_id,\n" +
-                "               MAX(visit_date) AS latest_fup_date,\n" +
-                "               MID(MAX(CONCAT(visit_date, appointment_date)), 11) AS latest_fup_app_date\n" +
-                "        FROM kenyaemr_etl.etl_prep_followup\n" +
-                "        WHERE visit_date <= :endDate\n" +
-                "        GROUP BY patient_id\n" +
-                "    ) f ON e.patient_id = f.patient_id\n" +
-                "             LEFT JOIN (\n" +
-                "        SELECT patient_id,\n" +
-                "               MAX(visit_date) AS latest_refill_visit_date,\n" +
-                "               MID(MAX(CONCAT(visit_date, next_appointment)), 11) AS latest_refill_app_date\n" +
-                "        FROM kenyaemr_etl.etl_prep_monthly_refill\n" +
-                "        WHERE visit_date <= :endDate\n" +
-                "        GROUP BY patient_id\n" +
-                "    ) r ON e.patient_id = r.patient_id\n" +
-                "             LEFT JOIN (\n" +
-                "        SELECT patient_id,\n" +
-                "               MAX(visit_date) AS latest_disc_date\n" +
-                "        FROM kenyaemr_etl.etl_prep_discontinuation\n" +
-                "        WHERE visit_date <= :endDate\n" +
-                "        GROUP BY patient_id\n" +
-                "    ) d ON e.patient_id = d.patient_id\n" +
-                "    GROUP BY e.patient_id\n" +
-                "    HAVING\n" +
-                "        -- Case 1: Newly enrolled within reporting period, no followup/refill yet = IN PrEP\n" +
-                "        (\n" +
-                "            MAX(e.visit_date) BETWEEN :startDate AND :endDate\n" +
-                "                AND (f.latest_fup_date IS NULL OR f.latest_fup_date < MAX(e.visit_date))\n" +
-                "                AND (r.latest_refill_visit_date IS NULL OR r.latest_refill_visit_date < MAX(e.visit_date))\n" +
-                "                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-                "            )\n" +
-                "        -- Case 2: Previously enrolled, latest visit occurred, and appointment not missed by >7 days = IN PrEP\n" +
-                "        OR\n" +
-                "        (\n" +
-                "            GREATEST(IFNULL(f.latest_fup_date, '0000-00-00'), IFNULL(r.latest_refill_visit_date, '0000-00-00')) >= MAX(e.visit_date)\n" +
-                "                AND TIMESTAMPDIFF(DAY,\n" +
-                "                                  GREATEST(IFNULL(f.latest_fup_app_date, '0000-00-00'), IFNULL(r.latest_refill_app_date, '0000-00-00')),\n" +
-                "                                  :endDate\n" +
-                "                    ) <= 7\n" +
-                "                AND (d.latest_disc_date IS NULL OR d.latest_disc_date < MAX(e.visit_date))\n" +
-                "            )\n" +
-                ") b ON a.patient_id = b.patient_id\n" +
-                "WHERE b.patient_id IS NULL;";
-		SqlCohortDefinition cd = new SqlCohortDefinition();
-		cd.setName("pregnantPostPartumNotLinkedToPrep");
-		cd.setQuery(sqlQuery);
-		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		cd.setDescription("Pregnant and postpartum women linked to PrEP");
-		return cd;
-	}
+
     /**
      * Number of Pregnant and postpartum women at high risk (ML-based) not linked to PrEP for Case Surveillance
      * @return
@@ -1189,30 +1103,25 @@ public class PublicHealthActionCohortLibrary {
                 "                           WHERE t.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                             AND t.final_test_result = 'Negative') t\n" +
                 "                          ON t.patient_id = s.patient_id\n" +
-                "                              -- enforce order: screening must be before (or same day as) HTS test\n" +
                 "                              AND s.visit_date <= t.visit_date\n" +
-                "               INNER JOIN kenyaemr_etl.etl_prep_behaviour_risk_assessment r\n" +
-                "                          ON r.patient_id = s.patient_id\n" +
-                "                              AND r.willing_to_take_prep = 'Yes'\n" +
                 "               INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
                 "                          ON d.patient_id = s.patient_id\n" +
                 "      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
                 "        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
                 "        AND s.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "        AND d.Gender = 'F'\n" +
-                "        -- enforce: all three events occur within the same 3-day window\n" +
                 "        AND TIMESTAMPDIFF(\n" +
                 "                    DAY,\n" +
-                "                    LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-                "                    GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
+                "                    LEAST(s.visit_date, t.visit_date),\n" +
+                "                    GREATEST(s.visit_date, t.visit_date)\n" +
                 "            ) <= 3) a\n" +
                 "         LEFT JOIN (select e.patient_id,\n" +
-                "                           max(e.visit_date)                                        as latest_enrollment_date,\n" +
+                "                           max(e.visit_date)                                           as latest_enrollment_date,\n" +
                 "                           f.latest_fup_date,\n" +
-                "                           greatest(ifnull(f.latest_fup_app_date, '0000-00-00'),\n" +
-                "                                    ifnull(latest_refill_app_date, '0000-00-00'))   as latest_appointment_date,\n" +
-                "                           greatest(ifnull(latest_fup_date, '0000-00-00'),\n" +
-                "                                    ifnull(latest_refill_visit_date, '0000-00-00')) as latest_visit_date,\n" +
+                "                           greatest(ifnull(f.latest_fup_app_date, '1900-01-01'),\n" +
+                "                                    ifnull(latest_refill_app_date, '1900-01-01'))      as latest_appointment_date,\n" +
+                "                           greatest(ifnull(latest_fup_date, '1900-01-01'),\n" +
+                "                                    ifnull(latest_refill_visit_date, '1900-01-01'))   as latest_visit_date,\n" +
                 "                           r.latest_refill_visit_date,\n" +
                 "                           f.latest_fup_app_date,\n" +
                 "                           r.latest_refill_app_date,\n" +
@@ -1241,10 +1150,25 @@ public class PublicHealthActionCohortLibrary {
                 "                                        having latest_disc_date <= date(:endDate)) d\n" +
                 "                                       on e.patient_id = d.disc_patient\n" +
                 "                    group by e.patient_id\n" +
-                "                    having timestampdiff(DAY, date(latest_appointment_date), date(:endDate)) >= 7\n" +
-                "                       and date(latest_appointment_date) >= date(latest_visit_date)\n" +
-                "                       and ((latest_enrollment_date >= d.latest_disc_date\n" +
-                "                        and latest_appointment_date > d.latest_disc_date) or d.disc_patient is null)) b\n" +
+                "                    having (\n" +
+                "                        latest_appointment_date IS NOT NULL\n" +
+                "                            AND latest_appointment_date != '1900-01-01'\n" +
+                "                            AND timestampdiff(DAY, date(latest_appointment_date), date(:endDate)) <= 7\n" +
+                "                            AND date(latest_appointment_date) >= date(latest_visit_date)\n" +
+                "                            AND (\n" +
+                "                            (latest_enrollment_date >= d.latest_disc_date AND latest_appointment_date > d.latest_disc_date)\n" +
+                "                                OR d.disc_patient IS NULL\n" +
+                "                            )\n" +
+                "                        )\n" +
+                "                        OR (\n" +
+                "                        timestampdiff(DAY, latest_enrollment_date, DATE(:endDate)) BETWEEN 0 AND 30\n" +
+                "                            AND d.disc_patient IS NULL\n" +
+                "                        )\n" +
+                "                        OR (\n" +
+                "                        latest_appointment_date IS NULL\n" +
+                "                            AND (latest_visit_date IS NULL OR latest_visit_date = '1900-01-01')\n" +
+                "                            AND d.disc_patient IS NULL\n" +
+                "                        )) b\n" +
                 "                   ON a.patient_id = b.patient_id\n" +
                 "WHERE b.patient_id IS NULL;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
