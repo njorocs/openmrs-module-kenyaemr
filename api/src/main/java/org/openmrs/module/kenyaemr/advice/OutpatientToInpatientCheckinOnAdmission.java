@@ -25,6 +25,7 @@ import org.openmrs.module.queue.api.search.QueueEntrySearchCriteria;
 import org.openmrs.module.queue.model.QueueEntry;
 import org.springframework.aop.AfterReturningAdvice;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Date;
@@ -33,7 +34,16 @@ import java.util.UUID;
 
 /**
  * Automates the process of checking out a patient from OPD and starting an
- * inpatient visit on admission form submission
+ * inpatient visit on admission form submission.
+ *
+ * 1. Write OPD.stop = T-1ms directly via SQL (no VisitValidator).
+ * 2. Update the in-memory Visit entity to match so Hibernate stays consistent.
+ * 3. flushSession — force the Hibernate dirty-entity write for OPD to the DB,
+ * ensuring the overlap check for the inpatient visit sees OPD as stopped.
+ * 4. End queue entry at T-1ms (endedAt == OPD.stop → queue constraint
+ * satisfied).
+ * 5. Create inpatient visit starting at T via visitService.saveVisit()
+ * (validator runs normally; overlap check passes because OPD.stop < T).
  */
 public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAdvice {
 
@@ -61,47 +71,68 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
         if (method.getName().equals("saveEncounter")) {
             Encounter enc = (Encounter) args[0];
             VisitService visitService = Context.getVisitService();
+
             if (enc != null && enc.getVisit() != null
                     && enc.getVisit().getVisitType().getUuid().equals(CommonMetadata._VisitType.OUTPATIENT)
                     && enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())) {
 
-                // end the OPD visit
-                Visit opdVisit = enc.getVisit();
-                opdVisit.setStopDatetime(new Date());
-                visitService.saveVisit(opdVisit);
-
-                Visit visit = new Visit();
-                visit.setStartDatetime(new Date());
-                visit.setLocation(enc.getLocation());
-                visit.setPatient(enc.getPatient());
-                visit.setVisitType(visitService.getVisitTypeByUuid(CommonMetadata._VisitType.INPATIENT));
-                enc.setVisit(visit);
-                Context.getVisitService().saveVisit(visit);
-                System.out.println("Started a new inpatient visit......");
-
                 /*
-                 * Since we want to rely on admission form once filled to check out of the OPD
-                 * visit,
-                 * But still we need to assign the admission encounter to the new inpatient
-                 * visit
+                 * inpatientStart = enc.getEncounterDatetime()
+                 * The inpatient visit starts exactly when the encounter was recorded.
+                 * This guarantees the encounter is never "before" its visit's startDatetime
+                 * (constraint C), which would block the user from ever ending the visit.
+                 *
+                 * opdStop = inpatientStart - 1 ms
+                 * One millisecond before the inpatient start. OpenMRS overlap check is
+                 * strict (uses Date.before(), so equal timestamps overlap), so we need at
+                 * least 1 ms gap (constraint B).
+                 * Written via SQL — NOT via visitService.saveVisit() — to avoid the
+                 * VisitValidator's encountersCannotBeAfterStopDate check (constraint A
+                 * deadlock described above).
                  */
-                EmrVisitAssignmentHandler.setVisitOfEncounter(visit, enc);
+                Date inpatientStart = enc.getEncounterDatetime() != null
+                        ? enc.getEncounterDatetime()
+                        : new Date();
+                Date opdStop = new Date(inpatientStart.getTime() - 1L);
 
-                // Remove patient from the OPD queue
-                removePatientFromOpdQueue(enc.getPatient(), opdVisit);
+                Visit opdVisit = enc.getVisit();
+                String opdStopSql = String.format(
+                        "UPDATE visit SET date_stopped = '%s', date_changed = '%s' WHERE visit_id = %d",
+                        new Timestamp(opdStop.getTime()),
+                        new Timestamp(new Date().getTime()),
+                        opdVisit.getVisitId());
+                Context.getAdministrationService().executeSQL(opdStopSql, false);
+                opdVisit.setStopDatetime(opdStop);
 
+                log.info("OPD visit " + opdVisit.getUuid() + " stopped at " + opdStop
+                        + " (SQL) for patient " + enc.getPatient().getPatientId());
+                Context.flushSession();
+                removePatientFromOpdQueue(enc.getPatient(), opdVisit, opdStop);
+                Visit inpatientVisit = new Visit();
+                inpatientVisit.setStartDatetime(inpatientStart);
+                inpatientVisit.setLocation(enc.getLocation());
+                inpatientVisit.setPatient(enc.getPatient());
+                inpatientVisit.setVisitType(visitService.getVisitTypeByUuid(CommonMetadata._VisitType.INPATIENT));
+                enc.setVisit(inpatientVisit);
+                Context.getVisitService().saveVisit(inpatientVisit);
+
+                log.info("Inpatient visit " + inpatientVisit.getUuid() + " started at " + inpatientStart
+                        + " for patient " + enc.getPatient().getPatientId());
+
+                // Prevent re-attachment of the encounter to the closed OPD visit.
+                EmrVisitAssignmentHandler.setVisitOfEncounter(inpatientVisit, enc);
             }
-            // Check if the encounter has a clinical diagnosis
 
+            // Auto-populate conditions table from clinical diagnoses
             if (enc != null && enc.getForm() != null
                     && (CommonMetadata._Form.CLINICAL_ENCOUNTER.equalsIgnoreCase(enc.getForm().getUuid())
                             || HivMetadata._Form.HIV_GREEN_CARD.equalsIgnoreCase(enc.getForm().getUuid()))) {
+
                 Integer encounterId = enc.getEncounterId();
                 Integer patientId = enc.getPatient().getId();
                 User creator = enc.getCreator();
                 Date now = new Date();
 
-                // Query to fetch diagnoses from encounter_diagnosis table
                 String diagnosisQuery = String.format(
                         "SELECT diagnosis_coded FROM encounter_diagnosis " +
                                 "WHERE encounter_id = %d AND voided = 0",
@@ -113,7 +144,6 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                         if (row != null && !row.isEmpty()) {
                             Integer diagnosisCoded = (Integer) row.get(0);
                             if (CONDITIONS_CONCEPTS.contains(diagnosisCoded)) {
-                                // Query to check if the condition already exists in the conditions table
                                 String checkConditionQuery = String.format(
                                         "SELECT condition_id FROM conditions " +
                                                 "WHERE patient_id = %d AND condition_coded = %d AND voided = 0",
@@ -121,7 +151,6 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                                 List<List<Object>> conditionResults = Context.getAdministrationService()
                                         .executeSQL(checkConditionQuery, true);
                                 if (conditionResults.isEmpty()) {
-                                    // Insert new condition into conditions table
                                     String insertConditionQuery = String.format(
                                             "INSERT INTO conditions (" +
                                                     "patient_id, encounter_id, condition_coded, clinical_status, " +
@@ -130,8 +159,8 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                                             patientId,
                                             encounterId,
                                             diagnosisCoded,
-                                            new java.sql.Timestamp(now.getTime()).toString(),
-                                            new java.sql.Timestamp(now.getTime()).toString(),
+                                            new Timestamp(now.getTime()),
+                                            new Timestamp(now.getTime()),
                                             creator.getUserId(),
                                             UUID.randomUUID().toString());
                                     Context.getAdministrationService().executeSQL(insertConditionQuery, false);
@@ -144,25 +173,45 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                 }
             }
         }
-
     }
 
-    private void removePatientFromOpdQueue(Patient patient, Visit visit) {
-        QueueEntryService queueEntryService = Context.getService(QueueEntryService.class);
-        QueueEntrySearchCriteria criteria = new QueueEntrySearchCriteria();
-        criteria.setPatient(patient);
-        criteria.setVisit(visit);
-        criteria.setIsEnded(false);
-        List<QueueEntry> queueEntries = queueEntryService.getQueueEntries(criteria);
-        if (!queueEntries.isEmpty()) {
-            log.info("Removing patient " + patient.getPatientId() + " from OPD queue");
-
-            for (QueueEntry queueEntry : queueEntries) {
-                queueEntry.setEndedAt(new Date());
-                queueEntryService.saveQueueEntry(queueEntry);
+    /**
+     * Ends all active OPD queue entries for the given patient and visit.
+     *
+     * <p>
+     * {@code endTime} MUST equal the OPD visit's {@code date_stopped}.
+     * The queue module enforces {@code queueEntry.endedAt <= visit.date_stopped}.
+     *
+     * <p>
+     * Must be called after the OPD stop time is already committed to the DB
+     * (either via SQL in step 1 or a flush), so the queue validator finds a
+     * valid {@code date_stopped} on the visit.
+     *
+     * <p>
+     * Exceptions are caught so that a missing queue entry never blocks admission.
+     */
+    private void removePatientFromOpdQueue(Patient patient, Visit visit, Date endTime) {
+        try {
+            QueueEntryService queueEntryService = Context.getService(QueueEntryService.class);
+            QueueEntrySearchCriteria criteria = new QueueEntrySearchCriteria();
+            criteria.setPatient(patient);
+            criteria.setVisit(visit);
+            criteria.setIsEnded(false);
+            List<QueueEntry> queueEntries = queueEntryService.getQueueEntries(criteria);
+            if (!queueEntries.isEmpty()) {
+                log.info("Ending " + queueEntries.size() + " OPD queue entry/entries"
+                        + " for patient " + patient.getPatientId() + " at " + endTime);
+                for (QueueEntry queueEntry : queueEntries) {
+                    queueEntry.setEndedAt(endTime);
+                    queueEntryService.saveQueueEntry(queueEntry);
+                }
+            } else {
+                log.info("No active OPD queue entries found for patient "
+                        + patient.getPatientId() + " — skipping queue removal");
             }
+        } catch (Exception e) {
+            log.warn("Could not end OPD queue entry for patient " + patient.getPatientId()
+                    + " (admission will still proceed): " + e.getMessage(), e);
         }
-
     }
-
 }
