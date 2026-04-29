@@ -27,7 +27,7 @@ public class FacilityDashboardUtil {
 	/**
 	 * This query counts the number of HIV positive clients who were not linked to
 	 * care (numerator).
-	 * 
+	 *
 	 * @param startDate the start date of the period to consider
 	 * @param endDate   the end date of the period to consider
 	 * @return the count of HIV positive clients not linked to care
@@ -155,9 +155,6 @@ public class FacilityDashboardUtil {
 				"                          ON t.patient_id = s.patient_id\n" +
 				"                              -- enforce order: screening must be before (or same day as) HTS test\n" +
 				"                              AND s.visit_date <= t.visit_date\n" +
-				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_behaviour_risk_assessment r\n" +
-				"                          ON r.patient_id = s.patient_id\n" +
-				"                              AND r.willing_to_take_prep = 'Yes'\n" +
 				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"                          ON d.patient_id = s.patient_id\n" +
 				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
@@ -167,8 +164,8 @@ public class FacilityDashboardUtil {
 				"        -- enforce: all three events occur within the same 3-day window\n" +
 				"        AND TIMESTAMPDIFF(\n" +
 				"                    DAY,\n" +
-				"                    LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"                    GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
+				"                    LEAST(s.visit_date, t.visit_date),\n" +
+				"                    GREATEST(s.visit_date, t.visit_date)\n" +
 				"            ) <= 3";
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -187,77 +184,90 @@ public class FacilityDashboardUtil {
 	 */
 	public static Long getPregnantPostpartumNotInPrep(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String pregnantPostPartumNotPrepLinkedQuery = "SELECT COUNT(DISTINCT(a.patient_id)) high_risk_not_on_PrEP\n" +
-				"FROM (SELECT s.patient_id\n" +
-				"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
-				"               INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
-				"                           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
-				"                           WHERE t.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
-				"                             AND t.final_test_result = 'Negative') t\n" +
-				"                          ON t.patient_id = s.patient_id\n" +
-				"                              -- enforce order: screening must be before (or same day as) HTS test\n" +
-				"                              AND s.visit_date <= t.visit_date\n" +
-				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_behaviour_risk_assessment r\n" +
-				"                          ON r.patient_id = s.patient_id\n" +
-				"                              AND r.willing_to_take_prep = 'Yes'\n" +
-				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
-				"                          ON d.patient_id = s.patient_id\n" +
-				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
-				"        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-				"        AND s.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
-				"        AND d.Gender = 'F'\n" +
-				"        -- enforce: all three events occur within the same 3-day window\n" +
-				"        AND TIMESTAMPDIFF(\n" +
-				"                    DAY,\n" +
-				"                    LEAST(s.visit_date, t.visit_date, r.visit_date),\n" +
-				"                    GREATEST(s.visit_date, t.visit_date, r.visit_date)\n" +
-				"            ) <= 3) a\n" +
-				"         LEFT JOIN (select e.patient_id,\n" +
-				"                           max(e.visit_date)                                        as latest_enrollment_date,\n" +
-				"                           f.latest_fup_date,\n" +
-				"                           greatest(ifnull(f.latest_fup_app_date, '0000-00-00'),\n" +
-				"                                    ifnull(latest_refill_app_date, '0000-00-00'))   as latest_appointment_date,\n" +
-				"                           greatest(ifnull(latest_fup_date, '0000-00-00'),\n" +
-				"                                    ifnull(latest_refill_visit_date, '0000-00-00')) as latest_visit_date,\n" +
-				"                           r.latest_refill_visit_date,\n" +
-				"                           f.latest_fup_app_date,\n" +
-				"                           r.latest_refill_app_date,\n" +
-				"                           d.latest_disc_date,\n" +
-				"                           d.disc_patient\n" +
-				"                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
-				"                             left join\n" +
-				"                         (select f.patient_id,\n" +
-				"                                 max(f.visit_date)                                      as latest_fup_date,\n" +
-				"                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
-				"                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
-				"                          where f.visit_date <= date('" + endDate + "')\n" +
-				"                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
-				"                             left join (select r.patient_id,\n" +
-				"                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
-				"                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
-				"                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
-				"                                        where r.visit_date <= date('" + endDate + "')\n" +
-				"                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
-				"                             left join (select patient_id                                               as disc_patient,\n" +
-				"                                               max(d.visit_date)                                        as latest_disc_date,\n" +
-				"                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
-				"                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
-				"                                        where d.visit_date <= date('" + endDate + "')\n" +
-				"                                        group by patient_id\n" +
-				"                                        having latest_disc_date <= date('" + endDate + "')) d\n" +
-				"                                       on e.patient_id = d.disc_patient\n" +
-				"                    group by e.patient_id\n" +
-				"                    having timestampdiff(DAY, date(latest_appointment_date), date('" + endDate + "')) <= 7\n" +
-				"                       and date(latest_appointment_date) >= date(latest_visit_date)\n" +
-				"                       and ((latest_enrollment_date >= d.latest_disc_date\n" +
-				"                        and latest_appointment_date > d.latest_disc_date) or d.disc_patient is null)) b\n" +
-				"                   ON a.patient_id = b.patient_id\n" +
+		String pregnantPostPartumNotPrepLinkedQuery = "SELECT COUNT(DISTINCT(a.patient_id)) AS high_risk_not_on_PrEP\n" +
+				"  FROM (SELECT s.patient_id\n" +
+				"             FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
+				"                      INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
+				"                                  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+				"                                  WHERE t.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
+				"                                    AND t.final_test_result = 'Negative') t\n" +
+				"                                 ON t.patient_id = s.patient_id\n" +
+				"                                     AND s.visit_date <= t.visit_date\n" +
+				"                      INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"                                 ON d.patient_id = s.patient_id\n" +
+				"             WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
+				"               AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
+				"               AND s.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL " + days + " DAY) AND date('" + endDate + "')\n" +
+				"               AND d.Gender = 'F'\n" +
+				"               AND TIMESTAMPDIFF(\n" +
+				"                           DAY,\n" +
+				"                           LEAST(s.visit_date, t.visit_date),\n" +
+				"                           GREATEST(s.visit_date, t.visit_date)\n" +
+				"                   ) <= 3) a\n" +
+				"    LEFT JOIN (select e.patient_id,\n" +
+				"                                          max(e.visit_date)                                           as latest_enrollment_date,\n" +
+				"                                          f.latest_fup_date,\n" +
+				"                                          greatest(ifnull(f.latest_fup_app_date, '1900-01-01'),\n" +
+				"                                                   ifnull(latest_refill_app_date, '1900-01-01'))      as latest_appointment_date,\n" +
+				"                                          greatest(ifnull(latest_fup_date, '1900-01-01'),\n" +
+				"                                                   ifnull(latest_refill_visit_date, '1900-01-01'))   as latest_visit_date,\n" +
+				"                                          r.latest_refill_visit_date,\n" +
+				"                                          f.latest_fup_app_date,\n" +
+				"                                          r.latest_refill_app_date,\n" +
+				"                                          d.latest_disc_date,\n" +
+				"                                          d.disc_patient\n" +
+				"                                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
+				"                                            left join\n" +
+				"                                        (select f.patient_id,\n" +
+				"                                                max(f.visit_date)                                      as latest_fup_date,\n" +
+				"                                                mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
+				"                                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
+				"                                         where f.visit_date <= date('" + endDate + "')\n" +
+				"                                         group by f.patient_id) f on e.patient_id = f.patient_id\n" +
+				"                                            left join (select r.patient_id,\n" +
+				"                                                              max(r.visit_date)                                      as latest_refill_visit_date,\n" +
+				"                                                              mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
+				"                                                       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
+				"                                                       where r.visit_date <= date('" + endDate + "')\n" +
+				"                                                       group by r.patient_id) r on e.patient_id = r.patient_id\n" +
+				"                                            left join (select patient_id                                               as disc_patient,\n" +
+				"                                                              max(d.visit_date)                                        as latest_disc_date,\n" +
+				"                                                              mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
+				"                                                       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
+				"                                                       where d.visit_date <= date('" + endDate + "')\n" +
+				"                                                       group by patient_id\n" +
+				"                                                       having latest_disc_date <= date('" + endDate + "')) d\n" +
+				"                                                      on e.patient_id = d.disc_patient\n" +
+				"                                   group by e.patient_id\n" +
+				"                                   having (\n" +
+				"                                       latest_appointment_date IS NOT NULL\n" +
+				"                                           AND latest_appointment_date != '1900-01-01'\n" +
+				"                                           AND timestampdiff(DAY, date(latest_appointment_date), date('" + endDate + "')) <= 7\n" +
+				"                                           AND date(latest_appointment_date) >= date(latest_visit_date)\n" +
+				"                                           AND (\n" +
+				"                                           (latest_enrollment_date >= d.latest_disc_date AND latest_appointment_date > d.latest_disc_date)\n" +
+				"                                               OR d.disc_patient IS NULL\n" +
+				"                                           )\n" +
+				"                                       )\n" +
+				"                                       OR (\n" +
+				"                                       timestampdiff(DAY, latest_enrollment_date, DATE('" + endDate + "')) BETWEEN 0 AND 30\n" +
+				"                                           AND d.disc_patient IS NULL\n" +
+				"                                       )\n" +
+				"                                       OR (\n" +
+				"                                       latest_appointment_date IS NULL\n" +
+				"                                           AND (latest_visit_date IS NULL OR latest_visit_date = '1900-01-01')\n" +
+				"                                           AND d.disc_patient IS NULL\n" +
+				"                                       )) b\n" +
+				"ON a.patient_id = b.patient_id\n" +
 				"WHERE b.patient_id IS NULL;";
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-			return (Long) Context.getAdministrationService().executeSQL(pregnantPostPartumNotPrepLinkedQuery, true)
-					.get(0).get(0);
+			List<List<Object>> result = Context.getAdministrationService().executeSQL(pregnantPostPartumNotPrepLinkedQuery, true);
+			if (result != null && !result.isEmpty() && result.get(0) != null && !result.get(0).isEmpty()) {
+				return ((Number) result.get(0).get(0)).longValue();
+			}
+			return 0L;
 		} finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		}
@@ -273,138 +283,6 @@ public class FacilityDashboardUtil {
 	public static Long getEligibleForVl(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
 		String eligibleForVlQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl\n" +
-				"from (select fup.visit_date,\n" +
-				"             fup.patient_id,\n" +
-				"             max(e.visit_date)                                                      as enroll_date,\n" +
-				"             greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"             greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"                      ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"             d.patient_id                                                           as disc_patient,\n" +
-				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"             max(d.visit_date)                                                      as date_discontinued,\n" +
-				"             de.patient_id                                                          as started_on_drugs\n" +
-				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
-				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"                            date(de.date_started) <= date('" + endDate + "')\n" +
-				"               left outer JOIN\n" +
-				"           (select patient_id,\n" +
-				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
-				"            where date(visit_date) <= date('" + endDate + "')\n" +
-				"              and program_name = 'HIV'\n" +
-				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"      where fup.visit_date <= date('" + endDate + "')\n" +
-				"      group by patient_id\n" +
-				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"         and (\n" +
-				"          (\n" +
-				"              (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
-				"               ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"                d.effective_disc_date is null))\n" +
-				"                  and\n" +
-				"              (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"               disc_patient is null)\n" +
-				"              )\n" +
-				"          )) e\n" +
-				"         INNER JOIN (SELECT t.patient_id\n" +
-				"                     FROM (SELECT v.*,\n" +
-				"                                  d.DOB,\n" +
-				"                                  -- Substitution Logic: If current is null and requested is later than base/previous, use previous\n" +
-				"                                  IF(\n" +
-				"                                          v.vl_result IS NULL\n" +
-				"                                              AND v.date_test_result_received IS NULL\n" +
-				"                                              AND v.date_test_requested >\n" +
-				"                                                  GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                           COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                  ),\n" +
-				"                                          v.previous_test_result,\n" +
-				"                                          v.vl_result\n" +
-				"                                  ) AS effective_vl_result,\n" +
-				"                                  IF(\n" +
-				"                                          v.vl_result IS NULL\n" +
-				"                                              AND v.date_test_result_received IS NULL\n" +
-				"                                              AND v.date_test_requested >\n" +
-				"                                                  GREATEST(COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                           COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                  ),\n" +
-				"                                          v.previous_date_test_requested,\n" +
-				"                                          v.date_test_requested\n" +
-				"                                  ) AS effective_date_requested\n" +
-				"                           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
-				"                                    INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
-				"                                               ON v.patient_id = d.patient_id\n" +
-				"                           WHERE v.date_test_requested <= '" + endDate + "') t\n" +
-				"                     WHERE (\n" +
-				"                         (TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3 AND\n" +
-				"                          t.base_viral_load_test_result IS NULL) -- First VL new on ART\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3\n" +
-				"                                 AND\n" +
-				"                             (t.effective_vl_result IS NOT NULL AND t.effective_date_requested < '" + endDate + "')\n" +
-				"                                 AND (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 3\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
-				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR t.effective_vl_result < 200)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 12\n" +
-				"                                 AND TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                             )\n" +
-				"                             OR\n" +
-				"                         (\n" +
-				"                             (t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                 AND TIMESTAMPDIFF(MONTH, t.date_started_art, '" + endDate + "') >= 3\n" +
-				"                                 AND (\n" +
-				"                                 t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                     AND TIMESTAMPDIFF(MONTH, t.effective_date_requested, '" + endDate + "') >= 6\n" +
-				"                                 )\n" +
-				"                                 AND ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
-				"                                      (t.effective_vl_result < 200))\n" +
-				"                             )\n" +
-				"                         )\n" +
-				"                       AND NOT (\n" +
-				"                         t.vl_result IS NULL\n" +
-				"                             AND t.date_test_result_received IS NULL\n" +
-				"                             AND t.base_viral_load_test_result IS NULL\n" +
-				"                             AND t.previous_test_result IS NULL\n" +
-				"                         )) b on e.patient_id = b.patient_id;";
-
-		try {
-			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-			return (Long) Context.getAdministrationService().executeSQL(eligibleForVlQuery, true).get(0).get(0);
-		} finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		}
-	}
-
-	/**
-	 * This query counts the number of patients eligible for viral load testing
-	 * who have not taken a sample (numerator) during a recent visit to the facility.
-	 *
-	 * @param startDate the start date in "dd/MM/yyyy" format
-	 * @param endDate   the end date in "dd/MM/yyyy" format
-	 * @return the number of eligible patients for viral load testing who have not
-	 *         taken a sample
-	 */
-	public static Long getEligibleForVlSampleNotTaken(String startDate, String endDate) {
-		long days = getNumberOfDays(startDate, endDate);
-		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken\n" +
 				"from (select fup.visit_date,\n" +
 				"             fup.patient_id,\n" +
 				"             max(e.visit_date)                                                      as enroll_date,\n" +
@@ -442,128 +320,84 @@ public class FacilityDashboardUtil {
 				"               disc_patient is null)\n" +
 				"              )\n" +
 				"          )) e\n" +
-				"         INNER JOIN (WITH vl_enriched AS (SELECT v.*,\n" +
-				"                                                 d.DOB,\n" +
-				"                                                 IF(\n" +
-				"                                                         v.vl_result IS NULL\n" +
-				"                                                             AND v.date_test_result_received IS NULL\n" +
-				"                                                             AND v.date_test_requested > GREATEST(\n" +
-				"                                                                 COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                 COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                                         ),\n" +
-				"                                                         v.previous_test_result,\n" +
-				"                                                         v.vl_result\n" +
-				"                                                 ) AS effective_vl_result,\n" +
-				"                                                 IF(\n" +
-				"                                                         v.vl_result IS NULL\n" +
-				"                                                             AND v.date_test_result_received IS NULL\n" +
-				"                                                             AND v.date_test_requested > GREATEST(\n" +
-				"                                                                 COALESCE(v.base_viral_load_test_date, '1900-01-01'),\n" +
-				"                                                                 COALESCE(v.previous_date_test_requested, '1900-01-01')\n" +
-				"                                                                                         ),\n" +
-				"                                                         v.previous_date_test_requested,\n" +
-				"                                                         v.date_test_requested\n" +
-				"                                                 ) AS effective_date_requested\n" +
-				"                                          FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
-				"                                                   INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
-				"                                                              ON v.patient_id = d.patient_id\n" +
-				"                                          WHERE v.date_test_requested IS NOT NULL),\n" +
-				"                          vl_with_status AS (SELECT t.*,\n" +
-				"                                                    TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                  t.latest_hiv_followup_visit) fup_minus_effective_test_date,\n" +
-				"                                                    CASE\n" +
-				"                                                        WHEN t.vl_result IS NULL AND t.date_test_result_received IS NULL\n" +
-				"                                                            THEN 'Pending'\n" +
-				"                                                        WHEN (\n" +
-				"                                                            (TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3 AND\n" +
-				"                                                             t.base_viral_load_test_result IS NULL)\n" +
-				"                                                                OR\n" +
-				"                                                            ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3\n" +
-				"                                                                AND (t.effective_vl_result IS NOT NULL)\n" +
-				"                                                                AND\n" +
-				"                                                             (t.order_reason NOT IN (159882, 1434, 2001237, 163718))\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (t.lab_test = 856 AND t.effective_vl_result >= 200\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             3\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
-				"                                                              t.effective_vl_result < 200)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             6\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) BETWEEN 0 AND 24\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            (((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
-				"                                                              t.effective_vl_result < 200)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >=\n" +
-				"                                                             12\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(YEAR, t.DOB, t.effective_date_requested) > 24\n" +
-				"                                                                )\n" +
-				"                                                                OR\n" +
-				"                                                            ((t.pregnancy_status = 1065 OR t.breastfeeding_status = 1065)\n" +
-				"                                                                AND\n" +
-				"                                                             TIMESTAMPDIFF(MONTH, t.date_started_art,\n" +
-				"                                                                           t.latest_hiv_followup_visit) >= 3\n" +
-				"                                                                AND (t.order_reason IN (159882, 1434, 2001237, 163718)\n" +
-				"                                                                    AND TIMESTAMPDIFF(MONTH, t.effective_date_requested,\n" +
-				"                                                                                      t.latest_hiv_followup_visit) >= 6)\n" +
-				"                                                                AND\n" +
-				"                                                             ((t.lab_test = 1305 AND t.effective_vl_result = 1302) OR\n" +
-				"                                                              (t.effective_vl_result < 200))\n" +
-				"                                                                )\n" +
-				"                                                            ) THEN 'Invalid'\n" +
-				"                                                        ELSE 'Valid'\n" +
-				"                                                        END AS                                 vl_status\n" +
-				"                                             FROM vl_enriched t),\n" +
-				"                          latest_any_request AS (\n" +
-				"                              /* Latest VL request overall (used only to exclude “latest is pending”) */\n" +
-				"                              SELECT q.*\n" +
-				"                              FROM (SELECT x.patient_id,\n" +
-				"                                           x.date_test_requested,\n" +
-				"                                           x.vl_status,\n" +
-				"                                           ROW_NUMBER() OVER (\n" +
-				"                                               PARTITION BY x.patient_id\n" +
-				"                                               ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                                               ) AS rn,\n" +
-				"                                           x.fup_minus_effective_test_date\n" +
-				"                                    FROM vl_with_status x) q\n" +
-				"                              WHERE q.rn = 1),\n" +
-				"                          latest_non_pending AS (\n" +
-				"                              /* Last non-pending VL row (this is the “last VL” we care about for this cohort) */\n" +
-				"                              SELECT q.*\n" +
-				"                              FROM (SELECT x.*,\n" +
-				"                                           ROW_NUMBER() OVER (\n" +
-				"                                               PARTITION BY x.patient_id\n" +
-				"                                               ORDER BY x.date_test_requested DESC, x.date_created DESC\n" +
-				"                                               ) AS rn\n" +
-				"                                    FROM vl_with_status x\n" +
-				"                                    WHERE x.vl_status <> 'Pending') q\n" +
-				"                              WHERE q.rn = 1)\n" +
-				"                     SELECT lnp.patient_id\n" +
-				"                     FROM latest_non_pending lnp\n" +
-				"                              INNER JOIN latest_any_request lar\n" +
-				"                                         ON lar.patient_id = lnp.patient_id\n" +
-				"                     WHERE lnp.vl_status = 'Invalid'\n" +
-				"                       AND lnp.latest_hiv_followup_visit IS NOT NULL\n" +
-				"                       AND lnp.latest_hiv_followup_visit > lnp.date_test_requested\n" +
-				"                         /* critical exclusion: if the latest request is pending, do NOT count them */\n" +
-				"                       AND lar.vl_status <> 'Pending'\n" +
-				"                     ORDER BY lnp.patient_id) b on e.patient_id = b.patient_id;";
+				"         INNER JOIN (select t.patient_id\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
+				"inner join (\n" +
+				"    select patient_id, max(visit_date) as latest_visit_date\n" +
+				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
+				"    where visit_date between date('"+startDate+"') and date('"+endDate+"')\n" +
+				"    group by patient_id\n" +
+				") latest on latest.patient_id = t.patient_id and latest.latest_visit_date = t.visit_date\n" +
+				"where t.vl_due_date <= date('"+endDate+"')) b on e.patient_id = b.patient_id;";
+
+		try {
+			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+			return (Long) Context.getAdministrationService().executeSQL(eligibleForVlQuery, true).get(0).get(0);
+		} finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		}
+	}
+
+	/**
+	 * This query counts the number of patients eligible for viral load testing
+	 * who have not taken a sample (numerator) during a recent visit to the facility.
+	 *
+	 * @param startDate the start date in "dd/MM/yyyy" format
+	 * @param endDate   the end date in "dd/MM/yyyy" format
+	 * @return the number of eligible patients for viral load testing who have not
+	 *         taken a sample
+	 */
+	public static Long getEligibleForVlSampleNotTaken(String startDate, String endDate) {
+		long days = getNumberOfDays(startDate, endDate);
+		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken\n" +
+				"from (select fup.visit_date,\n" +
+				"      fup.patient_id,\n" +
+				"      max(e.visit_date)                                                      as enroll_date,\n" +
+				"      greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"      greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"               ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"      d.patient_id                                                           as disc_patient,\n" +
+				"      d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"      max(d.visit_date)                                                      as date_discontinued,\n" +
+				"      de.patient_id                                                          as started_on_drugs\n" +
+				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"        left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"                  on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                     date(de.date_started) <= '" + endDate + "'\n" +
+				"        left outer JOIN\n" +
+				"    (select patient_id,\n" +
+				"            coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"            max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
+				"     where date(visit_date) <= date('" + endDate + "')\n" +
+				"       and program_name = 'HIV'\n" +
+				"     group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"      where fup.visit_date BETWEEN date('" + startDate + "') AND date('" + endDate + "')\n" +
+				"      group by patient_id\n" +
+				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"  and (\n" +
+				"   (\n" +
+				"       (timestampdiff(DAY, date(latest_tca), '" + endDate + "') <= 30 and\n" +
+				"        ((date(d.effective_disc_date) > '" + endDate + "' or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"         d.effective_disc_date is null))\n" +
+				"           and\n" +
+				"       (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"        disc_patient is null)\n" +
+				"       )\n" +
+				"   )) e\n" +
+				"  INNER JOIN (SELECT t.patient_id\n" +
+				"	FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
+				"         INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"                     FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
+				"                     WHERE visit_date BETWEEN DATE('"+startDate+"') AND DATE('"+endDate+"')\n" +
+				"                     GROUP BY patient_id) latest\n" +
+				"                    ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"	WHERE t.vl_due_date IS NOT NULL\n" +
+				"  	AND t.vl_due_date <= DATE('"+endDate+"')\n" +
+				"  	AND t.visit_date >= t.vl_due_date\n" +
+				"  	AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) b on e.patient_id = b.patient_id;";
 
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -586,18 +420,20 @@ public class FacilityDashboardUtil {
 	(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
 		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_denominator\n" +
-				"FROM (\n" +
-				"    -- Get latest VL results ≥ 200 within the period\n" +
-				"    SELECT x.patient_id, \n" +
-				"           COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) AS vl_effective_date,\n" +
-				"           COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
-				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
-				"    WHERE x.lab_test = 856\n" +
-				"      AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"      AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"      AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) \n" +
-				"          BETWEEN DATE_SUB(DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY), INTERVAL DATEDIFF(date('" +endDate + "'),date('" +startDate + "')) DAY)\n" +
-				"          AND DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY)\n" +
+				"FROM (SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE('" +startDate+ "') AND DATE('" +endDate + "')\n" +
 				") vl\n" +
 				"INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -662,17 +498,20 @@ public class FacilityDashboardUtil {
 		long days = getNumberOfDays(startDate, endDate);
 		String getVirallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_without_eac_numerator\n" +
 				"FROM (\n" +
-				"    -- Same VL logic as denominator with all required fields\n" +
-				"    SELECT x.patient_id, \n" +
-				"           COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) as vl_effective_date,\n" +
-				"           COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) AS vl_effective_result\n" +
-				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
-				"    WHERE x.lab_test = 856\n" +
-				"      AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"      AND COALESCE(x.vl_result, x.previous_test_result, x.base_viral_load_test_result) >= 200\n" +
-				"      AND COALESCE(x.date_test_result_received, x.previous_date_test_requested, x.base_viral_load_test_date) \n" +
-				"          BETWEEN DATE_SUB(DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY), INTERVAL DATEDIFF(date('" +endDate + "'),date('" +startDate + "')) DAY)\n" +
-				"          AND DATE_SUB(date('" +endDate + "'), INTERVAL 14 DAY)\n" +
+				"    SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE('" +startDate+ "') AND DATE('" +endDate + "')\n" +
 				") vl\n" +
 				"INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -721,7 +560,7 @@ public class FacilityDashboardUtil {
 				"    SELECT 1\n" +
 				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence e\n" +
 				"    WHERE e.patient_id = vl.patient_id\n" +
-				"      AND e.visit_date > vl.vl_effective_date\n" +
+				"      AND e.visit_date >= vl.vl_effective_result_date\n" +
 				"      AND e.visit_date <= DATE('" +endDate + "')\n" +
 				");";
 
@@ -869,22 +708,22 @@ public class FacilityDashboardUtil {
 				"FROM ((SELECT av.patient_id,av.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
-				"       WHERE av.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND av.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = d.patient_id\n" +
-				"       WHERE d.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE d.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND d.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT p.patient_id, p.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on p.patient_id = d.patient_id\n" +
-				"       WHERE p.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE p.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"         AND p.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT t.patient_id, t.visit_date\n" +
@@ -892,17 +731,17 @@ public class FacilityDashboardUtil {
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id\n" +
 				"           AND t.final_test_result = 'Positive'\n" +
 				"           AND t.voided = 0\n" +
-				"           AND t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE)) a\n" +
+				"           AND t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"')) a\n" +
 				"         LEFT JOIN\n" +
 				"     (SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
 				"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_referral_and_linkage l\n" +
-				"      WHERE date(l.visit_date) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL\n" +
-				"30 DAY) AND CURRENT_DATE\n" +
+				"      WHERE date(l.visit_date) BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
+				"30 DAY) AND '" + endDate +"'\n" +
 				"      GROUP BY l.patient_id) l ON a.patient_id = l.patient_id\n" +
 				"         LEFT JOIN (SELECT e.patient_id\n" +
 				"                    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
-				"                    WHERE e.program = 'HIV' and COALESCE(date(e.date_started),date(e.visit_date)) <= CURRENT_DATE) e\n" +
+				"                    WHERE e.program = 'HIV' and COALESCE(date(e.date_started),date(e.visit_date)) <= '" + endDate +"') e\n" +
 				"                   ON e.patient_id = a.patient_id\n" +
 				"where (e.patient_id is null and l.art_start_date is null)\n" +
 				"            group by date(visit_date)\n" +
@@ -934,7 +773,7 @@ public class FacilityDashboardUtil {
 				"    l.visit_date\n" +
 				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_linkage_tracing l\n" +
 				"             inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on l.patient_id = a.patient_id\n" +
-				"    WHERE date(l.visit_date) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"    WHERE date(l.visit_date) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"group by date(visit_date),grouped_tracing_status\n" +
 				"order by date(visit_date) ASC;";
 		return getSimpleObject(hivPositiveMonthlyNotLinkedPatients);
@@ -954,64 +793,85 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyHighRiskPBFWNotOnPrep(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String highRiskPBFWNotOnPrepQuery = "SELECT COUNT(DISTINCT(a.patient_id)) as high_risk_not_on_PrEP, a.visit_date as visit_date\n" +
+		String highRiskPBFWNotOnPrepQuery = "SELECT DISTINCT COUNT(DISTINCT (a.patient_id)) as high_risk_not_on_PrEP, a.visit_date as visit_date\n" +
 				"FROM (SELECT s.patient_id, s.visit_date\n" +
 				"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
-				"               INNER JOIN (SELECT t.patient_id,\n" +
-				"                                  t.final_test_result,\n" +
-				"                                  t.hts_entry_point,\n" +
-				"                                  t.visit_date\n" +
-				"                           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
-				"                           WHERE t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
-				"                              AND t.final_test_result = 'Negative'\n" +
-				"                              AND t.hts_entry_point in (160538, 160456, 1623)) t\n" +
-				"                          ON s.patient_id = t.patient_id\n" +
-				"                          INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON s.patient_id = d.patient_id\n" +
-				"      where s.hts_risk_category IN ('High', 'Very high') and (s.currently_on_prep in ('NO', 'Declined to answer', '') OR s.currently_on_prep is null)\n" +
-				"           AND s.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE AND d.Gender = 'F') a\n" +
-				"           left join (select e.patient_id,\n" +
-				"                             max(e.visit_date)                                        as latest_enrollment_date,\n" +
-				"                             f.latest_fup_date,\n" +
-				"                             greatest(ifnull(f.latest_fup_app_date, '0000-00-00'),\n" +
-				"                                      ifnull(latest_refill_app_date, '0000-00-00'))   as latest_appointment_date,\n" +
-				"                             greatest(ifnull(latest_fup_date, '0000-00-00'),\n" +
-				"                                      ifnull(latest_refill_visit_date, '0000-00-00')) as latest_visit_date,\n" +
-				"                             r.latest_refill_visit_date,\n" +
-				"                             f.latest_fup_app_date,\n" +
-				"                             r.latest_refill_app_date,\n" +
-				"                             d.latest_disc_date,\n" +
-				"                             d.disc_patient\n" +
-				"                      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
-				"                               left join\n" +
-				"                           (select f.patient_id,\n" +
-				"                                   max(f.visit_date)                                      as latest_fup_date,\n" +
-				"                                   mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
-				"                            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
-				"                            where f.visit_date <= CURRENT_DATE\n" +
-				"                            group by f.patient_id) f on e.patient_id = f.patient_id\n" +
-				"                               left join (select r.patient_id,\n" +
-				"                                                 max(r.visit_date)                                      as latest_refill_visit_date,\n" +
-				"                                                 mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
-				"                                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
-				"                                          where r.visit_date <= CURRENT_DATE\n" +
-				"                                          group by r.patient_id) r on e.patient_id = r.patient_id\n" +
-				"                               left join (select patient_id                                               as disc_patient,\n" +
-				"                                                 max(d.visit_date)                                        as latest_disc_date,\n" +
-				"                                                 mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
-				"                                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
-				"                                          where d.visit_date <= CURRENT_DATE\n" +
-				"                                          group by patient_id\n" +
-				"                                          having latest_disc_date <= CURRENT_DATE) d\n" +
-				"                                         on e.patient_id = d.disc_patient\n" +
-				"                      group by e.patient_id\n" +
-				"                      having timestampdiff(DAY, date(latest_appointment_date), CURRENT_DATE) <= 7\n" +
-				"                         and date(latest_appointment_date) >= date(latest_visit_date)\n" +
-				"                         and ((latest_enrollment_date >= d.latest_disc_date\n" +
-				"                          and latest_appointment_date > d.latest_disc_date) or d.disc_patient is null)) b\n" +
-				"                     on a.patient_id = b.patient_id\n" +
-				"  where b.patient_id is null\n" +
-				"group by date(latest_appointment_date)\n" +
-				"order by date(latest_appointment_date);";
+				"               INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
+				"                           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
+				"                           WHERE t.visit_date BETWEEN DATE_SUB(DATE('" + endDate + "'), INTERVAL 30 DAY) AND DATE('" + endDate + "')\n" +
+				"                             AND t.final_test_result = 'Negative') t\n" +
+				"                          ON t.patient_id = s.patient_id\n" +
+				"                              AND s.visit_date <= t.visit_date\n" +
+				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"                          ON d.patient_id = s.patient_id\n" +
+				"      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
+				"        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
+				"        AND s.visit_date BETWEEN DATE_SUB(DATE('" + endDate + "'), INTERVAL 30 DAY) AND DATE('" + endDate + "')\n" +
+				"        AND d.Gender = 'F'\n" +
+				"        AND TIMESTAMPDIFF(\n" +
+				"                    DAY,\n" +
+				"                    LEAST(s.visit_date, t.visit_date),\n" +
+				"                    GREATEST(s.visit_date, t.visit_date)\n" +
+				"            ) <= 3) a\n" +
+				"         LEFT JOIN (select e.patient_id,\n" +
+				"                           max(e.visit_date)                                        as latest_enrollment_date,\n" +
+				"                           f.latest_fup_date,\n" +
+				"                           greatest(ifnull(f.latest_fup_app_date, '1900-01-01'),\n" +
+				"                                    ifnull(latest_refill_app_date, '1900-01-01'))   as latest_appointment_date,\n" +
+				"                           greatest(ifnull(latest_fup_date, '1900-01-01'),\n" +
+				"                                    ifnull(latest_refill_visit_date, '1900-01-01')) as latest_visit_date,\n" +
+				"                           r.latest_refill_visit_date,\n" +
+				"                           f.latest_fup_app_date,\n" +
+				"                           r.latest_refill_app_date,\n" +
+				"                           d.latest_disc_date,\n" +
+				"                           d.disc_patient\n" +
+				"                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e\n" +
+				"                             left join\n" +
+				"                         (select f.patient_id,\n" +
+				"                                 max(f.visit_date)                                      as latest_fup_date,\n" +
+				"                                 mid(max(concat(f.visit_date, f.appointment_date)), 11) as latest_fup_app_date\n" +
+				"                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup f\n" +
+				"                          where f.visit_date <= date('" + endDate + "')\n" +
+				"                          group by f.patient_id) f on e.patient_id = f.patient_id\n" +
+				"                             left join (select r.patient_id,\n" +
+				"                                               max(r.visit_date)                                      as latest_refill_visit_date,\n" +
+				"                                               mid(max(concat(r.visit_date, r.next_appointment)), 11) as latest_refill_app_date\n" +
+				"                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill r\n" +
+				"                                        where r.visit_date <= date('" + endDate + "')\n" +
+				"                                        group by r.patient_id) r on e.patient_id = r.patient_id\n" +
+				"                             left join (select patient_id                                               as disc_patient,\n" +
+				"                                               max(d.visit_date)                                        as latest_disc_date,\n" +
+				"                                               mid(max(concat(d.visit_date, d.discontinue_reason)), 11) as latest_disc_reason\n" +
+				"                                        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_discontinuation d\n" +
+				"                                        where d.visit_date <= date('" + endDate + "')\n" +
+				"                                        group by patient_id\n" +
+				"                                        having latest_disc_date <= date('" + endDate + "')) d\n" +
+				"                                       on e.patient_id = d.disc_patient\n" +
+				"                    group by e.patient_id\n" +
+				"                    having (\n" +
+				"                        latest_appointment_date IS NOT NULL\n" +
+				"                            AND latest_appointment_date != '1900-01-01'\n" +
+				"                            AND timestampdiff(DAY, date(latest_appointment_date), date('" + endDate + "')) <= 7\n" +
+				"                            AND date(latest_appointment_date) >= date(latest_visit_date)\n" +
+				"                            AND (\n" +
+				"                            (latest_enrollment_date >= d.latest_disc_date AND\n" +
+				"                             latest_appointment_date > d.latest_disc_date)\n" +
+				"                                OR d.disc_patient IS NULL\n" +
+				"                            )\n" +
+				"                        )\n" +
+				"                        OR (\n" +
+				"                        timestampdiff(DAY, latest_enrollment_date, DATE('" + endDate + "')) BETWEEN 0 AND 30\n" +
+				"                            AND d.disc_patient IS NULL\n" +
+				"                        )\n" +
+				"                        OR (\n" +
+				"                        latest_appointment_date IS NULL\n" +
+				"                            AND (latest_visit_date IS NULL OR latest_visit_date = '1900-01-01')\n" +
+				"                            AND d.disc_patient IS NULL\n" +
+				"                        )) b\n" +
+				"                   ON a.patient_id = b.patient_id\n" +
+				"WHERE b.patient_id IS NULL\n" +
+				"group by date(a.visit_date)\n" +
+				"order by date(a.visit_date);";
 
 		return getSimpleObject(highRiskPBFWNotOnPrepQuery);
 	}
@@ -1026,73 +886,73 @@ public class FacilityDashboardUtil {
 	 *         - "value": The numeric count or metric from the result set.
 	 *         If the query returns no results, an empty data array is returned.
 	 */
-    private static SimpleObject getSimpleObject(String query) {
-        try {
-            Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-            List<List<Object>> resultSet = Context.getAdministrationService().executeSQL(query, true);
+	private static SimpleObject getSimpleObject(String query) {
+		try {
+			Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+			List<List<Object>> resultSet = Context.getAdministrationService().executeSQL(query, true);
 
-            List<SimpleObject> simpleObjectArrayList = new ArrayList<>();
-            // Use yyyy-MM-dd format
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            int total = 0;
+			List<SimpleObject> simpleObjectArrayList = new ArrayList<>();
+			// Use yyyy-MM-dd format
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			int total = 0;
 
-            if (resultSet != null) {
-                for (List<Object> row : resultSet) {
-                    if (row == null || row.isEmpty()) continue;
+			if (resultSet != null) {
+				for (List<Object> row : resultSet) {
+					if (row == null || row.isEmpty()) continue;
 
-                    SimpleObject rowObj = new SimpleObject();
-                    // Always assume first column is numeric value
-                    int value = ((Number) row.get(0)).intValue();
-                    rowObj.put("value", value);
-                    total += value;
+					SimpleObject rowObj = new SimpleObject();
+					// Always assume first column is numeric value
+					int value = ((Number) row.get(0)).intValue();
+					rowObj.put("value", value);
+					total += value;
 
-                    if (row.size() == 2) {
-                        // Case: value + day
-                        Object col = row.get(1);
-                        if (col instanceof Date) {
-                            rowObj.put("day", dateFormat.format((Date) col));
-                        } else {
-                            rowObj.put("group", col != null ? col.toString() : "");
-                        }
-                    } else if (row.size() == 3) {
-                        // Case: value + group + day
-                        Object col1 = row.get(1);
-                        Object col2 = row.get(2);
+					if (row.size() == 2) {
+						// Case: value + day
+						Object col = row.get(1);
+						if (col instanceof Date) {
+							rowObj.put("day", dateFormat.format((Date) col));
+						} else {
+							rowObj.put("group", col != null ? col.toString() : "");
+						}
+					} else if (row.size() == 3) {
+						// Case: value + group + day
+						Object col1 = row.get(1);
+						Object col2 = row.get(2);
 
-                        rowObj.put("group", col1 != null ? col1.toString() : "");
+						rowObj.put("group", col1 != null ? col1.toString() : "");
 
-                        if (col2 instanceof Date) {
-                            rowObj.put("day", dateFormat.format((Date) col2));
-                        } else {
-                            rowObj.put("label2", col2 != null ? col2.toString() : "");
-                        }
-                    } else {
-                        // Fallback for >3 columns
-                        for (int i = 1; i < row.size(); i++) {
-                            Object col = row.get(i);
-                            String key = (col instanceof Date) ? "day" : "label" + i;
-                            rowObj.put(key, col != null ? (col instanceof Date ? dateFormat.format((Date) col) : col.toString()) : "");
-                        }
-                    }
+						if (col2 instanceof Date) {
+							rowObj.put("day", dateFormat.format((Date) col2));
+						} else {
+							rowObj.put("label2", col2 != null ? col2.toString() : "");
+						}
+					} else {
+						// Fallback for >3 columns
+						for (int i = 1; i < row.size(); i++) {
+							Object col = row.get(i);
+							String key = (col instanceof Date) ? "day" : "label" + i;
+							rowObj.put(key, col != null ? (col instanceof Date ? dateFormat.format((Date) col) : col.toString()) : "");
+						}
+					}
 
-                    simpleObjectArrayList.add(rowObj);
-                }
-            }
+					simpleObjectArrayList.add(rowObj);
+				}
+			}
 
-            return SimpleObject.create("data", simpleObjectArrayList,"total",total);
-        } finally {
-            Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-        }
-    }
+			return SimpleObject.create("data", simpleObjectArrayList,"total",total);
+		} finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		}
+	}
 
-    /**
-     * Resolves dates: if not provided, defaults to current date
-     */
-    private static String resolveDateClause(String startDate, String endDate) {
-        String start = (startDate == null || startDate.isEmpty()) ? "CURDATE()" : "'" + startDate + "'";
-        String end   = (endDate == null || endDate.isEmpty()) ? "CURDATE()" : "'" + endDate + "'";
-        return String.format("BETWEEN DATE(%s) AND DATE(%s)", start, end);
-    }
+	/**
+	 * Resolves dates: if not provided, defaults to current date
+	 */
+	private static String resolveDateClause(String startDate, String endDate) {
+		String start = (startDate == null || startDate.isEmpty()) ? "CURDATE()" : "'" + startDate + "'";
+		String end   = (endDate == null || endDate.isEmpty()) ? "CURDATE()" : "'" + endDate + "'";
+		return String.format("BETWEEN DATE(%s) AND DATE(%s)", start, end);
+	}
 
 	/**
 	 * Retrieves the count of HEI (HIV-Exposed Infants) without a DNA PCR test
@@ -1112,9 +972,9 @@ public class FacilityDashboardUtil {
 				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
 				"         LEFT JOIN(SELECT x.patient_id week6pcr, x.test_result as week6results\n" +
 				"                   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
-				"                   WHERE x.lab_test = 1030 and x.date_test_requested <= CURRENT_DATE) t ON e.patient_id = t.week6pcr\n" +
-				"WHERE d.hei_no is not null AND d.DOB between DATE_SUB(CURRENT_DATE, INTERVAL 8 WEEK) AND\n" +
-				"    DATE_SUB(date(CURRENT_DATE), INTERVAL 6 WEEK)\n" +
+				"                   WHERE x.lab_test = 1030 and x.date_test_requested <= '" + endDate +"') t ON e.patient_id = t.week6pcr\n" +
+				"WHERE d.hei_no is not null AND d.DOB between DATE_SUB('" + endDate +"', INTERVAL 8 WEEK) AND\n" +
+				"    DATE_SUB(date('" + endDate +"'), INTERVAL 6 WEEK)\n" +
 				"  AND t.week6results IS NULL\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date) ASC;";
@@ -1135,72 +995,56 @@ public class FacilityDashboardUtil {
 		long days = getNumberOfDays(startDate, endDate);
 		String eligibleForVlSampleNotTakenQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken, e.visit_date as visit_date\n" +
 				"from (select fup.visit_date,\n" +
-				"             fup.patient_id,\n" +
-				"             max(e.visit_date)                                                      as enroll_date,\n" +
-				"             greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"             greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"                      ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"             d.patient_id                                                           as disc_patient,\n" +
-				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"             max(d.visit_date)                                                      as date_discontinued,\n" +
-				"             de.patient_id                                                          as started_on_drugs\n" +
-				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
-				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"                            date(de.date_started) <= CURRENT_DATE\n" +
-				"               left outer JOIN\n" +
-				"           (select patient_id,\n" +
-				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"\n" +
-				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"\n" +
-				"            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
-				"            where date(visit_date) <= CURRENT_DATE\n" +
-				"              and program_name = 'HIV'\n" +
-				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"      where fup.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
-				"      group by patient_id\n" +
-				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"         and (\n" +
-				"          (\n" +
-				"              (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30 and\n" +
-				"               ((date(d.effective_disc_date) > CURRENT_DATE or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"                d.effective_disc_date is null))\n" +
-				"                  and\n" +
-				"              (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"               disc_patient is null)\n" +
-				"              )\n" +
-				"          )) e\n" +
-				"         INNER JOIN (select v.patient_id\n" +
-				"                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
-				"                              inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id\n" +
-				"                     where (((TIMESTAMPDIFF(MONTH, v.date_started_art, v.latest_hiv_followup_visit) >= 3 and\n" +
-				"                             v.base_viral_load_test_result is null) -- First VL new on ART +\n" +
-				"                         OR ((v.pregnancy_status = 1065 or v.breastfeeding_status = 1065) and\n" +
-				"                             TIMESTAMPDIFF(MONTH, v.date_started_art, v.latest_hiv_followup_visit) >= 3 and\n" +
-				"                             (v.vl_result is not null and\n" +
-				"                              v.date_test_requested < v.latest_hiv_followup_visit) and\n" +
-				"                             (v.order_reason not in (159882, 1434, 2001237, 163718))) -- immediate for PG & BF +\n" +
-				"                         OR (v.lab_test = 856 AND v.vl_result >= 200 AND\n" +
-				"                             TIMESTAMPDIFF(MONTH, v.date_test_requested, v.latest_hiv_followup_visit) >=\n" +
-				"                             3) -- Unsuppressed VL +\n" +
-				"                         OR (((v.lab_test = 1305 AND v.vl_result = 1302) OR v.vl_result < 200) AND\n" +
-				"                             TIMESTAMPDIFF(MONTH, v.date_test_requested, v.latest_hiv_followup_visit) >= 6 and\n" +
-				"                             TIMESTAMPDIFF(YEAR, d.DOB, v.date_test_requested) BETWEEN 0 AND 24) -- 0-24 with last suppressed vl +\n" +
-				"                         OR (((v.lab_test = 1305 AND v.vl_result = 1302) OR v.vl_result < 200) AND\n" +
-				"                             TIMESTAMPDIFF(MONTH, v.date_test_requested, v.latest_hiv_followup_visit) >= 12 and\n" +
-				"                             TIMESTAMPDIFF(YEAR, d.DOB, v.date_test_requested) > 24) -- > 24 with last suppressed vl +\n" +
-				"                         OR ((v.pregnancy_status = 1065 or v.breastfeeding_status = 1065) and\n" +
-				"                             TIMESTAMPDIFF(MONTH, v.date_started_art, v.latest_hiv_followup_visit) >= 3\n" +
-				"                             and (v.order_reason in (159882, 1434, 2001237, 163718) and\n" +
-				"                                  TIMESTAMPDIFF(MONTH, v.date_test_requested, v.latest_hiv_followup_visit) >= 6) and\n" +
-				"                             ((v.lab_test = 1305 AND v.vl_result = 1302) OR (v.vl_result < 200)))) -- PG & BF after PG/BF baseline < 200\n" +
-				"                                and (v.latest_hiv_followup_visit > IFNULL(v.date_test_requested, '0000-00-00')))) b\n" +
-				"                    on e.patient_id = b.patient_id\n" +
-				"group by date(e.visit_date)\n" +
-				"order by date(e.visit_date);";
+				"         fup.patient_id,\n" +
+				"         max(e.visit_date)                                                      as enroll_date,\n" +
+				"         greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"         greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                  ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"         d.patient_id                                                           as disc_patient,\n" +
+				"         d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"         max(d.visit_date)                                                      as date_discontinued,\n" +
+				"         de.patient_id                                                          as started_on_drugs\n" +
+				"  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"           join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"           join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"                     on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                        date(de.date_started) <= date('" + endDate + "')\n" +
+				"           left outer JOIN\n" +
+				"       (select patient_id,\n" +
+				"               coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"               max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
+				"        where date(visit_date) <= date('" + endDate + "')\n" +
+				"          and program_name = 'HIV'\n" +
+				"        group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"  where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
+				"  group by patient_id\n" +
+				"  having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"     and (\n" +
+				"      (\n" +
+				"          (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
+				"           ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"            d.effective_disc_date is null))\n" +
+				"              and\n" +
+				"          (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"           disc_patient is null)\n" +
+				"          )\n" +
+				"      )) e\n" +
+				"     INNER JOIN (SELECT t.patient_id\n" +
+				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
+				"INNER JOIN (\n" +
+				"   SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
+				"   WHERE visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
+				"   GROUP BY patient_id\n" +
+				") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"WHERE t.vl_due_date IS NOT NULL\n" +
+				" AND t.vl_due_date <= DATE('" + endDate + "')\n" +
+				" AND t.visit_date >= t.vl_due_date\n" +
+				" AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) b on e.patient_id = b.patient_id\n" +
+				"GROUP BY DATE(e.visit_date)\n" +
+				"ORDER BY DATE(e.visit_date);";
 		return getSimpleObject(eligibleForVlSampleNotTakenQuery);
 	}
 
@@ -1220,12 +1064,12 @@ public class FacilityDashboardUtil {
 				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
 				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
 				"                     LEFT JOIN (select o.patient_id,o.hiv_status_at_exit from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment o where o.encounter_type = 'MCHCS_HEI_COMPLETION'\n" +
-				"                                and o.visit_date <= CURRENT_DATE) o on o.patient_id = e.patient_id\n" +
+				"                                and o.visit_date <= '" + endDate +"') o on o.patient_id = e.patient_id\n" +
 				"                     left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation c\n" +
 				"                               on e.patient_id = c.patient_id and c.program_name in ('MCH Child HEI','MCH Child')\n" +
 				"                     left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t on t.patient_id = e.patient_id\n" +
 				"WHERE d.hei_no is not null\n" +
-				"  AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"  AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"  AND (c.discontinuation_reason is null and o.hiv_status_at_exit is null and t.final_test_result is null)\n" +
 				"GROUP BY date\n" +
 				"ORDER BY date;";
@@ -1245,69 +1089,73 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyVirallyUnsuppressedWithoutEAC(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String virallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(a.patient_id)) AS unsuppressed_no_eac, DATE(results_date) AS results_date FROM\n" +
-				"(SELECT b.patient_id, eac_date, results_date\n" +
-				"FROM (\n" +
-				"    SELECT \n" +
-				"        x.patient_id AS patient_id,\n" +
-				"        DATE_SUB(CURRENT_DATE, INTERVAL 21 DAY), \n" +
-				"        DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY),\n" +
-				"        x.date_test_result_received AS results_date\n" +
-				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
-				"    WHERE x.lab_test = 856\n" +
-				"        AND test_result >= 200\n" +
-				"        AND x.date_test_result_received \n" +
-				"            BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 21 DAY) \n" +
-				"            AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
-				") b\n" +
-				"LEFT JOIN (\n" +
-				"    SELECT e.patient_id, e.visit_date AS eac_date\n" +
+		String virallyUnsuppressedWithoutEACQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_without_eac_numerator, DATE(vl.vl_effective_result_date) as results_date\n" +
+				"FROM (SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
+				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
+				"     ) vl\n" +
+				"         INNER JOIN (\n" +
+				"    SELECT t.patient_id\n" +
+				"    FROM (\n" +
+				"             SELECT fup.visit_date,\n" +
+				"                    fup.patient_id,\n" +
+				"                    max(e.visit_date) as enroll_date,\n" +
+				"                    greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"                    greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                             ifnull(max(d.visit_date), '0000-00-00')) as latest_tca,\n" +
+				"                    d.patient_id as disc_patient,\n" +
+				"                    d.effective_disc_date,\n" +
+				"                    max(d.visit_date) as date_discontinued,\n" +
+				"                    de.patient_id as started_on_drugs\n" +
+				"             FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"                      JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = fup.patient_id\n" +
+				"                      JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
+				"                      LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de ON e.patient_id = de.patient_id\n" +
+				"                 AND de.program = 'HIV'\n" +
+				"                 AND date(de.date_started) <= '" + endDate +"'\n" +
+				"                      LEFT OUTER JOIN (\n" +
+				"                 SELECT patient_id,\n" +
+				"                        coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"                        max(date(effective_discontinuation_date)) as effective_disc_date\n" +
+				"                 FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
+				"                 WHERE date(visit_date) <= '" + endDate +"'\n" +
+				"                   AND program_name = 'HIV'\n" +
+				"                 GROUP BY patient_id\n" +
+				"             ) d ON d.patient_id = fup.patient_id\n" +
+				"             WHERE fup.visit_date <= '" + endDate +"'\n" +
+				"             GROUP BY patient_id\n" +
+				"             HAVING (started_on_drugs IS NOT NULL AND started_on_drugs <> '')\n" +
+				"                AND (\n" +
+				"                 (timestampdiff(DAY, date(latest_tca), '" + endDate +"') <= 30\n" +
+				"                     AND ((date(d.effective_disc_date) > '" + endDate +"'\n" +
+				"                         OR date(enroll_date) > date(d.effective_disc_date))\n" +
+				"                         OR d.effective_disc_date IS NULL))\n" +
+				"                     AND (date(latest_vis_date) >= date(date_discontinued)\n" +
+				"                     OR date(latest_tca) >= date(date_discontinued)\n" +
+				"                     OR disc_patient IS NULL)\n" +
+				"                 )\n" +
+				"         ) t\n" +
+				") active ON vl.patient_id = active.patient_id\n" +
+				"WHERE NOT EXISTS (\n" +
+				"    -- Exclude patients who received EAC after high VL\n" +
+				"    SELECT 1\n" +
 				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence e\n" +
-				"    WHERE e.visit_date \n" +
-				"        BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY) \n" +
-				"        AND CURRENT_DATE\n" +
-				") e ON b.patient_id = e.patient_id\n" +
-				"WHERE e.patient_id IS NULL) a\n" +
-				"    inner join\n" +
-				"    (select t.patient_id\n" +
-				"    from (select fup.visit_date,\n" +
-				"    fup.patient_id,\n" +
-				"    max(e.visit_date)                                                      as enroll_date,\n" +
-				"    greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"    greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"    ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"    d.patient_id                                                           as disc_patient,\n" +
-				"    d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"    max(d.visit_date)                                                      as date_discontinued,\n" +
-				"    de.patient_id                                                          as started_on_drugs\n" +
-				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
-				"    on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"    date(de.date_started) <= date('" + endDate + "')\n" +
-				"    left outer JOIN\n" +
-				"    (select patient_id,\n" +
-				"    coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"    max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
-				"    where date(visit_date) <= date('" + endDate + "')\n" +
-				"    and program_name = 'HIV'\n" +
-				"    group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"    where fup.visit_date <= date('" + endDate + "')\n" +
-				"    group by patient_id\n" +
-				"    having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"    and (\n" +
-				"    (\n" +
-				"    (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
-				"    ((date(d.effective_disc_date) > date('" + endDate + "') or\n" +
-				"    date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"    d.effective_disc_date is null))\n" +
-				"    and\n" +
-				"    (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"    disc_patient is null)\n" +
-				"    )\n" +
-				"    )) t) c on a.patient_id = c.patient_id\n" +
+				"    WHERE e.patient_id = vl.patient_id\n" +
+				"      AND e.visit_date > vl.vl_effective_result_date\n" +
+				"      AND e.visit_date <= '" + endDate +"'\n" +
+				")\n" +
 				"GROUP BY DATE(results_date)\n" +
 				"ORDER BY DATE(results_date) ASC;";
 		return getSimpleObject(virallyUnsuppressedWithoutEACQuery);
@@ -1328,19 +1176,19 @@ public class FacilityDashboardUtil {
 				"FROM ((SELECT av.patient_id, av.encounter_id, av.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
-				"       WHERE av.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND av.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.encounter_id, d.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = d.patient_id\n" +
-				"       WHERE d.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE d.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND d.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT p.patient_id, p.encounter_id, p.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on p.patient_id = d.patient_id\n" +
-				"       WHERE p.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"       WHERE p.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
 				"         AND p.final_test_result = 'Positive')\n" +
 				"      UNION\n" +
 				"      (SELECT t.patient_id, t.encounter_id, t.visit_date\n" +
@@ -1348,14 +1196,14 @@ public class FacilityDashboardUtil {
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = t.patient_id \n" +
 				"         AND t.final_test_result = 'Positive'\n" +
 				"         AND t.voided = 0\n" +
-				"         AND t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE)\n" +
+				"         AND t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"')\n" +
 				"                      UNION\n" +
 				"       (SELECT l.patient_id, l.encounter_id, COALESCE(l.date_test_requested,l.visit_date) as visit_date\n" +
 				"                   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l\n" +
 				"                            inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on a.patient_id = l.patient_id\n" +
 				"                   WHERE l.lab_test = 1030 AND l.test_result = 703\n" +
-				"                     AND l.date_test_requested BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE)) a\n" +
-				"where date(a.visit_date) >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)\n" +
+				"                     AND l.date_test_requested BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"')) a\n" +
+				"where date(a.visit_date) >= DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
 				"group by date(visit_date)\n" +
 				"order by date(visit_date) ASC;";
 
@@ -1375,19 +1223,30 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyPregnantOrPostpartumClients(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String pregnantOrPostpartumQuery = "SELECT COUNT(DISTINCT(s.patient_id)) AS high_risk_preg_postpartum, s.visit_date AS visit_date\n" +
+		String pregnantOrPostpartumQuery = "SELECT COUNT(DISTINCT (s.patient_id)) AS high_risk_preg_postpartum, s.visit_date AS visit_date\n" +
 				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening s\n" +
 				"         INNER JOIN (SELECT t.patient_id,\n" +
 				"                            t.visit_date,\n" +
 				"                            t.final_test_result,\n" +
-				"                           t.hts_entry_point\n" +
+				"                            t.hts_entry_point\n" +
 				"                     FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n" +
-				"                     where t.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
-				"                        AND t.final_test_result = 'Negative'\n" +
-				"                        AND t.hts_entry_point in (160538, 160456, 1623)) t1\n" +
-				"                    ON s.patient_id = t1.patient_id\n" +
+				"                     where t.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
+				"                       AND t.final_test_result = 'Negative') t\n" +
+				"                    ON s.patient_id = t.patient_id\n" +
+				"                        -- enforce order: screening must be before (or same day as) HTS test\n" +
+				"                        AND s.visit_date <= t.visit_date\n" +
+				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"                    ON d.patient_id = s.patient_id\n" +
 				"WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
-				"  AND s.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
+				"  AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
+				"  AND s.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
+				"  AND d.Gender = 'F'\n" +
+				"-- enforce: all two events occur within the same 3-day window\n" +
+				"  AND TIMESTAMPDIFF(\n" +
+				"              DAY,\n" +
+				"              LEAST(s.visit_date, t.visit_date),\n" +
+				"              GREATEST(s.visit_date, t.visit_date)\n" +
+				"      ) <= 3\n" +
 				"GROUP BY DATE(s.visit_date)\n" +
 				"ORDER BY DATE(s.visit_date) ASC;";
 
@@ -1408,7 +1267,8 @@ public class FacilityDashboardUtil {
 		String getHeiEightWeeksOldQuery = "SELECT COUNT(DISTINCT(e.patient_id)) AS hei, e.visit_date as visit_date\n" +
 				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
 				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on e.patient_id = d.patient_id\n" +
-				"WHERE d.hei_no is not null AND TIMESTAMPDIFF(WEEK, d.DOB, DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)) = 8\n" +
+
+				"WHERE d.hei_no is not null AND TIMESTAMPDIFF(WEEK, d.DOB, DATE_SUB('" + endDate +"', INTERVAL 30 DAY)) = 8\n" +
 				"GROUP BY DATE(e.visit_date)\n" +
 				"ORDER BY DATE(e.visit_date) ASC;";
 
@@ -1426,68 +1286,57 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyEligibleForVl(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String eligibleForVlQuery = "select COUNT(DISTINCT(b.patient_id)) as eligible_for_vl, e.visit_date as visit_date\n" +
+		String eligibleForVlQuery = "select COUNT(DISTINCT (b.patient_id)) as eligible_for_vl_sample_not_taken, e.visit_date as visit_date\n" +
 				"from (select fup.visit_date,\n" +
 				"             fup.patient_id,\n" +
-				"               max(e.visit_date)                                                                as enroll_date,\n" +
-				"               greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00'))           as latest_vis_date,\n" +
-				"               greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"                        ifnull(max(d.visit_date), '0000-00-00'))                                as latest_tca,\n" +
-				"               d.patient_id                                                                     as disc_patient,\n" +
-				"               d.effective_disc_date                                                            as effective_disc_date,\n" +
-				"               max(d.visit_date)                                                                as date_discontinued,\n" +
-				"               de.patient_id                                                   as started_on_drugs\n" +
-				"        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-				"                 left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
-				"                           on e.patient_id = de.patient_id and de.program = 'HIV' and date(de.date_started) <= CURRENT_DATE\n" +
-				"                 left outer JOIN\n" +
-				"             (select patient_id,\n" +
-				"                     coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"                     max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
-				"              where date(visit_date) <= CURRENT_DATE\n" +
-				"                and program_name = 'HIV'\n" +
-				"              group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"        where fup.visit_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n" +
-				"        group by patient_id\n" +
-				"        having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"           and (\n" +
-				"            (\n" +
-				"                (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30 and\n" +
-				"                 ((date(d.effective_disc_date) > CURRENT_DATE or date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"                  d.effective_disc_date is null))\n" +
-				"                    and\n" +
-				"                (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"                 disc_patient is null)\n" +
-				"                )\n" +
-				"            )) e\n" +
-				"           INNER JOIN (select v.patient_id\n" +
-				"                       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker v\n" +
-				"                                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id\n" +
-				"                       where ((TIMESTAMPDIFF(MONTH, v.date_started_art, CURRENT_DATE) >= 3 and\n" +
-				"                               v.base_viral_load_test_result is null)                              -- First VL new on ART+\n" +
-				"                           OR ((v.pregnancy_status = 1065 or v.breastfeeding_status = 1065) and\n" +
-				"                               TIMESTAMPDIFF(MONTH, v.date_started_art, CURRENT_DATE) >= 3 and\n" +
-				"                               (v.vl_result is not null and\n" +
-				"                                v.date_test_requested < CURRENT_DATE) and (v.order_reason not in (159882, 1434, 2001237, 163718)))              -- immediate for PG & BF+\n" +
-				"                           OR (v.lab_test = 856 AND v.vl_result >= 200 AND\n" +
-				"                               TIMESTAMPDIFF(MONTH, v.date_test_requested, CURRENT_DATE) >= 3)  -- Unsuppressed VL+\n" +
-				"                           OR (((v.lab_test = 1305 AND v.vl_result = 1302) OR v.vl_result < 200) AND\n" +
-				"                               TIMESTAMPDIFF(MONTH, v.date_test_requested, CURRENT_DATE) >= 6 and\n" +
-				"                               TIMESTAMPDIFF(YEAR, d.DOB, v.date_test_requested) BETWEEN 0 AND 24) -- 0-24 with last suppressed vl+\n" +
-				"                           OR (((v.lab_test = 1305 AND v.vl_result = 1302) OR v.vl_result < 200) AND\n" +
-				"                               TIMESTAMPDIFF(MONTH, v.date_test_requested, CURRENT_DATE) >= 12 and\n" +
-				"                               TIMESTAMPDIFF(YEAR, d.DOB, v.date_test_requested) > 24)             -- > 24 with last suppressed vl+\n" +
-				"                           OR ((v.pregnancy_status = 1065 or v.breastfeeding_status = 1065) and\n" +
-				"                               TIMESTAMPDIFF(MONTH, v.date_started_art, CURRENT_DATE) >= 3\n" +
-				"                               and (v.order_reason in (159882, 1434, 2001237, 163718) and\n" +
-				"                                    TIMESTAMPDIFF(MONTH, v.date_test_requested, CURRENT_DATE) >= 6) and\n" +
-				"                               ((v.lab_test = 1305 AND v.vl_result = 1302) OR (v.vl_result < 200 ))) -- PG & BF after PG/BF baseline < 200\n" +
-				"                           )) b on e.patient_id = b.patient_id\n" +
-				"group by date(e.visit_date)\n" +
-				"order by date(e.visit_date);";
+				"             max(e.visit_date)                                                      as enroll_date,\n" +
+				"             greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"             greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                      ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
+				"             d.patient_id                                                           as disc_patient,\n" +
+				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
+				"             max(d.visit_date)                                                      as date_discontinued,\n" +
+				"             de.patient_id                                                          as started_on_drugs\n" +
+				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+				"                            date(de.date_started) <= date('" + endDate + "')\n" +
+				"               left outer JOIN\n" +
+				"           (select patient_id,\n" +
+				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
+				"            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
+				"            where date(visit_date) <= date('" + endDate + "')\n" +
+				"              and program_name = 'HIV'\n" +
+				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
+				"      where fup.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "')\n" +
+				"      group by patient_id\n" +
+				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
+				"         and (\n" +
+				"          (\n" +
+				"              (timestampdiff(DAY, date(latest_tca), date('" + endDate + "')) <= 30 and\n" +
+				"               ((date(d.effective_disc_date) > date('" + endDate + "') or date(enroll_date) > date(d.effective_disc_date)) or\n" +
+				"                d.effective_disc_date is null))\n" +
+				"                  and\n" +
+				"              (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
+				"               disc_patient is null)\n" +
+				"              )\n" +
+				"          )) e\n" +
+				"         INNER JOIN (" +
+				"select t.patient_id\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
+				"inner join (\n" +
+				"    select patient_id, max(visit_date) as latest_visit_date\n" +
+				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
+				"    where visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "') \n" +
+				"    group by patient_id\n" +
+				") latest on latest.patient_id = t.patient_id and latest.latest_visit_date = t.visit_date\n" +
+				"where t.vl_due_date <= date('"+endDate+"')) b\n" +
+				"                    on e.patient_id = b.patient_id\n" +
+				"GROUP BY DATE(e.visit_date)\n" +
+				"ORDER BY DATE(e.visit_date) ASC;";
 
 		return getSimpleObject(eligibleForVlQuery);
 	}
@@ -1506,7 +1355,7 @@ public class FacilityDashboardUtil {
 		String hei24MonthsOldQuery = "SELECT COUNT(DISTINCT(e.patient_id)) AS hei_24_months, DATE_ADD(d.dob, INTERVAL 24 MONTH) AS date\n" +
 				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
 				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = e.patient_id\n" +
-				"WHERE d.hei_no is not null AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) AND CURRENT_DATE\n"+
+				"WHERE d.hei_no is not null AND DATE_ADD(d.dob, INTERVAL 24 MONTH) BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n"+
 				"GROUP BY DATE(date)\n" +
 				"ORDER BY DATE(date) ASC;";
 		return getSimpleObject(hei24MonthsOldQuery);
@@ -1523,56 +1372,67 @@ public class FacilityDashboardUtil {
 	 */
 	public static SimpleObject getMonthlyVirallyUnsuppressed(String startDate, String endDate) {
 		long days = getNumberOfDays(startDate, endDate);
-		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(a.patient_id)) AS vl_unsuppressed, a.visit_date AS results_enc_date FROM\n" +
-				"(SELECT x.patient_id, COALESCE(x.date_test_result_received,x.visit_date) AS visit_date\n" +
-				"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
-				"WHERE x.lab_test = 856\n" +
-				"  AND x.test_result >= 200\n" +
-				"  AND x.date_test_result_received BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 21 DAY)\n" +
-				"  AND DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)\n" +
-				"ORDER BY DATE(x.visit_date) ASC) a\n" +
-				"    inner join\n" +
-				"    (select t.patient_id\n" +
-				"    from (select fup.visit_date,\n" +
-				"    fup.patient_id,\n" +
-				"    max(e.visit_date)                                                      as enroll_date,\n" +
-				"    greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
-				"    greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
-				"    ifnull(max(d.visit_date), '0000-00-00'))                      as latest_tca,\n" +
-				"    d.patient_id                                                           as disc_patient,\n" +
-				"    d.effective_disc_date                                                  as effective_disc_date,\n" +
-				"    max(d.visit_date)                                                      as date_discontinued,\n" +
-				"    de.patient_id                                                          as started_on_drugs\n" +
-				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"    left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
-				"    on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
-				"    date(de.date_started) <= CURRENT_DATE\n" +
-				"    left outer JOIN\n" +
-				"    (select patient_id,\n" +
-				"    coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
-				"    max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
-				"    where date(visit_date) <= CURRENT_DATE\n" +
-				"    and program_name = 'HIV'\n" +
-				"    group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"    where fup.visit_date <= CURRENT_DATE\n" +
-				"    group by patient_id\n" +
-				"    having (started_on_drugs is not null and started_on_drugs <> '')\n" +
-				"    and (\n" +
-				"    (\n" +
-				"    (timestampdiff(DAY, date(latest_tca), CURRENT_DATE) <= 30 and\n" +
-				"    ((date(d.effective_disc_date) > CURRENT_DATE or\n" +
-				"    date(enroll_date) > date(d.effective_disc_date)) or\n" +
-				"    d.effective_disc_date is null))\n" +
-				"    and\n" +
-				"    (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or\n" +
-				"    disc_patient is null)\n" +
-				"    )\n" +
-				"    )) t) c on a.patient_id = c.patient_id\n" +
-				"    GROUP BY visit_date\n" +
-				"    ORDER BY visit_date ASC;";
+		String getVirallyUnsuppressedQuery = "SELECT COUNT(DISTINCT(vl.patient_id)) as vl_unsuppressed_denominator, DATE(vl_effective_result_date)\n" +
+				"FROM (SELECT x.patient_id,\n" +
+				"                x.date_test_result_received,\n" +
+				"                vl_result,\n" +
+				"                x.previous_date_test_result_received,\n" +
+				"                x.previous_date_test_requested,\n" +
+				"                x.previous_test_result,\n" +
+				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
+				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
+				"         WHERE x.lab_test = 856\n" +
+				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
+				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
+				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
+				"     ) vl\n" +
+				"         INNER JOIN (\n" +
+				"    SELECT t.patient_id\n" +
+				"    FROM (\n" +
+				"             SELECT fup.visit_date,\n" +
+				"                    fup.patient_id,\n" +
+				"                    max(e.visit_date) as enroll_date,\n" +
+				"                    greatest(max(fup.visit_date), ifnull(max(d.visit_date), '0000-00-00')) as latest_vis_date,\n" +
+				"                    greatest(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11),\n" +
+				"                             ifnull(max(d.visit_date), '0000-00-00')) as latest_tca,\n" +
+				"                    d.patient_id as disc_patient,\n" +
+				"                    d.effective_disc_date,\n" +
+				"                    max(d.visit_date) as date_discontinued,\n" +
+				"                    de.patient_id as started_on_drugs\n" +
+				"             FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"                      JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = fup.patient_id\n" +
+				"                      JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e ON fup.patient_id = e.patient_id\n" +
+				"                      LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de ON e.patient_id = de.patient_id\n" +
+				"                 AND de.program = 'HIV'\n" +
+				"                 AND date(de.date_started) <= '" + endDate +"'\n" +
+				"                      LEFT OUTER JOIN (\n" +
+				"                 SELECT patient_id,\n" +
+				"                        coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
+				"                        max(date(effective_discontinuation_date)) as effective_disc_date\n" +
+				"                 FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
+				"                 WHERE date(visit_date) <= '" + endDate +"'\n" +
+				"                   AND program_name = 'HIV'\n" +
+				"                 GROUP BY patient_id\n" +
+				"             ) d ON d.patient_id = fup.patient_id\n" +
+				"             WHERE fup.visit_date <= '" + endDate +"'\n" +
+				"             GROUP BY patient_id\n" +
+				"             HAVING (started_on_drugs IS NOT NULL AND started_on_drugs <> '')\n" +
+				"                AND (\n" +
+				"                 (timestampdiff(DAY, date(latest_tca), '" + endDate +"') <= 30\n" +
+				"                     AND ((date(d.effective_disc_date) > '" + endDate +"'\n" +
+				"                         OR date(enroll_date) > date(d.effective_disc_date))\n" +
+				"                         OR d.effective_disc_date IS NULL))\n" +
+				"                     AND (date(latest_vis_date) >= date(date_discontinued)\n" +
+				"                     OR date(latest_tca) >= date(date_discontinued)\n" +
+				"                     OR disc_patient IS NULL)\n" +
+				"                 )\n" +
+				"         ) t\n" +
+				") active ON vl.patient_id = active.patient_id\n" +
+				"GROUP BY DATE(vl_effective_result_date)\n" +
+				"ORDER BY DATE(vl_effective_result_date) ASC;";
 		return getSimpleObject(getVirallyUnsuppressedQuery);
 	}
 

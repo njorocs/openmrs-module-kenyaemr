@@ -58,7 +58,7 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"             max(d.visit_date)                                                      as date_discontinued,\n" +
 				"             de.patient_id                                                          as started_on_drugs\n" +
 				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
-				"               join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
 				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
 				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
 				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
@@ -71,30 +71,18 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"            where date(visit_date) <= date(:endDate)\n" +
 				"              and program_name = 'HIV'\n" +
 				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
-				"               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker vt on vt.patient_id = fup.patient_id\n" +
+				"                      inner join (SELECT t.patient_id\n" +
+				"                  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
+				"                      INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
+				"                      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
+				"                      WHERE visit_date <= DATE(:endDate)\n" +
+				"                      GROUP BY patient_id) latest\n" +
+				"                  ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
+				"                  WHERE t.vl_due_date IS NOT NULL\n" +
+				"                    AND t.vl_due_date <= DATE(:endDate)\n" +
+				"                    AND t.visit_date >= t.vl_due_date\n" +
+				"                    AND (t.date_test_requested IS NULL OR t.date_test_requested < t.visit_date)) vt on fup.patient_id = vt.patient_id\n" +
 				"      where fup.visit_date <= date(:endDate)\n" +
-				"        and ((vt.vl_result >= 200 and timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 3)\n" +
-				"          OR (timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) between 0 and 24 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"              timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 6)\n" +
-				"          OR (timestampdiff(MONTH, vt.date_started_art, date(:endDate)) >= 3 and vt.vl_result is null and\n" +
-				"              vt.previous_test_result is null and vt.base_viral_load_test_result is null)\n" +
-				"          OR (TIMESTAMPDIFF(MONTH, date(vt.date_started_art), date(:endDate)) >= 3 and\n" +
-				"              (vt.breastfeeding_status = 1065 or vt.pregnancy_status = 1065) and\n" +
-				"              (vt.latest_hiv_followup_visit > vt.date_test_requested OR vt.date_test_requested is null))\n" +
-				"          OR (timestampdiff(MONTH, vt.date_test_requested, date(:endDate)) >= 6 and\n" +
-				"              timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) between 0 and 24 and\n" +
-				"              timestampdiff(MONTH, vt.date_started_art, date(:endDate)) >= 3 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)))\n" +
-				"          OR (timestampdiff(YEAR, p.DOB, date(vt.date_test_requested)) > 24 and\n" +
-				"              TIMESTAMPDIFF(MONTH, date(vt.date_started_art), date(:endDate)) >= 3 and\n" +
-				"              ((vt.lab_test = 856 and vt.vl_result < 200) OR (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"              timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 12)\n" +
-				"          OR (vt.pregnancy_status = 1065 or vt.breastfeeding_status = 1065 and\n" +
-				"                                            ((vt.lab_test = 856 and vt.vl_result < 200) OR\n" +
-				"                                             (vt.lab_test = 1305 and vt.vl_result = 1302)) and\n" +
-				"                                            vt.previous_order_reason in (1434, 159882))\n" +
-				"                 and timestampdiff(MONTH, date(vt.date_test_requested), date(:endDate)) >= 6)\n" +
 				"      group by patient_id\n" +
 				"      having (started_on_drugs is not null and started_on_drugs <> '')\n" +
 				"         and (\n" +
@@ -107,6 +95,7 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"               disc_patient is null)\n" +
 				"              )\n" +
 				"          )) t;";
+
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);
