@@ -308,6 +308,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PNS_PATIENT_CONTACT_LIVING_WITH_PATIENT = "35a08d84-9f80-4991-92b4-c4ae5903536e";
 		public static final String PNS_PATIENT_CONTACT_REGISTRATION_SOURCE = "7c94bd35-fba7-4ef7-96f5-29c89a318fcf";
 		public static final String PNS_PATIENT_CONTACT_IPV_OUTCOME = "49c543c2-a72a-4b0a-8cca-39c375c0726f";
+		public static final String NEXT_OF_KIN_NATIONAL_ID = "73d34479-2f9e-4de3-a5e6-1f79a17459bb";
 
 	}
 
@@ -826,7 +827,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				String.class, null, false, 4.5, _PersonAttributeType.PNS_PATIENT_CONTACT_REGISTRATION_SOURCE));
 		install(personAttributeType("Contact IPV Outcome", "Contact IPV Outcome",
 				String.class, null, false, 4.5, _PersonAttributeType.PNS_PATIENT_CONTACT_IPV_OUTCOME));
-
+		install(personAttributeType("Next of kin national ID", "National ID of patient's next of kin",
+				String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
 		// Provider attribute types.
 		install(providerAttributeType("Primary Facility", "Default facility for a provider", LocationDatatype.class, "",
 				0, 1, _ProviderAttributeType.PRIMARY_FACILITY));
