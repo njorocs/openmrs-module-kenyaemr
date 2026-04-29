@@ -571,18 +571,22 @@ public class CommonMetadata extends AbstractMetadataBundle {
 
 		//3pm Adx string
 		String adx3pmMappingString = "[{\"reportName\":\"Monthly report\",\"prefix\":\"\",\"datasets\":[{\"name\":\"1\",\"3pmName\":\"qzJqoxdfXJn\"}]}]";
-
+		AdministrationService administrationService = Context.getAdministrationService();
 		install(globalProperty(EmrConstants.GP_DHIS2_DATASET_MAPPING, "ADX Mapping for KenyaEMR and DHIS2 datasets", ""));
 		install(globalProperty(EmrConstants.GP_3PM_DATASET_MAPPING, "ADX Mapping for KenyaEMR and 3PM datasets", adx3pmMappingString));
-		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
-		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+		
+		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {
+    		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
+		}
+		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_PASSWORD) == null) {
+    		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+		}
 
 		install(globalProperty("order.drugDosingUnitsConceptUuid", "Drug dosing units concept",
 				"162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		install(globalProperty("client_number_label", "Label for Client Number", "Client Number"));
 		install(globalProperty("clientNumber.enabled", "Switch to show client number", "false"));
 
-		AdministrationService administrationService = Context.getAdministrationService();
 		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_USE_EMR_PROXY) == null) {
 			install(globalProperty(GP_CLIENT_VERIFICATION_USE_EMR_PROXY, "Use the EMR backend to proxy NUPI requests (true or false)", "false"));
 		}    
