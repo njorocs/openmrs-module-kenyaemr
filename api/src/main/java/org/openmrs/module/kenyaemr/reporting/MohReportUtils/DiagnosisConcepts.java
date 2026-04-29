@@ -13,6 +13,7 @@ import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DiagnosisConcepts {
@@ -22,8 +23,8 @@ public class DiagnosisConcepts {
 		//MOH705A
 
 		//Diarrhoea with no dehydration
-		public static final Integer DWSOD_1 = 142412;
-		public static final Integer DWSOD_2 = 142630;
+		public static final Integer DWSOD_1 = 2019918;
+		public static final Integer DWSOD_2 = 139753;
 
 		//Diarrhoea with severe dehydration
 		public static final Integer DWSD_1 = 2007117;
@@ -68,6 +69,20 @@ public class DiagnosisConcepts {
 		public static final Integer SP_8 = 150584;
 		public static final Integer SP_9 = 2005970;
 		public static final Integer SP_10 = 143772;
+
+		//Upper Pead Respiratory Tract Infections
+		public static final Integer URTI_1 = 2011131;
+		public static final Integer URTI_2 = 2011133;
+		public static final Integer URTI_3 = 2011134;
+		public static final Integer URTI_4 = 2011135;
+		public static final Integer URTI_5 = 2011136;
+		public static final Integer URTI_6 = 2017557;
+
+		//Lower Pead Respiratory Tract Infections
+		public static final Integer LRTI_1 = 2005873;
+		public static final Integer LRTI_2 = 2005875;
+		public static final Integer LRTI_3 = 2017815;
+
 
 		//Upper Respiratory Tract Infections
 		public static final Integer URC_1 = 106;
@@ -131,6 +146,9 @@ public class DiagnosisConcepts {
 		public static final Integer URC_59 = 2011134;
 		public static final Integer URC_60 = 2011135;
 		public static final Integer URC_61 = 2011136;
+		public static final Integer URC_62 = 2013711;
+		public static final Integer URC_63 = 2013715;
+		public static final Integer URC_64 = 2011117;
 
 
 		//Lower Respiratory Tract Infections
@@ -613,7 +631,7 @@ public class DiagnosisConcepts {
 		public static final Integer UTI6 = 2007892;
 		public static final Integer UTI7 = 159255;
 
-		//MENTAL DISORDER	
+		//MENTAL DISORDER
 
 		public static final Integer MDC_1 = 113155;
 		public static final Integer MDC_2 = 2004781;
@@ -1347,7 +1365,7 @@ public class DiagnosisConcepts {
 		public static final Integer MDC_731 = 2005438;
 		public static final Integer MDC_732 = 2005438;
 
-		//Dental disorders	
+		//Dental disorders
 
 		public static final Integer DDC_1 = 2006483;
 		public static final Integer DDC_2 = 2006479;
@@ -1545,7 +1563,7 @@ public class DiagnosisConcepts {
 		public static final Integer RTC_21 = 2012115;
 		public static final Integer RTC_22 = 2012116;
 		public static final Integer RTC_23 = 2012118;
-		
+
 		//VIOLENCE RELATED INJURIES
 		public static final Integer VRC_1 = 2012029;
 		public static final Integer VRC_2 = 2012033;
@@ -1572,7 +1590,7 @@ public class DiagnosisConcepts {
 		public static final Integer SAC_2 = 2022453;
 		public static final Integer SAC_4 = 2022455;
 		public static final Integer SAC_5 = 2022456;
-		//BURNS		
+		//BURNS
 		public static final Integer BC_1 = 2020933;
 		public static final Integer BC_2 = 2020936;
 		public static final Integer BC_3 = 2020937;
@@ -2282,15 +2300,15 @@ public class DiagnosisConcepts {
 
 		//Suspected malaria SMC
 		public static final Integer SMC_1 = 2002652;
-		
+
 
 		//Confirmed Malaria positive  COA
 		public static final Integer COA_1 = 2002649;
 		public static final Integer COA_2 = 2002650;
 		public static final Integer COA_3 = 2002636;
 		public static final Integer COA_4 = 2002641;
-		public static final Integer COA_5 = 2002646;		
-	
+		public static final Integer COA_5 = 2002646;
+
 		//Malaria in pregnancy positive  MPA
 		public static final Integer MPA_1 = 135361;
 		public static final Integer MPA_2 = 2009200;
@@ -2360,7 +2378,7 @@ public class DiagnosisConcepts {
 		public static final Integer MALA_62 = 2009285;
 		public static final Integer MALA_63 = 2014336;
 
-		//STI	
+		//STI
 
 		public static final Integer STIA_1 = 2002856;
 		public static final Integer STIA_2 = 2002857;
@@ -3223,7 +3241,7 @@ public class DiagnosisConcepts {
 		public static final Integer EYA_657 = 2010490;
 		public static final Integer EYA_658 = 2010491;
 
-		//     Ear Infection EIA  
+		//     Ear Infection EIA
 		public static final Integer EIA_1 = 134917;
 		public static final Integer EIA_2 = 2010497;
 		public static final Integer EIA_3 = 2010496;
@@ -3362,7 +3380,7 @@ public class DiagnosisConcepts {
 		public static final Integer EIA_136 = 2010600;
 		public static final Integer EIA_137 = 2010601;
 
-		// PNEUMONIA 
+		// PNEUMONIA
 
 		public static final Integer PNA_1 = 114100;
 		public static final Integer PNA_2 = 121252;
@@ -3391,7 +3409,7 @@ public class DiagnosisConcepts {
 		public static final Integer PNA_25 = 2006017;
 		public static final Integer PNA_26 = 2006018;
 
-		//ABORTION 
+		//ABORTION
 
 		public static final Integer ABA_1 = 2008752;
 		public static final Integer ABA_2 = 126127;
@@ -3713,7 +3731,7 @@ public class DiagnosisConcepts {
 		public static final Integer POA_9 = 2007476;
 		public static final Integer POA_10 = 2027745;
 
-	
+
 		//cardiovascular
 		// CAA Variables
 		public static final Integer CAA_1 = 2010039;
@@ -3811,16 +3829,16 @@ public class DiagnosisConcepts {
 
 		public static final Integer PNEUMONIA = 114100;
 
-	
+
 		public static final Integer ENT = 160455; //160455
 
 
 		public static final Integer STI = 160546; //160546
 
-		
+
 		public static final String SC = "db1ba5ed-1da0-430d-9744-4dcc006f98b0"; //1000047
 
-	
+
 
 		public static final Integer MALARIA = 123;
 
@@ -3835,14 +3853,14 @@ public class DiagnosisConcepts {
 
 		public static final Integer INDETERMINATE = 1138;
 
-	
+
 
 		//Diagnosis concepts
 		public static final String PROBLEM_ADDED = "6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-		
 
-		//Asthma 	
+
+		//Asthma
 		public static final Integer ASTHMA1 = 2005833;
 		public static final Integer ASTHMA2 = 110826;
 		public static final Integer ASTHMA3 = 113017;
@@ -3920,7 +3938,7 @@ public class DiagnosisConcepts {
 		public static final Integer ASTHMA75 = 2005830;
 
 
-		
+
 		//fistula
 		public static final Integer FISTULA1 = 49;
 
