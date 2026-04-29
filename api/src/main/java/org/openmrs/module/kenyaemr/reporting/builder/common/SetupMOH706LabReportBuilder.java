@@ -15,8 +15,8 @@ import org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.reporting.MohReportUtils.ReportAddonUtils;
 import org.openmrs.module.kenyaemr.reporting.MohReportUtils.ReportingUtils;
-import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706IndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706LabCohortLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706IndicatorLibrary;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +37,7 @@ import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 
 
-    private final Moh706IndicatorLibrary moh706IndicatorLibrary;
+	private final Moh706IndicatorLibrary moh706IndicatorLibrary;
 	//Lab test  - Question concept ids
 	static final int  URINE_ANALYSIS_GLUCOSE = 159734;
 	static final int  URINE_ANALYSIS_KETONES = 161442;
@@ -48,6 +49,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  URINE_ANALYSIS_BACTERIA = 165561;
 	static final int  PARASITOLOGY_MALARIA_BS = 2017901;
 	static final int  PARASITOLOGY_MALARIA_RAPID = 1643;
+	static final int  PARASITOLOGY_MALARIA_PCR = 2032282;
 	static final int  PARASITOLOGY_TAENIA_SPP = 1000453;
 	static final int  PARASITOLOGY_HNANA = 1000454;
 	static final int  PARASITOLOGY_HOOKWORM = 1000456;
@@ -104,7 +106,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  HELICOBACTER_PYLORI= 163348;
 	static final int  HEPATITIS_A= 2001225;
 	static final int  URINE_PREGNANCY= 45;
-		
+
 	//Answers
 	static final int  NIL = 2001195;
 	static final int  TRACE = 1874;
@@ -120,7 +122,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  RARELY = 159416;
 	static final int  POSITIVE = 703;
 	static final int  PRESENT = 163748;
-	static final int  REACTIVE = 1228;	
+	static final int  REACTIVE = 1228;
 	static final int  LESS_ONE_2 = 1311;
 	static final int  ONE_2 = 1312;
 	static final int  ONE_4 = 1313;
@@ -131,79 +133,82 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 	static final int  ONE_64 = 163621;
 	static final int  ONE_128 = 163622;
 	static final int  ONE_256 = 163623;
-	static final int  GREATER_ONE_572 = 163624;	
+	static final int  GREATER_ONE_572 = 163624;
+	static final int  MPS_SEEN = 2032341;
+	static final int  DETECTED = 1301;
 
 
-    @Autowired
-    public SetupMOH706LabReportBuilder(Moh706LabCohortLibrary moh706CohortLibrary, Moh706IndicatorLibrary moh706IndicatorLibrary) {
-        this.moh706IndicatorLibrary = moh706IndicatorLibrary;
-    }
+	@Autowired
+	public SetupMOH706LabReportBuilder(Moh706LabCohortLibrary moh706CohortLibrary, Moh706IndicatorLibrary moh706IndicatorLibrary) {
+		this.moh706IndicatorLibrary = moh706IndicatorLibrary;
+	}
 
-    @Override
-    protected List<Parameter> getParameters(ReportDescriptor reportDescriptor) {
-        return Arrays.asList(new Parameter("startDate", "Start Date", Date.class), new Parameter("endDate", "End Date",
-                Date.class), new Parameter("dateBasedReporting", "", String.class));
-    }
+	@Override
+	protected List<Parameter> getParameters(ReportDescriptor reportDescriptor) {
+		return Arrays.asList(new Parameter("startDate", "Start Date", Date.class), new Parameter("endDate", "End Date",
+				Date.class), new Parameter("dateBasedReporting", "", String.class));
+	}
 
-    @Override
-    protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor,
-                                                            ReportDefinition reportDefinition) {
-        return Arrays.asList(map(getMoh706LabDatasetDefinition(),
-                "startDate=${startDate},endDate=${endDate+23h}"));
-    }
+	@Override
+	protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor,
+															ReportDefinition reportDefinition) {
+		return Arrays.asList(map(getMoh706LabDatasetDefinition(),
+				"startDate=${startDate},endDate=${endDate+23h}"));
+	}
 
-    private DataSetDefinition getMoh706LabDatasetDefinition() {
-        CohortIndicatorDataSetDefinition cohortDsd = new CohortIndicatorDataSetDefinition();
-        String indParam = "startDate=${startDate},endDate=${endDate}";
-        cohortDsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        cohortDsd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cohortDsd.setName("MOH706");
-        cohortDsd.setDescription("MOH 706 for the lab");
-        cohortDsd.addDimension("age", ReportUtils.map(ReportingUtils.getAge(), "effectiveDate=${endDate}"));
-		
-     //URINALYSIS  	
+	private DataSetDefinition getMoh706LabDatasetDefinition() {
+		CohortIndicatorDataSetDefinition cohortDsd = new CohortIndicatorDataSetDefinition();
+		String indParam = "startDate=${startDate},endDate=${endDate}";
+		cohortDsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cohortDsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cohortDsd.setName("MOH706");
+		cohortDsd.setDescription("MOH 706 for the lab");
+		cohortDsd.addDimension("age", ReportUtils.map(ReportingUtils.getAge(), "effectiveDate=${endDate}"));
+
+		//URINALYSIS
 		cohortDsd.addColumn("UAGLT", "1.2 Glucose Total",ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_GLUCOSE), indParam), "");
-	    cohortDsd.addColumn("UAGLP", "1.2 Glucose Positive",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_GLUCOSE, Arrays.asList(ONE_PLUS,TWO_PLUS,THREE_PLUS,FOUR_PLUS)), indParam), "");
-        cohortDsd.addColumn("UAKETT", "1.3 Ketones Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_KETONES), indParam), "");
-        cohortDsd.addColumn("UAKETP", "1.3 Ketones Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_KETONES, Arrays.asList(ONE_PLUS,TWO_PLUS,THREE_PLUS,FOUR_PLUS)), indParam), "");
+		cohortDsd.addColumn("UAGLP", "1.2 Glucose Positive",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_GLUCOSE, Arrays.asList(ONE_PLUS,TWO_PLUS,THREE_PLUS,FOUR_PLUS)), indParam), "");
+		cohortDsd.addColumn("UAKETT", "1.3 Ketones Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_KETONES), indParam), "");
+		cohortDsd.addColumn("UAKETP", "1.3 Ketones Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_KETONES, Arrays.asList(ONE_PLUS,TWO_PLUS,THREE_PLUS,FOUR_PLUS)), indParam), "");
 		cohortDsd.addColumn("UAPT", "1.3 Proteins Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_PROTEINS), indParam), "");
-        cohortDsd.addColumn("UAPP", "1.4 Proteins Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_PROTEINS, Arrays.asList(TRACE,ONE_PLUS,TWO_PLUS,THREE_PLUS)), indParam), "");
-        cohortDsd.addColumn("UAPCT", "1.6 Pus Cells (<5/hpf) Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_PUS_CELLS), indParam), "");
-        cohortDsd.addColumn("UAPCP", "1.6 Pus Cells (<5/hpf) Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_PUS_CELLS, Arrays.asList(ONE_FIVE_HPF,SIX_TEN_HPF,TEN_TWENTY_HPF,ABOVE_TWENTY_HPF)), indParam), "");
+		cohortDsd.addColumn("UAPP", "1.4 Proteins Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_PROTEINS, Arrays.asList(TRACE,ONE_PLUS,TWO_PLUS,THREE_PLUS)), indParam), "");
+		cohortDsd.addColumn("UAPCT", "1.6 Pus Cells (<5/hpf) Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_PUS_CELLS), indParam), "");
+		cohortDsd.addColumn("UAPCP", "1.6 Pus Cells (<5/hpf) Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_PUS_CELLS, Arrays.asList(ONE_FIVE_HPF,SIX_TEN_HPF,TEN_TWENTY_HPF,ABOVE_TWENTY_HPF)), indParam), "");
 		cohortDsd.addColumn("UAHT", "1.7 S.haematobium Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_T_HAEMATOBIUM), indParam), "");
 		cohortDsd.addColumn("UAHP", "1.7 S.haematobium Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_T_HAEMATOBIUM, Arrays.asList(SEEN)), indParam), "");
-        cohortDsd.addColumn("UATVT", "1.8 T. vaginatis Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_T_VAGINATIS), indParam), "");
-        cohortDsd.addColumn("UATVP", "1.8 T. vaginatis Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_T_VAGINATIS, Arrays.asList(SEEN)), indParam), "");
-        cohortDsd.addColumn("UAYCT", "1.9 Urinalysis Yeast Cells Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_YEAST_CELLS), indParam), "");
+		cohortDsd.addColumn("UATVT", "1.8 T. vaginatis Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_T_VAGINATIS), indParam), "");
+		cohortDsd.addColumn("UATVP", "1.8 T. vaginatis Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_T_VAGINATIS, Arrays.asList(SEEN)), indParam), "");
+		cohortDsd.addColumn("UAYCT", "1.9 Urinalysis Yeast Cells Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_YEAST_CELLS), indParam), "");
 		cohortDsd.addColumn("UAYCP", "1.9 Urinalysis Yeast Cells Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_YEAST_CELLS, Arrays.asList(RARELY,ONE_PLUS,TWO_PLUS,THREE_PLUS)), indParam), "");
-        cohortDsd.addColumn("UABT", "1.10 Bacteria Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_BACTERIA), indParam), "");
-        cohortDsd.addColumn("UABP", "1.10 Bacteria Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_BACTERIA, Arrays.asList(SEEN)), indParam), "");
+		cohortDsd.addColumn("UABT", "1.10 Bacteria Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_BACTERIA), indParam), "");
+		cohortDsd.addColumn("UABP", "1.10 Bacteria Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_BACTERIA, Arrays.asList(SEEN)), indParam), "");
 
-        //PARASITOLOGY
-		//TODO: BS for malaria is text based changes to coded
-        ReportingUtils.addRow(cohortDsd, "BST", "Parasitology - Malaria test totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_BS), indParam), ReportAddonUtils.getAgeUnderOver5Columns());
-        ReportingUtils.addRow(cohortDsd, "BSP", "Parasitology - Malaria test positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_BS, Arrays.asList(POSITIVE)),indParam), ReportAddonUtils.getAgeUnderOver5Columns());
+		//PARASITOLOGY
+		ReportingUtils.addRow(cohortDsd, "BST", "Parasitology - Malaria test totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_BS), indParam), ReportAddonUtils.getAgeUnderOver5Columns());
+		ReportingUtils.addRow(cohortDsd, "BSP", "Parasitology - Malaria test positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_BS, Arrays.asList(POSITIVE,MPS_SEEN)),indParam), ReportAddonUtils.getAgeUnderOver5Columns());
 
+		cohortDsd.addColumn("BSPC", "3.0 Malaria PCR Tests totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_PCR), indParam), "");
+		cohortDsd.addColumn("BSPCP", "3.0 Malaria PCR Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_PCR, Arrays.asList(DETECTED)), indParam), "");
 		cohortDsd.addColumn("BSRT", "3.3 Malaria Rapid Diagnostic Tests totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_MALARIA_RAPID), indParam), "");
-        cohortDsd.addColumn("BSRTP", "3.3 Malaria Rapid Diagnostic Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_RAPID, Arrays.asList(POSITIVE)), indParam), "");
-        cohortDsd.addColumn("TSPPT", "3.4 Taenia SPP Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TAENIA_SPP), indParam), "");
-        cohortDsd.addColumn("TSPPP", "3.4 Taenia SPP Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TAENIA_SPP, Arrays.asList(PRESENT)), indParam), "");
-        cohortDsd.addColumn("HNNT", "3.5 Hymenolepis nana Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HNANA), indParam), "");
-        cohortDsd.addColumn("HNNP", "3.5 Hymenolepis nana Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HNANA, Arrays.asList(PRESENT)), indParam), "");
-      
-        cohortDsd.addColumn("HOWT", "3.6 Hookworm Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HOOKWORM), indParam), "");
-        cohortDsd.addColumn("HOWP", "3.6 Hookworm Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HOOKWORM, Arrays.asList(PRESENT)), indParam), "");
+		cohortDsd.addColumn("BSRTP", "3.3 Malaria Rapid Diagnostic Tests positives",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_MALARIA_RAPID, Arrays.asList(POSITIVE)), indParam), "");
+		cohortDsd.addColumn("TSPPT", "3.4 Taenia SPP Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TAENIA_SPP), indParam), "");
+		cohortDsd.addColumn("TSPPP", "3.4 Taenia SPP Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TAENIA_SPP, Arrays.asList(PRESENT)), indParam), "");
+		cohortDsd.addColumn("HNNT", "3.5 Hymenolepis nana Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HNANA), indParam), "");
+		cohortDsd.addColumn("HNNP", "3.5 Hymenolepis nana Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HNANA, Arrays.asList(PRESENT)), indParam), "");
+
+		cohortDsd.addColumn("HOWT", "3.6 Hookworm Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HOOKWORM), indParam), "");
+		cohortDsd.addColumn("HOWP", "3.6 Hookworm Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HOOKWORM, Arrays.asList(PRESENT)), indParam), "");
 		cohortDsd.addColumn("RWT", "3.7 Roundworm Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_ROUNDWORM), indParam), "");
 		cohortDsd.addColumn("RWP", "3.7 Roundworm Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_ROUNDWORM, Arrays.asList(PRESENT)), indParam), "");
 		cohortDsd.addColumn("SMT", "3.8 S. mansoni Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_S_MASONII), indParam), "");
 		cohortDsd.addColumn("SMP", "3.8 S. mansoni Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_S_MASONII, Arrays.asList(PRESENT)), indParam), "");
 		cohortDsd.addColumn("TTT", "3.9 Trichuris trichura Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TRICHURIS), indParam), "");
 		cohortDsd.addColumn("TTP", "3.9 Trichuris trichura Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TRICHURIS, Arrays.asList(PRESENT)), indParam), "");
-       //TODO: Need concept for Amoeba
+		//TODO: Need concept for Amoeba
 		cohortDsd.addColumn("AMBT", "3.9 Amoeba Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_TRICHURIS), indParam), "");
 		cohortDsd.addColumn("AMBP", "3.9 Amoeba Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TRICHURIS, Arrays.asList(PRESENT)), indParam), "");
 
-        //Serology
+		//Serology
 		cohortDsd.addColumn("VDRLT", "7.1 VDRL Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_SCREENING_SYPHILIS), indParam), "");
 		cohortDsd.addColumn("VDRLP", "7.1 VDRL Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BLOOD_SCREENING_SYPHILIS, Arrays.asList(REACTIVE)), indParam), "");
 
@@ -218,7 +223,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 
 		cohortDsd.addColumn("BRUT", "7.5 Brucella Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BRUCELLA), indParam), "");
 		cohortDsd.addColumn("BRUP", "7.5 Brucella Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BRUCELLA, Arrays.asList(REACTIVE)), indParam), "");
-		
+
 		cohortDsd.addColumn("RFT", "7.6 Rheumatoid factor Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(RHEUMATOID_FACTOR), indParam), "");
 		cohortDsd.addColumn("RFP", "7.6 Rheumatoid factor Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(RHEUMATOID_FACTOR, Arrays.asList(POSITIVE)), indParam), "");
 
@@ -238,14 +243,14 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("HCGT", "7.11 HCG test Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_PREGNANCY), indParam), "");
 		cohortDsd.addColumn("HCGP", "7.11 HCG test Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_PREGNANCY, Arrays.asList(POSITIVE)), indParam), "");
 
-        //4.Haematology
+		//4.Haematology
 		cohortDsd.addColumn("FBCT", "4.1 Haematology tests: Full blood count total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(HAEMATOLOGY_BLOOD_COUNT), indParam), "");
-        cohortDsd.addColumn("HB5", "4.1 Haematology tests: FBC HB <5 g/dl",ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_HAEMOGLOBIN, 0.0, 5.0), indParam), "");
-        cohortDsd.addColumn("HB510", "4.1 Haematology tests: FBC HB Between 5-10 g/dl",ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_HAEMOGLOBIN, 5.0, 10.0), indParam), "");
-        cohortDsd.addColumn("CD4T", "4.3 Haematology tests CD4 count total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestion(HAEMATOLOGY_CD4), indParam), "");
-        cohortDsd.addColumn("CD4T500", "4.3 Haematology tests CD4 count < 500", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_CD4, 0.0, 500.0), indParam),"");
+		cohortDsd.addColumn("HB5", "4.1 Haematology tests: FBC HB <5 g/dl",ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_HAEMOGLOBIN, 0.0, 5.0), indParam), "");
+		cohortDsd.addColumn("HB510", "4.1 Haematology tests: FBC HB Between 5-10 g/dl",ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_HAEMOGLOBIN, 5.0, 10.0), indParam), "");
+		cohortDsd.addColumn("CD4T", "4.3 Haematology tests CD4 count total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestion(HAEMATOLOGY_CD4), indParam), "");
+		cohortDsd.addColumn("CD4T500", "4.3 Haematology tests CD4 count < 500", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_CD4, 0.0, 500.0), indParam),"");
 
-        //Other Haematology tests
+		//Other Haematology tests
 		cohortDsd.addColumn("STT", "4.4 Other Haematology Tests Sickling test Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(HAEMATOLOGY_SICKLE_CELL), indParam), "");
 		cohortDsd.addColumn("STP", "4.4 Other Haematology Tests Sickling test Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(HAEMATOLOGY_SICKLE_CELL, Arrays.asList(POSITIVE)), indParam), "");
 		cohortDsd.addColumn("PBFT", "4.5 Other Haematology Tests Peripherial blood films Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(HAEMATOLOGY_PERIPHERAL_BLOOD_FILM), indParam), "");
@@ -256,19 +261,19 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		//TODO:Which is the high ESR need to determine lower and upper limits
 		cohortDsd.addColumn("ESRP", "4.9 Other Haematology Tests Erythrocyte sedimentation rate High", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HAEMATOLOGY_ERYTHROCYTE_SEDIMENTATION_RATE, 100.0, 500.0), indParam),"");
 
-       //Blood grouping
+		//Blood grouping
 		cohortDsd.addColumn("BGT", "4.10 Blood Grouping Blood Groups Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_GROUPING), indParam), "");
-		//TODO:How to compute Blood Units Grouped 
+		//TODO:How to compute Blood Units Grouped
 		cohortDsd.addColumn("BUGT", "4.11 Blood Grouping Blood Units Grouped Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(RHESUS_BLOOD_GROUP_UNITS), indParam), "");
 
-        //Blood Screening at facility
+		//Blood Screening at facility
 		cohortDsd.addColumn("BSHIVP", "4.18 Blood Screening at facility HIV Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BLOOD_SCREENING_HIV, Arrays.asList(POSITIVE)), indParam), "");
 		cohortDsd.addColumn("BSHPBP", "4.19 Blood Screening at facility Hepatitis B Positive", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnAlistOfQuestionsAndListOfAnswers(Arrays.asList(BLOOD_SCREENING_HEPATITIS_B_SURFACE_ANTIGEN, BLOOD_SCREENING_HEPATITIS_B_QUALITATIVE, BLOOD_SCREENING_HEPATITIS_B_SPOT), Arrays.asList(POSITIVE)), indParam), "");
 		cohortDsd.addColumn("BSHPCP", "4.20 Blood Screening at facility Hepatitis C Positive", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnAlistOfQuestionsAndListOfAnswers(Arrays.asList(BLOOD_SCREENING_HEPATITIS_C_SPOT, BLOOD_SCREENING_HEPATITIS_C_QUALITATIVE, BLOOD_SCREENING_HEPATITIS_C_ANTIGEN), Arrays.asList(POSITIVE,REACTIVE)), indParam), "");
 		cohortDsd.addColumn("BSSP", "4.21 Blood Screening at facility Syphilis Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BLOOD_SCREENING_SYPHILIS, Arrays.asList(REACTIVE)), indParam), "");
 
-        //2. BLOOD CHEMISTRY
-		//TODO: Check concept 887 for serum glucose is same as 1000443 for Random blood sugar used 
+		//2. BLOOD CHEMISTRY
+		//TODO: Check concept 887 for serum glucose is same as 1000443 for Random blood sugar used
 		cohortDsd.addColumn("BCBST", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_CHEMISTRY_BLOOD_SUGAR), indParam), "");
 		cohortDsd.addColumn("BCBSL", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - Low Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(BLOOD_CHEMISTRY_BLOOD_SUGAR, 0.0, 4.0), indParam), "");
 		cohortDsd.addColumn("BCBSH", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - High Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(BLOOD_CHEMISTRY_BLOOD_SUGAR, 6.0, 30.0), indParam), "");
@@ -328,12 +333,12 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("LPTLC", "2.17 BLOOD CHEMISTRY - Lipid Profile Test - Low Cholestrol", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TOTAL_CHOLESTEROL, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LFTHC", "2.17 BLOOD CHEMISTRY - Lipid Profile Test - High Cholestrol", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TOTAL_CHOLESTEROL, 5.2, 30.0), indParam), "");
 
-		//TODO: Check concept 166039 for serum glucose is same as 1009 for Triglycerides used 
+		//TODO: Check concept 166039 for serum glucose is same as 1009 for Triglycerides used
 		cohortDsd.addColumn("LPTT", "2.18 BLOOD CHEMISTRY -  Lipid Profile Test - Total Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(LP_TRIGLYCERIDES), indParam), "");
 		cohortDsd.addColumn("LPTLT", "2.18 BLOOD CHEMISTRY - Lipid Profile Test - Low Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TRIGLYCERIDES, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LPTHT", "2.18 BLOOD CHEMISTRY - Lipid Profile Test - High Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TRIGLYCERIDES, 2.3, 30.0), indParam), "");
 
-		//TODO: Check concept 166045 for serum glucose is same as 1008 for LDL used 
+		//TODO: Check concept 166045 for serum glucose is same as 1008 for LDL used
 		cohortDsd.addColumn("LPTLDL", "2.19 BLOOD CHEMISTRY -  Lipid Profile Test - Total LDL", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(LP_LDL), indParam), "");
 		cohortDsd.addColumn("LPTLLDL", "2.19 BLOOD CHEMISTRY - Lipid Profile Test - Low LDL", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_LDL, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LPTHLDL", "2.19 BLOOD CHEMISTRY - Lipid Profile Test - High LDL", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_LDL, 2.59, 30.0), indParam), "");
@@ -354,8 +359,8 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("HTTPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  Total PSA", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(HORMONAL_TEST_PSA), indParam), "");
 		cohortDsd.addColumn("HTLPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  Low PSA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HORMONAL_TEST_PSA, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("HTHPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  High PSA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HORMONAL_TEST_PSA, 4.0, 30.0), indParam), "");
-       
-		//Tumor markers 
+
+		//Tumor markers
 		cohortDsd.addColumn("TMTCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers -  Total CEA", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(TUMOR_MARKERS_CEA), indParam), "");
 		cohortDsd.addColumn("TMLCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers  -  Low CEA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(TUMOR_MARKERS_CEA, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("TMHCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers  -  High CEA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(TUMOR_MARKERS_CEA, 2.5, 30.0), indParam), "");
@@ -374,7 +379,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("CSFHG", "2.27 BLOOD CHEMISTRY - CSF Chemistry -  High Glucose", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(CFS_CHEMISTRY_GLUCOSE, 80.0, 200.0), indParam), "");
 
 		return cohortDsd;
-    }
+	}
 
 }
 
