@@ -246,140 +246,140 @@
 	<globalProperty>
 		<property>kenyaemr.userRole.config</property>
 		<defaultValue>
-		[
+			[
 			{
-				"category": "Admin Roles",
-				"roles": [
-					"o3: System Administrator",
-					"System Administrator",
-					"System Developer",
-					"ETL Administration",
-					"IL Administration",
-					"ML administration",
-					"API Privileges",
-					"API Privileges (View and Edit)",
-					"Edit Settings Role",
-					"Upi verification",
-					"Ushauri Administration",
-					"nimeCONFIRM app administration",
-					"Privilege Level: Full",
-					"Privilege Level: High",
-					"Manager",
-					"Administration",
-					"o3: ICT Officer",
-					"Afyastat delete queue items",
-					"Afyastat queue administration",
-					"Application: Configure HRS Report",
-					"Application: Configure SpeedPhases Reports Module",
-					"covid-19 app administration",
-					"Cross-Border app administration",
-					"ncd app administration"
-				]
+			"category": "Admin Roles",
+			"roles": [
+			"o3: System Administrator",
+			"System Administrator",
+			"System Developer",
+			"ETL Administration",
+			"IL Administration",
+			"ML administration",
+			"API Privileges",
+			"API Privileges (View and Edit)",
+			"Edit Settings Role",
+			"Upi verification",
+			"Ushauri Administration",
+			"nimeCONFIRM app administration",
+			"Privilege Level: Full",
+			"Privilege Level: High",
+			"Manager",
+			"Administration",
+			"o3: ICT Officer",
+			"Afyastat delete queue items",
+			"Afyastat queue administration",
+			"Application: Configure HRS Report",
+			"Application: Configure SpeedPhases Reports Module",
+			"covid-19 app administration",
+			"Cross-Border app administration",
+			"ncd app administration"
+			]
 			},
 			{
-				"category": "Billing Roles",
-				"roles": [
-					"o3: Cashier/Accountant",
-					"o3: Finance Administrator",
-					"o3 Cashier",
-					"Billing Manager",
-					"Finance Administrator",
-					"o3: Insurance Agent"
-				]
+			"category": "Billing Roles",
+			"roles": [
+			"o3: Cashier/Accountant",
+			"o3: Finance Administrator",
+			"o3 Cashier",
+			"Billing Manager",
+			"Finance Administrator",
+			"o3: Insurance Agent"
+			]
 			},
 			{
-				"category": "Clinician Roles",
-				"roles": [
-					"o3: Nurse",
-					"o3: Doctors/Clinicians/Specialists",
-					"o3: Adherence counsellor",
-					"o3: HTS Counsellor",
-					"Adherence Counselor",
-					"o3 Clinician",
-					"Provider",
-					"o3: Physiotherapist",
-					"o3: Occupational Therapist",
-					"o3: Nutritionist",
-					"o3: Orthopedics",
-					"Peer Educator",
-					"o3: Peer Eductor/Mentor Mother",
-					"o3: Triage Nurse",
-					"Key Population Module",
-					"Clinician",
-					"HTS Counsellor",
-					"Nutritionist",
-					"o3: Dentist",
-					"o3: Pathologist",
-					"o3: Social Worker",
-					"o3: Public Health Officer/Surveillance Officer",
-					"o3: Linkage Services",
-					"o3: Community Pharmacist"
-				]
+			"category": "Clinician Roles",
+			"roles": [
+			"o3: Nurse",
+			"o3: Doctors/Clinicians/Specialists",
+			"o3: Adherence counsellor",
+			"o3: HTS Counsellor",
+			"Adherence Counselor",
+			"o3 Clinician",
+			"Provider",
+			"o3: Physiotherapist",
+			"o3: Occupational Therapist",
+			"o3: Nutritionist",
+			"o3: Orthopedics",
+			"Peer Educator",
+			"o3: Peer Eductor/Mentor Mother",
+			"o3: Triage Nurse",
+			"Key Population Module",
+			"Clinician",
+			"HTS Counsellor",
+			"Nutritionist",
+			"o3: Dentist",
+			"o3: Pathologist",
+			"o3: Social Worker",
+			"o3: Public Health Officer/Surveillance Officer",
+			"o3: Linkage Services",
+			"o3: Community Pharmacist"
+			]
 			},
 			{
-				"category": "Records Roles",
-				"roles": [
-					"o3: Receptionist/Registration",
-					"Registration",
-					"Data Clerk",
-					"o3: Health Record Officer",
-					"Registration Officer",
-					"Lab Manifest",
-					"Lab Manifest Administration",
-					"Referral Administration",
-					"Intake",
-					"AIR",
-					"Anonymous",
-					"Authenticated",
-					"o3: RDE Clerk",
-					"o3: Mortician"
-				]
+			"category": "Records Roles",
+			"roles": [
+			"o3: Receptionist/Registration",
+			"Registration",
+			"Data Clerk",
+			"o3: Health Record Officer",
+			"Registration Officer",
+			"Lab Manifest",
+			"Lab Manifest Administration",
+			"Referral Administration",
+			"Intake",
+			"AIR",
+			"Anonymous",
+			"Authenticated",
+			"o3: RDE Clerk",
+			"o3: Mortician"
+			]
 			},
 			{
-				"category": "Investigation Roles",
-				"roles": [
-					"o3: Laboratory Technician",
-					"o3: Radiologist",
-					"Investigation Roles",
-					"ML pull risk scores from NDWH",
-					"Lab Technician"
-				]
+			"category": "Investigation Roles",
+			"roles": [
+			"o3: Laboratory Technician",
+			"o3: Radiologist",
+			"Investigation Roles",
+			"ML pull risk scores from NDWH",
+			"Lab Technician"
+			]
 			},
 			{
-				"category": "Pharmacist Roles",
-				"roles": [
-					"o3: Pharmacist",
-					"Community Pharmacy",
-					"Pharmacist"
-				]
+			"category": "Pharmacist Roles",
+			"roles": [
+			"o3: Pharmacist",
+			"Community Pharmacy",
+			"Pharmacist"
+			]
 			},
 			{
-				"category": "Inventory Roles",
-				"roles": [
-					"o3: Stock Controller/Manager",
-					"o3 Stock Manager",
-					"Inventory Administrator",
-					"Inventory Provider Access",
-					"Inventory Clerk",
-					"Inventory Manager",
-					"Stock Management Base Role",
-					"Inventory Reporting",
-					"Inventory Dispensing"
-				]
+			"category": "Inventory Roles",
+			"roles": [
+			"o3: Stock Controller/Manager",
+			"o3 Stock Manager",
+			"Inventory Administrator",
+			"Inventory Provider Access",
+			"Inventory Clerk",
+			"Inventory Manager",
+			"Stock Management Base Role",
+			"Inventory Reporting",
+			"Inventory Dispensing"
+			]
 			},
 			{
-				"category": "Core Inventory Roles",
-				"roles": [
-					"Inventory Administrator",
-					"Inventory Provider Access",
-					"Inventory Clerk",
-					"Inventory Manager",
-					"Stock Management Base Role",
-					"Inventory Reporting",
-					"Inventory Dispensing"
-				]
+			"category": "Core Inventory Roles",
+			"roles": [
+			"Inventory Administrator",
+			"Inventory Provider Access",
+			"Inventory Clerk",
+			"Inventory Manager",
+			"Stock Management Base Role",
+			"Inventory Reporting",
+			"Inventory Dispensing"
+			]
 			}
-		]
+			]
 		</defaultValue>
 		<description>
 			Configures for grouping of user roles
@@ -417,7 +417,7 @@
 		<property>kenyaemr.hie.claim.response.url</property>
 		<defaultValue>https://apistg.safaricom.co.ke/hie/api/v1/status/ClaimResponse</defaultValue>
 		<description>
-		Url to check submitted claim status/response from HIE
+			Url to check submitted claim status/response from HIE
 		</description>
 	</globalProperty>
 	<globalProperty>
@@ -511,17 +511,34 @@
 	</globalProperty>
 
 	<globalProperty>
-	<property>kenyaemr.enable.forms</property>
-	<defaultValue>true</defaultValue>
-	<description>
-		Defines whether to enable forms installation, default is true. This is used to enable/disable forms installation during module installation.
-	</description>
+		<property>kenyaemr.enable.forms</property>
+		<defaultValue>true</defaultValue>
+		<description>
+			Defines whether to enable forms installation via metadata deploy module, default is true. This is used to enable/disable forms installation during module installation.
+		</description>
 	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.enable.programs</property>
+		<defaultValue>true</defaultValue>
+		<description>
+			Defines whether to enable programs installation via metadata deploy module, default is true. This is used to enable/disable programs installation during module installation.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.enable.relationship.types</property>
+		<defaultValue>true</defaultValue>
+		<description>
+			Defines whether to enable relationship types installation via metadata deploy module, default is true. This is used to enable/disable relationship types installation during module installation.
+		</description>
+	</globalProperty>
+
 	<globalProperty>
 		<property>nlmis.base.url</property>
 		<defaultValue>https://integration-layer.apeiro-digital.com/endPoint</defaultValue>
 		<description>
-		   Base URL for NLIMS integration
+			Base URL for NLIMS integration
 		</description>
 	</globalProperty>
 
@@ -529,14 +546,14 @@
 		<property>nlmis.requisition.submit.endpoint</property>
 		<defaultValue>/api/hmis-requisition/submit</defaultValue>
 		<description>
-		   Endpoint URL for submitting requisitions to NLIMS
+			Endpoint URL for submitting requisitions to NLIMS
 		</description>
 	</globalProperty>
 	<globalProperty>
 		<property>nlmis.oauth.token</property>
 		<defaultValue></defaultValue>
 		<description>
-		   OAuth token for NLIMS integration
+			OAuth token for NLIMS integration
 		</description>
 	</globalProperty>
 
@@ -544,21 +561,21 @@
 		<property>nlmis.processing.periods.endpoint</property>
 		<defaultValue>/api/processingPeriods</defaultValue>
 		<description>
-		   Endpoint URL for retrieving processing periods from NLIMS
+			Endpoint URL for retrieving processing periods from NLIMS
 		</description>
 	</globalProperty>
 	<globalProperty>
 		<property>nlmis.programs.endpoint</property>
 		<defaultValue>/api/programs</defaultValue>
 		<description>
-		   Endpoint URL for retrieving programs from NLIMS
+			Endpoint URL for retrieving programs from NLIMS
 		</description>
 	</globalProperty>
 	<globalProperty>
 		<property>nlmis.daily.stock.status.submit.endpoint</property>
 		<defaultValue>/api/dailyStockStatus</defaultValue>
 		<description>
-		   Endpoint URL for submitting daily stock status to NLIMS
+			Endpoint URL for submitting daily stock status to NLIMS
 		</description>
 	</globalProperty>
 
@@ -566,9 +583,16 @@
 		<property>nlmis.requisition.status.endpoint</property>
 		<defaultValue>/api/hmis-requisition/status</defaultValue>
 		<description>
-		   Endpoint URL for retrieving requisition status from NLIMS
+			Endpoint URL for retrieving requisition status from NLIMS
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>nlmis.receiving.pods.endpoint</property>
+		<defaultValue>/api/receivingPods</defaultValue>
+		<description>
+			Endpoint URL to send proof of delivery (POD) notification to NLIMS when an order is received in KenyaEMR.
 		</description>
 	</globalProperty>
 
 </module>
-        
