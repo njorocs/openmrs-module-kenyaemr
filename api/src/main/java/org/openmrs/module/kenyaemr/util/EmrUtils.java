@@ -25,6 +25,7 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.Obs;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
@@ -33,6 +34,7 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
@@ -52,6 +54,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -483,5 +486,42 @@ public class EmrUtils {
 			return null;
 		}
 	}
+	public static <T extends OpenmrsObject> T safeGetMetadata(Class<T> type, String uuid) {
+		try {
+			return MetadataUtils.existing(type, uuid);
+		} catch (Exception e) {
+			log.warn("Metadata not found for type: " + type.getSimpleName() + ", UUID: " + uuid + ". Error: " + e.getMessage());
+			return null;
+		}
+	}
 
+	/**
+	 * Returns the most resent encounter, given a collection of encounters
+	 * @param encounters
+	 * @return
+	 */
+	public static Encounter latestEncounter(List<Encounter> encounters) {
+		if (encounters == null || encounters.isEmpty()) return null;
+		return encounters.stream()
+				.max(Comparator.comparing(Encounter::getEncounterDatetime))
+				.orElse(null);
+	}
+
+	/**
+	 * Checks whether a patient has an existing order given a list of order concepts
+	 * @param patient
+	 * @param orderService
+	 * @param orderConcepts
+	 * @return
+	 */
+	public static boolean hasExistingVlOrder(Patient patient, OrderService orderService, List<Concept> orderConcepts) {
+		CareSetting careSetting = orderService.getCareSetting(1);
+		List<Order> orders = orderService.getOrders(patient, careSetting, null, true);
+		for (Order order : orders) {
+			if (orderConcepts.contains(order.getConcept())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
