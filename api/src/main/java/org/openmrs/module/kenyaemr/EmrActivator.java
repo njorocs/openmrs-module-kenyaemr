@@ -142,7 +142,8 @@ public class EmrActivator implements ModuleActivator {
 				"org.apache.commons.**",
 				"org.slf4j.**", 
 				"ch.qos.logback.**",
-				"org.apache.log4j.**"
+				"org.apache.log4j.**",
+				"org.apache.logging.**"
 		};
 
 		int patchCount = 0;
