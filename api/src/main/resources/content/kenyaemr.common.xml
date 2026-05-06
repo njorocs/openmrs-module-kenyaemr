@@ -865,7 +865,7 @@
 
 	<bean id="kenyaemr.etl.common.report.moh731" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
 		<property name="targetUuid" value="a66bf454-2a11-4e51-b28d-3d7ece76aa13" />
-		<property name="name" value="Revised MOH 731" />
+		<property name="name" value="MOH 731 Revised" />
 		<property name="description" value="Comprehensive HIV/AIDS Facility Reporting Form - NASCOP (Y23)" />
 		<property name="apps">
 			<set>
