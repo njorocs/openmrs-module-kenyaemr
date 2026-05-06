@@ -216,7 +216,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("TPHAP", "7.2 TPHA Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(SEROLOGY_TPHA, Arrays.asList(REACTIVE,LESS_ONE_2,ONE_2,ONE_4,ONE_8,ONE_16,ONE_32,ONE_64,ONE_128,ONE_256,GREATER_ONE_32,GREATER_ONE_572)), indParam), "");
 		//TODO: Need concept for Asot
 		cohortDsd.addColumn("ASOT", "7.3 ASOT Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(SEROLOGY_TPHA), indParam), "");
-		cohortDsd.addColumn("ASOT", "7.3 ASOT Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(SEROLOGY_TPHA, Arrays.asList(LESS_ONE_2,ONE_2,ONE_4,ONE_8,ONE_16,ONE_32,ONE_64,ONE_128,ONE_256,GREATER_ONE_32,GREATER_ONE_572)), indParam), "");
+		cohortDsd.addColumn("ASOTP", "7.3 ASOT Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(SEROLOGY_TPHA, Arrays.asList(LESS_ONE_2,ONE_2,ONE_4,ONE_8,ONE_16,ONE_32,ONE_64,ONE_128,ONE_256,GREATER_ONE_32,GREATER_ONE_572)), indParam), "");
 
 		cohortDsd.addColumn("HIVT", "7.4 HIV Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_SCREENING_HIV), indParam), "");
 		cohortDsd.addColumn("HIVP", "7.4 HIV Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BLOOD_SCREENING_HIV, Arrays.asList(POSITIVE)), indParam), "");
