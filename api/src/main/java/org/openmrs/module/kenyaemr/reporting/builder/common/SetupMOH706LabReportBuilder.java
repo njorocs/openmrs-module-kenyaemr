@@ -164,8 +164,8 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
         cohortDsd.setName("MOH706");
         cohortDsd.setDescription("MOH 706 for the lab");
         cohortDsd.addDimension("age", ReportUtils.map(ReportingUtils.getAge(), "effectiveDate=${endDate}"));
-		
-     //URINALYSIS  	
+
+     //URINALYSIS
 		cohortDsd.addColumn("UAGLT", "1.2 Glucose Total",ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_GLUCOSE), indParam), "");
 	    cohortDsd.addColumn("UAGLP", "1.2 Glucose Positive",ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(URINE_ANALYSIS_GLUCOSE, Arrays.asList(ONE_PLUS,TWO_PLUS,THREE_PLUS,FOUR_PLUS)), indParam), "");
         cohortDsd.addColumn("UAKETT", "1.3 Ketones Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(URINE_ANALYSIS_KETONES), indParam), "");
@@ -195,7 +195,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
         cohortDsd.addColumn("TSPPP", "3.4 Taenia SPP Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_TAENIA_SPP, Arrays.asList(PRESENT)), indParam), "");
         cohortDsd.addColumn("HNNT", "3.5 Hymenolepis nana Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HNANA), indParam), "");
         cohortDsd.addColumn("HNNP", "3.5 Hymenolepis nana Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HNANA, Arrays.asList(PRESENT)), indParam), "");
-      
+
         cohortDsd.addColumn("HOWT", "3.6 Hookworm Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_HOOKWORM), indParam), "");
         cohortDsd.addColumn("HOWP", "3.6 Hookworm Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(PARASITOLOGY_HOOKWORM, Arrays.asList(PRESENT)), indParam), "");
 		cohortDsd.addColumn("RWT", "3.7 Roundworm Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(PARASITOLOGY_ROUNDWORM), indParam), "");
@@ -215,7 +215,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("TPHAT", "7.2 TPHA Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(SEROLOGY_TPHA), indParam), "");
 		cohortDsd.addColumn("TPHAP", "7.2 TPHA Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(SEROLOGY_TPHA, Arrays.asList(REACTIVE,LESS_ONE_2,ONE_2,ONE_4,ONE_8,ONE_16,ONE_32,ONE_64,ONE_128,ONE_256,GREATER_ONE_32,GREATER_ONE_572)), indParam), "");
 		//TODO: Need concept for Asot
-		cohortDsd.addColumn("ASOT", "7.3 ASOT Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(SEROLOGY_TPHA), indParam), "");
+		cohortDsd.addColumn("ASOTT", "7.3 ASOT Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(SEROLOGY_TPHA), indParam), "");
 		cohortDsd.addColumn("ASOTP", "7.3 ASOT Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(SEROLOGY_TPHA, Arrays.asList(LESS_ONE_2,ONE_2,ONE_4,ONE_8,ONE_16,ONE_32,ONE_64,ONE_128,ONE_256,GREATER_ONE_32,GREATER_ONE_572)), indParam), "");
 
 		cohortDsd.addColumn("HIVT", "7.4 HIV Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_SCREENING_HIV), indParam), "");
@@ -223,7 +223,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 
 		cohortDsd.addColumn("BRUT", "7.5 Brucella Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BRUCELLA), indParam), "");
 		cohortDsd.addColumn("BRUP", "7.5 Brucella Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BRUCELLA, Arrays.asList(REACTIVE)), indParam), "");
-		
+
 		cohortDsd.addColumn("RFT", "7.6 Rheumatoid factor Totals", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(RHEUMATOID_FACTOR), indParam), "");
 		cohortDsd.addColumn("RFP", "7.6 Rheumatoid factor Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(RHEUMATOID_FACTOR, Arrays.asList(POSITIVE)), indParam), "");
 
@@ -263,7 +263,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 
        //Blood grouping
 		cohortDsd.addColumn("BGT", "4.10 Blood Grouping Blood Groups Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_GROUPING), indParam), "");
-		//TODO:How to compute Blood Units Grouped 
+		//TODO:How to compute Blood Units Grouped
 		cohortDsd.addColumn("BUGT", "4.11 Blood Grouping Blood Units Grouped Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(RHESUS_BLOOD_GROUP_UNITS), indParam), "");
 
         //Blood Screening at facility
@@ -273,7 +273,7 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("BSSP", "4.21 Blood Screening at facility Syphilis Positive", ReportUtils.map(moh706IndicatorLibrary.getTotalCodedLabsByConceptAndPositiveAnswer(BLOOD_SCREENING_SYPHILIS, Arrays.asList(REACTIVE)), indParam), "");
 
         //2. BLOOD CHEMISTRY
-		//TODO: Check concept 887 for serum glucose is same as 1000443 for Random blood sugar used 
+		//TODO: Check concept 887 for serum glucose is same as 1000443 for Random blood sugar used
 		cohortDsd.addColumn("BCBST", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(BLOOD_CHEMISTRY_BLOOD_SUGAR), indParam), "");
 		cohortDsd.addColumn("BCBSL", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - Low Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(BLOOD_CHEMISTRY_BLOOD_SUGAR, 0.0, 4.0), indParam), "");
 		cohortDsd.addColumn("BCBSH", "2.1 BLOOD CHEMISTRY - Blood Sugar Test - High Blood Sugar Total", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(BLOOD_CHEMISTRY_BLOOD_SUGAR, 6.0, 30.0), indParam), "");
@@ -333,12 +333,12 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("LPTLC", "2.17 BLOOD CHEMISTRY - Lipid Profile Test - Low Cholestrol", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TOTAL_CHOLESTEROL, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LFTHC", "2.17 BLOOD CHEMISTRY - Lipid Profile Test - High Cholestrol", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TOTAL_CHOLESTEROL, 5.2, 30.0), indParam), "");
 
-		//TODO: Check concept 166039 for serum glucose is same as 1009 for Triglycerides used 
+		//TODO: Check concept 166039 for serum glucose is same as 1009 for Triglycerides used
 		cohortDsd.addColumn("LPTT", "2.18 BLOOD CHEMISTRY -  Lipid Profile Test - Total Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(LP_TRIGLYCERIDES), indParam), "");
 		cohortDsd.addColumn("LPTLT", "2.18 BLOOD CHEMISTRY - Lipid Profile Test - Low Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TRIGLYCERIDES, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LPTHT", "2.18 BLOOD CHEMISTRY - Lipid Profile Test - High Triglycerides", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_TRIGLYCERIDES, 2.3, 30.0), indParam), "");
 
-		//TODO: Check concept 166045 for serum glucose is same as 1008 for LDL used 
+		//TODO: Check concept 166045 for serum glucose is same as 1008 for LDL used
 		cohortDsd.addColumn("LPTLDL", "2.19 BLOOD CHEMISTRY -  Lipid Profile Test - Total LDL", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(LP_LDL), indParam), "");
 		cohortDsd.addColumn("LPTLLDL", "2.19 BLOOD CHEMISTRY - Lipid Profile Test - Low LDL", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_LDL, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("LPTHLDL", "2.19 BLOOD CHEMISTRY - Lipid Profile Test - High LDL", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(LP_LDL, 2.59, 30.0), indParam), "");
@@ -359,8 +359,8 @@ public class SetupMOH706LabReportBuilder extends AbstractReportBuilder {
 		cohortDsd.addColumn("HTTPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  Total PSA", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(HORMONAL_TEST_PSA), indParam), "");
 		cohortDsd.addColumn("HTLPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  Low PSA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HORMONAL_TEST_PSA, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("HTHPSA", "2.23 BLOOD CHEMISTRY - Hormonal Test -  High PSA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(HORMONAL_TEST_PSA, 4.0, 30.0), indParam), "");
-       
-		//Tumor markers 
+
+		//Tumor markers
 		cohortDsd.addColumn("TMTCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers -  Total CEA", ReportUtils.map(moh706IndicatorLibrary.getTotalTestsByConcept(TUMOR_MARKERS_CEA), indParam), "");
 		cohortDsd.addColumn("TMLCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers  -  Low CEA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(TUMOR_MARKERS_CEA, 0.0, 0.0), indParam), "");
 		cohortDsd.addColumn("TMHCEA", "2.24 BLOOD CHEMISTRY - Tumor Makers  -  High CEA", ReportUtils.map(moh706IndicatorLibrary.getResultsBasedOnValueNumericQuestionBetweenLimits(TUMOR_MARKERS_CEA, 2.5, 30.0), indParam), "");
