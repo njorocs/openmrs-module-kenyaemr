@@ -6,7 +6,7 @@
 		config.context = "patientId=${ config.patient.id }"
 	}
 
-	config.beforeContent = ui.includeFragment("kenyaemr", "header/pageHeader", config)
+	config.beforeContent = ""
 
 	config.beforeContent += ui.includeFragment("kenyaemr", "header/systemHeader", config)
 
@@ -19,9 +19,8 @@
 		config.beforeContent += ui.includeFragment("kenyaemr", "header/visitHeader", [ visit: config.visit ])
 	}
 
-	config.pageTitle = "KenyaEMR"
-	config.faviconIco = ui.resourceLink("kenyaemr", "images/logos/favicon.ico")
-	config.faviconPng = ui.resourceLink("kenyaemr", "images/logos/favicon.png")
+	config.pageTitle = ""
+
 	config.angularApp = "kenyaemr"
 	
 	ui.decorateWith("kenyaui", "standardPage", config)
