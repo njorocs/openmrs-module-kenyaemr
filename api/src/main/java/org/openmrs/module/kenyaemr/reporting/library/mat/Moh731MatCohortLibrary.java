@@ -392,14 +392,20 @@ public class Moh731MatCohortLibrary {
 	}
 
 	public CohortDefinition matClientsLTFU() {
-		String sqlQuery = "select drug.patient_id from kenyaemr_etl.etl_drug_order drug  \n" +
-				"where drug.voided = 0  \n" +
-				"AND (drug.drug_name like '%Buprenorphine%'  \n" +
-				"or drug.drug_name like '%Methadone%') \n" +
-				"group by drug.patient_id \n" +
-				"HAVING  \n" +
-				"    MAX(drug.visit_date) < DATE((:startDate)) \n" +
-				"    AND MAX(drug.visit_date) < (DATE((:endDate)) - INTERVAL 30 DAY); \n" ;
+		String sqlQuery = "SELECT t.patient_id FROM kenyaemr_etl.etl_mat_intial_registrations t \n" +
+				"INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = t.patient_id \n" +
+				"INNER JOIN ( \n" +
+				"    SELECT  \n" +
+				"        patient_id, \n" +
+				"        MAX(date_handed_over) AS last_dispense_date \n" +
+				"    FROM openmrs.medication_dispense \n" +
+				"    WHERE drug_id IN (6333,5149,5148) \n" +
+				"    GROUP BY patient_id \n" +
+				") md  \n" +
+				"	ON t.patient_id = md.patient_id \n" +
+				"WHERE t.voided = 0 \n" +
+				"AND DATE(md.last_dispense_date) < DATE_SUB(DATE(:endDate), INTERVAL 30 DAY) \n" +
+				"GROUP BY t.patient_id;" ;
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matClientsLTFU");
 		cd.setQuery(sqlQuery);
@@ -413,9 +419,8 @@ public class Moh731MatCohortLibrary {
 		CompositionCohortDefinition cd = new CompositionCohortDefinition();
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		cd.addSearch("active", ReportUtils.map(activeOnMAT(), "startDate=${startDate},endDate=${endDate}"));
 		cd.addSearch("matClientsLTFU", ReportUtils.map(matClientsLTFU(), "startDate=${startDate},endDate=${endDate}"));
-		cd.setCompositionString("active AND matClientsLTFU");
+		cd.setCompositionString("matClientsLTFU");
 		return cd;
 	}
 
