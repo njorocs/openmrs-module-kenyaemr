@@ -328,6 +328,9 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PROVIDER_TELEPHONE = "37daed7f-1f4e-4e62-8e83-6048ade18a87";
 		public static final String PROVIDER_PASSPORT_NUMBER = "5b4b88e8-9db3-41e6-a175-5e39f2c8a9a5";
 		public static final String PROVIDER_UNIQUE_IDENTIFIER = "dace9d99-9f29-4653-9eae-c05929f34a32";
+		public static final String PROVIDER_SPECIALTY = "7f5d8e2c-3a1b-4d6e-9c0f-2b4a1d5e8c91";
+		public static final String PROVIDER_CADRE = "8a6e9f3d-4b2c-5e7f-ad10-3c5b2e6f9da2";
+		public static final String PROVIDER_PRACTICE_TYPE = "9b7faa4e-5c3d-6f80-be21-4d6c3f70aeb3";
 
 	}
 
@@ -834,28 +837,75 @@ public class CommonMetadata extends AbstractMetadataBundle {
         String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
 
 		// Provider attribute types.
-		install(providerAttributeType("Primary Facility", "Default facility for a provider", LocationDatatype.class, "",
-				0, 1, _ProviderAttributeType.PRIMARY_FACILITY));
-		install(providerAttributeType("Practising License Number", "Provider Practising License Number",
+		install(providerAttributeType(
+				"Primary Facility",
+				"The default health facility where this provider practises.",
+				LocationDatatype.class, "", 0, 1, _ProviderAttributeType.PRIMARY_FACILITY));
+
+		install(providerAttributeType(
+				"Practising License Number",
+				"Provider's current practising license number (e.g. KMPDC GP/2026/638333). Pulled from the regulator's professional registry.",
 				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_NUMBER));
-		install(providerAttributeType("License Expiry Date", "Provider Practising License Expiry Date",
+
+		install(providerAttributeType(
+				"License Expiry Date",
+				"End date of the provider's current practising license. Sourced from the regulator's professional registry.",
 				DateDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_EXPIRY_DATE));
-		install(providerAttributeType("Provider National Id Number", "Provider National Id Number",
+
+		install(providerAttributeType(
+				"License Body",
+				"Regulatory body that licenses this provider (e.g. KMPDC, NCK, PPB, COC).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_BODY));
+
+		install(providerAttributeType(
+				"Provider National ID Number",
+				"Kenyan national identification number of the provider.",
 				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.NATIONAL_ID));
-		install(providerAttributeType("License Body", "", FreeTextDatatype.class, "", 0, 1,
-				_ProviderAttributeType.LICENSE_BODY));
-		install(providerAttributeType("Provider HIE FHIR Reference", "", FreeTextDatatype.class, "", 0, 1,
-				_ProviderAttributeType.PROVIDER_HIE_FHIR_REFERENCE));
-		install(providerAttributeType("Provider Qualification", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_QUALIFICATION));
-		install(providerAttributeType("Provider Address", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_ADDRESS));
-		install(providerAttributeType("Provider Telephone", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_TELEPHONE));
-		install(providerAttributeType("Provider passport number", "Provider passport number", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_PASSPORT_NUMBER));
-		install(providerAttributeType("Provider unique identifier", "Provider unique identifier", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_UNIQUE_IDENTIFIER));
+
+		install(providerAttributeType(
+				"Provider HIE FHIR Reference",
+				"FHIR resource reference linking this provider to their record in the Kenya Health Information Exchange (HIE).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_HIE_FHIR_REFERENCE));
+
+		install(providerAttributeType(
+				"Provider Qualification",
+				"Provider's highest educational qualification and awarding institution (e.g. MBChB(UON)2009). Sourced from the professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_QUALIFICATION));
+
+		install(providerAttributeType(
+				"Provider Address",
+				"Postal address of the provider as recorded in the professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_ADDRESS));
+
+		install(providerAttributeType(
+				"Provider Telephone",
+				"Primary contact telephone number for the provider.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_TELEPHONE));
+
+		install(providerAttributeType(
+				"Provider Passport Number",
+				"Passport number for providers who use a passport as their primary identification.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_PASSPORT_NUMBER));
+
+		install(providerAttributeType(
+				"Provider Unique Identifier",
+				"Cross-regulator provider identifier from the Kenya professional registry (e.g. PUID-0002011-6). Stable across license periods.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_UNIQUE_IDENTIFIER));
+
+		install(providerAttributeType(
+				"Provider Specialty",
+				"Provider's clinical specialty (e.g. MEDICAL DOCTOR, CARDIOLOGY, PAEDIATRICS). Sourced from the regulator's professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_SPECIALTY));
+
+		install(providerAttributeType(
+				"Provider Cadre",
+				"Broad professional cadre (e.g. MEDICINE, NURSING, PHARMACY, CLINICAL OFFICER). Sourced from the regulator's professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_CADRE));
+
+		install(providerAttributeType(
+				"Provider Practice Type",
+				"Whether the provider engages in clinical or non-clinical practice (e.g. Clinical Practice, Non-Clinical Practice, Academic, Research).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_PRACTICE_TYPE));
 		boolean installRelationshipTypes = shouldInstallRelationshipTypes();
 		if (installRelationshipTypes) {
 
