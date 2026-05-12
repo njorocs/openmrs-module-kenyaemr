@@ -1151,12 +1151,12 @@ public class PublicHealthActionCohortLibrary {
      * @return
      */
     public CohortDefinition pregnantPostPartumNotLinkedToPrepCs() {
-        String sqlQuery = "SELECT a.patient_id\n" +
+        String sqlQuery = "SELECT a.patient_id AS high_risk_not_on_PrEP\n" +
                 "FROM (SELECT s.patient_id\n" +
                 "      FROM kenyaemr_etl.etl_hts_eligibility_screening s\n" +
                 "               INNER JOIN (SELECT t.patient_id, t.final_test_result, t.visit_date\n" +
                 "                           FROM kenyaemr_etl.etl_hts_test t\n" +
-                "                           WHERE t.visit_date BETWEEN :startDate AND date(:endDate)\n" +
+                "                           WHERE t.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "                             AND t.final_test_result = 'Negative') t\n" +
                 "                          ON t.patient_id = s.patient_id\n" +
                 "                              AND s.visit_date <= t.visit_date\n" +
@@ -1164,7 +1164,7 @@ public class PublicHealthActionCohortLibrary {
                 "                          ON d.patient_id = s.patient_id\n" +
                 "      WHERE s.hts_risk_category IN ('High', 'Very high')\n" +
                 "        AND (s.pregnant = 'YES' OR s.breastfeeding_mother = 'YES')\n" +
-                "        AND s.visit_date BETWEEN :startDate AND date(:endDate)\n" +
+                "        AND s.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "        AND d.Gender = 'F'\n" +
                 "        AND TIMESTAMPDIFF(DAY,\n" +
                 "                          LEAST(s.visit_date, t.visit_date),\n" +
