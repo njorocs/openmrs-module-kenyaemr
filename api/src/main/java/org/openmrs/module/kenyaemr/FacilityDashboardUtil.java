@@ -68,7 +68,7 @@ public class FacilityDashboardUtil {
 				"                inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = l.patient_id\n" +
 				"       WHERE l.lab_test = 1030\n" +
 				"         AND l.test_result = 703\n" +
-				"         AND l.date_test_requested BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "'))) a\n" +
+				"         AND l.date_test_result_received BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL 30 DAY) AND date('" + endDate + "'))) a\n" +
 				"         LEFT JOIN\n" +
 				"     (SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
 				"      FROM kenyaemr_etl.etl_hts_referral_and_linkage l\n" +
@@ -132,7 +132,7 @@ public class FacilityDashboardUtil {
 				"                   FROM kenyaemr_etl.etl_laboratory_extract l\n" +
 				"                            inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = l.patient_id\n" +
 				"                   WHERE l.lab_test = 1030 AND l.test_result = 703\n" +
-				"                     AND l.date_test_requested BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL \n"
+				"                     AND l.date_test_result_received BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL \n"
 				+ days + " DAY) AND date('" + endDate + "'))) a;";
 
 		try {
@@ -753,7 +753,7 @@ public class FacilityDashboardUtil {
 				"                inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = l.patient_id\n" +
 				"        WHERE l.lab_test = 1030\n" +
 				"         AND l.test_result = 703\n" +
-				"         AND l.date_test_requested BETWEEN DATE_SUB(date('" + endDate +"'), INTERVAL 30 DAY) AND date('" + endDate +"'))) a\n" +
+				"         AND l.date_test_result_received BETWEEN DATE_SUB(date('" + endDate +"'), INTERVAL 30 DAY) AND date('" + endDate +"'))) a\n" +
 				"         LEFT JOIN\n" +
 				"     (SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
 				"      FROM kenyaemr_etl.etl_hts_referral_and_linkage l\n" +

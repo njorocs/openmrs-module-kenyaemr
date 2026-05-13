@@ -110,7 +110,7 @@ public class PublicHealthActionCohortLibrary {
                 "                   FROM kenyaemr_etl.etl_laboratory_extract l\n" +
                 "                            inner join kenyaemr_etl.etl_patient_demographics a on a.patient_id = l.patient_id\n" +
                 "                   WHERE l.lab_test = 1030 AND l.test_result = 703\n" +
-                "                     AND l.date_test_requested BETWEEN DATE(:startDate) and DATE(:endDate))\n" +
+                "                     AND l.date_test_result_received BETWEEN DATE(:startDate) and DATE(:endDate))\n" +
                 "           ) a\n" +
                 "              LEFT JOIN\n" +
                 "            (SELECT l.patient_id, l.ccc_number,l.art_start_date\n" +
