@@ -162,6 +162,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ATP_TRANSITION_READINESS = "2f184ba2-7582-411f-95d0-9cba4023dd46";
 		public static final String ATP_DISCLOSURE_TRACKING = "109fd691-d78d-4a0e-ac15-b31954bf9a0a";
 		public static final String TRANSFUSION_SERVICES = "e506db7f-0b95-48ad-bd50-88fb2fad3fe5";
+		public static final String THERAPEUTIC_PLAY = "0623ef8d-4374-41c3-a425-90add8fcc568";
 	}
 
 	public static final class _Form {
@@ -251,6 +252,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ATP_DISCLOSURE_TRACKING_FORM = "40b6b389-5b4e-47b1-aa15-88ee24b56f6a";
 		public static final String PREOPERATIVE_QUESTIONNAIRE_FORM = "77a06fb9-0035-474e-8b2b-c247ac75d2e7";
 		public static final String BLOOD_TRANSFUSION_FORM = "ed5ec662-5326-4873-b60c-43d22ad5fb5f";
+		public static final String THERAPEUTIC_PLAY_FORM = "8424097e-2d07-4ce7-b231-617bf4c7c6a6";
 	}
 
 	public static final class _OrderType {
@@ -447,6 +449,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ATP Transition Readiness Assessment", "ATP Transition Readiness Assessment", _EncounterType.ATP_TRANSITION_READINESS));
 		install(encounterType("ATP Disclosure Tracking", "ATP Disclosure Tracking", _EncounterType.ATP_DISCLOSURE_TRACKING));
 		install(encounterType("Transfusion Services", "Blood Transfusion Services", _EncounterType.TRANSFUSION_SERVICES));
+		install(encounterType("Therapeutic Play", "Therapeutic Play encounter type ", _EncounterType.THERAPEUTIC_PLAY));
 
 
 
@@ -562,6 +565,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("ATP Disclosure Tracking Form", "ATP Disclosure Tracking Form", _EncounterType.ATP_DISCLOSURE_TRACKING, "1", _Form.ATP_DISCLOSURE_TRACKING_FORM));
 			install(form("PreOperative Questionnare For Anaesthesia Form", "A form used to capture PreOperative Questionnare For Anaesthesia", _EncounterType.SOPC, "1", _Form.PREOPERATIVE_QUESTIONNAIRE_FORM));
 			install(form("Blood Transfusion Services Form", "A form collecting blood transfusion details", _EncounterType.TRANSFUSION_SERVICES, "1", _Form.BLOOD_TRANSFUSION_FORM));
+			install(form("Therapeutic Play Form", "Form for recording Therapeutic Play ", _EncounterType.THERAPEUTIC_PLAY, "1.0", _Form.THERAPEUTIC_PLAY_FORM));
 
 
 		} else {
