@@ -34,6 +34,7 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
+import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
@@ -53,128 +54,134 @@ public class ReportPageController {
 	private AdministrationService admService;
 
 	public void get(@RequestParam("reportUuid") String reportUuid,
-					@RequestParam(required = false, value = "startDate") Date startDate,
-					@RequestParam("returnUrl") String returnUrl,
-					PageRequest pageRequest,
-					PageModel model,
-					UiUtils ui,
-					@SpringBean ReportManager reportManager,
-					@SpringBean KenyaUiUtils kenyaUi,
-					@SpringBean ReportService reportService,
-					@SpringBean ReportDefinitionService definitionService) throws Exception {
+			@RequestParam(required = false, value = "startDate") Date startDate,
+			@RequestParam("returnUrl") String returnUrl,
+			PageRequest pageRequest,
+			PageModel model,
+			UiUtils ui,
+			@SpringBean ReportManager reportManager,
+			@SpringBean KenyaUiUtils kenyaUi,
+			@SpringBean ReportService reportService,
+			@SpringBean ReportDefinitionService definitionService) throws Exception {
 
-		ReportDescriptor report = reportManager.getReportDescriptorByUuid(reportUuid);
-		if (report == null) {
-			throw new IllegalArgumentException(
-					"No report descriptor registered for UUID: " + reportUuid +
-							". Ensure the report is configured in a ReportConfiguration bean " +
-							"and the module loaded without errors.");
-		}
-
-	
-		ReportDefinition definition = definitionService.getDefinitionByUuid(reportUuid);
-		if (definition == null) {
-			definition = reportManager.buildReportDefinition(report);
-		}
-
-		if (definition == null) {
-			throw new IllegalStateException(
-					"Could not load or build a report definition for: " + report.getName() +
-							" (UUID: " + reportUuid + "). No builder is registered for this report.");
-		}
-
-		admService = Context.getAdministrationService();
-		CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
-		User loggedInUser = Context.getUserContext().getAuthenticatedUser();
-		Set<Role> userRoles = loggedInUser.getAllRoles();
-		boolean isSuperUser = loggedInUser.isSuperUser();
-
-		boolean isIndicator = false;
-		if (report instanceof IndicatorReportDescriptor || report instanceof HybridReportDescriptor)
-			isIndicator = true;
-
-		boolean excelRenderable = false;
-		if (report instanceof IndicatorReportDescriptor && isIndicator && ((IndicatorReportDescriptor) report).getTemplate() != null) {
-			excelRenderable = true;
-		} else if (report instanceof HybridReportDescriptor && isIndicator && ((HybridReportDescriptor) report).getTemplate() != null) {
-			excelRenderable = true;
-		}
-
-		ConfigurableAdxGenerationStrategy adxStrategy = new ConfigurableAdxGenerationStrategy();
-		org.openmrs.module.reporting.config.ReportDescriptor reportDescriptor =
-				new org.openmrs.module.reporting.config.ReportDescriptor();
-		reportDescriptor.setName(definition.getName());
-
-		boolean adxConfigured = adxStrategy.canHandle(reportDescriptor);
-		String outputFormat = "adx";
-		String formatLabel = "Other Format";
-		if (adxConfigured) {
-			AdxConfiguration config = adxStrategy.getConfigurationForReport(definition.getName());
-			if (config != null && "json".equalsIgnoreCase(config.getOutputFormat())) {
-				outputFormat = "json";
-				formatLabel = "JSON";
-			}
-		}
-
-
-		model.addAttribute("report", report);
-		model.addAttribute("definition", definition);
-		model.addAttribute("isIndicator", isIndicator);
-		model.addAttribute("adxConfigured", adxConfigured);
-		model.addAttribute("excelRenderable", excelRenderable);
-		model.addAttribute("outputFormat", outputFormat);
-		model.addAttribute("formatLabel", formatLabel);
-		model.addAttribute("returnUrl", returnUrl);
-		model.addAttribute("period", definition.getName().replaceAll("[^0-9]", ""));
-
-		if (isIndicator) {
-			Map<String, String> startDateOptions = new LinkedHashMap<String, String>();
-			SimpleDateFormat pretty = new SimpleDateFormat("MMMM yyyy");
-			Date d = DateUtil.getStartOfMonth(new Date());
-			for (int i = 0; i < 6; ++i) {
-				d = DateUtil.getStartOfMonth(d, -1);
-				startDateOptions.put(kenyaUi.formatDateParam(d), pretty.format(d));
+		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
+		try {
+			ReportDescriptor report = reportManager.getReportDescriptorByUuid(reportUuid);
+			if (report == null) {
+				throw new IllegalArgumentException(
+						"No report descriptor registered for UUID: " + reportUuid +
+								". Ensure the report is configured in a ReportConfiguration bean " +
+								"and the module loaded without errors.");
 			}
 
-			model.addAttribute("startDateOptions", startDateOptions);
-			model.addAttribute("startDateSelected", startDate != null ? kenyaUi.formatDateParam(startDate) : null);
-			model.addAttribute("startDate", startDate);
-		}
-
-		SimpleDateFormat datePeriodForAll = new SimpleDateFormat("MMM-yyyy");
-		String date = "";
-		if(startDate != null) {
-			date ="_"+ datePeriodForAll.format(startDate);
-		}
-		model.addAttribute("date", date);
-
-		model.addAttribute("requests", getRequests(definition, ui, reportService));
-
-		// Showing list of subcounties
-		List<String> subCountyList = new ArrayList<String>();
-
-		String userRole = null;
-		for (Role role : userRoles) {
-			if(role.getName().equalsIgnoreCase(SecurityMetadata._Role.SYSTEM_ADMIN)) {
-				userRole ="System Administrator";
-				break;
+			ReportDefinition definition = definitionService.getDefinitionByUuid(reportUuid);
+			if (definition == null) {
+				definition = reportManager.buildReportDefinition(report);
 			}
-		}
-		if (isSuperUser || userRole != null) {
-			subCountyList = EmrUtils.getSubCountyList();
-		     }
-		model.addAttribute("subCountyList", subCountyList.size() > 0 ? subCountyList : Collections.emptyList());
-		}
 
-		/**
-		 * Gets the existing requests for the given report
-		 * @param definition the report definition
-		 * @param ui the UI utils
-		 * @param reportService the report service
-		 * @return the simplified requests
-		 */
-		public SimpleObject[] getRequests(ReportDefinition definition, UiUtils ui, ReportService reportService) {
-			List<ReportRequest> requests = reportService.getReportRequests(definition, null, null, null);
-			return ui.simplifyCollection(requests);
+			if (definition == null) {
+				throw new IllegalStateException(
+						"Could not load or build a report definition for: " + report.getName() +
+								" (UUID: " + reportUuid + "). No builder is registered for this report.");
+			}
+
+			admService = Context.getAdministrationService();
+			CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
+			User loggedInUser = Context.getUserContext().getAuthenticatedUser();
+			Set<Role> userRoles = loggedInUser.getAllRoles();
+			boolean isSuperUser = loggedInUser.isSuperUser();
+
+			boolean isIndicator = false;
+			if (report instanceof IndicatorReportDescriptor || report instanceof HybridReportDescriptor)
+				isIndicator = true;
+
+			boolean excelRenderable = false;
+			if (report instanceof IndicatorReportDescriptor && isIndicator
+					&& ((IndicatorReportDescriptor) report).getTemplate() != null) {
+				excelRenderable = true;
+			} else if (report instanceof HybridReportDescriptor && isIndicator
+					&& ((HybridReportDescriptor) report).getTemplate() != null) {
+				excelRenderable = true;
+			}
+
+			ConfigurableAdxGenerationStrategy adxStrategy = new ConfigurableAdxGenerationStrategy();
+			org.openmrs.module.reporting.config.ReportDescriptor reportDescriptor = new org.openmrs.module.reporting.config.ReportDescriptor();
+			reportDescriptor.setName(definition.getName());
+
+			boolean adxConfigured = adxStrategy.canHandle(reportDescriptor);
+			String outputFormat = "adx";
+			String formatLabel = "Other Format";
+			if (adxConfigured) {
+				AdxConfiguration config = adxStrategy.getConfigurationForReport(definition.getName());
+				if (config != null && "json".equalsIgnoreCase(config.getOutputFormat())) {
+					outputFormat = "json";
+					formatLabel = "JSON";
+				}
+			}
+
+			model.addAttribute("report", report);
+			model.addAttribute("definition", definition);
+			model.addAttribute("isIndicator", isIndicator);
+			model.addAttribute("adxConfigured", adxConfigured);
+			model.addAttribute("excelRenderable", excelRenderable);
+			model.addAttribute("outputFormat", outputFormat);
+			model.addAttribute("formatLabel", formatLabel);
+			model.addAttribute("returnUrl", returnUrl);
+			model.addAttribute("period", definition.getName().replaceAll("[^0-9]", ""));
+
+			if (isIndicator) {
+				Map<String, String> startDateOptions = new LinkedHashMap<String, String>();
+				SimpleDateFormat pretty = new SimpleDateFormat("MMMM yyyy");
+				Date d = DateUtil.getStartOfMonth(new Date());
+				for (int i = 0; i < 6; ++i) {
+					d = DateUtil.getStartOfMonth(d, -1);
+					startDateOptions.put(kenyaUi.formatDateParam(d), pretty.format(d));
+				}
+
+				model.addAttribute("startDateOptions", startDateOptions);
+				model.addAttribute("startDateSelected", startDate != null ? kenyaUi.formatDateParam(startDate) : null);
+				model.addAttribute("startDate", startDate);
+			}
+
+			SimpleDateFormat datePeriodForAll = new SimpleDateFormat("MMM-yyyy");
+			String date = "";
+			if (startDate != null) {
+				date = "_" + datePeriodForAll.format(startDate);
+			}
+			model.addAttribute("date", date);
+
+			model.addAttribute("requests", getRequests(definition, ui, reportService));
+
+			List<String> subCountyList = new ArrayList<String>();
+			String userRole = null;
+			for (Role role : userRoles) {
+				if (role.getName().equalsIgnoreCase(SecurityMetadata._Role.SYSTEM_ADMIN)) {
+					userRole = "System Administrator";
+					break;
+				}
+			}
+			if (isSuperUser || userRole != null) {
+				subCountyList = EmrUtils.getSubCountyList();
+			}
+			model.addAttribute("subCountyList", subCountyList.size() > 0 ? subCountyList : Collections.emptyList());
+
+		} finally {
+
+			Thread.currentThread().setContextClassLoader(originalClassLoader);
 		}
 	}
+
+	/**
+	 * Gets the existing requests for the given report
+	 * 
+	 * @param definition    the report definition
+	 * @param ui            the UI utils
+	 * @param reportService the report service
+	 * @return the simplified requests
+	 */
+	public SimpleObject[] getRequests(ReportDefinition definition, UiUtils ui, ReportService reportService) {
+		List<ReportRequest> requests = reportService.getReportRequests(definition, null, null, null);
+		return ui.simplifyCollection(requests);
+	}
+}
