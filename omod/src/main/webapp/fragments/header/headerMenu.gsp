@@ -4,10 +4,10 @@
 
 	if (context.authenticatedUser) {
 
-		appMenuItems << """<a href="/${ contextPath }/kenyaemr/userHome.page?${ config.context ? config.context : "" }"><img src="${ ui.resourceLink("kenyaui", "images/toolbar/home.png") }" width="12" height="12" />&nbsp;&nbsp;Home</a>"""
+		appMenuItems << """<a href="/${contextPath}/spa/home"><img src="${ ui.resourceLink("kenyaui", "images/toolbar/home.png") }" width="12" height="12" />&nbsp;&nbsp;Home</a>"""
 
 		if (currentApp) {
-			appMenuItems << """<a href="/${ contextPath }/${ currentApp.url }">${ currentApp.label }</a>"""
+			appMenuItems << """<a href="/openmrs/">${ currentApp.label }</a>"""
 		}
 
 		userMenuItems << """<span>Logged in as <i>${ context.authenticatedUser.personName }</i></span>"""
