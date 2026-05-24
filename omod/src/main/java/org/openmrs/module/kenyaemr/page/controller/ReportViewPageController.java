@@ -22,6 +22,7 @@ import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.framework.page.PageRequest;
+import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -29,26 +30,31 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @SharedPage
 public class ReportViewPageController {
-	
+
 	public void get(@RequestParam("request") ReportRequest reportRequest,
-					@RequestParam("returnUrl") String returnUrl,
-					PageRequest pageRequest,
-					PageModel model,
-					@SpringBean ReportManager reportManager,
-					@SpringBean KenyaUiUtils kenyaUi,
-					@SpringBean ReportService reportService) throws Exception {
+			@RequestParam("returnUrl") String returnUrl,
+			PageRequest pageRequest,
+			PageModel model,
+			@SpringBean ReportManager reportManager,
+			@SpringBean KenyaUiUtils kenyaUi,
+			@SpringBean ReportService reportService) throws Exception {
 
-		ReportDefinition definition = reportRequest.getReportDefinition().getParameterizable();
-		ReportDescriptor report = reportManager.getReportDescriptor(definition);
+		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
+		try {
+			ReportDefinition definition = reportRequest.getReportDefinition().getParameterizable();
+			ReportDescriptor report = reportManager.getReportDescriptor(definition);
+			CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
+			ReportData reportData = reportService.loadReportData(reportRequest);
 
-		CoreUtils.checkAccess(report, kenyaUi.getCurrentApp(pageRequest));
+			model.addAttribute("reportRequest", reportRequest);
+			model.addAttribute("definition", definition);
+			model.addAttribute("isIndicator", report instanceof IndicatorReportDescriptor);
+			model.addAttribute("reportData", reportData);
+			model.addAttribute("returnUrl", returnUrl);
 
-		ReportData reportData = reportService.loadReportData(reportRequest);
-
-		model.addAttribute("reportRequest", reportRequest);
-		model.addAttribute("definition", definition);
-		model.addAttribute("isIndicator", report instanceof IndicatorReportDescriptor);
-		model.addAttribute("reportData", reportData);
-		model.addAttribute("returnUrl", returnUrl);
+		} finally {
+			Thread.currentThread().setContextClassLoader(originalClassLoader);
+		}
 	}
 }

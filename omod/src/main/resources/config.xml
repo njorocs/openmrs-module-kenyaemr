@@ -594,6 +594,22 @@
 		   Endpoint URL to send proof of delivery (POD) notification to NLIMS when an order is received in KenyaEMR.
 		</description>
 	</globalProperty>
+	<filter>
+		<filter-name>genericEmrFilter</filter-name>
+		<filter-class>org.openmrs.module.kenyaemr.web.filter.GenericUrlFilter</filter-class>
+	</filter>
+
+	<!-- Handles /emr/*  forward to /kenyaemr/* -->
+	<filter-mapping>
+		<filter-name>genericEmrFilter</filter-name>
+		<url-pattern>/emr/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Handles /kenyaemr/* redirect to /emr/* -->
+	<filter-mapping>
+		<filter-name>genericEmrFilter</filter-name>
+		<url-pattern>/kenyaemr/*</url-pattern>
+	</filter-mapping>
 
 </module>
         
