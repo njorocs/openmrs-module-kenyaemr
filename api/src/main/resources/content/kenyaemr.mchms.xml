@@ -459,7 +459,7 @@
 				<ref bean="kenyaemr.app.reports" />
 			</set></property>
 		<property name="template" value="kenyaemr:pmtct/PNC_Register_Template.xls" />
-		<property name="repeatingSection" value="sheet:1,row:12,dataset:pncRegister" />
+		<property name="repeatingSection" value="sheet:1,row:16,dataset:pncRegister" />
 	</bean>
 	<!-- Currently enrolled on MCH -->
 	<bean id="kenyaemr.mchms.report.currentlyEnrolledInMCH" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
