@@ -25,6 +25,7 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.Obs;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
@@ -33,6 +34,7 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
@@ -52,6 +54,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +72,7 @@ public class EmrUtils {
 
 	/**
 	 * Checks whether a date has any time value
-	 * 
+	 *
 	 * @param date the date
 	 * @return true if the date has time
 	 * @should return true only if date has time
@@ -83,7 +86,7 @@ public class EmrUtils {
 
 	/**
 	 * Checks if a given date is today
-	 * 
+	 *
 	 * @param date the date
 	 * @return true if date is today
 	 */
@@ -93,7 +96,7 @@ public class EmrUtils {
 
 	/**
 	 * Converts a WHO stage concept to a WHO stage number
-	 * 
+	 *
 	 * @param c the WHO stage concept
 	 * @return the WHO stage number (null if the concept isn't a WHO stage)
 	 */
@@ -121,7 +124,7 @@ public class EmrUtils {
 
 	/**
 	 * Parses a CSV list of strings, returning all trimmed non-empty values
-	 * 
+	 *
 	 * @param csv the CSV string
 	 * @return the concepts
 	 */
@@ -140,7 +143,7 @@ public class EmrUtils {
 
 	/**
 	 * Parses a CSV list of concept ids, UUIDs or mappings
-	 * 
+	 *
 	 * @param csv the CSV string
 	 * @return the concepts
 	 */
@@ -160,7 +163,7 @@ public class EmrUtils {
 
 	/**
 	 * Unlike in OpenMRS core, a user can only be one provider in KenyaEMR
-	 * 
+	 *
 	 * @param user the user
 	 * @return the provider or null
 	 */
@@ -300,7 +303,7 @@ public class EmrUtils {
 
 	/**
 	 * a helper method that checks if an encounter has obs for a concept
-	 * 
+	 *
 	 * @param enc
 	 * @param question
 	 * @return
@@ -319,11 +322,9 @@ public class EmrUtils {
 	public static List<String> getSubCountyList() {
 		List<String> subCountyList = new ArrayList<String>();
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-
-		String etlDb = EmrDatabaseUtil.getEtlDatabaseName();
 		StringBuilder q = new StringBuilder();
 		q.append("Select distinct implementation_subcounty ");
-		q.append("from ").append(etlDb).append(".etl_contact;");
+		q.append("from kenyaemr_etl.etl_contact;");
 
 		List<List<Object>> subCounties = Context.getAdministrationService().executeSQL(q.toString(), true);
 		if (!subCounties.isEmpty()) {
@@ -335,7 +336,6 @@ public class EmrUtils {
 		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		return subCountyList;
 	}
-
 
 	public static List<Person> getPersonChildren(Patient patient) {
 		List<Person> people = new ArrayList<Person>();
@@ -350,7 +350,7 @@ public class EmrUtils {
 	/**
 	 * A temporary solution for whitelisting forms to show in 2.x
 	 * TODO: retire this once all forms are fully moved to o3
-	 * 
+	 *
 	 * @return
 	 */
 	public static List<String> getFormsToShowInLegacyUI() {
@@ -396,7 +396,7 @@ public class EmrUtils {
 	/**
 	 * Helper method that receives a List of Strings and returns a String
 	 * of comma-separated and single-quoted input list elements
-	 * 
+	 *
 	 * @param list
 	 * @return
 	 */
@@ -410,7 +410,7 @@ public class EmrUtils {
 
 	/**
 	 * Helper method for getting mfl code for a facility
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getMFLCode() {
@@ -468,7 +468,7 @@ public class EmrUtils {
 
 	/**
 	 * Safely resolve default location ID from global property
-	 * 
+	 *
 	 * @return Integer location id or null if missing/invalid
 	 */
 	public static Integer getDefaultLocationId() {
@@ -486,5 +486,42 @@ public class EmrUtils {
 			return null;
 		}
 	}
+	public static <T extends OpenmrsObject> T safeGetMetadata(Class<T> type, String uuid) {
+		try {
+			return MetadataUtils.existing(type, uuid);
+		} catch (Exception e) {
+			log.warn("Metadata not found for type: " + type.getSimpleName() + ", UUID: " + uuid + ". Error: " + e.getMessage());
+			return null;
+		}
+	}
 
+	/**
+	 * Returns the most resent encounter, given a collection of encounters
+	 * @param encounters
+	 * @return
+	 */
+	public static Encounter latestEncounter(List<Encounter> encounters) {
+		if (encounters == null || encounters.isEmpty()) return null;
+		return encounters.stream()
+				.max(Comparator.comparing(Encounter::getEncounterDatetime))
+				.orElse(null);
+	}
+
+	/**
+	 * Checks whether a patient has an existing order given a list of order concepts
+	 * @param patient
+	 * @param orderService
+	 * @param orderConcepts
+	 * @return
+	 */
+	public static boolean hasExistingVlOrder(Patient patient, OrderService orderService, List<Concept> orderConcepts) {
+		CareSetting careSetting = orderService.getCareSetting(1);
+		List<Order> orders = orderService.getOrders(patient, careSetting, null, true);
+		for (Order order : orders) {
+			if (orderConcepts.contains(order.getConcept())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
