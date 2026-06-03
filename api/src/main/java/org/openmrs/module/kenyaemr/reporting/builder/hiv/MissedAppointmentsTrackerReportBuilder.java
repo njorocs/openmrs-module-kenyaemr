@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.builder.hiv;
 
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.logic.op.Last;
 import org.openmrs.module.kenyacore.report.HybridReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportUtils;
@@ -24,7 +25,21 @@ import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculati
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MissedAppointmentsDuringPeriodCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentTypeNotHonouredDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCaseManagerDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.*;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreCategoryDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.LastRtcRiskScoreEvaluationDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentDaysMissedDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentEffectiveDiscontinuationDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentInterruptionDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentLastDateBookedDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentLastTracingCommentsDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentLastTracingDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentLastTracingOutcomeDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentRTCDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentTracingAttemptsDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentTracingFinalOutcomeDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentTracingMethodsDataDefinition;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.common.SortCriteria;
@@ -38,7 +53,12 @@ import org.openmrs.module.reporting.data.encounter.definition.EncounterProviderD
 import org.openmrs.module.reporting.data.patient.definition.ConvertedPatientDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
-import org.openmrs.module.reporting.data.person.definition.*;
+import org.openmrs.module.reporting.data.person.definition.AgeDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.BirthdateDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.ConvertedPersonDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PersonAttributeDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PreferredNameDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.EncounterDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
@@ -154,6 +174,18 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		discontinuationDate.addParameter(new Parameter("endDate", "End Date", Date.class));
 		discontinuationDate.addParameter(new Parameter("startDate", "Start Date", Date.class));
 
+		LastRtcRiskScoreDataDefinition rtcRiskScoreDataDefinition = new LastRtcRiskScoreDataDefinition();
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
+		LastRtcRiskScoreCategoryDataDefinition rtcRiskScoreCategoryDataDefinition = new LastRtcRiskScoreCategoryDataDefinition();
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreCategoryDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
+		LastRtcRiskScoreEvaluationDateDataDefinition rtcRiskScoreEvaluationDateDataDefinition = new LastRtcRiskScoreEvaluationDateDataDefinition();
+		rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		rtcRiskScoreEvaluationDateDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+
 		dsd.addColumn("Name", nameDef, "");
 		dsd.addColumn("id", new PatientIdDataDefinition(), "");
 		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), "", new BirthdateConverter(DATE_FORMAT));
@@ -177,6 +209,9 @@ public class MissedAppointmentsTrackerReportBuilder extends AbstractHybridReport
 		dsd.addColumn("Effective Discontinuation Date", discontinuationDate, paramMapping, new DateConverter(DATE_FORMAT));
 		dsd.addColumn("RTC Date", rtcDate, paramMapping, new DateConverter(DATE_FORMAT)); // first visit after missed appointment
 		dsd.addColumn("Case Manager", etlCaseManagerDataDefinition, paramMapping, null);
+		dsd.addColumn("RTC Risk Score", rtcRiskScoreDataDefinition, paramMapping, null);
+		dsd.addColumn("RTC Risk Score Category", rtcRiskScoreCategoryDataDefinition, paramMapping, null);
+		dsd.addColumn("RTC Risk Score Category Evaluator", rtcRiskScoreEvaluationDateDataDefinition, paramMapping, null);
 
 		MissedAppointmentsDuringPeriodCohortDefinition cd = new MissedAppointmentsDuringPeriodCohortDefinition();
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
