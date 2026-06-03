@@ -9,28 +9,26 @@
  */
 package org.openmrs.module.kenyaemr.converter;
 
-import org.apache.commons.lang3.StringUtils;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.util.OpenmrsClassLoader;
+import org.openmrs.api.context.Context;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-/**
- * Convert from {@link String} to {@link org.openmrs.module.reporting.report.ReportRequest}
- */
 @Component
 public class StringToReportRequestConverter implements Converter<String, ReportRequest> {
 
-	/**
-	 * @see org.springframework.core.convert.converter.Converter#convert(Object)
-	 */
 	@Override
-	public ReportRequest convert(String source) {
-		if (StringUtils.isEmpty(source)) {
-			return null;
-		}
+	public ReportRequest convert(String id) {
 
-		return Context.getService(ReportService.class).getReportRequest(Integer.valueOf(source));
+		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
+		try {
+			ReportService reportService = Context.getService(ReportService.class);
+			return reportService.getReportRequest(Integer.valueOf(id));
+		} finally {
+			Thread.currentThread().setContextClassLoader(originalClassLoader);
+		}
 	}
 }

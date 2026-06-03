@@ -42,6 +42,9 @@ public class AdxConfiguration {
     @JsonProperty("metadata")
     private Map<String, String> metadata;
 
+    @JsonProperty("outputFormat")
+    private String outputFormat;
+
     public AdxConfiguration() {
         this.datasets = new ArrayList<>();
         this.metadata = new HashMap<>();
@@ -62,6 +65,9 @@ public class AdxConfiguration {
 
     public Map<String, String> getMetadata() { return metadata; }
     public void setMetadata(Map<String, String> metadata) { this.metadata = metadata; }
+
+    public String getOutputFormat() { return outputFormat; }
+    public void setOutputFormat(String outputFormat) { this.outputFormat = outputFormat; }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class AdxDatasetMapping {

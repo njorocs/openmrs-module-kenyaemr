@@ -21,13 +21,14 @@ import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.Metadata;
 import org.openmrs.module.kenyaemr.datatype.FormDatatype;
 import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
-import org.openmrs.module.kenyaemr.util.EmrDatabaseUtil;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
+
+
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
-
-
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallRelationshipTypes;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,10 +91,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 	public static final String GP_HEI_OPT_SOURCE = "kenyaemr.hie.registry.otp.source";
 	public static final String GP_LOGIN_OTP_REQUIREMENT = "kenyaemr.hie.login.otp";
 	public static final String GP_ENABLE_FORMS = MetadataUtils.GP_ENABLE_FORMS;
-	
-    public static final class _Program {
-        public static final String NUTRITION = Metadata.Program.NUTRITION;
-    }
+
+	public static final class _Program {
+		public static final String NUTRITION = Metadata.Program.NUTRITION;
+	}
 
 	public static final class _EncounterType {
 		public static final String CONSULTATION = "465a92f2-baf8-42e9-9612-53064be868e8";
@@ -148,10 +149,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String FLUID_INTAKE = "657bdb00-0eab-48a6-8da4-bb1644d5fd48";
 		public static final String ADR_ASSESSMENT_TOOL = "d18d6d8a-4be2-4115-ac7e-86cc0ec2b263";
 		public static final String INITIAL_NURSING_CARDEX = "3efe6966-a011-4d24-aa43-d3051bfbb8e3";
-        public static final String MCHMS_INPATIENT = "6877a5b4-441d-4dff-ada1-fcc2485c33e6";
-        public static final String MCHMS_POST_DELIVERY = "07dc609f-e607-43d6-9dc3-8bd405c4226a";
-        public static final String NUTRITION_ENROLLMENT = "cff2c1c2-b5ff-4b06-a0aa-6973007b89cb";
-        public static final String NUTRITION_DISCONTINUATION = "41cc14fa-6011-4939-8c2c-0d1c2554efc8";
+		public static final String MCHMS_INPATIENT = "6877a5b4-441d-4dff-ada1-fcc2485c33e6";
+		public static final String MCHMS_POST_DELIVERY = "07dc609f-e607-43d6-9dc3-8bd405c4226a";
+		public static final String NUTRITION_ENROLLMENT = "cff2c1c2-b5ff-4b06-a0aa-6973007b89cb";
+		public static final String NUTRITION_DISCONTINUATION = "41cc14fa-6011-4939-8c2c-0d1c2554efc8";
 		public static final String NURSING_CARE_PLAN = "b6569074-3b8c-43ba-bd4a-98c445405035";
 		public static final String AEFI_INVESTIGATION = "036a0ef4-8197-41ad-bfbf-802e79a14606";
 		public static final String IN_PATIENT_ADMISSION = "e22e39fd-7db2-45e7-80f1-60fa0d5a4378";
@@ -161,6 +162,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ATP_TRANSITION_READINESS = "2f184ba2-7582-411f-95d0-9cba4023dd46";
 		public static final String ATP_DISCLOSURE_TRACKING = "109fd691-d78d-4a0e-ac15-b31954bf9a0a";
 		public static final String TRANSFUSION_SERVICES = "e506db7f-0b95-48ad-bd50-88fb2fad3fe5";
+		public static final String THERAPEUTIC_PLAY = "0623ef8d-4374-41c3-a425-90add8fcc568";
 	}
 
 	public static final class _Form {
@@ -234,10 +236,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String INITIAL_NURSING_CARDEX_FORM = "cd65f1dd-0047-4449-9c38-0710a7214c52";
 		public static final String MORGUE_DISCHARGE_FORM = "bd483dc1-9cd2-4f0e-a761-31a89b5f8bd0";
 		public static final String MORGUE_ADMISSION_FORM = "b990437a8-8dbb-4ae1-a2b4-71df0041adfa";
-        public static final String MCHMS_INPATIENT_FORM = "57b8bb54-321f-4b94-bba5-58850527bfd6";
-        public static final String MCHMS_POST_DELIVERY_FORM = "43dacebf-2412-44b6-b55a-63aff5b02fcd";
-        public static final String NUTRITION_ENROLLMENT_FORM = "849e88cc-6a78-463a-a4d2-e4e8c2f795bc";
-        public static final String NUTRITION_DISCONTINUATION_FORM = "0648a046-f404-4246-806f-c9ee78232d6d";
+		public static final String MCHMS_INPATIENT_FORM = "57b8bb54-321f-4b94-bba5-58850527bfd6";
+		public static final String MCHMS_POST_DELIVERY_FORM = "43dacebf-2412-44b6-b55a-63aff5b02fcd";
+		public static final String NUTRITION_ENROLLMENT_FORM = "849e88cc-6a78-463a-a4d2-e4e8c2f795bc";
+		public static final String NUTRITION_DISCONTINUATION_FORM = "0648a046-f404-4246-806f-c9ee78232d6d";
 		public static final String NURSING_CARE_PLAN_FORM = "56b3ca43-2687-49d4-a03e-1b4329fe0f63";
 		public static final String AEFI_INVESTIGATION_FORM = "901e5166-0724-4a87-a8a0-60f44d5b92e7";
 		public static final String IN_PATIENT_ADMISSION_FORM = "49f3686d-b83c-4263-a5a1-89040f643a78";
@@ -250,6 +252,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ATP_DISCLOSURE_TRACKING_FORM = "40b6b389-5b4e-47b1-aa15-88ee24b56f6a";
 		public static final String PREOPERATIVE_QUESTIONNAIRE_FORM = "77a06fb9-0035-474e-8b2b-c247ac75d2e7";
 		public static final String BLOOD_TRANSFUSION_FORM = "ed5ec662-5326-4873-b60c-43d22ad5fb5f";
+		public static final String THERAPEUTIC_PLAY_FORM = "8424097e-2d07-4ce7-b231-617bf4c7c6a6";
 	}
 
 	public static final class _OrderType {
@@ -309,7 +312,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PNS_PATIENT_CONTACT_REGISTRATION_SOURCE = "7c94bd35-fba7-4ef7-96f5-29c89a318fcf";
 		public static final String PNS_PATIENT_CONTACT_IPV_OUTCOME = "49c543c2-a72a-4b0a-8cca-39c375c0726f";
 		public static final String NEXT_OF_KIN_NATIONAL_ID = "73d34479-2f9e-4de3-a5e6-1f79a17459bb";
-
 	}
 
 	public static final class _Provider {
@@ -328,6 +330,9 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PROVIDER_TELEPHONE = "37daed7f-1f4e-4e62-8e83-6048ade18a87";
 		public static final String PROVIDER_PASSPORT_NUMBER = "5b4b88e8-9db3-41e6-a175-5e39f2c8a9a5";
 		public static final String PROVIDER_UNIQUE_IDENTIFIER = "dace9d99-9f29-4653-9eae-c05929f34a32";
+		public static final String PROVIDER_SPECIALTY = "7f5d8e2c-3a1b-4d6e-9c0f-2b4a1d5e8c91";
+		public static final String PROVIDER_CADRE = "8a6e9f3d-4b2c-5e7f-ad10-3c5b2e6f9da2";
+		public static final String PROVIDER_PRACTICE_TYPE = "9b7faa4e-5c3d-6f80-be21-4d6c3f70aeb3";
 
 	}
 
@@ -357,18 +362,17 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String CASUALTY = "0419d15f-67ad-4fd0-97a1-9b5246b2d0d7";
 		public static final String MORTUARY = "02b67c47-6071-4091-953d-ad21452e830c";
 	}
-	public static final class EmrDatabaseEtl {
-		public static final String ETL_DATABASE = EmrDatabaseUtil.getEtlDatabaseName();
-		public static final String DATATOOLS_DATABASE = EmrDatabaseUtil.getDataToolsSchema();
 
-	}
 
 	/**
 	 * @see org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle#install()
 	 */
 	@Override
 	public void install() {
-        install(program("Nutrition", "Nutrition program",Dictionary.NUTRITION_PROGRAM, _Program.NUTRITION));
+		boolean installPrograms = shouldInstallPrograms();
+		if(installPrograms) {
+			install(program("Nutrition", "Nutrition program",Dictionary.NUTRITION_PROGRAM, _Program.NUTRITION));
+		}
 
 		install(encounterType("Consultation", "Collection of clinical data during the main consultation",
 				_EncounterType.CONSULTATION));
@@ -432,10 +436,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ADR Assessment Tool", "Adverse Drug Reaction Assessment Tool Clinical encounter type",
 				_EncounterType.ADR_ASSESSMENT_TOOL));
 		install(encounterType("Initial Nursing Cardex", "Initial Nursing Cardex Clinical encounter type", _EncounterType.INITIAL_NURSING_CARDEX));
-        install(encounterType("MCH Inpatient", "Inpatient encounter for a pregnant mother", _EncounterType.MCHMS_INPATIENT));
-        install(encounterType("MCH Post Delivery", "Post delivery encounter for a mother", _EncounterType.MCHMS_POST_DELIVERY));
-        install(encounterType("Nutrition Enrollment", "Enrollment into Nutrition program", _EncounterType.NUTRITION_ENROLLMENT));
-        install(encounterType("Nutrition Discontinuation", "Discontinuation from Nutrition program", _EncounterType.NUTRITION_DISCONTINUATION));
+		install(encounterType("MCH Inpatient", "Inpatient encounter for a pregnant mother", _EncounterType.MCHMS_INPATIENT));
+		install(encounterType("MCH Post Delivery", "Post delivery encounter for a mother", _EncounterType.MCHMS_POST_DELIVERY));
+		install(encounterType("Nutrition Enrollment", "Enrollment into Nutrition program", _EncounterType.NUTRITION_ENROLLMENT));
+		install(encounterType("Nutrition Discontinuation", "Discontinuation from Nutrition program", _EncounterType.NUTRITION_DISCONTINUATION));
 		install(encounterType("Nursing Care Plan", "Nursing care plan encounter for a inpatient", _EncounterType.NURSING_CARE_PLAN));
 		install(encounterType("AEFI Investigation", "AEFI Investigation encounter for a patient with adverse vaccine reaction", _EncounterType.AEFI_INVESTIGATION));
 		install(encounterType("Admission", "Indicates that the patient has been admitted for inpatient care, and is not expected to leave the hospital unless discharged.", _EncounterType.IN_PATIENT_ADMISSION));
@@ -445,12 +449,13 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ATP Transition Readiness Assessment", "ATP Transition Readiness Assessment", _EncounterType.ATP_TRANSITION_READINESS));
 		install(encounterType("ATP Disclosure Tracking", "ATP Disclosure Tracking", _EncounterType.ATP_DISCLOSURE_TRACKING));
 		install(encounterType("Transfusion Services", "Blood Transfusion Services", _EncounterType.TRANSFUSION_SERVICES));
+		install(encounterType("Therapeutic Play", "Therapeutic Play encounter type ", _EncounterType.THERAPEUTIC_PLAY));
 
 
 
 
 		boolean installForms = shouldInstallForms();
-		
+
 		if (installForms) {
 			logger.info("=== Installing forms because shouldInstallForms() returned true ===");
 			install(form("Clinical Encounter", null, _EncounterType.CONSULTATION, "1", _Form.CLINICAL_ENCOUNTER));
@@ -513,7 +518,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("Speech and Language Therapy Clinical Form",
 					"Form for Speech and Language Therapy clinical encounter", _EncounterType.SPEECHANDLANGUAGE, "1",
 					_Form.SPEECH_AND_LANGAUGE_THERAPY_CLINICAL_FORM));
-			install(form("Diabetic Clinical Form", "Form for Diabetic Consultattion clinical encounter", _EncounterType.DIABETICCONSULTATION, "1", 
+			install(form("Diabetic Clinical Form", "Form for Diabetic Consultattion clinical encounter", _EncounterType.DIABETICCONSULTATION, "1",
 					_Form.DIABETIC_CLINICAL_FORM));
 			install(form("Adverse Drug Reaction Clinical Form", "Form for Adverse Drug Reaction and Pharmacovigilance clinical encounter", _EncounterType.ADVERSEDRUGREACTION, "1", _Form.ADVERSE_DRUG_REACTION_FORM));
 			install(form("Dermatology Clinical Form", "Form for Dermatology clinical encounter", _EncounterType.DERMATOLOGY, "1", _Form.DERMATOLOGY_CLINICAL_FORM));
@@ -560,36 +565,41 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("ATP Disclosure Tracking Form", "ATP Disclosure Tracking Form", _EncounterType.ATP_DISCLOSURE_TRACKING, "1", _Form.ATP_DISCLOSURE_TRACKING_FORM));
 			install(form("PreOperative Questionnare For Anaesthesia Form", "A form used to capture PreOperative Questionnare For Anaesthesia", _EncounterType.SOPC, "1", _Form.PREOPERATIVE_QUESTIONNAIRE_FORM));
 			install(form("Blood Transfusion Services Form", "A form collecting blood transfusion details", _EncounterType.TRANSFUSION_SERVICES, "1", _Form.BLOOD_TRANSFUSION_FORM));
+			install(form("Therapeutic Play Form", "Form for recording Therapeutic Play ", _EncounterType.THERAPEUTIC_PLAY, "1.0", _Form.THERAPEUTIC_PLAY_FORM));
 
 
 		} else {
 			logger.info("=== SKIPPING form installation because shouldInstallForms() returned false ===");
 		}
 
-        install(globalProperty(EmrConstants.GP_DEFAULT_LOCATION,
+		install(globalProperty(EmrConstants.GP_DEFAULT_LOCATION,
 				"The facility for which this installation is configured",
 				LocationDatatype.class, null, null));
 
 		//3pm Adx string
 		String adx3pmMappingString = "[{\"reportName\":\"Monthly report\",\"prefix\":\"\",\"datasets\":[{\"name\":\"1\",\"3pmName\":\"qzJqoxdfXJn\"}]}]";
-
+		AdministrationService administrationService = Context.getAdministrationService();
 		install(globalProperty(EmrConstants.GP_DHIS2_DATASET_MAPPING, "ADX Mapping for KenyaEMR and DHIS2 datasets", ""));
 		install(globalProperty(EmrConstants.GP_3PM_DATASET_MAPPING, "ADX Mapping for KenyaEMR and 3PM datasets", adx3pmMappingString));
-		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
-		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+
+		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {
+			install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
+		}
+		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_PASSWORD) == null) {
+			install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+		}
 
 		install(globalProperty("order.drugDosingUnitsConceptUuid", "Drug dosing units concept",
 				"162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		install(globalProperty("client_number_label", "Label for Client Number", "Client Number"));
 		install(globalProperty("clientNumber.enabled", "Switch to show client number", "false"));
 
-		AdministrationService administrationService = Context.getAdministrationService();
 		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_USE_EMR_PROXY) == null) {
 			install(globalProperty(GP_CLIENT_VERIFICATION_USE_EMR_PROXY, "Use the EMR backend to proxy NUPI requests (true or false)", "false"));
-		}    
+		}
 		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_EMR_VERIFICATION_PROXY_URL) == null) {
 			install(globalProperty(GP_CLIENT_VERIFICATION_EMR_VERIFICATION_PROXY_URL, "The local EMR URL to proxy NUPI verification requests", "http://127.0.0.1:8080/openmrs/ws/rest/v1/kenyaemr/verifynupi"));
-		} 
+		}
 		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_GET_END_POINT) == null) {
 			install(globalProperty(GP_CLIENT_VERIFICATION_GET_END_POINT, "A GET API for getting client information at the client registry", "https://afyakenyaapi.health.go.ke/partners/registry/search"));
 		}
@@ -829,43 +839,97 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				String.class, null, false, 4.5, _PersonAttributeType.PNS_PATIENT_CONTACT_IPV_OUTCOME));
 		install(personAttributeType("Next of kin national ID", "National ID of patient's next of kin",
 				String.class, null, false, 4.6, _PersonAttributeType.NEXT_OF_KIN_NATIONAL_ID));
-		// Provider attribute types.
-		install(providerAttributeType("Primary Facility", "Default facility for a provider", LocationDatatype.class, "",
-				0, 1, _ProviderAttributeType.PRIMARY_FACILITY));
-		install(providerAttributeType("Practising License Number", "Provider Practising License Number",
-				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_NUMBER));
-		install(providerAttributeType("License Expiry Date", "Provider Practising License Expiry Date",
-				DateDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_EXPIRY_DATE));
-		install(providerAttributeType("Provider National Id Number", "Provider National Id Number",
-				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.NATIONAL_ID));
-		install(providerAttributeType("License Body", "", FreeTextDatatype.class, "", 0, 1,
-				_ProviderAttributeType.LICENSE_BODY));
-		install(providerAttributeType("Provider HIE FHIR Reference", "", FreeTextDatatype.class, "", 0, 1,
-				_ProviderAttributeType.PROVIDER_HIE_FHIR_REFERENCE));
-		install(providerAttributeType("Provider Qualification", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_QUALIFICATION));
-		install(providerAttributeType("Provider Address", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_ADDRESS));
-		install(providerAttributeType("Provider Telephone", "", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_TELEPHONE));
-		install(providerAttributeType("Provider passport number", "Provider passport number", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_PASSPORT_NUMBER));
-		install(providerAttributeType("Provider unique identifier", "Provider unique identifier", FreeTextDatatype.class, "", 0, 1,
-			_ProviderAttributeType.PROVIDER_UNIQUE_IDENTIFIER));
 
-		install(relationshipType("Guardian", "Dependant", "One that guards, watches over, or protects",
-				_RelationshipType.GUARDIAN_DEPENDANT));
-		install(relationshipType("Spouse", "Spouse",
-				"A spouse is a partner in a marriage, civil union, domestic partnership or common-law marriage a male spouse is a husband and a female spouse is a wife",
-				_RelationshipType.SPOUSE));
-		install(relationshipType("Partner", "Partner",
-				"Someone I had sex with for fun without commitment to a relationship", _RelationshipType.PARTNER));
-		install(relationshipType("Co-wife", "Co-wife", "Female member spouse in a polygamist household",
-				_RelationshipType.CO_WIFE));
-		install(relationshipType("SNS", "SNS", "Social Network Strategy", _RelationshipType.SNS));
-		install(relationshipType("Case manager", "Client", "Case manager", _RelationshipType.CASE_MANAGER));
-		install(relationshipType("Primary caregiver", "Primary caregiver", "Primary caregiver",
-				_RelationshipType.CARE_GIVER));
+		// Provider attribute types.
+		install(providerAttributeType(
+				"Primary Facility",
+				"The default health facility where this provider practises.",
+				LocationDatatype.class, "", 0, 1, _ProviderAttributeType.PRIMARY_FACILITY));
+
+		install(providerAttributeType(
+				"Practising License Number",
+				"Provider's current practising license number (e.g. KMPDC GP/2026/638333). Pulled from the regulator's professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_NUMBER));
+
+		install(providerAttributeType(
+				"License Expiry Date",
+				"End date of the provider's current practising license. Sourced from the regulator's professional registry.",
+				DateDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_EXPIRY_DATE));
+
+		install(providerAttributeType(
+				"License Body",
+				"Regulatory body that licenses this provider (e.g. KMPDC, NCK, PPB, COC).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.LICENSE_BODY));
+
+		install(providerAttributeType(
+				"Provider National ID Number",
+				"Kenyan national identification number of the provider.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.NATIONAL_ID));
+
+		install(providerAttributeType(
+				"Provider HIE FHIR Reference",
+				"FHIR resource reference linking this provider to their record in the Kenya Health Information Exchange (HIE).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_HIE_FHIR_REFERENCE));
+
+		install(providerAttributeType(
+				"Provider Qualification",
+				"Provider's highest educational qualification and awarding institution (e.g. MBChB(UON)2009). Sourced from the professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_QUALIFICATION));
+
+		install(providerAttributeType(
+				"Provider Address",
+				"Postal address of the provider as recorded in the professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_ADDRESS));
+
+		install(providerAttributeType(
+				"Provider Telephone",
+				"Primary contact telephone number for the provider.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_TELEPHONE));
+
+		install(providerAttributeType(
+				"Provider Passport Number",
+				"Passport number for providers who use a passport as their primary identification.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_PASSPORT_NUMBER));
+
+		install(providerAttributeType(
+				"Provider Unique Identifier",
+				"Cross-regulator provider identifier from the Kenya professional registry (e.g. PUID-0002011-6). Stable across license periods.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_UNIQUE_IDENTIFIER));
+
+		install(providerAttributeType(
+				"Provider Specialty",
+				"Provider's clinical specialty (e.g. MEDICAL DOCTOR, CARDIOLOGY, PAEDIATRICS). Sourced from the regulator's professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_SPECIALTY));
+
+		install(providerAttributeType(
+				"Provider Cadre",
+				"Broad professional cadre (e.g. MEDICINE, NURSING, PHARMACY, CLINICAL OFFICER). Sourced from the regulator's professional registry.",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_CADRE));
+
+		install(providerAttributeType(
+				"Provider Practice Type",
+				"Whether the provider engages in clinical or non-clinical practice (e.g. Clinical Practice, Non-Clinical Practice, Academic, Research).",
+				FreeTextDatatype.class, "", 0, 1, _ProviderAttributeType.PROVIDER_PRACTICE_TYPE));
+		boolean installRelationshipTypes = shouldInstallRelationshipTypes();
+		if (installRelationshipTypes) {
+
+			install(relationshipType("Guardian", "Dependant", "One that guards, watches over, or protects",
+					_RelationshipType.GUARDIAN_DEPENDANT));
+			install(relationshipType("Spouse", "Spouse",
+					"A spouse is a partner in a marriage, civil union, domestic partnership or common-law marriage a male spouse is a husband and a female spouse is a wife",
+					_RelationshipType.SPOUSE));
+			install(relationshipType("Partner", "Partner",
+					"Someone I had sex with for fun without commitment to a relationship", _RelationshipType.PARTNER));
+			install(relationshipType("Co-wife", "Co-wife", "Female member spouse in a polygamist household",
+					_RelationshipType.CO_WIFE));
+			install(relationshipType("SNS", "SNS", "Social Network Strategy", _RelationshipType.SNS));
+			install(relationshipType("Case manager", "Client", "Case manager", _RelationshipType.CASE_MANAGER));
+			install(relationshipType("Primary caregiver", "Primary caregiver", "Primary caregiver",
+					_RelationshipType.CARE_GIVER));
+
+		} else {
+			logger.info("=== SKIPPING relationship type installation because shouldInstallRelationshipTypes() returned false ===");
+		}
 
 		install(visitAttributeType("Source form", "The form whose submission created the visit",
 				FormDatatype.class, null, 0, 1, _VisitAttributeType.SOURCE_FORM));
@@ -890,8 +954,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(visitType("Inpatient", "Visit where the patient is admitted to the hospital", _VisitType.INPATIENT));
 		install(visitType("Casualty/Emergency", "Visit where the patient is admitted to the casualty/emergency department", _VisitType.CASUALTY));
 		install(visitType("Mortuary", "Visit where the body is admitted to the Mortuary", _VisitType.MORTUARY));
-		uninstall(possible(PersonAttributeType.class, "73d34479-2f9e-4de3-a5e6-1f79a17459bb"),
-				"Became patient identifier"); // National ID attribute type
 
 		//Retiring Lab results form
 		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"), "Form deprecated with introduction of Lab orders");
