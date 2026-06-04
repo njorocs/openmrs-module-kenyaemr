@@ -1224,7 +1224,7 @@ public class Moh710CohortLibrary {
 	}
 
 	/*Measles - Rubella 2(at 1 1/2 - 2 years)*/
-	public CohortDefinition givenMeaslesRubella2VaccineAge18To24MonthsCl() {
+	public CohortDefinition givenMeaslesRubella2Vaccine() {
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_immunization i where date(i.Measles_rubella_2) between date(:startDate) and date(:endDate) group by i.patient_id;";
 

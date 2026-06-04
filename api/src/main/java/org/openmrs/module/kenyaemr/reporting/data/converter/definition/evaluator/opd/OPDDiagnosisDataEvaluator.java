@@ -41,22 +41,12 @@ public class OPDDiagnosisDataEvaluator implements EncounterDataEvaluator {
 			"  con.name as mnci_diagnosis\n" +
 			"from kenyaemr_etl.etl_clinical_encounter v\n" +
 			"            inner join (select\n" +
-			"                            cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
-			"                        from openmrs.encounter_diagnosis ed\n" +
-			"                                 inner join openmrs.concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
-			"                                     and date(ed.date_created) between date(:startDate) and date(:endDate)\n" +
-			") con on v.encounter_id = con.encounter_id and date(v.visit_Date) between date(:startDate) and date(:endDate)\n" +
-			"UNION\n" +
-			"select\n" +
-			"   sc.encounter_id,\n" +
-			"    con.name as mnci_diagnosis\n" +
-			"from kenyaemr_etl.etl_special_clinics sc\n" +
-			"         inner join (select\n" +
-			"                         cn.name, cn.date_created, ed.patient_id,ed.encounter_id\n" +
-			"                     from openmrs.encounter_diagnosis ed\n" +
-			"                              inner join openmrs.concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
-			"                         and date(ed.date_created) between date(:startDate) and date(:endDate)\n" +
-			") con on sc.encounter_id = con.encounter_id and date(sc.visit_Date) between date(:startDate) and date(:endDate);";
+			"                            cn.name, ed.date_created, ed.patient_id,ed.encounter_id\n" +
+			"                        from encounter_diagnosis ed\n" +
+			"                                 inner join concept_name cn on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en'\n" +
+			"                                 and cn.concept_name_type = 'FULLY_SPECIFIED'\n" +
+			"                                     and date(ed.date_created) between date(:startDate) and date(:endDate) WHERE ed.dx_rank = 2\n" +
+			") con on v.encounter_id = con.encounter_id and date(v.visit_Date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
