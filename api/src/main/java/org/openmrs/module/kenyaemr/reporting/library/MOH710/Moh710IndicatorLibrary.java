@@ -348,17 +348,10 @@ public class Moh710IndicatorLibrary {
 		);
 	}
 
-	/*Measles - Rubella 2(at 1 1/2 - 2 years)*/
-	public CohortIndicator givenMeaslesRubella2VaccineAge18To24Months() {
+	/*Measles - Rubella 2*/
+	public CohortIndicator givenMeaslesRubella2Vaccine() {
 
-		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubella2VaccineAge18To24MonthsCl(), "startDate=${startDate},endDate=${endDate}")
-		);
-	}
-
-	/*Measles-Rubella 2 Above 2 years*/
-	public CohortIndicator givenMeaslesRubellaVaccine2AndAgedOver2Years() {
-
-		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubellaVaccine2AndAgedOver2YearsCl(), "startDate=${startDate},endDate=${endDate}")
+		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubella2Vaccine(), "startDate=${startDate},endDate=${endDate}")
 		);
 	}
 
