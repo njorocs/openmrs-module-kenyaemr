@@ -176,6 +176,7 @@
                  <ref bean="kenyaemr.ehrReports.report.fcdrr" />
                  <ref bean="kenyaemr.ehrReports.report.clinicianWorkloadReport" />
                  <ref bean="kenyaemr.ehrReports.report.moh301InpatientRegister" />
+                 <ref bean="kenyaemr.ehrReports.report.moh643" />
 			</set>
 		</property>
 	</bean>
@@ -1617,5 +1618,16 @@
 		</property>
 		<property name="template" value="kenyaemr:MOH301_IP_register.xls" />
 		<property name="repeatingSection" value="sheet:2,row:6,dataset:admittedPatients" />
+	</bean>
+	<bean id="kenyaemr.ehrReports.report.moh643" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
+		<property name="targetUuid" value="5553e41a-ac5e-4b33-b640-49ea99470ae5" />
+		<property name="name" value="MOH 643" />
+		<property name="description" value="Facility Consumption Data and Request (F-CDRR) for Laboratory Commodities (MoH 643)" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set>
+		</property>
+		<property name="template" value="kenyaemr:MOH_643_FCDRR.xls" />
 	</bean>
 </beans>
