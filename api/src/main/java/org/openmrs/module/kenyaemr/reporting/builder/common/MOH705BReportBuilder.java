@@ -155,7 +155,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "RETA", "Re-Attendances", ReportUtils.map(moh705indicatorLibrary.reAttendances(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFHA","Referrals from other health facility", ReportUtils.map(moh705indicatorLibrary.referralsFromOtherFacilities(EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFCA","Referrals to other health facility", ReportUtils.map(moh705indicatorLibrary.referralsToOtherFacilities(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-
+		ReportingUtils.addRow(cohortDsd, "RFCU", "Referrals from community unit", ReportUtils.map(moh705indicatorLibrary.referralsFromCommunityUnit(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		return cohortDsd;
 	}
 }

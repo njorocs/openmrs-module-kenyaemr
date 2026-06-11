@@ -201,6 +201,19 @@ public class MOH705CohortLibrary {
 		return cd;
 	}
 
+	public CohortDefinition referralsFromCommunityUnit(String age) {
+		String sqlQuery = "SELECT v.patient_id FROM kenyaemr_etl.etl_clinical_encounter v\n" +
+				"INNER JOIN kenyaemr_etl.etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
+				"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
+				"WHERE v.referred_from = 1759 and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+		cd.setName("referralsFromCommunityUnit");
+		cd.setQuery(sqlQuery);
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cd.setDescription("Patients who are referrals From Community Unit");
+		return cd;
+	}
 	/**
 	 * MOH705
 	 * DeathDueToRoadTrafficInjuries

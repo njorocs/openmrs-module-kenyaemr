@@ -169,13 +169,14 @@ public class MOH705AReportBuilder extends AbstractReportBuilder {
 
 		ReportingUtils.addRow(cohortDsd,"TC","Tuberculosis",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getTuberculosisDiagnosisList(), AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"OVC","Overweight", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getOverweightList(), AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
+		ReportingUtils.addRow(cohortDsd,"AODC","All other diseases for children",ReportUtils.map(moh705indicatorLibrary.allOtherDiseasesUnderFive(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 
 		ReportingUtils.addRow(cohortDsd, "NFAC", "No. Of First Attendances", ReportUtils.map(moh705indicatorLibrary.newAttendances(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "RAC", "Re-Attendances", ReportUtils.map(moh705indicatorLibrary.reAttendances(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFHC","Referrals from other health facility", ReportUtils.map(moh705indicatorLibrary.referralsFromOtherFacilities(AGE_BELOW_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFCC","Referrals to other health facility", ReportUtils.map(moh705indicatorLibrary.referralsToOtherFacilities(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-		ReportingUtils.addRow(cohortDsd,"AODC","All other diseases for children",ReportUtils.map(moh705indicatorLibrary.allOtherDiseasesUnderFive(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-		//TODO: Referrals from community unit
+
+		ReportingUtils.addRow(cohortDsd, "RFCU", "Referrals from community unit", ReportUtils.map(moh705indicatorLibrary.referralsFromCommunityUnit(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		//TODO:Referrals to community unit
 		return cohortDsd;
 
