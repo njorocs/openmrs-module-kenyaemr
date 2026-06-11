@@ -576,12 +576,12 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				"The facility for which this installation is configured",
 				LocationDatatype.class, null, null));
 
-		//3pm Adx string
-		String adx3pmMappingString = "[{\"reportName\":\"Monthly report\",\"prefix\":\"\",\"datasets\":[{\"name\":\"1\",\"3pmName\":\"qzJqoxdfXJn\"}]}]";
+		// ADX dataset mappings are no longer stored as global properties: the DHIS2 mapping
+		// outgrew the global_property.property_value column. They now live as JSON files under
+		// the application data directory and are read via AdxMappingConfigStore, which seeds the
+		// files from any legacy global property value or a bundled default on first use.
 		AdministrationService administrationService = Context.getAdministrationService();
-		install(globalProperty(EmrConstants.GP_DHIS2_DATASET_MAPPING, "ADX Mapping for KenyaEMR and DHIS2 datasets", ""));
-		install(globalProperty(EmrConstants.GP_3PM_DATASET_MAPPING, "ADX Mapping for KenyaEMR and 3PM datasets", adx3pmMappingString));
-		
+
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {
     		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
 		}

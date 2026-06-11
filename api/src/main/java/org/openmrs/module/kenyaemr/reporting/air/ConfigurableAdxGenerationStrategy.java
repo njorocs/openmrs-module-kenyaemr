@@ -14,7 +14,6 @@
 
 package org.openmrs.module.kenyaemr.reporting.air;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,7 +28,6 @@ import org.openmrs.module.facilityreporting.api.restUtil.DatasetIndicatorDetails
 import org.openmrs.module.facilityreporting.api.restUtil.FacilityReporting;
 import org.openmrs.module.facilityreporting.api.restUtil.ReportDatasetValueEntryMapper;
 import org.openmrs.module.kenyaemr.EmrConstants;
-import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.reporting.config.ReportDescriptor;
 import org.openmrs.module.reporting.dataset.DataSet;
@@ -798,8 +796,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
     public AdxConfiguration getConfigurationForReport(String reportName) {
         try {
             // First check DHIS2 ADX mapping
-            String dhisConfigJson = EmrUtils.getGlobalPropertyValue(EmrConstants.GP_DHIS2_DATASET_MAPPING);
-            AdxConfiguration config = findConfigInJson(dhisConfigJson, reportName);
+            AdxConfiguration config = findConfig(AdxMappingConfigStore.getDhis2Configurations(), reportName);
 
             if (config != null) {
                 log.debug("Found configuration for report '" + reportName + "' in DHIS2 mapping");
@@ -807,8 +804,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
             }
 
             // If not found, check 3PM ADX mapping
-            String threePmConfigJson = EmrUtils.getGlobalPropertyValue(EmrConstants.GP_3PM_DATASET_MAPPING);
-            config = findConfigInJson(threePmConfigJson, reportName);
+            config = findConfig(AdxMappingConfigStore.getThreePmConfigurations(), reportName);
 
             if (config != null) {
                 log.debug("Found configuration for report '" + reportName + "' in 3PM mapping");
@@ -818,35 +814,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
             log.debug("No configuration found for report: " + reportName);
 
         } catch (Exception e) {
-            log.error("Error parsing ADX configuration for report: " + reportName, e);
+            log.error("Error resolving ADX configuration for report: " + reportName, e);
         }
 
         return null;
     }
 
-    private AdxConfiguration findConfigInJson(String configJson, String reportName) {
-        try {
-            if (StringUtils.isBlank(configJson)) {
-                return null;
-            }
-
-            // Parse JSON array of configurations
-            JsonNode rootNode = objectMapper.readTree(configJson);
-            if (rootNode.isArray()) {
-                for (JsonNode configNode : rootNode) {
-                    AdxConfiguration config = objectMapper.treeToValue(configNode, AdxConfiguration.class);
-                    if (reportName.equals(config.getReportName())) {
-                        return config;
-                    }
-                }
-            } else {
-                log.warn("ADX configuration is not a JSON array: " + configJson);
-            }
-
-        } catch (Exception e) {
-            log.error("Error parsing JSON configuration: " + configJson, e);
+    private AdxConfiguration findConfig(List<AdxConfiguration> configurations, String reportName) {
+        if (configurations == null) {
+            return null;
         }
-
+        for (AdxConfiguration config : configurations) {
+            if (reportName.equals(config.getReportName())) {
+                return config;
+            }
+        }
         return null;
     }
 
