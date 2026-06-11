@@ -208,10 +208,26 @@ public class MOH705CohortLibrary {
 	 */
 	public CohortDefinition deathDueToRoadTrafficInjuries(String age , String  diagnosisList) {
 
-		String sqlQuery = "SELECT x.patient_id FROM encounter_diagnosis x\n" +
-			"  INNER JOIN kenyaemr_etl.etl_patient_demographics d on x.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			"  INNER JOIN kenyaemr_etl.etl_clinical_encounter v on x.encounter_id = v.encounter_id and v.patient_outcome = 159\n" +
-			"  WHERE x.diagnosis_coded in ("+diagnosisList+") and date(x.date_created) between date(:startDate) and date(:endDate);\n";
+		String sqlQuery = "SELECT a.patient_id\n" +
+				"FROM (SELECT x.patient_id\n" +
+				"      FROM openmrs.encounter_diagnosis x\n" +
+				"               INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+				"                          ON x.patient_id = d.patient_id\n" +
+				"               INNER JOIN kenyaemr_etl.etl_clinical_encounter v ON x.encounter_id = v.encounter_id\n" +
+				"      WHERE x.diagnosis_coded IN\n" +
+				"            ("+diagnosisList+")\n" +
+				"        AND timestampdiff(YEAR, date(d.dob), date(:endDate)) "+age+"\n" +
+				"        AND d.dead = 1\n" +
+				"        AND date(v.visit_date) BETWEEN date(:startDate) AND date(:endDate) AND DATE(d.death_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
+				"      AND (d.cause_of_death IS NULL OR d.cause_of_death = '' OR d.cause_of_death = 1067)\n" +
+				"      UNION\n" +
+				"      SELECT d.patient_id\n" +
+				"      FROM kenyaemr_etl.etl_patient_demographics d\n" +
+				"      WHERE d.dead = 1\n" +
+				"        AND timestampdiff(YEAR, date(d.dob), date(:endDate)) "+age+"\n" +
+				"        AND d.cause_of_death IN\n" +
+				"            ("+diagnosisList+")\n" +
+				"        AND DATE(d.death_date) BETWEEN date(:startDate) AND date(:endDate)) a;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("deathDueToRoadTrafficInjuries");
 		cd.setQuery(sqlQuery);

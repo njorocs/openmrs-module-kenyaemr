@@ -13,7 +13,6 @@ import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DiagnosisConcepts {
@@ -85,71 +84,64 @@ public class DiagnosisConcepts {
 		
 
 		//Upper Respiratory Tract Infections
+
+
 		public static final Integer URC_1 = 106;
 		public static final Integer URC_2 = 121832;
-		public static final Integer URC_3 = 2011090;
-		public static final Integer URC_4 = 2011091;
-		public static final Integer URC_5 = 2011092;
-		public static final Integer URC_6 = 2011093;
-		public static final Integer URC_7 = 125815;
-		public static final Integer URC_8 = 2011095;
-		public static final Integer URC_9 = 2011096;
-		public static final Integer URC_10 = 149713;
-		public static final Integer URC_11 = 149716;
-		public static final Integer URC_12 = 149495;
-		public static final Integer URC_13 = 2011097;
-		public static final Integer URC_14 = 149714;
-		public static final Integer URC_15 = 149825;
-		public static final Integer URC_16 = 2011099;
-		public static final Integer URC_17 = 2011101;
-		public static final Integer URC_18 = 149477;
-		public static final Integer URC_19 = 121691;
-		public static final Integer URC_20 = 2011103;
-		public static final Integer URC_21 = 2011104;
-		public static final Integer URC_22 = 2011105;
-		public static final Integer URC_23 = 2011106;
-		public static final Integer URC_24 = 2011108;
-		public static final Integer URC_25 = 2011109;
-		public static final Integer URC_26 = 2011110;
-		public static final Integer URC_27 = 157808;
-		public static final Integer URC_28 = 123280;
-		public static final Integer URC_29 = 145175;
-		public static final Integer URC_30 = 145276;
-		public static final Integer URC_31 = 145214;
-		public static final Integer URC_32 = 2011115;
-		public static final Integer URC_33 = 2011116;
-		public static final Integer URC_34 = 2011117;
-		public static final Integer URC_35 = 2011118;
-		public static final Integer URC_36 = 2011119;
-		public static final Integer URC_37 = 142493;
-		public static final Integer URC_38 = 138130;
-		public static final Integer URC_39 = 138120;
-		public static final Integer URC_40 = 138144;
-		public static final Integer URC_41 = 2011121;
-		public static final Integer URC_42 = 2011122;
-		public static final Integer URC_43 = 2011123;
-		public static final Integer URC_44 = 2011124;
-		public static final Integer URC_45 = 130868;
-		public static final Integer URC_46 = 129522;
-		public static final Integer URC_47 = 2011126;
-		public static final Integer URC_48 = 141479;
-		public static final Integer URC_49 = 116400;
-		public static final Integer URC_50 = 125914;
-		public static final Integer URC_51 = 2011127;
-		public static final Integer URC_52 = 2011128;
-		public static final Integer URC_53 = 129518;
-		public static final Integer URC_54 = 2011129;
-		public static final Integer URC_55 = 2011130;
-		public static final Integer URC_56 = 2011132;
-		public static final Integer URC_57 = 130385;
-		public static final Integer URC_58 = 2011133;
-		public static final Integer URC_59 = 2011134;
-		public static final Integer URC_60 = 2011135;
-		public static final Integer URC_61 = 2011136;
-		public static final Integer URC_62 = 2013711;
-		public static final Integer URC_63 = 2013715;
-		public static final Integer URC_64 = 2011117;
-
+		public static final Integer URC_3 = 149579;
+		public static final Integer URC_4 = 2011090;
+		public static final Integer URC_5 = 154989;
+		public static final Integer URC_6 = 2011091;
+		public static final Integer URC_7 = 2011092;
+		public static final Integer URC_8 = 2011093;
+		public static final Integer URC_9 = 2022699;
+		public static final Integer URC_10 = 2011094;
+		public static final Integer URC_11 = 149496;
+		public static final Integer URC_12 = 125815;
+		public static final Integer URC_13 = 2011095;
+		public static final Integer URC_14 = 2011096;
+		public static final Integer URC_15 = 149713;
+		public static final Integer URC_16 = 149715;
+		public static final Integer URC_17 = 149716;
+		public static final Integer URC_18 = 149495;
+		public static final Integer URC_19 = 2011097;
+		public static final Integer URC_20 = 2011098;
+		public static final Integer URC_21 = 149714;
+		public static final Integer URC_22 = 149825;
+		public static final Integer URC_23 = 2011099;
+		public static final Integer URC_24 = 2011100;
+		public static final Integer URC_25 = 2011101;
+		public static final Integer URC_26 = 149477;
+		public static final Integer URC_27 = 2011102;
+		public static final Integer URC_28 = 121692;
+		public static final Integer URC_29 = 121691;
+		public static final Integer URC_30 = 2011103;
+		public static final Integer URC_31 = 2011104;
+		public static final Integer URC_32 = 2011105;
+		public static final Integer URC_33 = 2011106;
+		public static final Integer URC_34 = 2011107;
+		public static final Integer URC_35 = 2011108;
+		public static final Integer URC_36 = 2011109;
+		public static final Integer URC_37 = 2011110;
+		public static final Integer URC_38 = 157808;
+		public static final Integer URC_39 = 123280;
+		public static final Integer URC_40 = 2011111;
+		public static final Integer URC_41 = 2011112;
+		public static final Integer URC_42 = 2011113;
+		public static final Integer URC_43 = 145175;
+		public static final Integer URC_44 = 145276;
+		public static final Integer URC_45 = 145214;
+		public static final Integer URC_46 = 2011114;
+		public static final Integer URC_47 = 2011116;
+		public static final Integer URC_48 = 2011136;
+		public static final Integer URC_49 = 2011135;
+		public static final Integer URC_50 = 2011134;
+		public static final Integer URC_51 = 2011133;
+		public static final Integer URC_52 = 130385;
+		public static final Integer URC_53 = 2011132;
+		public static final Integer URC_54 = 2011117;
+		public static final Integer URC_55 = 2013715;
+		public static final Integer URC_56 = 2013711;
 
 		//Lower Respiratory Tract Infections
 		public static final Integer OTRA_1 = 2017815;
@@ -383,7 +375,7 @@ public class DiagnosisConcepts {
 		public static final Integer OMC_43 = 2009405;
 		public static final Integer OMC_44 = 2014610;
 
-		//Poliomyelitis
+		//Poliomyelitis AFP
 		public static final Integer PMC_1 = 2002520;
 		public static final Integer PMC_2 = 158786;
 		// DS Variables (Diseases of Skin)
@@ -464,6 +456,7 @@ public class DiagnosisConcepts {
 		public static final Integer DS_75 = 152161;
 		public static final Integer DS_76 = 141053;
 		public static final Integer DS_77 = 2007569;
+
 		// CHICKEN POX
 		public static final Integer CPC_1 = 160435;
 		public static final Integer CPC_2 = 892;
@@ -534,10 +527,13 @@ public class DiagnosisConcepts {
 		public static final Integer MPC_2 = 152238;
 		public static final Integer MPC_3 = 2002518;
 		public static final Integer MPC_4 = 2015563;
+
+/*
 		public static final Integer MPC_5 = 133662;
 		public static final Integer MPC_6 = 133667;
 		public static final Integer MPC_7 = 133669;
 		public static final Integer MPC_8 = 133661;
+*/
 
 		//Typhoid fever
 		public static final Integer TYC_1 = 141;
@@ -553,6 +549,7 @@ public class DiagnosisConcepts {
 		public static final Integer BLC_4 = 2002800;
 		public static final Integer BLC_5 = 2002804;
 		public static final Integer BLC_6 = 2002801;
+
 		public static final Integer BLC_7 = 2002802;
 		public static final Integer BLC_8 = 2002803;
 
@@ -564,6 +561,8 @@ public class DiagnosisConcepts {
 		public static final Integer IWC_4 = 134042;
 		public static final Integer IWC_5 = 2002808;
 		public static final Integer IWC_6 = 2002809;
+
+
 		public static final Integer IWC_7 = 2002733;
 		public static final Integer IWC_8 = 151976;
 		public static final Integer IWC_9 = 2002734;
@@ -661,90 +660,91 @@ public class DiagnosisConcepts {
 		public static final Integer MDC_26 = 2004813;
 		public static final Integer MDC_27 = 2004814;
 		public static final Integer MDC_28 = 2004815;
-		public static final Integer MDC_30 = 2004816;
-		public static final Integer MDC_31 = 2004817;
-		public static final Integer MDC_32 = 2004818;
-		public static final Integer MDC_33 = 2004819;
-		public static final Integer MDC_34 = 2004820;
-		public static final Integer MDC_35 = 2004821;
-		public static final Integer MDC_36 = 2004822;
-		public static final Integer MDC_37 = 2004823;
-		public static final Integer MDC_38 = 113139;
-		public static final Integer MDC_39 = 154937;
-		public static final Integer MDC_40 = 2004825;
-		public static final Integer MDC_41 = 2004824;
-		public static final Integer MDC_42 = 2004826;
-		public static final Integer MDC_43 = 2004827;
-		public static final Integer MDC_44 = 2004828;
-		public static final Integer MDC_45 = 2004829;
-		public static final Integer MDC_46 = 2004830;
-		public static final Integer MDC_47 = 2004803;
-		public static final Integer MDC_48 = 2004804;
-		public static final Integer MDC_49 = 2004805;
-		public static final Integer MDC_50 = 2004807;
-		public static final Integer MDC_51 = 2005361;
-		public static final Integer MDC_52 = 119570;
-		public static final Integer MDC_53 = 2005362;
-		public static final Integer MDC_54 = 2005363;
-		public static final Integer MDC_55 = 2005364;
-		public static final Integer MDC_56 = 2005365;
-		public static final Integer MDC_57 = 2005374;
-		public static final Integer MDC_58 = 2005378;
-		public static final Integer MDC_59 = 2005379;
-		public static final Integer MDC_60 = 2005380;
-		public static final Integer MDC_61 = 2005381;
-		public static final Integer MDC_62 = 2005382;
-		public static final Integer MDC_63 = 2005383;
-		public static final Integer MDC_64 = 2005384;
-		public static final Integer MDC_65 = 2005385;
-		public static final Integer MDC_66 = 2005386;
-		public static final Integer MDC_67 = 2005387;
-		public static final Integer MDC_68 = 2005388;
-		public static final Integer MDC_69 = 2005389;
-		public static final Integer MDC_70 = 2005390;
-		public static final Integer MDC_71 = 2005391;
-		public static final Integer MDC_72 = 2005392;
-		public static final Integer MDC_73 = 2005393;
-		public static final Integer MDC_74 = 2005394;
-		public static final Integer MDC_75 = 2005395;
-		public static final Integer MDC_76 = 2005396;
-		public static final Integer MDC_77 = 2005397;
-		public static final Integer MDC_78 = 2005398;
-		public static final Integer MDC_79 = 2005399;
-		public static final Integer MDC_80 = 2005400;
-		public static final Integer MDC_81 = 2005401;
-		public static final Integer MDC_82 = 2005402;
-		public static final Integer MDC_83 = 2005403;
-		public static final Integer MDC_84 = 2005404;
-		public static final Integer MDC_85 = 2005405;
-		public static final Integer MDC_86 = 2005406;
-		public static final Integer MDC_87 = 2005407;
-		public static final Integer MDC_88 = 2005408;
-		public static final Integer MDC_89 = 2005409;
-		public static final Integer MDC_90 = 2005410;
-		public static final Integer MDC_91 = 119706;
-		public static final Integer MDC_92 = 2005411;
-		public static final Integer MDC_93 = 2005412;
-		public static final Integer MDC_94 = 2005413;
-		public static final Integer MDC_95 = 2005414;
-		public static final Integer MDC_96 = 2005415;
-		public static final Integer MDC_97 = 2005416;
-		public static final Integer MDC_98 = 2005417;
-		public static final Integer MDC_99 = 2005418;
-		public static final Integer MDC_100 = 2005419;
-		public static final Integer MDC_101 = 2005420;
-		public static final Integer MDC_102 = 2005421;
-		public static final Integer MDC_103 = 2005422;
-		public static final Integer MDC_104 = 2005423;
-		public static final Integer MDC_105 = 127839;
-		public static final Integer MDC_106 = 2005424;
-		public static final Integer MDC_107 = 2005425;
-		public static final Integer MDC_108 = 2005426;
-		public static final Integer MDC_109 = 2005427;
-		public static final Integer MDC_110 = 2005428;
-		public static final Integer MDC_111 = 2005429;
-		public static final Integer MDC_112 = 2005430;
-		public static final Integer MDC_113 = 2005431;
+		public static final Integer MDC_29 = 2004816;
+		public static final Integer MDC_30 = 2004817;
+		public static final Integer MDC_31 = 2004818;
+		public static final Integer MDC_32 = 2004819;
+		public static final Integer MDC_33 = 2004820;
+		public static final Integer MDC_34 = 2004821;
+		public static final Integer MDC_35 = 2004822;
+		public static final Integer MDC_36 = 2004823;
+		public static final Integer MDC_37 = 113139;
+		public static final Integer MDC_38 = 154937;
+		public static final Integer MDC_39 = 2004825;
+		public static final Integer MDC_40 = 2004824;
+		public static final Integer MDC_41 = 2004826;
+		public static final Integer MDC_42 = 2004827;
+		public static final Integer MDC_43 = 2004828;
+		public static final Integer MDC_44 = 2004829;
+		public static final Integer MDC_45 = 2004830;
+		public static final Integer MDC_46 = 2004803;
+		public static final Integer MDC_47 = 2004804;
+		public static final Integer MDC_48 = 2004805;
+		public static final Integer MDC_49 = 2004807;
+		public static final Integer MDC_50 = 2005361;
+		public static final Integer MDC_51 = 119570;
+		public static final Integer MDC_52 = 2005362;
+		public static final Integer MDC_53 = 2005363;
+		public static final Integer MDC_54 = 2005364;
+		public static final Integer MDC_55 = 2005365;
+		public static final Integer MDC_56 = 2005374;
+		public static final Integer MDC_57 = 2005378;
+		public static final Integer MDC_58 = 2005379;
+		public static final Integer MDC_59 = 2005380;
+		public static final Integer MDC_60 = 2005381;
+		public static final Integer MDC_61 = 2005382;
+		public static final Integer MDC_62 = 2005383;
+		public static final Integer MDC_63 = 2005384;
+		public static final Integer MDC_64 = 2005385;
+		public static final Integer MDC_65 = 2005386;
+		public static final Integer MDC_66 = 2005387;
+		public static final Integer MDC_67 = 2005388;
+		public static final Integer MDC_68 = 2005389;
+		public static final Integer MDC_69 = 2005390;
+		public static final Integer MDC_70 = 2005391;
+		public static final Integer MDC_71 = 2005392;
+		public static final Integer MDC_72 = 2005393;
+		public static final Integer MDC_73 = 2005394;
+		public static final Integer MDC_74 = 2005395;
+		public static final Integer MDC_75 = 2005396;
+		public static final Integer MDC_76 = 2005397;
+		public static final Integer MDC_77 = 2005398;
+		public static final Integer MDC_78 = 2005399;
+		public static final Integer MDC_79 = 2005400;
+		public static final Integer MDC_80 = 2005401;
+		public static final Integer MDC_81 = 2005402;
+		public static final Integer MDC_82 = 2005403;
+		public static final Integer MDC_83 = 2005404;
+		public static final Integer MDC_84 = 2005405;
+		public static final Integer MDC_85 = 2005406;
+		public static final Integer MDC_86 = 2005407;
+		public static final Integer MDC_87 = 2005408;
+		public static final Integer MDC_88 = 2005409;
+		public static final Integer MDC_89 = 2005410;
+		public static final Integer MDC_90 = 119706;
+		public static final Integer MDC_91 = 2005411;
+		public static final Integer MDC_92 = 2005412;
+		public static final Integer MDC_93 = 2005413;
+		public static final Integer MDC_94 = 2005414;
+		public static final Integer MDC_95 = 2005415;
+		public static final Integer MDC_96 = 2005416;
+		public static final Integer MDC_97 = 2005417;
+		public static final Integer MDC_98 = 2005418;
+		public static final Integer MDC_99 = 2005419;
+		public static final Integer MDC_100 = 2005420;
+		public static final Integer MDC_101 = 2005421;
+		public static final Integer MDC_102 = 2005422;
+		public static final Integer MDC_103 = 2005423;
+		public static final Integer MDC_104 = 127839;
+		public static final Integer MDC_105 = 2005424;
+		public static final Integer MDC_106 = 2005425;
+		public static final Integer MDC_107 = 2005426;
+		public static final Integer MDC_108 = 2005427;
+		public static final Integer MDC_109 = 2005428;
+		public static final Integer MDC_110 = 2005429;
+		public static final Integer MDC_111 = 2005430;
+		public static final Integer MDC_112 = 2005431;
+		public static final Integer MDC_113 = 2005432;
 		public static final Integer MDC_114 = 2005433;
 		public static final Integer MDC_115 = 118779;
 		public static final Integer MDC_116 = 134079;
@@ -758,612 +758,11 @@ public class DiagnosisConcepts {
 		public static final Integer MDC_124 = 2004831;
 		public static final Integer MDC_125 = 2004832;
 		public static final Integer MDC_126 = 2004833;
-		public static final Integer MDC_127 = 2004833;
+		public static final Integer MDC_127 = 118678;
 		public static final Integer MDC_128 = 2004834;
 		public static final Integer MDC_129 = 2004835;
-		public static final Integer MDC_130 = 2004835;
-		public static final Integer MDC_131 = 113881;
-		public static final Integer MDC_132 = 2004872;
-		public static final Integer MDC_133 = 2004717;
-		public static final Integer MDC_134 = 2004719;
-		public static final Integer MDC_135 = 2004720;
-		public static final Integer MDC_136 = 2004722;
-		public static final Integer MDC_137 = 2004723;
-		public static final Integer MDC_138 = 2004724;
-		public static final Integer MDC_139 = 155205;
-		public static final Integer MDC_140 = 121320;
-		public static final Integer MDC_141 = 148142;
-		public static final Integer MDC_142 = 2004768;
-		public static final Integer MDC_143 = 2004770;
-		public static final Integer MDC_144 = 2004727;
-		public static final Integer MDC_145 = 2004729;
-		public static final Integer MDC_146 = 2004731;
-		public static final Integer MDC_147 = 2004733;
-		public static final Integer MDC_148 = 2004734;
-		public static final Integer MDC_149 = 2004736;
-		public static final Integer MDC_150 = 2004738;
-		public static final Integer MDC_151 = 2004739;
-		public static final Integer MDC_152 = 2004754;
-		public static final Integer MDC_153 = 2004755;
-		public static final Integer MDC_154 = 2004756;
-		public static final Integer MDC_155 = 2004758;
-		public static final Integer MDC_156 = 2004760;
-		public static final Integer MDC_157 = 2004761;
-		public static final Integer MDC_158 = 2004773;
-		public static final Integer MDC_159 = 125901;
-		public static final Integer MDC_160 = 2004774;
-		public static final Integer MDC_161 = 2004776;
-		public static final Integer MDC_162 = 2004777;
-		public static final Integer MDC_163 = 2005367;
-		public static final Integer MDC_164 = 2005368;
-		public static final Integer MDC_165 = 2005369;
-		public static final Integer MDC_166 = 2005370;
-		public static final Integer MDC_167 = 2005371;
-		public static final Integer MDC_168 = 2005372;
-		public static final Integer MDC_169 = 2005373;
-		public static final Integer MDC_170 = 118678;
-		public static final Integer MDC_171 = 2004836;
-		public static final Integer MDC_172 = 2004841;
-		public static final Integer MDC_173 = 2004842;
-		public static final Integer MDC_174 = 2004844;
-		public static final Integer MDC_175 = 2004845;
-		public static final Integer MDC_176 = 2004846;
-		public static final Integer MDC_177 = 2004848;
-		public static final Integer MDC_178 = 2004854;
-		public static final Integer MDC_179 = 2004855;
-		public static final Integer MDC_180 = 2004857;
-		public static final Integer MDC_181 = 2004859;
-		public static final Integer MDC_182 = 2004860;
-		public static final Integer MDC_183 = 2004861;
-		public static final Integer MDC_184 = 2004863;
-		public static final Integer MDC_185 = 2004864;
-		public static final Integer MDC_186 = 112196;
-		public static final Integer MDC_187 = 2004866;
-		public static final Integer MDC_188 = 2004867;
-		public static final Integer MDC_189 = 2004868;
-		public static final Integer MDC_190 = 2004870;
-		public static final Integer MDC_191 = 2004871;
-		public static final Integer MDC_192 = 2004873;
-		public static final Integer MDC_193 = 2004875;
-		public static final Integer MDC_194 = 127891;
-		public static final Integer MDC_195 = 2004883;
-		public static final Integer MDC_196 = 2004885;
-		public static final Integer MDC_197 = 2004887;
-		public static final Integer MDC_198 = 2005138;
-		public static final Integer MDC_199 = 2005140;
-		public static final Integer MDC_200 = 2005141;
-		public static final Integer MDC_201 = 2005142;
-		public static final Integer MDC_202 = 2005143;
-		public static final Integer MDC_203 = 2005144;
-		public static final Integer MDC_204 = 2005145;
-		public static final Integer MDC_205 = 2005146;
-		public static final Integer MDC_206 = 2005147;
-		public static final Integer MDC_207 = 2005148;
-		public static final Integer MDC_208 = 121722;
-		public static final Integer MDC_209 = 123823;
-		public static final Integer MDC_210 = 2005154;
-		public static final Integer MDC_211 = 110093;
-		public static final Integer MDC_212 = 2005155;
-		public static final Integer MDC_213 = 2005156;
-		public static final Integer MDC_214 = 2005157;
-		public static final Integer MDC_215 = 2005158;
-		public static final Integer MDC_216 = 2005159;
-		public static final Integer MDC_217 = 2005160;
-		public static final Integer MDC_218 = 2005161;
-		public static final Integer MDC_219 = 149146;
-		public static final Integer MDC_220 = 149147;
-		public static final Integer MDC_221 = 2005163;
-		public static final Integer MDC_222 = 2005164;
-		public static final Integer MDC_223 = 2005166;
-		public static final Integer MDC_224 = 2005168;
-		public static final Integer MDC_225 = 2005169;
-		public static final Integer MDC_226 = 2005170;
-		public static final Integer MDC_227 = 2005171;
-		public static final Integer MDC_228 = 2005172;
-		public static final Integer MDC_229 = 2005173;
-		public static final Integer MDC_230 = 2005174;
-		public static final Integer MDC_231 = 2005175;
-		public static final Integer MDC_232 = 146497;
-		public static final Integer MDC_233 = 169528;
-		public static final Integer MDC_234 = 2005176;
-		public static final Integer MDC_235 = 146491;
-		public static final Integer MDC_236 = 2005178;
-		public static final Integer MDC_237 = 146493;
-		public static final Integer MDC_238 = 2005179;
-		public static final Integer MDC_239 = 2005180;
-		public static final Integer MDC_240 = 2005182;
-		public static final Integer MDC_241 = 2005184;
-		public static final Integer MDC_242 = 2005185;
-		public static final Integer MDC_243 = 2005186;
-		public static final Integer MDC_244 = 2005187;
-		public static final Integer MDC_245 = 2005189;
-		public static final Integer MDC_246 = 2005195;
-		public static final Integer MDC_247 = 2005197;
-		public static final Integer MDC_248 = 2005199;
-		public static final Integer MDC_249 = 2005201;
-		public static final Integer MDC_250 = 2005203;
-		public static final Integer MDC_251 = 2005205;
-		public static final Integer MDC_252 = 2005209;
-		public static final Integer MDC_253 = 2005210;
-		public static final Integer MDC_254 = 2005211;
-		public static final Integer MDC_255 = 2005212;
-		public static final Integer MDC_256 = 2005214;
-		public static final Integer MDC_257 = 2005216;
-		public static final Integer MDC_258 = 2005218;
-		public static final Integer MDC_259 = 2005222;
-		public static final Integer MDC_260 = 2005224;
-		public static final Integer MDC_261 = 2005226;
-		public static final Integer MDC_262 = 2005228;
-		public static final Integer MDC_263 = 2004920;
-		public static final Integer MDC_264 = 2004990;
-		public static final Integer MDC_265 = 2004916;
-		public static final Integer MDC_266 = 2004991;
-		public static final Integer MDC_267 = 2004992;
-		public static final Integer MDC_268 = 131781;
-		public static final Integer MDC_269 = 131779;
-		public static final Integer MDC_270 = 2004993;
-		public static final Integer MDC_271 = 2004995;
-		public static final Integer MDC_272 = 2004996;
-		public static final Integer MDC_273 = 131778;
-		public static final Integer MDC_274 = 2004998;
-		public static final Integer MDC_275 = 2004999;
-		public static final Integer MDC_276 = 2005001;
-		public static final Integer MDC_277 = 2005070;
-		public static final Integer MDC_278 = 2005071;
-		public static final Integer MDC_279 = 2005072;
-		public static final Integer MDC_280 = 2005074;
-		public static final Integer MDC_281 = 2005075;
-		public static final Integer MDC_282 = 2005076;
-		public static final Integer MDC_283 = 2005077;
-		public static final Integer MDC_284 = 2005078;
-		public static final Integer MDC_285 = 2005078;
-		public static final Integer MDC_286 = 2005080;
-		public static final Integer MDC_287 = 2005081;
-		public static final Integer MDC_288 = 2005083;
-		public static final Integer MDC_289 = 2005084;
-		public static final Integer MDC_290 = 2005085;
-		public static final Integer MDC_291 = 2005086;
-		public static final Integer MDC_292 = 2005088;
-		public static final Integer MDC_293 = 2005089;
-		public static final Integer MDC_294 = 2005090;
-		public static final Integer MDC_295 = 2005091;
-		public static final Integer MDC_296 = 2005092;
-		public static final Integer MDC_297 = 2005093;
-		public static final Integer MDC_298 = 2005004;
-		public static final Integer MDC_299 = 2005006;
-		public static final Integer MDC_300 = 2005007;
-		public static final Integer MDC_301 = 2005008;
-		public static final Integer MDC_302 = 2005011;
-		public static final Integer MDC_303 = 2005012;
-		public static final Integer MDC_304 = 2005013;
-		public static final Integer MDC_305 = 2005014;
-		public static final Integer MDC_306 = 2005015;
-		public static final Integer MDC_307 = 2005021;
-		public static final Integer MDC_308 = 2005025;
-		public static final Integer MDC_309 = 2005026;
-		public static final Integer MDC_310 = 2005027;
-		public static final Integer MDC_311 = 2005028;
-		public static final Integer MDC_312 = 2005030;
-		public static final Integer MDC_313 = 2005031;
-		public static final Integer MDC_314 = 2005032;
-		public static final Integer MDC_315 = 126831;
-		public static final Integer MDC_316 = 126832;
-		public static final Integer MDC_317 = 2005036;
-		public static final Integer MDC_318 = 2005045;
-		public static final Integer MDC_319 = 2005038;
-		public static final Integer MDC_320 = 2005042;
-		public static final Integer MDC_321 = 2005047;
-		public static final Integer MDC_322 = 2005049;
-		public static final Integer MDC_323 = 144657;
-		public static final Integer MDC_324 = 144658;
-		public static final Integer MDC_325 = 2005052;
-		public static final Integer MDC_326 = 2005053;
-		public static final Integer MDC_327 = 2005055;
-		public static final Integer MDC_328 = 120332;
-		public static final Integer MDC_329 = 144655;
-		public static final Integer MDC_330 = 2005056;
-		public static final Integer MDC_331 = 144650;
-		public static final Integer MDC_332 = 2005059;
-		public static final Integer MDC_333 = 2005060;
-		public static final Integer MDC_334 = 2005061;
-		public static final Integer MDC_335 = 144652;
-		public static final Integer MDC_336 = 144653;
-		public static final Integer MDC_337 = 2005063;
-		public static final Integer MDC_338 = 2005064;
-		public static final Integer MDC_339 = 2005065;
-		public static final Integer MDC_340 = 2005066;
-		public static final Integer MDC_341 = 2005095;
-		public static final Integer MDC_342 = 2005097;
-		public static final Integer MDC_343 = 2005098;
-		public static final Integer MDC_344 = 2005099;
-		public static final Integer MDC_345 = 2005100;
-		public static final Integer MDC_346 = 2005102;
-		public static final Integer MDC_347 = 2005105;
-		public static final Integer MDC_348 = 2005106;
-		public static final Integer MDC_349 = 2005107;
-		public static final Integer MDC_350 = 2005108;
-		public static final Integer MDC_351 = 2005109;
-		public static final Integer MDC_352 = 2005110;
-		public static final Integer MDC_353 = 2005111;
-		public static final Integer MDC_354 = 2005111;
-		public static final Integer MDC_355 = 2005112;
-		public static final Integer MDC_356 = 2005114;
-		public static final Integer MDC_357 = 2005115;
-		public static final Integer MDC_358 = 2005116;
-		public static final Integer MDC_359 = 2005117;
-		public static final Integer MDC_360 = 2005119;
-		public static final Integer MDC_361 = 2005120;
-		public static final Integer MDC_362 = 2005121;
-		public static final Integer MDC_363 = 2005122;
-		public static final Integer MDC_364 = 2005123;
-		public static final Integer MDC_365 = 2005124;
-		public static final Integer MDC_366 = 2005126;
-		public static final Integer MDC_367 = 2005128;
-		public static final Integer MDC_368 = 2005129;
-		public static final Integer MDC_369 = 2005130;
-		public static final Integer MDC_370 = 120968;
-		public static final Integer MDC_371 = 169527;
-		public static final Integer MDC_372 = 146594;
-		public static final Integer MDC_373 = 2005132;
-		public static final Integer MDC_374 = 2005133;
-		public static final Integer MDC_375 = 2005135;
-		public static final Integer MDC_376 = 2005150;
-		public static final Integer MDC_377 = 2005152;
-		public static final Integer MDC_378 = 2005190;
-		public static final Integer MDC_379 = 2005191;
-		public static final Integer MDC_380 = 2005192;
-		public static final Integer MDC_381 = 2005193;
-		public static final Integer MDC_382 = 2005194;
-		public static final Integer MDC_383 = 117713;
-		public static final Integer MDC_384 = 2005196;
-		public static final Integer MDC_385 = 2005198;
-		public static final Integer MDC_386 = 2005202;
-		public static final Integer MDC_387 = 139134;
-		public static final Integer MDC_388 = 2005204;
-		public static final Integer MDC_389 = 2005206;
-		public static final Integer MDC_390 = 2005213;
-		public static final Integer MDC_391 = 2005217;
-		public static final Integer MDC_392 = 2005219;
-		public static final Integer MDC_393 = 2005221;
-		public static final Integer MDC_394 = 2005225;
-		public static final Integer MDC_395 = 2005227;
-		public static final Integer MDC_396 = 2005229;
-		public static final Integer MDC_397 = 2005230;
-		public static final Integer MDC_398 = 2005232;
-		public static final Integer MDC_399 = 2005233;
-		public static final Integer MDC_400 = 133041;
-		public static final Integer MDC_401 = 2005234;
-		public static final Integer MDC_402 = 2005235;
-		public static final Integer MDC_403 = 2005238;
-		public static final Integer MDC_404 = 2005241;
-		public static final Integer MDC_405 = 2005242;
-		public static final Integer MDC_406 = 2005244;
-		public static final Integer MDC_407 = 2005246;
-		public static final Integer MDC_408 = 2005247;
-		public static final Integer MDC_409 = 2005248;
-		public static final Integer MDC_410 = 2005249;
-		public static final Integer MDC_411 = 2005250;
-		public static final Integer MDC_412 = 2005251;
-		public static final Integer MDC_413 = 2005252;
-		public static final Integer MDC_414 = 2005253;
-		public static final Integer MDC_415 = 2005254;
-		public static final Integer MDC_416 = 2005256;
-		public static final Integer MDC_417 = 2005257;
-		public static final Integer MDC_418 = 2005258;
-		public static final Integer MDC_419 = 2005259;
-		public static final Integer MDC_420 = 2005261;
-		public static final Integer MDC_421 = 2005263;
-		public static final Integer MDC_422 = 2005264;
-		public static final Integer MDC_423 = 2005265;
-		public static final Integer MDC_424 = 2005267;
-		public static final Integer MDC_425 = 2005268;
-		public static final Integer MDC_426 = 2005269;
-		public static final Integer MDC_427 = 2005270;
-		public static final Integer MDC_428 = 2005271;
-		public static final Integer MDC_429 = 2005103;
-		public static final Integer MDC_430 = 2005446;
-		public static final Integer MDC_431 = 2005447;
-		public static final Integer MDC_432 = 2005449;
-		public static final Integer MDC_433 = 2005450;
-		public static final Integer MDC_434 = 2005451;
-		public static final Integer MDC_435 = 2005452;
-		public static final Integer MDC_436 = 2005454;
-		public static final Integer MDC_437 = 2005456;
-		public static final Integer MDC_438 = 2005457;
-		public static final Integer MDC_439 = 2005458;
-		public static final Integer MDC_440 = 2005460;
-		public static final Integer MDC_441 = 2005461;
-		public static final Integer MDC_442 = 2005462;
-		public static final Integer MDC_443 = 2005463;
-		public static final Integer MDC_444 = 2005464;
-		public static final Integer MDC_445 = 2005465;
-		public static final Integer MDC_446 = 2005466;
-		public static final Integer MDC_447 = 2005467;
-		public static final Integer MDC_448 = 2005469;
-		public static final Integer MDC_449 = 2005470;
-		public static final Integer MDC_450 = 2005471;
-		public static final Integer MDC_451 = 2005472;
-		public static final Integer MDC_452 = 2005474;
-		public static final Integer MDC_453 = 2005476;
-		public static final Integer MDC_454 = 2005477;
-		public static final Integer MDC_455 = 2005478;
-		public static final Integer MDC_456 = 2005480;
-		public static final Integer MDC_457 = 2005481;
-		public static final Integer MDC_458 = 2005483;
-		public static final Integer MDC_459 = 2005484;
-		public static final Integer MDC_460 = 2005485;
-		public static final Integer MDC_461 = 2005487;
-		public static final Integer MDC_462 = 2005488;
-		public static final Integer MDC_463 = 2005489;
-		public static final Integer MDC_464 = 2005490;
-		public static final Integer MDC_465 = 2005491;
-		public static final Integer MDC_466 = 2005492;
-		public static final Integer MDC_467 = 2005493;
-		public static final Integer MDC_468 = 2005495;
-		public static final Integer MDC_469 = 2005496;
-		public static final Integer MDC_470 = 2005497;
-		public static final Integer MDC_471 = 2005498;
-		public static final Integer MDC_472 = 2005499;
-		public static final Integer MDC_473 = 2005500;
-		public static final Integer MDC_474 = 2005502;
-		public static final Integer MDC_475 = 2005504;
-		public static final Integer MDC_476 = 2005505;
-		public static final Integer MDC_477 = 2005506;
-		public static final Integer MDC_478 = 2005508;
-		public static final Integer MDC_479 = 2005509;
-		public static final Integer MDC_480 = 2005510;
-		public static final Integer MDC_481 = 2005512;
-		public static final Integer MDC_482 = 2005513;
-		public static final Integer MDC_483 = 2005515;
-		public static final Integer MDC_484 = 2005516;
-		public static final Integer MDC_485 = 2005517;
-		public static final Integer MDC_486 = 2005518;
-		public static final Integer MDC_487 = 2005519;
-		public static final Integer MDC_488 = 2005520;
-		public static final Integer MDC_489 = 2005521;
-		public static final Integer MDC_490 = 2005522;
-		public static final Integer MDC_491 = 2005524;
-		public static final Integer MDC_492 = 2005525;
-		public static final Integer MDC_493 = 2005526;
-		public static final Integer MDC_494 = 2005527;
-		public static final Integer MDC_495 = 2005528;
-		public static final Integer MDC_496 = 2005529;
-		public static final Integer MDC_497 = 2005531;
-		public static final Integer MDC_498 = 2005533;
-		public static final Integer MDC_499 = 2005534;
-		public static final Integer MDC_500 = 2005535;
-		public static final Integer MDC_501 = 2005537;
-		public static final Integer MDC_502 = 2005538;
-		public static final Integer MDC_503 = 2005539;
-		public static final Integer MDC_504 = 2005540;
-		public static final Integer MDC_505 = 2005541;
-		public static final Integer MDC_506 = 2005542;
-		public static final Integer MDC_507 = 2005243;
-		public static final Integer MDC_508 = 2005236;
-		public static final Integer MDC_509 = 2007370;
-		public static final Integer MDC_510 = 2007371;
-		public static final Integer MDC_511 = 2007372;
-		public static final Integer MDC_512 = 2007373;
-		public static final Integer MDC_513 = 2007375;
-		public static final Integer MDC_514 = 2007376;
-		public static final Integer MDC_515 = 2007378;
-		public static final Integer MDC_516 = 2007379;
-		public static final Integer MDC_517 = 2007380;
-		public static final Integer MDC_518 = 2007382;
-		public static final Integer MDC_519 = 2007382;
-		public static final Integer MDC_520 = 2007985;
-		public static final Integer MDC_521 = 2007986;
-		public static final Integer MDC_522 = 2007987;
-		public static final Integer MDC_523 = 2007988;
-		public static final Integer MDC_524 = 2007989;
-		public static final Integer MDC_525 = 2007990;
-		public static final Integer MDC_526 = 2007991;
-		public static final Integer MDC_527 = 2005279;
-		public static final Integer MDC_528 = 2005280;
-		public static final Integer MDC_529 = 2005281;
-		public static final Integer MDC_530 = 2005282;
-		public static final Integer MDC_531 = 2005283;
-		public static final Integer MDC_532 = 2005284;
-		public static final Integer MDC_533 = 2005285;
-		public static final Integer MDC_534 = 117958;
-		public static final Integer MDC_535 = 2005287;
-		public static final Integer MDC_536 = 2005288;
-		public static final Integer MDC_537 = 2005289;
-		public static final Integer MDC_538 = 2005290;
-		public static final Integer MDC_539 = 2005292;
-		public static final Integer MDC_540 = 2005293;
-		public static final Integer MDC_541 = 2005294;
-		public static final Integer MDC_542 = 2005295;
-		public static final Integer MDC_543 = 119569;
-		public static final Integer MDC_544 = 2005295;
-		public static final Integer MDC_545 = 2005296;
-		public static final Integer MDC_546 = 2005297;
-		public static final Integer MDC_547 = 2005298;
-		public static final Integer MDC_548 = 2005299;
-		public static final Integer MDC_549 = 2005300;
-		public static final Integer MDC_550 = 2005300;
-		public static final Integer MDC_551 = 2005301;
-		public static final Integer MDC_552 = 2005303;
-		public static final Integer MDC_553 = 2005304;
-		public static final Integer MDC_554 = 2005305;
-		public static final Integer MDC_555 = 2005306;
-		public static final Integer MDC_556 = 2005307;
-		public static final Integer MDC_557 = 2005308;
-		public static final Integer MDC_558 = 2005309;
-		public static final Integer MDC_559 = 2005310;
-		public static final Integer MDC_560 = 2005311;
-		public static final Integer MDC_561 = 2005312;
-		public static final Integer MDC_562 = 2005316;
-		public static final Integer MDC_563 = 2005317;
-		public static final Integer MDC_564 = 2005318;
-		public static final Integer MDC_565 = 2005319;
-		public static final Integer MDC_566 = 2005375;
-		public static final Integer MDC_567 = 2005376;
-		public static final Integer MDC_568 = 2005437;
-		public static final Integer MDC_569 = 2004896;
-		public static final Integer MDC_570 = 2004897;
-		public static final Integer MDC_571 = 2004896;
-		public static final Integer MDC_572 = 2004900;
-		public static final Integer MDC_573 = 2004901;
-		public static final Integer MDC_574 = 2004902;
-		public static final Integer MDC_575 = 2004903;
-		public static final Integer MDC_576 = 2004904;
-		public static final Integer MDC_577 = 2004905;
-		public static final Integer MDC_578 = 2004908;
-		public static final Integer MDC_579 = 2004910;
-		public static final Integer MDC_580 = 2004912;
-		public static final Integer MDC_581 = 2004913;
-		public static final Integer MDC_582 = 2004915;
-		public static final Integer MDC_583 = 2004918;
-		public static final Integer MDC_584 = 2004919;
-		public static final Integer MDC_585 = 2004922;
-		public static final Integer MDC_586 = 2004923;
-		public static final Integer MDC_587 = 2004925;
-		public static final Integer MDC_588 = 2004926;
-		public static final Integer MDC_589 = 2004930;
-		public static final Integer MDC_590 = 2004931;
-		public static final Integer MDC_591 = 2004934;
-		public static final Integer MDC_592 = 2004936;
-		public static final Integer MDC_593 = 2004939;
-		public static final Integer MDC_594 = 2004940;
-		public static final Integer MDC_595 = 2004943;
-		public static final Integer MDC_596 = 2004945;
-		public static final Integer MDC_597 = 2004947;
-		public static final Integer MDC_598 = 2004948;
-		public static final Integer MDC_599 = 2004957;
-		public static final Integer MDC_600 = 2004958;
-		public static final Integer MDC_601 = 2004961;
-		public static final Integer MDC_602 = 2004966;
-		public static final Integer MDC_603 = 2004968;
-		public static final Integer MDC_604 = 2004969;
-		public static final Integer MDC_605 = 2004971;
-		public static final Integer MDC_606 = 2004972;
-		public static final Integer MDC_607 = 2004975;
-		public static final Integer MDC_608 = 146847;
-		public static final Integer MDC_609 = 169453;
-		public static final Integer MDC_610 = 2004977;
-		public static final Integer MDC_611 = 130220;
-		public static final Integer MDC_612 = 2004986;
-		public static final Integer MDC_613 = 2004985;
-		public static final Integer MDC_614 = 2004987;
-		public static final Integer MDC_615 = 158534;
-		public static final Integer MDC_616 = 141854;
-		public static final Integer MDC_617 = 133005;
-		public static final Integer MDC_618 = 2004911;
-		public static final Integer MDC_619 = 2004933;
-		public static final Integer MDC_620 = 2004937;
-		public static final Integer MDC_621 = 2004942;
-		public static final Integer MDC_622 = 2004946;
-		public static final Integer MDC_623 = 2004952;
-		public static final Integer MDC_624 = 2004955;
-		public static final Integer MDC_625 = 2004959;
-		public static final Integer MDC_626 = 2004964;
-		public static final Integer MDC_627 = 2004967;
-		public static final Integer MDC_628 = 2004970;
-		public static final Integer MDC_629 = 2004974;
-		public static final Integer MDC_630 = 2007993;
-		public static final Integer MDC_631 = 2007994;
-		public static final Integer MDC_632 = 2004995;
-		public static final Integer MDC_633 = 2007997;
-		public static final Integer MDC_634 = 2007998;
-		public static final Integer MDC_635 = 2007999;
-		public static final Integer MDC_636 = 2008000;
-		public static final Integer MDC_637 = 2008001;
-		public static final Integer MDC_638 = 127984;
-		public static final Integer MDC_639 = 2008002;
-		public static final Integer MDC_640 = 136746;
-		public static final Integer MDC_641 = 2008003;
-		public static final Integer MDC_642 = 2008004;
-		public static final Integer MDC_643 = 2008008;
-		public static final Integer MDC_644 = 2008011;
-		public static final Integer MDC_645 = 2008014;
-		public static final Integer MDC_646 = 2008019;
-		public static final Integer MDC_647 = 2008021;
-		public static final Integer MDC_648 = 2008022;
-		public static final Integer MDC_649 = 2008023;
-		public static final Integer MDC_650 = 2008008;
-		public static final Integer MDC_651 = 2008011;
-		public static final Integer MDC_652 = 2008032;
-		public static final Integer MDC_653 = 2008033;
-		public static final Integer MDC_654 = 2008034;
-		public static final Integer MDC_655 = 2008035;
-		public static final Integer MDC_656 = 2008036;
-		public static final Integer MDC_657 = 2008037;
-		public static final Integer MDC_658 = 2008038;
-		public static final Integer MDC_659 = 2008039;
-		public static final Integer MDC_660 = 2008040;
-		public static final Integer MDC_661 = 2008041;
-		public static final Integer MDC_662 = 2008043;
-		public static final Integer MDC_663 = 2008044;
-		public static final Integer MDC_664 = 2008045;
-		public static final Integer MDC_665 = 2008046;
-		public static final Integer MDC_666 = 2008047;
-		public static final Integer MDC_667 = 2008048;
-		public static final Integer MDC_668 = 2008049;
-		public static final Integer MDC_669 = 2008050;
-		public static final Integer MDC_670 = 2008051;
-		public static final Integer MDC_671 = 2008052;
-		public static final Integer MDC_672 = 2008053;
-		public static final Integer MDC_673 = 2008054;
-		public static final Integer MDC_674 = 2008055;
-		public static final Integer MDC_675 = 2008056;
-		public static final Integer MDC_676 = 2008057;
-		public static final Integer MDC_677 = 2008058;
-		public static final Integer MDC_678 = 2008059;
-		public static final Integer MDC_679 = 2008060;
-		public static final Integer MDC_680 = 2008061;
-		public static final Integer MDC_681 = 2008062;
-		public static final Integer MDC_682 = 2008063;
-		public static final Integer MDC_683 = 2008064;
-		public static final Integer MDC_684 = 2008065;
-		public static final Integer MDC_685 = 2008066;
-		public static final Integer MDC_686 = 2005272;
-		public static final Integer MDC_687 = 2005273;
-		public static final Integer MDC_688 = 2005274;
-		public static final Integer MDC_689 = 2005275;
-		public static final Integer MDC_690 = 2005276;
-		public static final Integer MDC_691 = 2005277;
-		public static final Integer MDC_692 = 2005314;
-		public static final Integer MDC_693 = 2005315;
-		public static final Integer MDC_694 = 2005320;
-		public static final Integer MDC_695 = 2005321;
-		public static final Integer MDC_696 = 2005322;
-		public static final Integer MDC_697 = 2005323;
-		public static final Integer MDC_698 = 2005324;
-		public static final Integer MDC_699 = 2005325;
-		public static final Integer MDC_700 = 2005326;
-		public static final Integer MDC_701 = 2005328;
-		public static final Integer MDC_702 = 2005329;
-		public static final Integer MDC_703 = 2005330;
-		public static final Integer MDC_704 = 2005332;
-		public static final Integer MDC_705 = 2005333;
-		public static final Integer MDC_706 = 2005334;
-		public static final Integer MDC_707 = 2005335;
-		public static final Integer MDC_708 = 2005337;
-		public static final Integer MDC_709 = 2005338;
-		public static final Integer MDC_710 = 2005339;
-		public static final Integer MDC_711 = 2005340;
-		public static final Integer MDC_712 = 2005341;
-		public static final Integer MDC_713 = 2005342;
-		public static final Integer MDC_714 = 2005343;
-		public static final Integer MDC_715 = 2005344;
-		public static final Integer MDC_716 = 2005345;
-		public static final Integer MDC_717 = 2005346;
-		public static final Integer MDC_718 = 2005347;
-		public static final Integer MDC_719 = 2005348;
-		public static final Integer MDC_720 = 2005349;
-		public static final Integer MDC_721 = 2005350;
-		public static final Integer MDC_722 = 2005351;
-		public static final Integer MDC_723 = 2005438;
-		public static final Integer MDC_724 = 2005439;
-		public static final Integer MDC_725 = 2005440;
-		public static final Integer MDC_726 = 2005441;
-		public static final Integer MDC_727 = 2005442;
-		public static final Integer MDC_728 = 2005443;
-		public static final Integer MDC_729 = 2005444;
-		public static final Integer MDC_730 = 2005438;
-		public static final Integer MDC_731 = 2005438;
-		public static final Integer MDC_732 = 2005438;
+		public static final Integer MDC_130 = 113881;
+		public static final Integer MDC_131 = 2004872;
 
 		//Dental disorders	
 
@@ -1397,172 +796,95 @@ public class DiagnosisConcepts {
 		public static final Integer DDC_28 = 2006436;
 		public static final Integer DDC_29 = 2006437;
 		public static final Integer DDC_30 = 2006438;
-		public static final Integer DDC_32 = 2006439;
-		public static final Integer DDC_33 = 2006440;
-		public static final Integer DDC_34 = 2020284;
-		public static final Integer DDC_35 = 2020327;
-		public static final Integer DDC_36 = 2020329;
-		public static final Integer DDC_37 = 2012428;
-		public static final Integer DDC_38 = 2012432;
-		public static final Integer DDC_39 = 2012435;
-		public static final Integer DDC_40 = 2012437;
-		public static final Integer DDC_41 = 120292;
-		public static final Integer DDC_42 = 2006408;
-		public static final Integer DDC_43 = 2006411;
-		public static final Integer DDC_44 = 112347;
-		public static final Integer DDC_45 = 2006415;
-		public static final Integer DDC_46 = 2006416;
-		public static final Integer DDC_47 = 2006417;
-		public static final Integer DDC_48 = 2006418;
-		public static final Integer DDC_49 = 2006423;
-		public static final Integer DDC_50 = 2006470;
-		public static final Integer DDC_51 = 119558;
-		public static final Integer DDC_52 = 2006361;
-		public static final Integer DDC_53 = 5337;
-		public static final Integer DDC_54 = 2006362;
-		public static final Integer DDC_55 = 2006363;
-		public static final Integer DDC_56 = 2006365;
-		public static final Integer DDC_57 = 2006366;
-		public static final Integer DDC_58 = 2006367;
-		public static final Integer DDC_59 = 2006368;
-		public static final Integer DDC_60 = 2006369;
-		public static final Integer DDC_61 = 2006370;
-		public static final Integer DDC_62 = 2006371;
-		public static final Integer DDC_63 = 2006374;
-		public static final Integer DDC_64 = 2006375;
-		public static final Integer DDC_65 = 2006377;
-		public static final Integer DDC_66 = 2006378;
-		public static final Integer DDC_67 = 2006379;
-		public static final Integer DDC_68 = 2006380;
-		public static final Integer DDC_69 = 2006381;
-		public static final Integer DDC_70 = 2006382;
-		public static final Integer DDC_71 = 2006383;
-		public static final Integer DDC_72 = 2006384;
-		public static final Integer DDC_73 = 139407;
-		public static final Integer DDC_74 = 39495;
-		public static final Integer DDC_75 = 148147;
-		public static final Integer DDC_76 = 2006393;
-		public static final Integer DDC_77 = 138121;
-		public static final Integer DDC_78 = 118614;
-		public static final Integer DDC_79 = 2006394;
-		public static final Integer DDC_80 = 2006395;
-		public static final Integer DDC_81 = 148154;
-		public static final Integer DDC_82 = 138127;
-		public static final Integer DDC_83 = 126523;
-		public static final Integer DDC_84 = 150560;
-		public static final Integer DDC_85 = 126519;
-		public static final Integer DDC_86 = 126519;
-		public static final Integer DDC_87 = 133824;
-		public static final Integer DDC_88 = 141862;
-		public static final Integer DDC_89 = 2006396;
-		public static final Integer DDC_90 = 2006397;
-		public static final Integer DDC_91 = 2006398;
-		public static final Integer DDC_92 = 2006399;
-		public static final Integer DDC_93 = 145740;
-		public static final Integer DDC_94 = 2006354;
-		public static final Integer DDC_95 = 2006355;
-		public static final Integer DDC_96 = 2006356;
-		public static final Integer DDC_97 = 2006357;
-		public static final Integer DDC_98 = 2006358;
-		public static final Integer DDC_99 = 2006386;
-		public static final Integer DDC_100 = 2006387;
-		public static final Integer DDC_101 = 2006388;
-		public static final Integer DDC_102 = 2006411;
-		public static final Integer DDC_103 = 2006412;
-		public static final Integer DDC_104 = 2006413;
-		public static final Integer DDC_105 = 2006420;
-		public static final Integer DDC_106 = 2006421;
-		public static final Integer DDC_107 = 2006422;
-		public static final Integer DDC_108 = 128096;
-		public static final Integer DDC_109 = 133448;
-		public static final Integer DDC_110 = 113480;
-		public static final Integer DDC_111 = 2006428;
-		public static final Integer DDC_112 = 128098;
-		public static final Integer DDC_113 = 150841;
-		public static final Integer DDC_114 = 2006429;
-		public static final Integer DDC_115 = 114258;
-		public static final Integer DDC_116 = 2006430;
-		public static final Integer DDC_117 = 114259;
-		public static final Integer DDC_118 = 2006431;
-		public static final Integer DDC_119 = 149907;
-		public static final Integer DDC_120 = 145491;
-		public static final Integer DDC_121 = 2006432;
-		public static final Integer DDC_122 = 127934;
-		public static final Integer DDC_123 = 2006434;
-		public static final Integer DDC_124 = 2006435;
-		public static final Integer DDC_125 = 148162;
-		public static final Integer DDC_126 = 127608;
-		public static final Integer DDC_127 = 2006441;
-		public static final Integer DDC_128 = 2006442;
-		public static final Integer DDC_129 = 2006443;
-		public static final Integer DDC_130 = 2006444;
-		public static final Integer DDC_131 = 2006445;
-		public static final Integer DDC_132 = 2006446;
-		public static final Integer DDC_133 = 2006447;
-		public static final Integer DDC_134 = 2006448;
-		public static final Integer DDC_135 = 2006444;
-		public static final Integer DDC_136 = 114250;
-		public static final Integer DDC_137 = 121873;
-		public static final Integer DDC_138 = 2006449;
-		public static final Integer DDC_139 = 2006451;
-		public static final Integer DDC_140 = 2006452;
-		public static final Integer DDC_141 = 2006453;
-		public static final Integer DDC_142 = 2006454;
-		public static final Integer DDC_143 = 2006455;
-		public static final Integer DDC_144 = 159344;
-		public static final Integer DDC_145 = 2006456;
-		public static final Integer DDC_146 = 117796;
-		public static final Integer DDC_147 = 139443;
-		public static final Integer DDC_148 = 2006458;
-		public static final Integer DDC_149 = 2006459;
-		public static final Integer DDC_150 = 2006460;
-		public static final Integer DDC_151 = 2006461;
-		public static final Integer DDC_152 = 2006462;
-		public static final Integer DDC_153 = 2006465;
-		public static final Integer DDC_154 = 2006466;
-		public static final Integer DDC_155 = 2006467;
-		public static final Integer DDC_156 = 2006468;
-		public static final Integer DDC_157 = 2006469;
-		public static final Integer DDC_158 = 2006470;
-		public static final Integer DDC_159 = 2006471;
-		public static final Integer DDC_160 = 2006472;
-		public static final Integer DDC_161 = 2006472;
-		public static final Integer DDC_162 = 2006473;
-		public static final Integer DDC_163 = 2006474;
-		public static final Integer DDC_164 = 2006475;
-		public static final Integer DDC_165 = 134715;
-		public static final Integer DDC_166 = 2006476;
-		public static final Integer DDC_167 = 2006477;
-		public static final Integer DDC_168 = 2006478;
-		public static final Integer DDC_169 = 112454;
-		public static final Integer DDC_170 = 112454;
-		public static final Integer DDC_171 = 112454;
-		public static final Integer DDC_172 = 112454;
+		public static final Integer DDC_31 = 2006439;
+		public static final Integer DDC_32 = 2006440;
+		public static final Integer DDC_33 = 2020284;
+		public static final Integer DDC_34 = 2020327;
+		public static final Integer DDC_35 = 2020329;
+		public static final Integer DDC_36 = 2012428;
+		public static final Integer DDC_37 = 2012432;
+		public static final Integer DDC_38 = 2012435;
+		public static final Integer DDC_39 = 2012437;
+		public static final Integer DDC_40 = 120292;
+		public static final Integer DDC_41 = 2006408;
+		public static final Integer DDC_42 = 2006411;
+		public static final Integer DDC_43 = 112347;
+		public static final Integer DDC_44 = 2006415;
+		public static final Integer DDC_45 = 2006416;
+		public static final Integer DDC_46 = 2006417;
+		public static final Integer DDC_47 = 2006418;
+		public static final Integer DDC_48 = 2006423;
+		public static final Integer DDC_49 = 2006470;
+		public static final Integer DDC_50 = 119558;
+		public static final Integer DDC_51 = 2006421;
+		public static final Integer DDC_52 = 2006422;
+		public static final Integer DDC_53 = 127608;
+		public static final Integer DDC_54 = 133448;
+		public static final Integer DDC_55 = 113480;
+		public static final Integer DDC_56 = 2006429;
+		public static final Integer DDC_57 = 114258;
+		public static final Integer DDC_58 = 2006430;
+		public static final Integer DDC_59 = 114259;
+		public static final Integer DDC_60 = 2006431;
+		public static final Integer DDC_61 = 149907;
+		public static final Integer DDC_62 = 145491;
+		public static final Integer DDC_63 = 2006432;
+		public static final Integer DDC_64 = 148162;
+		public static final Integer DDC_65 = 117798;
+		public static final Integer DDC_66 = 2006441;
+		public static final Integer DDC_67 = 2006442;
+		public static final Integer DDC_68 = 2006443;
+		public static final Integer DDC_69 = 2006444;
+		public static final Integer DDC_70 = 2006445;
+		public static final Integer DDC_71 = 2006446;
+		public static final Integer DDC_72 = 114250;
+		public static final Integer DDC_73 = 2006447;
+		public static final Integer DDC_74 = 2006448;
+		public static final Integer DDC_75 = 114240;
+		public static final Integer DDC_76 = 121873;
+		public static final Integer DDC_77 = 2006449;
+		public static final Integer DDC_78 = 130463;
+		public static final Integer DDC_79 = 2006451;
+		public static final Integer DDC_80 = 2006453;
+		public static final Integer DDC_81 = 2006454;
+		public static final Integer DDC_82 = 2006455;
+		public static final Integer DDC_83 = 159344;
+		public static final Integer DDC_84 = 2006456;
+		public static final Integer DDC_85 = 117796;
+		public static final Integer DDC_86 = 139443;
+		public static final Integer DDC_87 = 2006458;
+		public static final Integer DDC_88 = 2006472;
+		public static final Integer DDC_89 = 2006473;
+		public static final Integer DDC_90 = 2006474;
+		public static final Integer DDC_91 = 2006475;
+		public static final Integer DDC_92 = 134715;
+		public static final Integer DDC_93 = 2006476;
+		public static final Integer DDC_94 = 2006477;
+		public static final Integer DDC_95 = 2006478;
+		public static final Integer DDC_96 = 112454;
 
 		//ROAD TRAFFIC INJURIES
 		public static final Integer RTC_1 = 2011801;
 		public static final Integer RTC_2 = 2012092;
 		public static final Integer RTC_3 = 2011800;
-		public static final Integer RTC_4 = 2011801;
-		public static final Integer RTC_5 = 2011897;
-		public static final Integer RTC_6 = 2012091;
-		public static final Integer RTC_7 = 2012092;
-		public static final Integer RTC_8 = 2012094;
-		public static final Integer RTC_9 = 2012095;
-		public static final Integer RTC_10 = 2012097;
-		public static final Integer RTC_11 = 2012098;
-		public static final Integer RTC_12 = 2012100;
-		public static final Integer RTC_13 = 2012101;
-		public static final Integer RTC_14 = 2012103;
-		public static final Integer RTC_15 = 2012104;
-		public static final Integer RTC_16 = 2012105;
-		public static final Integer RTC_17 = 2012106;
-		public static final Integer RTC_18 = 2012108;
-		public static final Integer RTC_19 = 2012110;
-		public static final Integer RTC_20 = 2012113;
-		public static final Integer RTC_21 = 2012115;
-		public static final Integer RTC_22 = 2012116;
-		public static final Integer RTC_23 = 2012118;
+		public static final Integer RTC_4 = 2011897;
+		public static final Integer RTC_5 = 2012091;
+		public static final Integer RTC_6 = 2012094;
+		public static final Integer RTC_7 = 2012095;
+		public static final Integer RTC_8 = 2012097;
+		public static final Integer RTC_9 = 2012098;
+		public static final Integer RTC_10 = 2012100;
+		public static final Integer RTC_11 = 2012101;
+		public static final Integer RTC_12 = 2012103;
+		public static final Integer RTC_13 = 2012104;
+		public static final Integer RTC_14 = 2012105;
+		public static final Integer RTC_15 = 2012106;
+		public static final Integer RTC_16 = 2012108;
+		public static final Integer RTC_17 = 2012110;
+		public static final Integer RTC_18 = 2012113;
+		public static final Integer RTC_19 = 2012115;
+		public static final Integer RTC_20 = 2012116;
+		public static final Integer RTC_21 = 2012118;
 		
 		//VIOLENCE RELATED INJURIES
 		public static final Integer VRC_1 = 2012029;
@@ -1590,7 +912,8 @@ public class DiagnosisConcepts {
 		public static final Integer SAC_2 = 2022453;
 		public static final Integer SAC_4 = 2022455;
 		public static final Integer SAC_5 = 2022456;
-		//BURNS		
+		public static final Integer SAC_6 = 2022454;
+		//BURNS
 		public static final Integer BC_1 = 2020933;
 		public static final Integer BC_2 = 2020936;
 		public static final Integer BC_3 = 2020937;
@@ -1703,13 +1026,11 @@ public class DiagnosisConcepts {
 		public static final Integer SBC_4 = 2030392;
 		public static final Integer SBC_5 = 2029073;
 		public static final Integer SBC_6 = 2023720;
-		public static final Integer SBC_7 = 2021568;
-		public static final Integer SBC_8 = 2012002;
 		//Dog bites
 		public static final Integer DBC_1 = 160146;
 		public static final Integer DBC_2 = 2013469;
 		public static final Integer DBC_3 = 2015528;
-		public static final Integer DBC_4 = 2015528;
+		public static final Integer DBC_4 = 2012028;
 
 		//Other bites refer to
 		public static final Integer OBC_1 = 127902;
@@ -1772,16 +1093,15 @@ public class DiagnosisConcepts {
 		public static final Integer EPC_24 = 2005762;
 
 		//Convulsive disorders
-
 		public static final Integer OCDC_1 = 2013847;
 		public static final Integer OCDC_2 = 2014318;
 		public static final Integer OCDC_3 = 2014323;
-		//Reumotic fever
+
+		//Rheumatic fever
 		public static final Integer RF_1 = 113229;
 		public static final Integer RF_2 = 113230;
 		public static final Integer RF_3 = 2002814;
 		public static final Integer RF_4 = 121843;
-
 
 		//Rickets
 		public static final Integer RKC_1 = 2005019;
@@ -1789,6 +1109,7 @@ public class DiagnosisConcepts {
 		public static final Integer RKC_3 = 2004605;
 		public static final Integer RKC_4 = 2004606;
 		public static final Integer RKC_5 = 2004607;
+
 		//cerebral mental Palsy
 		public static final Integer CRPC_1 = 126258;
 		public static final Integer CRPC_2 = 2006001;
@@ -1803,7 +1124,6 @@ public class DiagnosisConcepts {
 		public static final Integer CRPC_11 = 2006007;
 		public static final Integer CRPC_12 = 2006008;
 
-
 		//Autism
 		public static final Integer ATC_1 = 2004741;
 		public static final Integer ATC_2 = 2004742;
@@ -1816,7 +1136,6 @@ public class DiagnosisConcepts {
 
 
 		//Trypanosomiasis
-
 		public static final Integer TRC_1 = 149241;
 		public static final Integer TRC_2 = 2002658;
 		public static final Integer TRC_3 = 2002660;
@@ -1928,7 +1247,7 @@ public class DiagnosisConcepts {
 		public static final Integer SCC_71 = 2003144;
 		public static final Integer SCC_72 = 2003145;
 		public static final Integer SCC_73 = 133578;
-		public static final Integer SCC_74 = 2003146; //
+		public static final Integer SCC_74 = 2003146;
 		public static final Integer SCC_75 = 2003147;
 		public static final Integer SCC_76 = 2003148;
 		public static final Integer SCC_77 = 2003149;
@@ -2065,6 +1384,8 @@ public class DiagnosisConcepts {
 		public static final Integer SCC_208 = 2003655;
 		public static final Integer SCC_209 = 2003658;
 		public static final Integer SCC_210 = 2003659;
+		public static final Integer SCC_211 = 2003007;
+		public static final Integer SCC_212 = 2003540;
 
 
 		//moh705B
@@ -2177,7 +1498,6 @@ public class DiagnosisConcepts {
 		public static final Integer MOA_42 = 125958;
 		public static final Integer MOA_43 = 130095;
 		public static final Integer MOA_44 = 134359;
-		public static final Integer MOA_45 = 134369;
 
 		//Tetanus
 		public static final Integer NTA_1 = 2013066;
@@ -2314,64 +1634,11 @@ public class DiagnosisConcepts {
 		public static final Integer MPA_2 = 2009200;
 
 		//Malnutrition
-		public static final Integer MALA_1 = 2004982;
-		public static final Integer MALA_2 = 2004983;
-		public static final Integer MALA_3 = 2004984;
-		public static final Integer MALA_4 = 2004988;
-		public static final Integer MALA_5 = 2004989;
-		public static final Integer MALA_6 = 123056;
-		public static final Integer MALA_7 = 2004994;
-		public static final Integer MALA_8 = 123054;
-		public static final Integer MALA_9 = 2004997;
-		public static final Integer MALA_10 = 2005000;
-		public static final Integer MALA_11 = 2005002;
-		public static final Integer MALA_12 = 2005009;
-		public static final Integer MALA_13 = 2005016;
-		public static final Integer MALA_14 = 2005017;
-		public static final Integer MALA_15 = 2005018;
-		public static final Integer MALA_16 = 2005019;
-		public static final Integer MALA_17 = 2005020;
-		public static final Integer MALA_18 = 2005022;
-		public static final Integer MALA_19 = 2005024;
-		public static final Integer MALA_20 = 123029;
-		public static final Integer MALA_21 = 141696;
-		public static final Integer MALA_22 = 122868;
-		public static final Integer MALA_23 = 2005033;
-		public static final Integer MALA_24 = 2005035;
-		public static final Integer MALA_25 = 2005037;
-		public static final Integer MALA_26 = 2005039;
-		public static final Integer MALA_27 = 2005041;
-		public static final Integer MALA_28 = 2005044;
-		public static final Integer MALA_29 = 2005046;
-		public static final Integer MALA_30 = 2005048;
-		public static final Integer MALA_31 = 130654;
-		public static final Integer MALA_32 = 2005051;
-		public static final Integer MALA_33 = 2005054;
-		public static final Integer MALA_34 = 123041;
-		public static final Integer MALA_35 = 140018;
-		public static final Integer MALA_36 = 2005057;
-		public static final Integer MALA_37 = 147315;
-		public static final Integer MALA_38 = 2004406;
-		public static final Integer MALA_39 = 145602;
-		public static final Integer MALA_40 = 136537;
-		public static final Integer MALA_41 = 2004408;
-		public static final Integer MALA_42 = 2004410;
-		public static final Integer MALA_43 = 2004409;
-		public static final Integer MALA_44 = 122745;
-		public static final Integer MALA_45 = 136556;
-		public static final Integer MALA_46 = 2004411;
-		public static final Integer MALA_47 = 2004412;
-		public static final Integer MALA_48 = 155758;
-		public static final Integer MALA_49 = 126810;
-		public static final Integer MALA_50 = 145525;
-		public static final Integer MALA_51 = 134702;
-		public static final Integer MALA_52 = 152426;
-		public static final Integer MALA_53 = 2004413;
-		public static final Integer MALA_54 = 2004414;
+		public static final Integer MALA_54 = 157648;
 		public static final Integer MALA_55 = 152346;
 		public static final Integer MALA_56 = 152351;
-		public static final Integer MALA_57 = 152352;
-		public static final Integer MALA_58 = 2004416;
+		public static final Integer MALA_57 = 152346;
+		public static final Integer MALA_58 = 2004984;
 		public static final Integer MALA_59 = 2004417;
 		public static final Integer MALA_60 = 2004418;
 		public static final Integer MALA_61 = 157648;
@@ -2435,21 +1702,9 @@ public class DiagnosisConcepts {
 		public static final Integer STIA_53 = 2002725;
 		public static final Integer STIA_54 = 120730;
 		public static final Integer STIA_55 = 155117;
-		public static final Integer STIA_56 = 2010396;
-		public static final Integer STIA_70 = 2002832;
-		public static final Integer STIA_57 = 145762;
-		public static final Integer STIA_58 = 139277;
-		public static final Integer STIA_59 = 117146;
 		public static final Integer STIA_60 = 112992;
-		public static final Integer STIA_61 = 2002845;
-		public static final Integer STIA_62 = 2002847;
 		public static final Integer STIA_63 = 2002849;
-		public static final Integer STIA_64 = 155080;
-		public static final Integer STIA_65 = 139505;
-		public static final Integer STIA_66 = 2002853;
-		public static final Integer STIA_67 = 2002854;
-		public static final Integer STIA_68 = 2002856;
-		public static final Integer STIA_69 = 2002857;
+		public static final Integer STIA_70 = 2010395;
 
 
 		//Urinary Tract Infection URA
@@ -2471,6 +1726,8 @@ public class DiagnosisConcepts {
 		public static final Integer INA_6 = 2002811;
 		public static final Integer INA_7 = 2002812;
 		public static final Integer INA_8 = 2002813;
+
+
 		public static final Integer INA_9 = 2002733;
 		public static final Integer INA_10 = 151976;
 		public static final Integer INA_11 = 2002734;
@@ -3240,6 +2497,9 @@ public class DiagnosisConcepts {
 		public static final Integer EYA_656 = 2009456;
 		public static final Integer EYA_657 = 2010490;
 		public static final Integer EYA_658 = 2010491;
+		public static final Integer EYA_659 = 2008376;
+		public static final Integer EYA_660 = 2009403;
+		public static final Integer EYA_661 = 127090;
 
 		//     Ear Infection EIA  
 		public static final Integer EIA_1 = 134917;
@@ -3307,78 +2567,6 @@ public class DiagnosisConcepts {
 		public static final Integer EIA_63 = 2010547;
 		public static final Integer EIA_64 = 2010548;
 		public static final Integer EIA_65 = 123212;
-		public static final Integer EIA_66 = 130689;
-		public static final Integer EIA_67 = 114179;
-		public static final Integer EIA_68 = 145611;
-		public static final Integer EIA_69 = 145950;
-		public static final Integer EIA_70 = 148141;
-		public static final Integer EIA_71 = 2010527;
-		public static final Integer EIA_72 = 2010528;
-		public static final Integer EIA_73 = 2010529;
-		public static final Integer EIA_74 = 121934;
-		public static final Integer EIA_75 = 2010530;
-		public static final Integer EIA_76 = 111761;
-		public static final Integer EIA_77 = 121796;
-		public static final Integer EIA_78 = 2010531;
-		public static final Integer EIA_79 = 2010532;
-		public static final Integer EIA_80 = 2010533;
-		public static final Integer EIA_81 = 2010534;
-		public static final Integer EIA_82 = 2010535;
-		public static final Integer EIA_83 = 2010536;
-		public static final Integer EIA_84 = 2010537;
-		public static final Integer EIA_85 = 2010538;
-		public static final Integer EIA_86 = 2010586;
-		public static final Integer EIA_87 = 2010575;
-		public static final Integer EIA_88 = 2010576;
-		public static final Integer EIA_89 = 2010577;
-		public static final Integer EIA_90 = 2010578;
-		public static final Integer EIA_91 = 2010579;
-		public static final Integer EIA_92 = 2010581;
-		public static final Integer EIA_93 = 2010582;
-		public static final Integer EIA_94 = 2010583;
-		public static final Integer EIA_95 = 2010584;
-		public static final Integer EIA_96 = 2010585;
-		public static final Integer EIA_97 = 129199;
-		public static final Integer EIA_98 = 2010589;
-		public static final Integer EIA_99 = 2010588;
-		public static final Integer EIA_100 = 2010590;
-		public static final Integer EIA_101 = 2010591;
-		public static final Integer EIA_102 = 2010592;
-		public static final Integer EIA_103 = 20105;
-		public static final Integer EIA_104 = 2010587;
-		public static final Integer EIA_105 = 146078;
-		public static final Integer EIA_106 = 2010540;
-		public static final Integer EIA_107 = 136194;
-		public static final Integer EIA_108 = 2010541;
-		public static final Integer EIA_109 = 2010542;
-		public static final Integer EIA_110 = 2010544;
-		public static final Integer EIA_111 = 2010545;
-		public static final Integer EIA_112 = 2010550;
-		public static final Integer EIA_113 = 2010552;
-		public static final Integer EIA_114 = 2010553;
-		public static final Integer EIA_115 = 2010554;
-		public static final Integer EIA_116 = 2010555;
-		public static final Integer EIA_117 = 2010556;
-		public static final Integer EIA_118 = 2010557;
-		public static final Integer EIA_119 = 2010559;
-		public static final Integer EIA_120 = 2010561;
-		public static final Integer EIA_121 = 2010570;
-		public static final Integer EIA_122 = 115226;
-		public static final Integer EIA_123 = 151702;
-		public static final Integer EIA_124 = 2010594;
-		public static final Integer EIA_125 = 131602;
-		public static final Integer EIA_126 = 2010596;
-		public static final Integer EIA_127 = 2010595;
-		public static final Integer EIA_128 = 150122;
-		public static final Integer EIA_129 = 2010597;
-		public static final Integer EIA_130 = 2010598;
-		public static final Integer EIA_131 = 2010599;
-		public static final Integer EIA_132 = 127837;
-		public static final Integer EIA_133 = 133800;
-		public static final Integer EIA_134 = 139285;
-		public static final Integer EIA_135 = 145320;
-		public static final Integer EIA_136 = 2010600;
-		public static final Integer EIA_137 = 2010601;
 
 		// PNEUMONIA 
 
@@ -3478,8 +2666,6 @@ public class DiagnosisConcepts {
 		public static final Integer ABA_65 = 2008872;
 		public static final Integer ABA_66 = 2008873;
 		public static final Integer ABA_67 = 2008874;
-		public static final Integer ABA_68 = 156220;
-		public static final Integer ABA_69 = 156220;
 
 
 		//Dis Of Puerperium & Childbath
@@ -3540,8 +2726,6 @@ public class DiagnosisConcepts {
 		public static final Integer HYA_33 = 2008882;
 		public static final Integer HYA_34 = 113859;
 		public static final Integer HYA_35 = 136205;
-		public static final Integer HYA_36 = 117386;
-		public static final Integer HYA_37 = 2010607;
 
 		//menta disorder b
 		public static final Integer MDA_1 = 113155;
@@ -3794,8 +2978,8 @@ public class DiagnosisConcepts {
 		public static final Integer OVA_6 = 2004444;
 
 
-		// Meningococcal
-		public static final Integer MENINGOCOCCAL_MENINGITIS = 134369; // 134369
+		// Meningococcal Meningitis
+		public static final Integer MENINGOCOCCAL_MENINGITIS = 134369;
 
 
 		public static final Integer OM24 = 138594;
@@ -3838,11 +3022,8 @@ public class DiagnosisConcepts {
 		
 		public static final String SC = "db1ba5ed-1da0-430d-9744-4dcc006f98b0"; //1000047
 
-	
 
 		public static final Integer MALARIA = 123;
-
-
 
 
 		//malaria confirmed
@@ -3853,452 +3034,69 @@ public class DiagnosisConcepts {
 
 		public static final Integer INDETERMINATE = 1138;
 
-	
 
 		//Diagnosis concepts
 		public static final String PROBLEM_ADDED = "6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-		
 
 		//Asthma 	
-		public static final Integer ASTHMA1 = 2005833;
-		public static final Integer ASTHMA2 = 110826;
-		public static final Integer ASTHMA3 = 113017;
-		public static final Integer ASTHMA4 = 113018;
-		public static final Integer ASTHMA5 = 116632;
-		public static final Integer ASTHMA6 = 116633;
-		public static final Integer ASTHMA7 = 116634;
-		public static final Integer ASTHMA8 = 116635;
-		public static final Integer ASTHMA9 = 118494;
-		public static final Integer ASTHMA10 = 119500;
-		public static final Integer ASTHMA11 = 120675;
-		public static final Integer ASTHMA12 = 120676;
-		public static final Integer ASTHMA13 = 121366;
-		public static final Integer ASTHMA14 = 121367;
-		public static final Integer ASTHMA15 = 121369;
-		public static final Integer ASTHMA16 = 121372;
-		public static final Integer ASTHMA17 = 121373;
-		public static final Integer ASTHMA18 = 121375;
-		public static final Integer ASTHMA19 = 121699;
-		public static final Integer ASTHMA20 = 122838;
-		public static final Integer ASTHMA21 = 125023;
-		public static final Integer ASTHMA22 = 128465;
-		public static final Integer ASTHMA23 = 129952;
-		public static final Integer ASTHMA24 = 130070;
-		public static final Integer ASTHMA25 = 132491;
-		public static final Integer ASTHMA26 = 134026;
-		public static final Integer ASTHMA27 = 134121;
-		public static final Integer ASTHMA28 = 134161;
-		public static final Integer ASTHMA29 = 134557;
-		public static final Integer ASTHMA30 = 136032;
-		public static final Integer ASTHMA31 = 136577;
-		public static final Integer ASTHMA32 = 136578;
-		public static final Integer ASTHMA33 = 139094;
-		public static final Integer ASTHMA34 = 139212;
-		public static final Integer ASTHMA35 = 140234;
-		public static final Integer ASTHMA36 = 140848;
-		public static final Integer ASTHMA37 = 140849;
-		public static final Integer ASTHMA38 = 140850;
-		public static final Integer ASTHMA39 = 140926;
-		public static final Integer ASTHMA40 = 143261;
-		public static final Integer ASTHMA41 = 145683;
-		public static final Integer ASTHMA42 = 145742;
-		public static final Integer ASTHMA43 = 146186;
-		public static final Integer ASTHMA44 = 147994;
-		public static final Integer ASTHMA45 = 148272;
-		public static final Integer ASTHMA46 = 148273;
-		public static final Integer ASTHMA47 = 148307;
-		public static final Integer ASTHMA48 = 149075;
-		public static final Integer ASTHMA49 = 149319;
-		public static final Integer ASTHMA50 = 149899;
-		public static final Integer ASTHMA51 = 153753;
-		public static final Integer ASTHMA52 = 153754;
-		public static final Integer ASTHMA53 = 155022;
-		public static final Integer ASTHMA54 = 155180;
-		public static final Integer ASTHMA55 = 155181;
-		public static final Integer ASTHMA56 = 157788;
-		public static final Integer ASTHMA57 = 157792;
-		public static final Integer ASTHMA58 = 157802;
-		public static final Integer ASTHMA59 = 4;
-		public static final Integer ASTHMA60 = 2005821;
-		public static final Integer ASTHMA61 = 2005822;
-		public static final Integer ASTHMA62 = 2005824;
-		public static final Integer ASTHMA63 = 2005825;
-		public static final Integer ASTHMA64 = 2005829;
-		public static final Integer ASTHMA65 = 2005831;
-		public static final Integer ASTHMA66 = 2005832;
-		public static final Integer ASTHMA67 = 143261;
-		public static final Integer ASTHMA68 = 2005834;
-		public static final Integer ASTHMA69 = 2005835;
-		public static final Integer ASTHMA70 = 2005836;
-		public static final Integer ASTHMA71 = 2006074;
-		public static final Integer ASTHMA72 = 121375;
-		public static final Integer ASTHMA73 = 121699;
-		public static final Integer ASTHMA74 = 2005823;
-		public static final Integer ASTHMA75 = 2005830;
+		public static final Integer ASTHMA1 = 2006074;
+		public static final Integer ASTHMA2 = 121375;
+		public static final Integer ASTHMA3 = 121699;
+		public static final Integer ASTHMA4 = 4;
+		public static final Integer ASTHMA5 = 2005821;
+		public static final Integer ASTHMA6 = 2005822;
+		public static final Integer ASTHMA7 = 2005823;
+		public static final Integer ASTHMA8 = 2005824;
+		public static final Integer ASTHMA9 = 2005825;
+		public static final Integer ASTHMA10 = 2005829;
+		public static final Integer ASTHMA11 = 2005830;
+		public static final Integer ASTHMA12 = 2005831;
+		public static final Integer ASTHMA13 = 143261;
+		public static final Integer ASTHMA14 = 2005833;
+		public static final Integer ASTHMA15 = 2005834;
+		public static final Integer ASTHMA16 = 2005835;
+		public static final Integer ASTHMA17 = 2005836;
+
+		//fistula Birth related
+		public static final Integer FISTULA1 = 2007840;
+		public static final Integer FISTULA2 = 2020563;
+		public static final Integer FISTULA3 = 2007877;
+		public static final Integer FISTULA4 = 111645;
+		public static final Integer FISTULA5 = 118145;
+		public static final Integer FISTULA6 = 49;
+		public static final Integer FISTULA7 = 156316;
+		public static final Integer FISTULA8 = 156315;
+		public static final Integer FISTULA9 = 140464;
+		public static final Integer FISTULA10 = 123511;
+		public static final Integer FISTULA11 = 2007878;
+		public static final Integer FISTULA12 = 127847;
+		public static final Integer FISTULA13 = 2007879;
+		public static final Integer FISTULA14 = 2007880;
+		public static final Integer FISTULA15 = 2007881;
+		public static final Integer FISTULA16 = 2007882;
+		public static final Integer FISTULA17 = 2007883;
+		public static final Integer FISTULA18 = 2007884;
+		public static final Integer FISTULA19 = 2007885;
+		public static final Integer FISTULA20 = 2007886;
+		public static final Integer FISTULA21 = 2007887;
+		public static final Integer FISTULA22 = 2021036;
+		public static final Integer FISTULA23 = 152300;
+		public static final Integer FISTULA24 = 148441;
+		public static final Integer FISTULA25 = 2020709;
+		public static final Integer FISTULA26 = 2020714;
+		public static final Integer FISTULA27 = 143745;
+		public static final Integer FISTULA28 = 152086;
+		public static final Integer FISTULA29 = 2009831;
+		public static final Integer FISTULA30 = 136197;
+		public static final Integer FISTULA31 = 148652;
+
+
+		public static final Integer JIGGERS_INFESTATION = 166567;
+
+
+		// Diseases of The Skin
 
-
-		
-		//fistula
-		public static final Integer FISTULA1 = 49;
-
-		public static final Integer FISTULA2 = 110168;
-
-		public static final Integer FISTULA3 = 110267;
-
-		public static final Integer FISTULA4 = 110268;
-
-		public static final Integer FISTULA5 = 111645;
-
-		public static final Integer FISTULA6 = 113876;
-
-		public static final Integer FISTULA7 = 113877;
-
-		public static final Integer FISTULA8 = 114601;
-
-		public static final Integer FISTULA9 = 117885;
-
-		public static final Integer FISTULA10 = 118145;
-
-		public static final Integer FISTULA11 = 118808;
-
-		public static final Integer FISTULA12 = 118809;
-
-		public static final Integer FISTULA13 = 123201;
-
-		public static final Integer FISTULA14 = 123202;
-
-		public static final Integer FISTULA15 = 123203;
-
-		public static final Integer FISTULA16 = 123204;
-
-		public static final Integer FISTULA17 = 123205;
-
-		public static final Integer FISTULA18 = 123289;
-
-		public static final Integer FISTULA19 = 123310;
-
-		public static final Integer FISTULA20 = 123377;
-
-		public static final Integer FISTULA21 = 123423;
-
-		public static final Integer FISTULA22 = 123439;
-
-		public static final Integer FISTULA23 = 123442;
-
-		public static final Integer FISTULA24 = 123443;
-
-		public static final Integer FISTULA25 = 123497;
-
-		public static final Integer FISTULA26 = 123509;
-
-		public static final Integer FISTULA27 = 123510;
-
-		public static final Integer FISTULA28 = 123511;
-
-		public static final Integer FISTULA29 = 123513;
-
-		public static final Integer FISTULA30 = 123514;
-
-		public static final Integer FISTULA31 = 123535;
-
-		public static final Integer FISTULA32 = 123541;
-
-		public static final Integer FISTULA33 = 123659;
-
-		public static final Integer FISTULA34 = 124267;
-
-		public static final Integer FISTULA35 = 124402;
-
-		public static final Integer FISTULA36 = 124403;
-
-		public static final Integer FISTULA37 = 125865;
-
-		public static final Integer FISTULA38 = 126503;
-
-		public static final Integer FISTULA39 = 126794;
-
-		public static final Integer FISTULA40 = 127319;
-
-		public static final Integer FISTULA41 = 127844;
-
-		public static final Integer FISTULA42 = 127846;
-
-		public static final Integer FISTULA43 = 127847;
-
-		public static final Integer FISTULA44 = 127855;
-
-		public static final Integer FISTULA45 = 129265;
-
-		public static final Integer FISTULA46 = 129460;
-
-		public static final Integer FISTULA47 = 130056;
-
-		public static final Integer FISTULA48 = 130345;
-
-		public static final Integer FISTULA49 = 130573;
-
-		public static final Integer FISTULA50 = 130974;
-
-		public static final Integer FISTULA51 = 131097;
-
-		public static final Integer FISTULA52 = 131696;
-
-		public static final Integer FISTULA53 = 131748;
-
-		public static final Integer FISTULA54 = 132475;
-
-		public static final Integer FISTULA55 = 134295;
-
-		public static final Integer FISTULA56 = 134306;
-
-		public static final Integer FISTULA57 = 134540;
-
-		public static final Integer FISTULA58 = 134541;
-
-		public static final Integer FISTULA59 = 134705;
-
-		public static final Integer FISTULA60 = 135494;
-
-		public static final Integer FISTULA61 = 135551;
-
-		public static final Integer FISTULA62 = 136170;
-
-		public static final Integer FISTULA63 = 136196;
-
-		public static final Integer FISTULA64 = 136197;
-
-		public static final Integer FISTULA65 = 136492;
-
-		public static final Integer FISTULA66 = 136671;
-
-		public static final Integer FISTULA67 = 136672;
-
-		public static final Integer FISTULA68 = 136673;
-
-		public static final Integer FISTULA69 = 136731;
-
-		public static final Integer FISTULA70 = 136732;
-
-		public static final Integer FISTULA71 = 137857;
-
-		public static final Integer FISTULA72 = 138413;
-
-		public static final Integer FISTULA73 = 138642;
-
-		public static final Integer FISTULA74 = 139570;
-
-		public static final Integer FISTULA75 = 139592;
-
-		public static final Integer FISTULA76 = 139595;
-
-		public static final Integer FISTULA77 = 139615;
-
-		public static final Integer FISTULA78 = 140083;
-
-		public static final Integer FISTULA79 = 140084;
-
-		public static final Integer FISTULA80 = 140085;
-
-		public static final Integer FISTULA81 = 140086;
-
-		public static final Integer FISTULA82 = 140087;
-
-		public static final Integer FISTULA83 = 140088;
-
-		public static final Integer FISTULA84 = 140089;
-
-		public static final Integer FISTULA85 = 140090;
-
-		public static final Integer FISTULA86 = 140091;
-
-		public static final Integer FISTULA87 = 140092;
-
-		public static final Integer FISTULA88 = 140093;
-
-		public static final Integer FISTULA89 = 140094;
-
-		public static final Integer FISTULA90 = 140095;
-
-		public static final Integer FISTULA91 = 140096;
-
-		public static final Integer FISTULA92 = 140097;
-
-		public static final Integer FISTULA93 = 140098;
-
-		public static final Integer FISTULA94 = 140099;
-
-		public static final Integer FISTULA95 = 140100;
-
-		public static final Integer FISTULA96 = 140102;
-
-		public static final Integer FISTULA97 = 140428;
-
-		public static final Integer FISTULA98 = 140464;
-
-		public static final Integer FISTULA99 = 140465;
-
-		public static final Integer FISTULA100 = 140889;
-
-		public static final Integer FISTULA101 = 140892;
-
-		public static final Integer FISTULA102 = 140996;
-
-		public static final Integer FISTULA103 = 141001;
-
-		public static final Integer FISTULA104 = 141006;
-
-		public static final Integer FISTULA105 = 141214;
-
-		public static final Integer FISTULA106 = 141215;
-
-		public static final Integer FISTULA107 = 141327;
-
-		public static final Integer FISTULA108 = 141328;
-
-		public static final Integer FISTULA109 = 141329;
-
-		public static final Integer FISTULA110 = 141330;
-
-		public static final Integer FISTULA111 = 141331;
-
-		public static final Integer FISTULA112 = 141662;
-
-		public static final Integer FISTULA113 = 141663;
-
-		public static final Integer FISTULA114 = 141677;
-
-		public static final Integer FISTULA115 = 143642;
-
-		public static final Integer FISTULA116 = 143737;
-
-		public static final Integer FISTULA117 = 143743;
-
-		public static final Integer FISTULA118 = 143744;
-
-		public static final Integer FISTULA119 = 143745;
-
-		public static final Integer FISTULA120 = 143746;
-
-		public static final Integer FISTULA121 = 143747;
-
-		public static final Integer FISTULA122 = 143960;
-
-		public static final Integer FISTULA123 = 143961;
-
-		public static final Integer FISTULA124 = 143970;
-
-		public static final Integer FISTULA125 = 143971;
-
-		public static final Integer FISTULA126 = 144070;
-
-		public static final Integer FISTULA127 = 144090;
-
-		public static final Integer FISTULA128 = 144156;
-
-		public static final Integer FISTULA129 = 144157;
-
-		public static final Integer FISTULA130 = 145626;
-
-		public static final Integer FISTULA131 = 145628;
-
-		public static final Integer FISTULA132 = 145629;
-
-		public static final Integer FISTULA133 = 145778;
-
-		public static final Integer FISTULA134 = 145783;
-
-		public static final Integer FISTULA135 = 146144;
-
-		public static final Integer FISTULA136 = 146875;
-
-		public static final Integer FISTULA137 = 146879;
-
-		public static final Integer FISTULA138 = 146880;
-
-		public static final Integer FISTULA139 = 146890;
-
-		public static final Integer FISTULA140 = 146950;
-
-		public static final Integer FISTULA141 = 147251;
-
-		public static final Integer FISTULA142 = 148441;
-
-		public static final Integer FISTULA143 = 148454;
-
-		public static final Integer FISTULA144 = 148505;
-
-		public static final Integer FISTULA145 = 148541;
-
-		public static final Integer FISTULA146 = 148543;
-
-		public static final Integer FISTULA147 = 148544;
-
-		public static final Integer FISTULA148 = 148652;
-
-		public static final Integer FISTULA149 = 148903;
-
-		public static final Integer FISTULA150 = 150103;
-
-		public static final Integer FISTULA151 = 150104;
-
-		public static final Integer FISTULA152 = 150111;
-
-		public static final Integer FISTULA153 = 150112;
-
-		public static final Integer FISTULA154 = 150899;
-
-		public static final Integer FISTULA155 = 151765;
-
-		public static final Integer FISTULA156 = 152085;
-
-		public static final Integer FISTULA157 = 152086;
-
-		public static final Integer FISTULA158 = 152300;
-
-		public static final Integer FISTULA159 = 152671;
-
-		public static final Integer FISTULA160 = 155120;
-
-		public static final Integer FISTULA161 = 155197;
-
-		public static final Integer FISTULA162 = 155684;
-
-		public static final Integer FISTULA163 = 155761;
-
-		public static final Integer FISTULA164 = 156140;
-
-		public static final Integer FISTULA165 = 156313;
-
-		public static final Integer FISTULA166 = 156315;
-
-		public static final Integer FISTULA167 = 156316;
-
-		public static final Integer FISTULA168 = 156463;
-
-		public static final Integer FISTULA169 = 156616;
-
-		public static final Integer FISTULA170 = 157329;
-
-		public static final Integer FISTULA171 = 157402;
-
-		public static final Integer FISTULA172 = 157974;
-
-		public static final Integer FISTULA173 = 157980;
-
-		public static final Integer FISTULA174 = 158603;
-
-		public static final Integer FISTULA175 = 158635;
-
-		public static final Integer FISTULA176 = 159919;
-
-		public static final Integer FISTULA177 = 163848;
-
-		public static final Integer FISTULA178 = 163870;
-
-		public static final Integer FISTULA179 = 163871;
-
-		public static final Integer FISTULA180 = 163872;
 
 	}
 
@@ -4335,74 +3133,5 @@ public class DiagnosisConcepts {
 
 		return Context.getConceptService().getConcept(lookup);
 	}
-
-	/*
-	 * Provides a list of diagnosis which are not mapped as a list for under 5
-	 *
-	 * */
-	public static List<Integer> allNonListedDiagnosisForUnder5() {
-
-		Integer DYSENTERY = 2014827;
-		Integer CHOLERA = 2002391;
-		Integer ANAEMIA = 1226;
-		Integer MENINGOCOCCAL_MENINGITIS = 134369;
-		Integer NEONATAL_SEPSIS = 226;
-		Integer NEONATAL_TETANUS = 124954;
-		Integer JIGGERS_INFESTATION = 166567;
-		Integer DISEASES_OF_SKIN = 2009210;
-		Integer DOWN_SYNDROME = 144481;
-		Integer POISONING = 2027745;
-		Integer BRUCELLOSIS = 121005;
-		Integer VIRAL_HAEMORRHAGIC_FEVER = 2002647;
-		Integer CUTANEOUS_LEISHMANIASIS = 143074;
-		Integer SUSPECTED_ANTHRAX = 121555;
-		Integer HYPOXAEMIA = 2006141;
-		List<Integer> allNonListedDiagnosisForUnder5 = new ArrayList<Integer>();
-
-		allNonListedDiagnosisForUnder5.add(DYSENTERY);
-		allNonListedDiagnosisForUnder5.add(CHOLERA);
-		allNonListedDiagnosisForUnder5.add(ANAEMIA);
-		allNonListedDiagnosisForUnder5.add(MENINGOCOCCAL_MENINGITIS);
-		allNonListedDiagnosisForUnder5.add(NEONATAL_SEPSIS);
-		allNonListedDiagnosisForUnder5.add(NEONATAL_TETANUS);
-		allNonListedDiagnosisForUnder5.add(JIGGERS_INFESTATION);
-		allNonListedDiagnosisForUnder5.add(DISEASES_OF_SKIN);
-		allNonListedDiagnosisForUnder5.add(DOWN_SYNDROME);
-		allNonListedDiagnosisForUnder5.add(POISONING);
-		allNonListedDiagnosisForUnder5.add(BRUCELLOSIS);
-		allNonListedDiagnosisForUnder5.add(VIRAL_HAEMORRHAGIC_FEVER);
-		allNonListedDiagnosisForUnder5.add(CUTANEOUS_LEISHMANIASIS);
-		allNonListedDiagnosisForUnder5.add(SUSPECTED_ANTHRAX);
-		allNonListedDiagnosisForUnder5.add(HYPOXAEMIA);
-		return allNonListedDiagnosisForUnder5;
-	}
-
-	/*
-	 * Provides a list of diagnosis which are not mapped as a list for above 5
-	 *
-	 * */
-	public static List<Integer> allNonListedDiagnosisForAbove5() {
-		Integer MENINGOCOCCAL_MENINGITIS = 134369;
-		Integer MALARIA_IN_PREGNANCY = 135361;
-		Integer JIGGERS_INFESTATION = 166567;
-		Integer BRUCELLOCIS = 121005;
-		Integer PHYSICAL_DISABILITY = 2014582;
-		Integer VIRAL_HAEMORRHAGIC_FEVER = 2002647;
-		Integer CUTANEOUS_LEISHMANIASIS = 143074;
-		Integer SUSPECTED_ANTHRAX = 121555;
-
-		List<Integer> allNonListedDiagnosisForAbove5 = new ArrayList<Integer>();
-
-		allNonListedDiagnosisForAbove5.add(MENINGOCOCCAL_MENINGITIS);
-		allNonListedDiagnosisForAbove5.add(MALARIA_IN_PREGNANCY);
-		allNonListedDiagnosisForAbove5.add(JIGGERS_INFESTATION);
-		allNonListedDiagnosisForAbove5.add(BRUCELLOCIS);
-		allNonListedDiagnosisForAbove5.add(PHYSICAL_DISABILITY);
-		allNonListedDiagnosisForAbove5.add(VIRAL_HAEMORRHAGIC_FEVER);
-		allNonListedDiagnosisForAbove5.add(CUTANEOUS_LEISHMANIASIS);
-		allNonListedDiagnosisForAbove5.add(SUSPECTED_ANTHRAX);
-		return allNonListedDiagnosisForAbove5;
-	}
-
 
 }
