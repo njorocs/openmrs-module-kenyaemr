@@ -92,16 +92,19 @@ public class VisitSummaryPdfGenerator {
     private static final String LAB_ORDER_CONCEPT    = "9a6f10d6-7fc5-4fb7-9428-24ef7b8d01f7";
     private static final String PROCEDURE_ORDER_TYPE = "b4a7c280-369e-4d12-9ce8-18e36783fed6";
     private static final String IMAGING_CLASS_UUID   = "8caa332c-efe4-4025-8b18-3398328e1323";
+    private static final String RETURN_VISIT_DATE    = "5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     private static final DeviceGray C_RULE = new DeviceGray(0.65f);
 
     private PdfFont regular;
     private PdfFont bold;
+    private PdfFont italic;
 
 
     public byte[] generate(Visit visit) throws IOException {
         regular = PdfFontFactory.createFont(StandardFonts.HELVETICA);
         bold    = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+        italic  = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE);
 
         String printedBy = resolveCurrentUser();
         String printDate = printFmt.format(new Date());
@@ -136,15 +139,14 @@ public class VisitSummaryPdfGenerator {
         Date visitEnd = visit.getStopDatetime() != null ? visit.getStopDatetime() : new Date();
 
         addPageHeader(doc, visit, patient, visitEnd, cs, facility);
-        addDiagnoses(doc, visit);
-        addComplaints(doc, visit, cs);
         addVitals(doc, visit, visitEnd, cs);
-        addConditions(doc, visit, visitEnd, patient);
+        addHistoryAndExamination(doc, visit, cs, visitEnd, patient);
         addLabResults(doc, visit, visitEnd, cs);
-        addAllergies(doc, visit, visitEnd, patient);
+        addRadiologyImaging(doc, visit);
+        addProcedures(doc, visit);
+        addDiagnoses(doc, visit);
         addMedications(doc, visit);
-        addProceduresAndImaging(doc, visit);
-        addClinicalNotes(doc, visit);
+        addAppointments(doc, visit);
         doc.close();
     }
 
@@ -210,19 +212,22 @@ public class VisitSummaryPdfGenerator {
                                ConceptService cs, FacilityInfo facility) {
         String visitDate = visit.getStartDatetime() != null
             ? dateFmt.format(visit.getStartDatetime()).toUpperCase() : "";
-        doc.add(new Paragraph("VISIT SUMMARY  •  " + visitDate)
+        doc.add(new Paragraph("PATIENT VISIT SUMMARY  •  " + visitDate)
             .setFontSize(7).setFontColor(ColorConstants.BLACK).setMarginBottom(1));
 
-        // Row 1: patient name (left) flush with facility name + address (right)
         String name = patient.getPersonName() != null ? patient.getPersonName().getFullName() : "";
         Table nameRow = new Table(UnitValue.createPercentArray(new float[]{55, 45}))
             .setWidth(UnitValue.createPercentValue(100))
-            .setMarginBottom(2);
+            .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
+            .setMarginBottom(4);
 
         nameRow.addCell(new Cell()
             .setBorder(Border.NO_BORDER)
+            .setPaddingBottom(3)
             .add(new Paragraph(name)
-                .setFont(bold).setFontSize(11).setFontColor(ColorConstants.BLACK)));
+                .setFont(bold).setFontSize(11).setFontColor(ColorConstants.BLACK).setMarginBottom(2))
+            .add(new Paragraph(buildDemographicsLine(patient, visit, visitEnd, cs))
+                .setFontSize(8).setFontColor(ColorConstants.BLACK)));
 
         Paragraph facilityPara = new Paragraph()
             .setTextAlignment(TextAlignment.RIGHT)
@@ -236,15 +241,10 @@ public class VisitSummaryPdfGenerator {
         }
         nameRow.addCell(new Cell()
             .setBorder(Border.NO_BORDER)
+            .setPaddingBottom(3)
             .add(facilityPara));
 
         doc.add(nameRow);
-
-        // Row 2: demographics line with bottom separator
-        doc.add(new Paragraph(buildDemographicsLine(patient, visit, visitEnd, cs))
-            .setFontSize(8).setFontColor(ColorConstants.BLACK)
-            .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
-            .setMarginBottom(4).setPaddingBottom(3));
     }
 
     private String buildDemographicsLine(Patient patient, Visit visit, Date visitEnd, ConceptService cs) {
@@ -266,9 +266,28 @@ public class VisitSummaryPdfGenerator {
         List<Diagnosis> list = Context.getService(DiagnosisService.class)
             .getDiagnosesByVisit(visit, false, false);
         if (list.isEmpty()) return;
-        addSectionHeader(doc, "DIAGNOSES");
+
+        List<Diagnosis> provisional = new ArrayList<>();
+        List<Diagnosis> confirmed   = new ArrayList<>();
         for (Diagnosis d : list) {
-            doc.add(bulletItem(buildDiagnosisLabel(d)));
+            if (d.getCertainty() != null && "CONFIRMED".equalsIgnoreCase(d.getCertainty().toString())) {
+                confirmed.add(d);
+            } else {
+                provisional.add(d);
+            }
+        }
+
+        addSectionHeader(doc, "DIAGNOSIS — IMPRESSION & MAIN DIAGNOSIS");
+
+        if (!provisional.isEmpty()) {
+            doc.add(new Paragraph("Impression").setFont(bold).setFontSize(7)
+                .setMarginTop(2).setMarginBottom(2));
+            for (Diagnosis d : provisional) doc.add(bulletItem(buildDiagnosisLabel(d)));
+        }
+        if (!confirmed.isEmpty()) {
+            doc.add(new Paragraph("Main Diagnosis").setFont(bold).setFontSize(7)
+                .setMarginTop(4).setMarginBottom(2));
+            for (Diagnosis d : confirmed) doc.add(bulletItem(buildDiagnosisLabel(d)));
         }
         doc.add(tiny());
     }
@@ -277,21 +296,71 @@ public class VisitSummaryPdfGenerator {
         String name = d.getDiagnosis().getCoded() != null
             ? d.getDiagnosis().getCoded().getName().getName()
             : d.getDiagnosis().getNonCoded();
-        if (name == null) name = "";
-        String certainty = d.getCertainty() != null ? d.getCertainty().toString().toLowerCase() : "";
-        return certainty.isEmpty() ? name : name + " (" + certainty + ")";
+        return name != null ? name : "";
     }
 
 
-    private void addComplaints(Document doc, Visit visit, ConceptService cs) {
-        List<String> items = collectComplaintItems(visit, cs);
-        if (items.isEmpty()) return;
-        addSectionHeader(doc, "CHIEF COMPLAINTS");
-        for (String item : items) doc.add(bulletItem(item));
-        doc.add(tiny());
+    private static class ComplaintItem {
+        final String text;
+        final String source;
+        ComplaintItem(String text, String source) { this.text = text; this.source = source; }
     }
 
-    private List<String> collectComplaintItems(Visit visit, ConceptService cs) {
+    private void addHistoryAndExamination(Document doc, Visit visit, ConceptService cs,
+                                          Date visitEnd, Patient patient) {
+        List<ComplaintItem> complaints = collectComplaintItems(visit, cs);
+        List<Condition> conditions = getConditionsForVisit(visit, visitEnd, patient);
+        List<Allergy> allergies = getAllergiesForVisit(visit, visitEnd, patient);
+        List<String> notes = buildClinicalNotesText(visit);
+        if (complaints.isEmpty() && conditions.isEmpty() && allergies.isEmpty() && notes.isEmpty()) return;
+
+        addSectionHeader(doc, "HISTORY & EXAMINATION");
+
+        if (!complaints.isEmpty()) {
+            doc.add(new Paragraph("Chief Complaints").setFont(bold).setFontSize(7)
+                .setMarginTop(2).setMarginBottom(2));
+            for (ComplaintItem item : complaints) {
+                doc.add(new Paragraph()
+                    .add(new Text("•  " + item.text).setFontSize(8))
+                    .add(new Text("  " + item.source).setFont(italic).setFontSize(6.5f))
+                    .setMarginLeft(6).setMarginBottom(1));
+            }
+        }
+
+        if (!conditions.isEmpty()) {
+            doc.add(new Paragraph("Conditions").setFont(bold).setFontSize(7)
+                .setMarginTop(4).setMarginBottom(2));
+            Table table = buildTable(new float[]{55, 30, 15}, "Condition", "Date Noted", "Status");
+            for (Condition c : conditions) {
+                table.addCell(dataCell(getConditionName(c)));
+                String dateStr = c.getOnsetDate() != null ? datetimeFmt.format(c.getOnsetDate()) : "";
+                String status  = c.getClinicalStatus() != null ? c.getClinicalStatus().toString() : "";
+                table.addCell(dataCell(dateStr));
+                table.addCell(dataCell(status));
+            }
+            doc.add(table);
+        }
+
+        if (!allergies.isEmpty()) {
+            doc.add(new Paragraph("Allergies").setFont(bold).setFontSize(7)
+                .setMarginTop(4).setMarginBottom(2));
+            Table table = buildTable(new float[]{70, 30}, "Allergen", "Severity");
+            for (Allergy a : allergies) {
+                table.addCell(dataCell(getAllergenName(a)));
+                table.addCell(dataCell(getAllergySeverity(a)));
+            }
+            doc.add(table);
+        }
+
+        if (!notes.isEmpty()) {
+            doc.add(new Paragraph("Clinical Notes").setFont(bold).setFontSize(7)
+                .setMarginTop(4).setMarginBottom(2));
+            for (String note : notes) doc.add(bulletItem(note));
+            doc.add(tiny());
+        }
+    }
+
+    private List<ComplaintItem> collectComplaintItems(Visit visit, ConceptService cs) {
         Concept groupConcept = cs.getConceptByUuid(COMPLAINT_GROUP);
         Concept complaintCon = cs.getConceptByUuid(COMPLAINT_CONCEPT);
         Concept durationCon  = cs.getConceptByUuid(COMPLAINT_DURATION);
@@ -299,20 +368,26 @@ public class VisitSummaryPdfGenerator {
 
         EncounterType triageType = Context.getEncounterService()
             .getEncounterTypeByUuid(CommonMetadata._EncounterType.TRIAGE);
-        List<String> items = new ArrayList<>();
+        EncounterType consultType = Context.getEncounterService()
+            .getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
+
+        List<ComplaintItem> items = new ArrayList<>();
         for (Encounter enc : visit.getEncounters()) {
-            if (!isActiveEncounterOfType(enc, triageType)) continue;
+            if (Boolean.TRUE.equals(enc.getVoided())) continue;
+            String sourceLabel;
+            if (triageType != null && enc.getEncounterType().equals(triageType)) {
+                sourceLabel = "at triage";
+            } else if (consultType != null && enc.getEncounterType().equals(consultType)) {
+                sourceLabel = "at clinical consultation";
+            } else {
+                continue;
+            }
             for (Obs top : enc.getObsAtTopLevel(false)) {
-                String item = extractComplaintItem(top, groupConcept, complaintCon, durationCon);
-                if (item != null) items.add(item);
+                String text = extractComplaintItem(top, groupConcept, complaintCon, durationCon);
+                if (text != null) items.add(new ComplaintItem(text, sourceLabel));
             }
         }
         return items;
-    }
-
-    private boolean isActiveEncounterOfType(Encounter enc, EncounterType type) {
-        return !Boolean.TRUE.equals(enc.getVoided())
-            && (type == null || enc.getEncounterType().equals(type));
     }
 
     private String extractComplaintItem(Obs top, Concept groupConcept, Concept complaintCon, Concept durationCon) {
@@ -412,21 +487,6 @@ public class VisitSummaryPdfGenerator {
     }
 
 
-    private void addConditions(Document doc, Visit visit, Date visitEnd, Patient patient) {
-        List<Condition> inVisit = getConditionsForVisit(visit, visitEnd, patient);
-        if (inVisit.isEmpty()) return;
-        addSectionHeader(doc, "CONDITIONS");
-        Table table = buildTable(new float[]{55, 30, 15}, "Condition", "Date Noted", "Status");
-        for (Condition c : inVisit) {
-            table.addCell(dataCell(getConditionName(c)));
-            String dateStr = c.getOnsetDate() != null ? datetimeFmt.format(c.getOnsetDate()) : "";
-            String status  = c.getClinicalStatus() != null ? c.getClinicalStatus().toString() : "";
-            table.addCell(dataCell(dateStr));
-            table.addCell(dataCell(status));
-        }
-        doc.add(table);
-    }
-
     private List<Condition> getConditionsForVisit(Visit visit, Date visitEnd, Patient patient) {
         List<Condition> all = Context.getService(ConditionService.class).getActiveConditions(patient);
         List<Condition> result = new ArrayList<>();
@@ -521,12 +581,17 @@ public class VisitSummaryPdfGenerator {
         if (cn.getUnits() != null && !cn.getUnits().isEmpty()) {
             d.value = d.value + " " + cn.getUnits();
         }
+        // Reference range display — only when normal bounds are defined
         if (cn.getLowNormal() != null || cn.getHiNormal() != null) {
             String lo = cn.getLowNormal() != null ? formatNum(cn.getLowNormal()) : "";
-            String hi = cn.getHiNormal() != null ? formatNum(cn.getHiNormal()) : "";
+            String hi = cn.getHiNormal()  != null ? formatNum(cn.getHiNormal())  : "";
             d.refRange = lo + " – " + hi;
-            d.interpCode = interpCode(obs.getValueNumeric(),
-                cn.getLowCritical(), cn.getLowNormal(), cn.getHiNormal(), cn.getHiCritical());
+        }
+        // Interpretation — derived from whichever reference range bounds are available
+        boolean hasRange = cn.getLowNormal()   != null || cn.getHiNormal()   != null
+                        || cn.getLowCritical() != null || cn.getHiCritical() != null;
+        if (hasRange && obs.getValueNumeric() != null) {
+            d.interpCode = interpretByConcept(obs.getValueNumeric(), cn);
         }
     }
 
@@ -547,18 +612,6 @@ public class VisitSummaryPdfGenerator {
         return "";
     }
 
-
-    private void addAllergies(Document doc, Visit visit, Date visitEnd, Patient patient) {
-        List<Allergy> inVisit = getAllergiesForVisit(visit, visitEnd, patient);
-        if (inVisit.isEmpty()) return;
-        addSectionHeader(doc, "ALLERGIES");
-        Table table = buildTable(new float[]{70, 30}, "Allergen", "Severity");
-        for (Allergy a : inVisit) {
-            table.addCell(dataCell(getAllergenName(a)));
-            table.addCell(dataCell(getAllergySeverity(a)));
-        }
-        doc.add(table);
-    }
 
     private List<Allergy> getAllergiesForVisit(Visit visit, Date visitEnd, Patient patient) {
         List<Allergy> all = Context.getPatientService().getAllergies(patient);
@@ -588,8 +641,8 @@ public class VisitSummaryPdfGenerator {
     private void addMedications(Document doc, Visit visit) {
         List<DrugOrder> drugs = collectDrugOrders(visit);
         if (drugs.isEmpty()) return;
-        addSectionHeader(doc, "MEDICATIONS");
-        Table table = buildTable(new float[]{55, 30, 15}, "Drug", "Details", "Status");
+        addSectionHeader(doc, "PHARMACY ORDERS");
+        Table table = buildTable(new float[]{45, 45, 10}, "Drug", "Details", "Status");
         for (DrugOrder d : drugs) {
             table.addCell(dataCell(resolveDrugName(d)));
             table.addCell(dataCell(buildMedicationDetails(d)));
@@ -631,6 +684,10 @@ public class VisitSummaryPdfGenerator {
             if (sb.length() > 0) sb.append(", ");
             sb.append(d.getRoute().getName().getName());
         }
+        if (d.getInstructions() != null) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(d.getInstructions());
+        }
         return sb.toString();
     }
 
@@ -640,50 +697,84 @@ public class VisitSummaryPdfGenerator {
     }
 
 
-    private void addProceduresAndImaging(Document doc, Visit visit) {
-        List<Order> procedures = new ArrayList<>();
-        List<Order> imaging    = new ArrayList<>();
-        for (Encounter enc : visit.getEncounters()) {
-            if (!Boolean.TRUE.equals(enc.getVoided())) {
-                collectOrdersByType(enc, procedures, imaging);
-            }
-        }
-        if (procedures.isEmpty() && imaging.isEmpty()) return;
-        addSectionHeader(doc, "PROCEDURES & IMAGING");
-        for (Order o : procedures) addOrderBlock(doc, o, false);
-        for (Order o : imaging)    addOrderBlock(doc, o, true);
+    private void addAppointments(Document doc, Visit visit) {
+        List<String> dates = collectReturnVisitDates(visit);
+        if (dates.isEmpty()) return;
+        addSectionHeader(doc, "APPOINTMENTS SCHEDULED");
+        for (String d : dates) doc.add(bulletItem(d));
+        doc.add(tiny());
     }
 
-    private void collectOrdersByType(Encounter enc, List<Order> procedures, List<Order> imaging) {
-        for (Order o : enc.getOrders()) {
-            if (!Boolean.TRUE.equals(o.getVoided())
-                    && o.getOrderType() != null
-                    && PROCEDURE_ORDER_TYPE.equals(o.getOrderType().getUuid())) {
-                if (isImagingOrder(o)) imaging.add(o);
-                else procedures.add(o);
+    private List<String> collectReturnVisitDates(Visit visit) {
+        Concept concept = Context.getConceptService().getConceptByUuid(RETURN_VISIT_DATE);
+        if (concept == null) return Collections.emptyList();
+        List<String> result = new ArrayList<>();
+        for (Encounter enc : visit.getEncounters()) {
+            if (Boolean.TRUE.equals(enc.getVoided())) continue;
+            for (Obs obs : enc.getObs()) {
+                if (Boolean.TRUE.equals(obs.getVoided()) || !obs.getConcept().equals(concept)) continue;
+                if (obs.getValueDatetime() != null) result.add(datetimeFmt.format(obs.getValueDatetime()));
+                else if (obs.getValueDate() != null) result.add(dateFmt.format(obs.getValueDate()));
             }
         }
+        return result;
+    }
+
+
+    private void addRadiologyImaging(Document doc, Visit visit) {
+        List<Order> imaging = collectOrdersOfKind(visit, true);
+        if (imaging.isEmpty()) return;
+        addSectionHeader(doc, "RADIOLOGY & IMAGING");
+        for (Order o : imaging) addOrderBlock(doc, o, true);
+    }
+
+    private void addProcedures(Document doc, Visit visit) {
+        List<Order> procedures = collectOrdersOfKind(visit, false);
+        if (procedures.isEmpty()) return;
+        addSectionHeader(doc, "PROCEDURES");
+        for (Order o : procedures) addOrderBlock(doc, o, false);
+    }
+
+    private List<Order> collectOrdersOfKind(Visit visit, boolean imaging) {
+        List<Order> result = new ArrayList<>();
+        for (Encounter enc : visit.getEncounters()) {
+            if (Boolean.TRUE.equals(enc.getVoided())) continue;
+            for (Order o : enc.getOrders()) {
+                if (!Boolean.TRUE.equals(o.getVoided())
+                        && o.getOrderType() != null
+                        && PROCEDURE_ORDER_TYPE.equals(o.getOrderType().getUuid())
+                        && isImagingOrder(o) == imaging) {
+                    result.add(o);
+                }
+            }
+        }
+        return result;
     }
 
     private void addOrderBlock(Document doc, Order order, boolean isImaging) {
         doc.add(new Paragraph(order.getConcept().getName().getName().toUpperCase())
-            .setFont(bold).setFontSize(9).setMarginBottom(1).setMarginTop(2));
-        doc.add(new Paragraph(buildOrderSubtitle(order))
-            .setFontSize(7).setMarginBottom(2));
+            .setFont(bold).setFontSize(7).setMarginBottom(1).setMarginTop(2));
         Procedure procedure = getLinkedProcedure(order);
         if (procedure != null) renderProcedureReport(doc, procedure, isImaging);
+        String footer = buildOrderFooter(order);
+        if (!footer.isEmpty()) {
+            doc.add(new Paragraph(footer).setFont(italic).setFontSize(7)
+                .setMarginTop(2).setMarginBottom(2));
+        }
     }
 
-    private String buildOrderSubtitle(Order order) {
+    private String buildOrderFooter(Order order) {
         StringBuilder sb = new StringBuilder();
-        if (order.getOrderer() != null) sb.append(order.getOrderer().getName());
+        if (order.getOrderer() != null) {
+            sb.append(order.getOrderer().getName());
+        }
         if (order.getDateActivated() != null) {
-            if (sb.length() > 0) sb.append(" • ");
-            sb.append(dateFmt.format(order.getDateActivated()));
+            if (sb.length() > 0) sb.append("  •  ");
+            sb.append("Ordered: ").append(dateFmt.format(order.getDateActivated()));
         }
         if (order.getFulfillerStatus() != null) {
-            if (sb.length() > 0) sb.append(" • ");
-            sb.append(order.getFulfillerStatus().name());
+            if (sb.length() > 0) sb.append("  •  ");
+            sb.append("Status: ").append(order.getFulfillerStatus().name());
         }
         return sb.toString();
     }
@@ -693,45 +784,44 @@ public class VisitSummaryPdfGenerator {
         if (report != null && !report.isEmpty()) {
             doc.add(new Paragraph(isImaging ? "Report:" : "Procedure Report:")
                 .setFont(bold).setFontSize(7).setMarginBottom(1));
-            addHtmlAwareTextBox(doc, report);
+            doc.add(new Paragraph(stripHtml(report)).setFontSize(8).setMarginBottom(2));
         }
         if (!isImaging) return;
         String impression = procedure.getImpressions();
         if (impression != null && !impression.isEmpty()) {
             doc.add(new Paragraph("Impression:")
                 .setFont(bold).setFontSize(7).setMarginTop(2).setMarginBottom(1));
-            addHtmlAwareTextBox(doc, impression);
+            doc.add(new Paragraph(stripHtml(impression)).setFontSize(8).setMarginBottom(2));
         }
     }
 
-
-    private void addClinicalNotes(Document doc, Visit visit) {
-        String notes = buildClinicalNotesText(visit);
-        if (notes.isEmpty()) return;
-        addSectionHeader(doc, "CLINICAL NOTES & PLAN");
-        doc.add(new Paragraph(notes).setFontSize(8).setMarginBottom(4));
+    private String stripHtml(String raw) {
+        String plain = HtmlToITextUtil.stripTags(raw);
+        return plain.isEmpty() ? HtmlToITextUtil.decodeHtmlEntities(raw) : plain;
     }
 
-    private String buildClinicalNotesText(Visit visit) {
+
+    private List<String> buildClinicalNotesText(Visit visit) {
         Set<String> noteTypes = new HashSet<>(Arrays.asList(
             CommonMetadata._EncounterType.CONSULTATION,
             CommonMetadata._EncounterType.NURSING_CARE_PLAN));
-        StringBuilder sb = new StringBuilder();
+        List<String> items = new ArrayList<>();
         for (Encounter enc : visit.getEncounters()) {
             if (!Boolean.TRUE.equals(enc.getVoided())
                     && noteTypes.contains(enc.getEncounterType().getUuid())) {
-                appendEncounterNotes(sb, enc);
+                appendEncounterNotes(items, enc);
             }
         }
-        return sb.toString();
+        return items;
     }
 
-    private void appendEncounterNotes(StringBuilder sb, Encounter enc) {
+    private void appendEncounterNotes(List<String> items, Encounter enc) {
         for (Obs obs : enc.getObs()) {
             String val = obs.getValueText();
             if (!Boolean.TRUE.equals(obs.getVoided()) && val != null && !val.isEmpty()) {
-                if (sb.length() > 0) sb.append("\n");
-                sb.append(obs.getConcept().getName().getName()).append(": ").append(val);
+                String conceptName = obs.getConcept() != null && obs.getConcept().getName() != null
+                    ? obs.getConcept().getName().getName() : null;
+                items.add(conceptName != null ? conceptName + " - " + val : val);
             }
         }
     }
@@ -748,28 +838,6 @@ public class VisitSummaryPdfGenerator {
     /** Compact bullet-point item. */
     private Paragraph bulletItem(String text) {
         return new Paragraph("•  " + text).setFontSize(8).setMarginLeft(6).setMarginBottom(1);
-    }
-
-    /** Bordered text block for plain text content. */
-    private void addTextBox(Document doc, String text) {
-        doc.add(new Table(1).setWidth(UnitValue.createPercentValue(100)).setMarginBottom(2)
-            .addCell(new Cell()
-                .setBorder(new SolidBorder(C_RULE, 0.5f))
-                .setPadding(4)
-                .add(new Paragraph(text).setFontSize(8))));
-    }
-
-    /**
-     * Bordered text box that handles HTML content from procedure reports.
-     * Uses HtmlToITextUtil only for String→String operations (safe across
-     * module classloader boundaries): entities are decoded and HTML tags are
-     * stripped before rendering, so no cross-classloader iText objects are used.
-     */
-    private void addHtmlAwareTextBox(Document doc, String raw) {
-        // stripTags: iteratively decodes HTML entities then extracts plain text via Jsoup.
-        // All types that cross the classloader boundary are plain Strings.
-        String plain = HtmlToITextUtil.stripTags(raw);
-        addTextBox(doc, plain.isEmpty() ? HtmlToITextUtil.decodeHtmlEntities(raw) : plain);
     }
 
     /** Creates a table pre-loaded with header cells. */
@@ -821,12 +889,12 @@ public class VisitSummaryPdfGenerator {
         return (v == Math.floor(v) && !Double.isInfinite(v)) ? String.valueOf((int) v) : String.valueOf(v);
     }
 
-    private String interpCode(double value, Double ll, Double l, Double h, Double hh) {
-        if (ll != null && value < ll) return "LL";
-        if (l  != null && value < l)  return "L";
-        if (hh != null && value > hh) return "HH";
-        if (h  != null && value > h)  return "H";
-        return "N";
+    private String interpretByConcept(double value, ConceptNumeric cn) {
+        if (cn.getLowCritical() != null && value < cn.getLowCritical()) return "LL";
+        if (cn.getLowNormal()   != null && value < cn.getLowNormal())   return "L";
+        if (cn.getHiCritical()  != null && value > cn.getHiCritical())  return "HH";
+        if (cn.getHiNormal()    != null && value > cn.getHiNormal())    return "H";
+        return null;
     }
 
     private boolean isImagingOrder(Order order) {

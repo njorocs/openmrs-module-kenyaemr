@@ -66,14 +66,13 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	protected final Log log = LogFactory.getLog(getClass());
 	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-	// ── Complaint obs concepts ─────────────────────────────────────────────────
-	private static final String COMPLAINT_GROUP_CONCEPT = "160531AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	private static final String COMPLAINT_CONCEPT       = "5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	private static final String COMPLAINT_DURATION      = "159368AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	private static final String COMPLAINT_ONSET_STATUS  = "d7a3441d-6aeb-49be-b7d6-b2a3bb39e78d";
-	private static final String COMPLAINT_OTHER_TEXT    = "20395601-257c-490c-86c2-acffb627f91f";
+	private static final String COMPLAINT_GROUP_CONCEPT   = "160531AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String COMPLAINT_CONCEPT         = "5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String COMPLAINT_DURATION        = "159368AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String COMPLAINT_DURATION_UNITS  = "1732AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String COMPLAINT_ONSET_STATUS    = "d7a3441d-6aeb-49be-b7d6-b2a3bb39e78d";
+	private static final String COMPLAINT_OTHER_TEXT      = "20395601-257c-490c-86c2-acffb627f91f";
 
-	// ── Vital-signs concept UUIDs ──────────────────────────────────────────────
 	private static final String WEIGHT           = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	private static final String HEIGHT           = "5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	private static final String TEMPERATURE      = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -95,13 +94,14 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	private static final String K_O2_SAT       = "oxygenSaturation";
 	private static final String K_MUAC         = "muac";
 
-	// ── FHIR interpretation ────────────────────────────────────────────────────
 	private static final String FHIR_INTERP_SYSTEM =
 		"http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
 	private static final String K_INTERPRETATION = "interpretation";
 	private static final String K_VALUE          = "value";
 	private static final String K_UNIT           = "unit";
 	private static final String K_RESULTS        = "results";
+	private static final String K_STATUS         = "status";
+	private static final String K_INSTRUCTIONS   = "instructions";
 
 
 	@GetMapping("/visitSummary")
@@ -132,6 +132,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		summary.put("procedures", buildProcedures(visit));
 		summary.put("imaging", buildImaging(visit));
 		summary.put("labResults", buildLabResults(visit, cs));
+		summary.put("examinationFindings", buildExaminationFindings(visit));
+		summary.put("appointments", buildAppointments(visit));
 
 		return summary;
 	}
@@ -156,8 +158,6 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 				new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	// ── Section builders ──────────────────────────────────────────────────────
 
 	private SimpleObject buildVitals(Visit visit, Date visitEnd, ConceptService cs) {
 		List<Concept> vitalConcepts = conceptList(cs, WEIGHT, HEIGHT, TEMPERATURE, PULSE_RATE,
@@ -286,35 +286,47 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private List<SimpleObject> buildComplaints(Visit visit, ConceptService cs) {
 		List<SimpleObject> complaints = new ArrayList<>();
-		EncounterType triageType = Context.getEncounterService()
-			.getEncounterTypeByUuid(CommonMetadata._EncounterType.TRIAGE);
+		org.openmrs.api.EncounterService encounterService = Context.getEncounterService();
+		EncounterType triageType       = encounterService.getEncounterTypeByUuid(CommonMetadata._EncounterType.TRIAGE);
+		EncounterType consultationType = encounterService.getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
 
-		Concept groupConcept   = cs.getConceptByUuid(COMPLAINT_GROUP_CONCEPT);
-		Concept complaintCon   = cs.getConceptByUuid(COMPLAINT_CONCEPT);
-		Concept durationCon    = cs.getConceptByUuid(COMPLAINT_DURATION);
-		Concept onsetStatusCon = cs.getConceptByUuid(COMPLAINT_ONSET_STATUS);
-		Concept otherTextCon   = cs.getConceptByUuid(COMPLAINT_OTHER_TEXT);
+		Concept groupConcept     = cs.getConceptByUuid(COMPLAINT_GROUP_CONCEPT);
+		Concept complaintCon     = cs.getConceptByUuid(COMPLAINT_CONCEPT);
+		Concept durationCon      = cs.getConceptByUuid(COMPLAINT_DURATION);
+		Concept durationUnitsCon = cs.getConceptByUuid(COMPLAINT_DURATION_UNITS);
+		Concept onsetStatusCon   = cs.getConceptByUuid(COMPLAINT_ONSET_STATUS);
+		Concept otherTextCon     = cs.getConceptByUuid(COMPLAINT_OTHER_TEXT);
 
 		if (groupConcept == null || complaintCon == null) {
 			return complaints;
 		}
 
+		Set<EncounterType> allowedTypes = new HashSet<>();
+		if (triageType != null)       allowedTypes.add(triageType);
+		if (consultationType != null) allowedTypes.add(consultationType);
+		if (allowedTypes.isEmpty()) {
+			log.warn("buildComplaints: neither triage nor consultation encounter type resolved; returning empty");
+			return complaints;
+		}
+
 		for (Encounter enc : visit.getEncounters()) {
-			boolean active = !Boolean.TRUE.equals(enc.getVoided());
-			boolean matchesType = triageType == null || enc.getEncounterType().equals(triageType);
-			if (active && matchesType) {
+			if (Boolean.TRUE.equals(enc.getVoided()) || enc.getEncounterType() == null) {
+				continue;
+			}
+			if (allowedTypes.contains(enc.getEncounterType())) {
 				collectComplaintsFromEncounter(enc, groupConcept, complaintCon,
-					durationCon, onsetStatusCon, otherTextCon, complaints);
+					durationCon, durationUnitsCon, onsetStatusCon, otherTextCon, complaints);
 			}
 		}
 		return complaints;
 	}
 
 	private void collectComplaintsFromEncounter(Encounter enc, Concept groupConcept, Concept complaintCon,
-			Concept durationCon, Concept onsetStatusCon, Concept otherTextCon, List<SimpleObject> complaints) {
+			Concept durationCon, Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon,
+			List<SimpleObject> complaints) {
 		for (Obs topObs : enc.getObsAtTopLevel(false)) {
 			if (topObs.getConcept().equals(groupConcept) && topObs.hasGroupMembers()) {
-				SimpleObject entry = buildComplaintEntry(topObs, complaintCon, durationCon, onsetStatusCon, otherTextCon);
+				SimpleObject entry = buildComplaintEntry(topObs, complaintCon, durationCon, durationUnitsCon, onsetStatusCon, otherTextCon);
 				if (!entry.isEmpty()) {
 					complaints.add(entry);
 				}
@@ -323,22 +335,33 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	}
 
 	private SimpleObject buildComplaintEntry(Obs groupObs, Concept complaintCon, Concept durationCon,
-			Concept onsetStatusCon, Concept otherTextCon) {
+			Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon) {
 		SimpleObject complaint = new SimpleObject();
+		Double durationValue = null;
+		String durationUnit  = "days";
+
 		for (Obs member : groupObs.getGroupMembers(false)) {
 			Concept mc = member.getConcept();
 			if (mc.equals(complaintCon)) {
-				String val = member.getValueCoded() != null
-					? member.getValueCoded().getName().getName() : member.getValueText();
-				complaint.put("complaint", val);
+				String coded = codedValueName(member);
+				complaint.put("complaint", coded != null ? coded : member.getValueText());
 			} else if (durationCon != null && mc.equals(durationCon) && member.getValueNumeric() != null) {
-				complaint.put("duration", member.getValueNumeric().intValue() + " days");
-			} else if (onsetStatusCon != null && mc.equals(onsetStatusCon) && member.getValueCoded() != null) {
+				durationValue = member.getValueNumeric();
+			} else if (durationUnitsCon != null && mc.equals(durationUnitsCon)
+					&& member.getValueCoded() != null && member.getValueCoded().getName() != null) {
+				durationUnit = member.getValueCoded().getName().getName();
+			} else if (onsetStatusCon != null && mc.equals(onsetStatusCon)
+					&& member.getValueCoded() != null && member.getValueCoded().getName() != null) {
 				complaint.put("onsetStatus", member.getValueCoded().getName().getName());
 			} else if (otherTextCon != null && mc.equals(otherTextCon) && member.getValueText() != null) {
 				complaint.put("otherComplaints", member.getValueText());
 			}
 		}
+
+		if (durationValue != null) {
+			complaint.put("duration", durationValue.intValue() + " " + durationUnit);
+		}
+
 		return complaint;
 	}
 
@@ -362,7 +385,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		SimpleObject obj = new SimpleObject();
 		obj.put("name", name != null ? name : "");
 		obj.put("onsetDate", formatDate(onset));
-		obj.put("status", condition.getClinicalStatus() != null ? condition.getClinicalStatus().toString() : "");
+		obj.put(K_STATUS, condition.getClinicalStatus() != null ? condition.getClinicalStatus().toString() : "");
 		return obj;
 	}
 
@@ -425,6 +448,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		SimpleObject obj = new SimpleObject();
 		obj.put("diagnosis", name != null ? name : "");
 		obj.put("certainty", diagnosis.getCertainty() != null ? diagnosis.getCertainty().toString() : "");
+		String certaintyStr = diagnosis.getCertainty() != null ? diagnosis.getCertainty().toString() : "";
+		obj.put("type", "CONFIRMED".equalsIgnoreCase(certaintyStr) ? "MAIN_DIAGNOSIS" : "IMPRESSION");
 		obj.put("rank", diagnosis.getRank());
 		obj.put("date", date);
 		return obj;
@@ -450,6 +475,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		String duration = buildDurationString(d);
 		String route = d.getRoute() != null ? d.getRoute().getName().getName() : "";
 		String frequency = d.getFrequency() != null ? d.getFrequency().getName() : "";
+		String instructions = d.getInstructions() != null ? d.getInstructions() : "";
 
 		SimpleObject obj = new SimpleObject();
 		obj.put("drug", drugName);
@@ -457,6 +483,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		obj.put("frequency", frequency);
 		obj.put("duration", duration);
 		obj.put("route", route);
+		obj.put(K_INSTRUCTIONS, instructions);
 		obj.put("dateActivated", formatDate(d.getDateActivated()));
 		obj.put("autoExpireDate", formatDate(d.getAutoExpireDate()));
 		return obj;
@@ -509,7 +536,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 				if (text.length() > 0) {
 					text.append("\n");
 				}
-				text.append(obs.getConcept().getName().getName()).append(": ").append(val);
+				text.append(val);
 			}
 		}
 		return text.toString();
@@ -582,9 +609,9 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		obj.put("orderNumber", order.getOrderNumber());
 		obj.put("action", order.getAction() != null ? order.getAction().name() : "");
 		obj.put("urgency", order.getUrgency() != null ? order.getUrgency().name() : "");
-		obj.put("status", order.getFulfillerStatus() != null ? order.getFulfillerStatus().name() : "");
+		obj.put(K_STATUS, order.getFulfillerStatus() != null ? order.getFulfillerStatus().name() : "");
 		obj.put("orderedDate", formatDate(order.getDateActivated()));
-		obj.put("instructions", order.getInstructions() != null ? order.getInstructions() : "");
+		obj.put(K_INSTRUCTIONS, order.getInstructions() != null ? order.getInstructions() : "");
 		obj.put("orderer", order.getOrderer() != null ? order.getOrderer().getName() : "");
 		obj.put("procedureReport", procedure != null && procedure.getProcedureReport() != null ? procedure.getProcedureReport() : "");
 		obj.put(K_RESULTS, collectOrderResults(order, allVisitObs));
@@ -599,9 +626,9 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		obj.put("orderNumber", order.getOrderNumber());
 		obj.put("action", order.getAction() != null ? order.getAction().name() : "");
 		obj.put("urgency", order.getUrgency() != null ? order.getUrgency().name() : "");
-		obj.put("status", order.getFulfillerStatus() != null ? order.getFulfillerStatus().name() : "");
+		obj.put(K_STATUS, order.getFulfillerStatus() != null ? order.getFulfillerStatus().name() : "");
 		obj.put("orderedDate", formatDate(order.getDateActivated()));
-		obj.put("instructions", order.getInstructions() != null ? order.getInstructions() : "");
+		obj.put(K_INSTRUCTIONS, order.getInstructions() != null ? order.getInstructions() : "");
 		obj.put("orderer", order.getOrderer() != null ? order.getOrderer().getName() : "");
 		obj.put("procedureReport", procedure != null && procedure.getProcedureReport() != null ? procedure.getProcedureReport() : "");
 		obj.put("impression", procedure != null && procedure.getImpressions() != null ? procedure.getImpressions() : "");
@@ -638,6 +665,34 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	// UUID of the "Laboratory Order" concept set — parent of all lab panels
 	private static final String LAB_ORDER_CONCEPT_UUID = "9a6f10d6-7fc5-4fb7-9428-24ef7b8d01f7";
+
+	private static final String RETURN_VISIT_DATE = "5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+	// Examination Findings — General
+	private static final String EXAM_GENERAL_FINDINGS      = "162737AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_GENERAL_NOTES         = "160430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_SYSTEM_REVIEW_STATUS  = "159615AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_ALL_SYSTEMS_NORMAL    = "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	// System blocks
+	private static final String EXAM_ABDOMINAL_FINDINGS    = "1125AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_ABDOMINAL_NOTES       = "160948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_CNS_FINDINGS          = "752132fb-235c-45cd-8914-854c388e358f";
+	private static final String EXAM_CNS_NOTES             = "160994AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_CVS_FINDINGS          = "1124AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_CVS_NOTES             = "163046AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_ENT_FINDINGS          = "f8fd8181-655e-4b32-97e3-4ae539c6de45";
+	private static final String EXAM_ENT_NOTES             = "462bfb69-b97e-425c-b387-ddd3a5c8653c";
+	private static final String EXAM_ENDOCRINE_FINDINGS    = "644504bd-23bc-4f1e-b9a0-d44f81f4148e";
+	private static final String EXAM_EYES_FINDINGS         = "163309AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_EYES_NOTES            = "850a960b-e8b5-4775-ba74-aaddb2abbf51";
+	private static final String EXAM_GENITOURINARY_FINDINGS = "1126AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_GENITOURINARY_NOTES   = "163047AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_MUSCULOSKELETAL_FINDINGS = "1128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_MUSCULOSKELETAL_NOTES = "163048AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_RESPIRATORY_FINDINGS  = "1123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_RESPIRATORY_NOTES     = "163042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_SKIN_FINDINGS         = "1120AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String EXAM_SKIN_NOTES            = "160981AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 	private List<SimpleObject> buildLabResults(Visit visit, ConceptService cs) {
 		Concept labOrderConcept = cs.getConceptByUuid(LAB_ORDER_CONCEPT_UUID);
@@ -756,6 +811,114 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		return "Normal";
 	}
 
+	private SimpleObject buildExaminationFindings(Visit visit) {
+		EncounterType consultType = Context.getEncounterService()
+			.getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
+		SimpleObject result = new SimpleObject();
+
+		if (consultType == null) return result;
+
+		Map<String, List<Obs>> obsMap = new java.util.LinkedHashMap<>();
+		for (Encounter enc : visit.getEncounters()) {
+			if (Boolean.TRUE.equals(enc.getVoided())) continue;
+			if (!consultType.equals(enc.getEncounterType())) continue;
+			for (Obs obs : enc.getObs()) {
+				if (Boolean.TRUE.equals(obs.getVoided())) continue;
+				String uuid = obs.getConcept().getUuid();
+				obsMap.computeIfAbsent(uuid, k -> new ArrayList<>()).add(obs);
+			}
+		}
+
+		// General examination
+		List<String> generalFindings = new ArrayList<>();
+		for (Obs o : obsMap.getOrDefault(EXAM_GENERAL_FINDINGS, Collections.emptyList())) {
+			if (o.getValueCoded() != null) generalFindings.add(o.getValueCoded().getName().getName());
+		}
+		String generalNotes = null;
+		for (Obs o : obsMap.getOrDefault(EXAM_GENERAL_NOTES, Collections.emptyList())) {
+			if (o.getValueText() != null && !o.getValueText().isEmpty()) { generalNotes = o.getValueText(); break; }
+		}
+		SimpleObject general = new SimpleObject();
+		general.put("findings", generalFindings);
+		general.put("notes", generalNotes);
+		result.put("general", general);
+
+		// System review
+		boolean allNormal = false;
+		for (Obs o : obsMap.getOrDefault(EXAM_SYSTEM_REVIEW_STATUS, Collections.emptyList())) {
+			if (o.getValueCoded() != null && EXAM_ALL_SYSTEMS_NORMAL.equals(o.getValueCoded().getUuid())) {
+				allNormal = true; break;
+			}
+		}
+		SimpleObject systemReview = new SimpleObject();
+		systemReview.put("allSystemsNormal", allNormal);
+		List<SimpleObject> systems = new ArrayList<>();
+		if (!allNormal) {
+			addSystemEntry(systems, obsMap, "Abdominal",       EXAM_ABDOMINAL_FINDINGS,       EXAM_ABDOMINAL_NOTES);
+			addSystemEntry(systems, obsMap, "CNS",             EXAM_CNS_FINDINGS,             EXAM_CNS_NOTES);
+			addSystemEntry(systems, obsMap, "CVS",             EXAM_CVS_FINDINGS,             EXAM_CVS_NOTES);
+			addSystemEntry(systems, obsMap, "ENT",             EXAM_ENT_FINDINGS,             EXAM_ENT_NOTES);
+			addSystemEntry(systems, obsMap, "Endocrine",       EXAM_ENDOCRINE_FINDINGS,       EXAM_ENT_NOTES);
+			addSystemEntry(systems, obsMap, "Eyes",            EXAM_EYES_FINDINGS,            EXAM_EYES_NOTES);
+			addSystemEntry(systems, obsMap, "Genitourinary",   EXAM_GENITOURINARY_FINDINGS,   EXAM_GENITOURINARY_NOTES);
+			addSystemEntry(systems, obsMap, "Musculoskeletal", EXAM_MUSCULOSKELETAL_FINDINGS, EXAM_MUSCULOSKELETAL_NOTES);
+			addSystemEntry(systems, obsMap, "Respiratory",     EXAM_RESPIRATORY_FINDINGS,     EXAM_RESPIRATORY_NOTES);
+			// Skin: same concept used for findings (coded) and notes (text)
+			List<String> skinFindings = new ArrayList<>();
+			String skinNotes = null;
+			for (Obs o : obsMap.getOrDefault(EXAM_SKIN_FINDINGS, Collections.emptyList())) {
+				if (o.getValueCoded() != null) skinFindings.add(o.getValueCoded().getName().getName());
+				else if (o.getValueText() != null && !o.getValueText().isEmpty()) skinNotes = o.getValueText();
+			}
+			for (Obs o : obsMap.getOrDefault(EXAM_SKIN_NOTES, Collections.emptyList())) {
+				if (o.getValueText() != null && !o.getValueText().isEmpty()) { skinNotes = o.getValueText(); break; }
+			}
+			if (!skinFindings.isEmpty() || skinNotes != null) {
+				SimpleObject s = new SimpleObject();
+				s.put("system", "Skin");
+				s.put("findings", skinFindings);
+				s.put("notes", skinNotes);
+				systems.add(s);
+			}
+		}
+		systemReview.put("systems", systems);
+		result.put("systemReview", systemReview);
+		return result;
+	}
+
+	private void addSystemEntry(List<SimpleObject> systems, Map<String, List<Obs>> obsMap,
+	                            String label, String findingsUuid, String notesUuid) {
+		List<String> findings = new ArrayList<>();
+		for (Obs o : obsMap.getOrDefault(findingsUuid, Collections.emptyList())) {
+			if (o.getValueCoded() != null) findings.add(o.getValueCoded().getName().getName());
+		}
+		String notes = null;
+		for (Obs o : obsMap.getOrDefault(notesUuid, Collections.emptyList())) {
+			if (o.getValueText() != null && !o.getValueText().isEmpty()) { notes = o.getValueText(); break; }
+		}
+		if (findings.isEmpty() && notes == null) return;
+		SimpleObject s = new SimpleObject();
+		s.put("system", label);
+		s.put("findings", findings);
+		s.put("notes", notes);
+		systems.add(s);
+	}
+
+	private List<String> buildAppointments(Visit visit) {
+		Concept concept = Context.getConceptService().getConceptByUuid(RETURN_VISIT_DATE);
+		List<String> dates = new ArrayList<>();
+		if (concept == null) return dates;
+		for (Encounter enc : visit.getEncounters()) {
+			if (Boolean.TRUE.equals(enc.getVoided())) continue;
+			for (Obs obs : enc.getObs()) {
+				if (Boolean.TRUE.equals(obs.getVoided()) || !obs.getConcept().equals(concept)) continue;
+				if (obs.getValueDatetime() != null) dates.add(formatDate(obs.getValueDatetime()));
+				else if (obs.getValueDate() != null) dates.add(formatDate(obs.getValueDate()));
+			}
+		}
+		return dates;
+	}
+
 	// ── Utilities ─────────────────────────────────────────────────────────────
 
 	private String formatDate(Date date) {
@@ -769,6 +932,11 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		if (obs.getValueDate() != null)     return formatDate(obs.getValueDate());
 		if (obs.getValueDatetime() != null) return formatDate(obs.getValueDatetime());
 		return "";
+	}
+
+	private String codedValueName(Obs obs) {
+		return obs.getValueCoded() != null && obs.getValueCoded().getName() != null
+			? obs.getValueCoded().getName().getName() : null;
 	}
 
 	private List<Concept> conceptList(ConceptService cs, String... uuids) {
