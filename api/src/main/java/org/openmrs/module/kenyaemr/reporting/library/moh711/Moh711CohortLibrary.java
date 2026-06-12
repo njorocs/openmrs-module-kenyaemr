@@ -11,6 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.library.moh711;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH705.MOH705CohortLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH717.Moh705CohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Library of cohort definitions used specifically in the MOH711 report
@@ -1146,6 +1149,22 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
 
     /**
+     * No. of Low APGAR Score (≤ 6 at 5 Min)
+     * @return
+     */
+    public CohortDefinition lowAPGARScore(){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.apgar_score_5min <= 6;";
+        cd.setName("No. with Low APGAR Score (≤ 6 at 5 Min)");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("No. with Low APGAR Score (≤ 6 at 5 Min)");
+
+        return cd;
+    }
+
+    /**
      * No.of births with deformities
      * @return
      */
@@ -1775,6 +1794,68 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
         return cd;
     }
+
+    /**
+     * CWC Visit
+     * @return
+     */
+    public CohortDefinition cwcVisit(){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate);";
+        cd.setName("CWC Visit");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("CWC Visit");
+
+        return cd;
+    }
+
+    /**
+     *  Diarrhoea with severe dehydration
+     * @param diarrSevereDehydration
+     * @return
+     */
+    public CohortDefinition diarrhoeaSevereDehydration(List<Integer> diarrSevereDehydration) {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("cwcVisit", ReportUtils.map(cwcVisit(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrSevereDehydration", ReportUtils.map(moh705CohortLibrary.patientDiagnosis(diarrSevereDehydration), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("cwcVisit AND diarrSevereDehydration");
+        return cd;
+    }
+
+    /**
+     *  Diarrhoea with no dehydration
+     * @param diarrSomeDehydration
+     * @return
+     */
+    public CohortDefinition diarrhoeaSomeDehydration(List<Integer> diarrSomeDehydration) {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("cwcVisit", ReportUtils.map(cwcVisit(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrSomeDehydration", ReportUtils.map(moh705CohortLibrary.patientDiagnosis(diarrSomeDehydration), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("cwcVisit AND diarrSomeDehydration");
+        return cd;
+    }
+
+    /**
+     *  Diarrhoea with no dehydration
+     * @param diarrNoDehydration
+     * @return
+     */
+    public CohortDefinition diarrhoeaNoDehydration(List<Integer> diarrNoDehydration) {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("cwcVisit", ReportUtils.map(cwcVisit(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrNoDehydration", ReportUtils.map(moh705CohortLibrary.patientDiagnosis(diarrNoDehydration), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("cwcVisit AND diarrNoDehydration");
+        return cd;
+    }
+
     /**
      * MNPs_Supplementation
      * @return

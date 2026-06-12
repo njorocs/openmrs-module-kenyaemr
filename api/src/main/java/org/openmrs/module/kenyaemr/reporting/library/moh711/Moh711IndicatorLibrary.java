@@ -14,6 +14,8 @@ import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
@@ -349,6 +351,13 @@ public class Moh711IndicatorLibrary {
 	}
 
 	/**
+	 * No. of Low APGAR Score (≤ 6 at 5 Min)
+	 * @return
+	 */
+	public CohortIndicator lowAPGARScore() {
+		return cohortIndicator("No. with Low APGAR Score (≤ 6 at 5 Min)", ReportUtils.map(moh711Cohorts.lowAPGARScore(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
 	 * No. of births with deformities
 	 * @return
 	 */
@@ -621,6 +630,29 @@ public class Moh711IndicatorLibrary {
 	 */
 	public CohortIndicator mnpsSupplementation() {
 		return cohortIndicator("MNPs_Supplementation", ReportUtils.map(moh711Cohorts.mnpsSupplementation(), "startDate=${startDate},endDate=${endDate}"));
+	}
+	/**
+	 *
+	 * @return
+	 */
+	public CohortIndicator diarrhoeaSevereDehydration(List<Integer> severeDehydartion) {
+		return cohortIndicator("No of children who have diarrhoea with severe dehydration", ReportUtils.map(moh711Cohorts.diarrhoeaSevereDehydration(severeDehydartion), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public CohortIndicator diarrhoeaSomeDehydration(List<Integer> someDehydration) {
+		return cohortIndicator("No of children who have diarrhoea with some dehydration", ReportUtils.map(moh711Cohorts.diarrhoeaSomeDehydration(someDehydration), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public CohortIndicator diarrhoeaNoDehydration(List<Integer> noDehydration) {
+		return cohortIndicator("No of children who have diarrhoea with no dehydration", ReportUtils.map(moh711Cohorts.diarrhoeaNoDehydration(noDehydration), "startDate=${startDate},endDate=${endDate}"));
 	}
 	/**
 	 * Child Mortality

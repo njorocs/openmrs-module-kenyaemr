@@ -17,6 +17,7 @@ import org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.reporting.ColumnParameters;
 import org.openmrs.module.kenyaemr.reporting.EmrReportingUtils;
+import org.openmrs.module.kenyaemr.reporting.MohReportUtils.DiagnosisLists;
 import org.openmrs.module.kenyaemr.reporting.library.moh711.Moh711IndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.moh717.Moh717IndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonDimensionLibrary;
@@ -33,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 
 import static org.openmrs.module.kenyacore.report.ReportUtils.map;
+import static org.openmrs.module.kenyaemr.reporting.builder.common.MOH705AReportBuilder.DIARRHOEA_WITH_SEVERE_DEHYDRATION;
+import static org.openmrs.module.kenyaemr.reporting.builder.common.MOH705AReportBuilder.DIARRHOEA_WITH_SOME_DEHYDRATION;
 
 /**
  * MOH 711 report
@@ -42,7 +45,7 @@ import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 public class Moh711ReportBuilder extends AbstractReportBuilder {
 
     protected static final Log log = LogFactory.getLog(Moh711ReportBuilder.class);
-
+    static final String AGE_BELOW_FIVE = "<5";
     static final String[] HPV_TEST_SCREENING = {"HPV Test","HPV"};
     static final String PAP_SMEAR_SCREENING = "Pap Smear";
     static final String HPV_SCREENING = "HPV";
@@ -127,7 +130,8 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     ColumnParameters m0To59Months = new ColumnParameters(null, "0-59 months, Male", "gender=M|age=0-59");
     ColumnParameters f12To59Months = new ColumnParameters(null, "12-59 months, Female", "gender=F|age=12-59");
     ColumnParameters m12To59Months = new ColumnParameters(null, "12-59 months, Male", "gender=M|age=12-59");
-    ColumnParameters all0To59Months = new ColumnParameters(null, "0-59 months", "age=0-59");
+    ColumnParameters mTo59Months = new ColumnParameters(null, "0-59 months", "gender=M|age=0-59");
+    ColumnParameters fTo59Months = new ColumnParameters(null, "0-59 months", "gender=F|age=0-59");
 
     ColumnParameters funder35 = new ColumnParameters(null, "<35 Years", "gender=F|age=<35");
     ColumnParameters f35To55 = new ColumnParameters(null, "35-55 Years", "gender=F|age=35-55");
@@ -148,11 +152,9 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     List<ColumnParameters> childMUACAgeDisaggregations = Arrays.asList(f6To59Months, m6To59Months, colTotal);
     List<ColumnParameters> childMNPsAgeDisaggregations = Arrays.asList(f6To23Months, m6To23Months, colTotal);
     List<ColumnParameters> childDewormingAgeDisaggregations = Arrays.asList(f12To59Months, m12To59Months, colTotal);
-    List<ColumnParameters> childDelayedGrowthAgeDisaggregations = Arrays.asList(all0To59Months);
+    List<ColumnParameters> childDelayedGrowthAgeDisaggregations = Arrays.asList(fTo59Months,mTo59Months);
     List<ColumnParameters> sgbvAgeDisaggregation = Arrays.asList(all0_9, all10_17, all18_49, all50AndAbove);
     List<ColumnParameters> familyPlanningAgeDisaggregation = Arrays.asList(all10_14, all15_19, all20_24, all25_And_Above);
-    List<ColumnParameters> breastCancerDisaggregations = Arrays.asList(funder35, f35To55, f56AndAbove);
-    List<ColumnParameters> colorectalCancerDisaggregations = Arrays.asList(allUnder40, all40To75);
 
     /**
      * A. ANC / PMCT
@@ -214,8 +216,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Cryotherapy", "Number of clients treated using Cryotherapy", ReportUtils.map(moh711Indicators.treatedUsingCyrotherapy(), indParams), cacxScreeningAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "LEEP", "Number of clients treated using LEEP", ReportUtils.map(moh711Indicators.treatedUsingLEEP(), indParams), cacxScreeningAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "HIV+_CACX_Screened", "Number of HIV positive clients screened", ReportUtils.map(moh711Indicators.cacxScreenedAndHIVPositive(PAP_SMEAR_SCREENING,VIA_VILI_SCREENING,HPV_SCREENING), indParams), cacxScreeningAgeDisaggregations, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd, "Screened_for_Breast_Cancer", "Number of women screened for breast cancer", ReportUtils.map(moh711Indicators.screenedForBreastCancer(), indParams), breastCancerDisaggregations, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd, "Screened_for_Colorectal_Cancer", "Number screened for colorectal cancer", ReportUtils.map(moh711Indicators.screenedForColorectalCancer(), indParams), colorectalCancerDisaggregations, Arrays.asList("01", "02"));
+
         return dsd;
     }
 
@@ -239,11 +240,9 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Mothers received PostParturm care after 6 weeks", "", ReportUtils.map(moh711Indicators.motherPPCAfter6weeks(), indParams), "");
         dsd.addColumn("Mothers counselled PostParturm FP", "", ReportUtils.map(moh711Indicators.pncMothersPPCounsellingFP(), indParams), "");
         dsd.addColumn("Mothers received PostParturm FP", "", ReportUtils.map(moh711Indicators.pncMothersReceivedPPFP(), indParams), "");
-
         dsd.addColumn("Babies received PostParturm care within 48 hrs", "", ReportUtils.map(moh711Indicators.babyPPCWithin48hrs(), indParams), "");
         dsd.addColumn("Babies received PostParturm care btw 3 days and 6 weeks", "", ReportUtils.map(moh711Indicators.babyPPCbtw3And42Days(), indParams), "");
         dsd.addColumn("Babies received PostParturm care after 6 weeks", "", ReportUtils.map(moh711Indicators.babyPPCAfter6weeks(), indParams), "");
-
         dsd.addColumn("Number of Cases of Fistula", "", ReportUtils.map(moh711Indicators.noOfFistulaCasesPNC(), indParams), "");
         dsd.addColumn("No Referred from the community unit for PNC", "", ReportUtils.map(moh711Indicators.noReferredFromCommunityForPNC(), indParams), "");
 
@@ -267,15 +266,14 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Caesarean Sections", "", ReportUtils.map(moh711Indicators.deliveryMethod(CAESAREAN_SECTION), indParams), "");
         dsd.addColumn("Breech Delivery", "", ReportUtils.map(moh711Indicators.deliveryMethod(BREECH_DELIVERY), indParams), "");
         dsd.addColumn("Assisted Vaginal Deliveries (Vacuum Extraction)", "", ReportUtils.map(moh711Indicators.deliveryMethod(ASSISTED_VAGINAL_DELIVERY), indParams), "");
-
         dsd.addColumn("Number of Mothers given uterotonics-oxytocin", "", ReportUtils.map(moh711Indicators.clientsGivenUterotonics(), indParams), "");
         dsd.addColumn("Number of Mothers given uterotonics-carbatosin", "", ReportUtils.map(moh711Indicators.clientsGivenCarbatosin(), indParams), "");
-
         dsd.addColumn("Live Births", "", ReportUtils.map(moh711Indicators.liveBirths(), indParams), "");
         dsd.addColumn("Low birth weight Babies (below 2500 grams)", "", ReportUtils.map(moh711Indicators.lowBirthWeight(), indParams), "");
+        dsd.addColumn("No of Low APGAR Score (≤ 6 at 5 Min)", "", ReportUtils.map(moh711Indicators.lowAPGARScore(), indParams), "");
         dsd.addColumn("Births with deformities", "", ReportUtils.map(moh711Indicators.deformities(), indParams), "");
-        dsd.addColumn("Neonates given Vit K", "", ReportUtils.map(moh711Indicators.givenVitaminK(), indParams), "");
         dsd.addColumn("Babies applied chlorhexidine", "", ReportUtils.map(moh711Indicators.chlorhexidineForCordCaregiven(), indParams), "");
+        dsd.addColumn("Neonates given Vit K", "", ReportUtils.map(moh711Indicators.givenVitaminK(), indParams), "");
         dsd.addColumn("Infants initiated on Kangaroo Mother Care", "", ReportUtils.map(moh711Indicators.initiatedKangarooMotherCare(), indParams), "");
         //dsd.addColumn("Neonates 0-28 days put on Continous Positive Airway Pressure(CPAP)", "", ReportUtils.map(moh711Indicators.continousPositiveAirwayPressureAt0To28Days(), indParams), "");
         dsd.addColumn("Babies given tetracycline at birth", "", ReportUtils.map(moh711Indicators.givenTetracyclineAtBirth(), indParams), "");
@@ -337,9 +335,12 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Exclusive_breast_feeding", "", ReportUtils.map(moh711Indicators.exclusiveBreastFeeding(), indParams), childExclusiveBFAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "Dewormed", "", ReportUtils.map(moh711Indicators.dewormed(), indParams), childDewormingAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "MNPs_Supplementation", "", ReportUtils.map(moh711Indicators.mnpsSupplementation(), indParams), childMNPsAgeDisaggregations, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd, "Child Mortality", "", ReportUtils.map(moh711Indicators.childrenDiscontinuationReasonDied(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01"));
-        EmrReportingUtils.addRow(dsd, "Children_With_Disability_Any_Form", "", ReportUtils.map(moh711Indicators.childrenWithDisability(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01"));
-        EmrReportingUtils.addRow(dsd, "Children_with_delayed_developmental_milestones", "", ReportUtils.map(moh711Indicators.childrenWithDelayedDevelopmentalMilestones(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01"));
+        EmrReportingUtils.addRow(dsd, "Diarrhoea with severe dehydration", "", ReportUtils.map(moh711Indicators.diarrhoeaSevereDehydration(Arrays.asList(DIARRHOEA_WITH_SEVERE_DEHYDRATION)), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Diarrhoea with some dehydration", "", ReportUtils.map(moh711Indicators.diarrhoeaSomeDehydration(Arrays.asList(DIARRHOEA_WITH_SOME_DEHYDRATION)), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Diarrhoea with no dehydration", "", ReportUtils.map(moh711Indicators.diarrhoeaNoDehydration(DiagnosisLists.getDiarrheaWithNoDehydrationDiagnosisList()), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Child Mortality", "", ReportUtils.map(moh711Indicators.childrenDiscontinuationReasonDied(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Children_With_Disability_Any_Form", "", ReportUtils.map(moh711Indicators.childrenWithDisability(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Children_with_delayed_developmental_milestones", "", ReportUtils.map(moh711Indicators.childrenWithDelayedDevelopmentalMilestones(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
         return dsd;
     }
 
@@ -424,7 +425,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Receiving FP services (New)", "", ReportUtils.map(moh711Indicators.receivingFamilyPlanningServicesByVisitType(NEW_VISIT, FIRST_INSERTION), indParams), familyPlanningAgeDisaggregation,Arrays.asList("01","02","03","04"));
         EmrReportingUtils.addRow(dsd, "Receiving FP services (Revisit)", "", ReportUtils.map(moh711Indicators.receivingFamilyPlanningServicesByVisitType(RE_VISIT, RE_INSERTION), indParams), familyPlanningAgeDisaggregation,Arrays.asList("01","02","03","04"));
         dsd.addColumn("Receiving immediate postpartum FP (within 48 hrs)", "", ReportUtils.map(moh711Indicators.postPartumFP(POSTPARTUM_WITHIN_48_HRS), indParams), "");
-        dsd.addColumn("Receiving immediate postpartum FP (3 days to 6 weeks)", "", ReportUtils.map(moh711Indicators.postPartumFP(POSTPARTUM_3_DAYS_TO_6_WEEKS), indParams), "");
+        dsd.addColumn("Receiving immediate postpartum FP (4 weeks to 6 weeks)", "", ReportUtils.map(moh711Indicators.postPartumFP(POSTPARTUM_3_DAYS_TO_6_WEEKS), indParams), "");
         dsd.addColumn("Receiving post abortion FP Method", "", ReportUtils.map(moh711Indicators.postPartumFP(POST_ABORTION_FP), indParams), "");
         return dsd;
     }
