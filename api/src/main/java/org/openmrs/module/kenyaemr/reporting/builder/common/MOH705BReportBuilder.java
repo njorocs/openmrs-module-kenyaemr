@@ -111,7 +111,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "UPA", "Upper Respiratory Tract Infections", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getUpperRespiratoryTractInfectionsList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "ASA", "Asthma",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getAsthmaList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "PNA", "Pneumonia",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getPneumoniaList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
-		ReportingUtils.addRow(cohortDsd, "OTRA", "Other Dis Of Respiratory System",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getOtherDisOfRespiratorySystemList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
+		ReportingUtils.addRow(cohortDsd, "OTRA", "Other Lower Respiratory tract infections",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getOtherDisOfRespiratorySystemList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "ABA", "Abortion",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getAbortionList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "DPA", "Dis Of Puerperium & Childbath", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getDisOfPuerperiumChildbathList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "HYA", "Hypertension", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getHypertensionList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
@@ -121,7 +121,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "DSA", "Diseases of the Skin", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getDiseasesOfSkin(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "AJPA", "Anthritis Joint Pains", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getAnthritisJointPainsList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "POA", "Poisoning", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getPoisoningList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
-		ReportingUtils.addRow(cohortDsd, "ROA", "Road Traffic Injuries", ReportUtils.map(moh705indicatorLibrary.roadTrafficInjuries(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
+	    ReportingUtils.addRow(cohortDsd, "ROA", "Road Traffic Injuries", ReportUtils.map(moh705indicatorLibrary.roadTrafficInjuries(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "DRA", "Death due to road traffic injuries", ReportUtils.map(moh705indicatorLibrary.deathDueToRoadTrafficInjuries(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "OIA", "Other Injuries", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getOtherInjuriesList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "SEA", "Sexual Assault", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getSexualAssaultList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
@@ -155,7 +155,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "RETA", "Re-Attendances", ReportUtils.map(moh705indicatorLibrary.reAttendances(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFHA","Referrals from other health facility", ReportUtils.map(moh705indicatorLibrary.referralsFromOtherFacilities(EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"RFCA","Referrals to other health facility", ReportUtils.map(moh705indicatorLibrary.referralsToOtherFacilities(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-
+		ReportingUtils.addRow(cohortDsd, "RFCU", "Referrals from community unit", ReportUtils.map(moh705indicatorLibrary.referralsFromCommunityUnit(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		return cohortDsd;
 	}
 }
