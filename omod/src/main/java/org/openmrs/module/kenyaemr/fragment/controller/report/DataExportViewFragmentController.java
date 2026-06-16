@@ -113,7 +113,7 @@ public class DataExportViewFragmentController {
         String outputFormat = detectOutputFormat(reportData);
         String payload = generatePayload(reportData, outputFormat);
 
-        model.addAttribute("adx", payload);
+        model.addAttribute("khis", payload);
         model.addAttribute("reportName", definition.getName());
         model.addAttribute("returnUrl", returnUrl);
         model.addAttribute("outputFormat", outputFormat);
