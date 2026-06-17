@@ -97,6 +97,9 @@ import org.openmrs.module.kenyaemr.calculation.library.hiv.art.TransferInDateCal
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.TransferOutDateCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.ViralLoadAndLdlCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.art.WhoStageAtArtStartCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.IsBreastFeedingCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.IsPregnantCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnArtCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.mchms.EligibleForMchmsDischargeCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.rdqa.DateOfDeathCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.rdqa.PatientProgramEnrollmentCalculation;
@@ -4620,8 +4623,55 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body("{\"status\":\"Error\"}");
 	}
+	/**
+	 * Returns VL order validation details for a patient:
+	 * whether they are pregnant, breastfeeding, and initiated on ART.
+	 * Only applicable to female patients.
+	 */
+	@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.OPTIONS })
+	@RequestMapping(method = RequestMethod.GET, value = "/vl-orders-validation")
+	@ResponseBody
+	public Object getVlOrdersValidation(@RequestParam("patientUuid") String patientUuid) {
+		if (StringUtils.isBlank(patientUuid)) {
+			return new ResponseEntity<Object>("You must specify patientUuid in the request!",
+					new HttpHeaders(), HttpStatus.BAD_REQUEST);
+		}
 
+		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+		if (patient == null) {
+			return new ResponseEntity<Object>("The provided patient was not found in the system!",
+					new HttpHeaders(), HttpStatus.NOT_FOUND);
+		}
 
+		ObjectNode result = JsonNodeFactory.instance.objectNode();
+
+		boolean isFemale = patient.getPerson().getGender().equalsIgnoreCase("F");
+		result.put("is_female", isFemale);
+
+		if (!isFemale) {
+			result.put("pregnant", false);
+			result.put("breastfeeding", false);
+			result.put("initiated_on_art", false);
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.toString());
+		}
+
+		PatientCalculationService calculationService = Context.getService(PatientCalculationService.class);
+		Integer patientId = patient.getPatientId();
+
+		CalculationResult pregnantResult = calculationService.evaluate(patientId, new IsPregnantCalculation());
+		boolean pregnant = pregnantResult != null && Boolean.TRUE.equals(pregnantResult.getValue());
+
+		CalculationResult breastfeedingResult = calculationService.evaluate(patientId, new IsBreastFeedingCalculation());
+		boolean breastfeeding = breastfeedingResult != null && Boolean.TRUE.equals(breastfeedingResult.getValue());
+
+		CalculationResult onArtResult = calculationService.evaluate(patientId, new OnArtCalculation());
+		boolean initiatedOnArt = onArtResult != null && Boolean.TRUE.equals(onArtResult.getValue());
+
+		result.put("pregnant", pregnant);
+		result.put("breastfeeding", breastfeeding);
+		result.put("initiated_on_art", initiatedOnArt);
+
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.toString());
+	}
 
 }
-
