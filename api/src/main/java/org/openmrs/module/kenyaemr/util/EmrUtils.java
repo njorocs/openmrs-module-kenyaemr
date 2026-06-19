@@ -15,6 +15,8 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
+import org.joda.time.DateTime;
+import org.joda.time.Months;
 import org.openmrs.CareSetting;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
@@ -524,4 +526,13 @@ public class EmrUtils {
 		}
 		return false;
 	}
+
+	public static Integer getAgeInMonths(Date birthDate, Date now) {
+        if (birthDate == null || now == null) {
+            return null;
+        }
+        DateTime d1 = new DateTime(birthDate.getTime());
+        DateTime d2 = new DateTime(now.getTime());
+        return Months.monthsBetween(d1, d2).getMonths();
+    }
 }
