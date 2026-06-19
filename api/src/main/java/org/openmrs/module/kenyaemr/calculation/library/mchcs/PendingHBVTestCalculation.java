@@ -24,6 +24,8 @@ import org.openmrs.module.kenyaemr.metadata.MchMetadata;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 
+import static org.openmrs.module.kenyaemr.util.EmrUtils.getAgeInMonths;
+
 import java.util.*;
 
 public class PendingHBVTestCalculation extends AbstractPatientCalculation implements PatientFlagCalculation {
@@ -57,64 +59,66 @@ public class PendingHBVTestCalculation extends AbstractPatientCalculation implem
 
         CalculationResultMap ret = new CalculationResultMap();
 
-        for (Integer ptId : cohort) {
-            boolean pendingHbvTest = false;
+        // Only evaluate patients who are alive and enrolled in MCHCS — avoids unnecessary work
+        for (Integer ptId : inMchcsProgram) {
+            boolean showFlag = false;
 
-            if (inMchcsProgram.contains(ptId)) {
-                Person person = Context.getPersonService().getPerson(ptId);
-                Integer ageInMonths = getAgeInMonths(person.getBirthdate(), context.getNow());
+            Person person = Context.getPersonService().getPerson(ptId);
+            Integer ageInMonths = getAgeInMonths(person.getBirthdate(), context.getNow());
 
-                if (ageInMonths >= 9) {
-                    Obs hivStatusObs = EmrCalculationUtils.obsResultForPatient(lastChildHivStatus, ptId);
+            if (ageInMonths != null && ageInMonths >= 9) {
+                Obs hivStatusObs = EmrCalculationUtils.obsResultForPatient(lastChildHivStatus, ptId);
+                Concept valueCoded = hivStatusObs != null ? hivStatusObs.getValueCoded() : null;
 
-                    if (hivStatusObs != null && (hivStatusObs.getValueCoded().equals(hivExposed) || hivStatusObs.getValueCoded().equals(hivExposedUnknown))) {
+                boolean isHivExposed = valueCoded != null
+                        && (valueCoded.equals(hivExposed) || valueCoded.equals(hivExposedUnknown));
 
-                        if (immunizationEncType != null) {
-                            Patient patient = Context.getPatientService().getPatient(ptId);
-                            List<Encounter> immunizationEncounters = Context.getEncounterService().getEncounters(
-                                    new EncounterSearchCriteriaBuilder()
-                                            .setPatient(patient)
-                                            .setEncounterTypes(Collections.singletonList(immunizationEncType))
-                                            .setIncludeVoided(false)
-                                            .createEncounterSearchCriteria()
-                            );
+                if (isHivExposed && immunizationEncType != null) {
+                    Patient patient = Context.getPatientService().getPatient(ptId);
+                    List<Encounter> immunizationEncounters = Context.getEncounterService().getEncounters(
+                            new EncounterSearchCriteriaBuilder()
+                                    .setPatient(patient)
+                                    .setEncounterTypes(Collections.singletonList(immunizationEncType))
+                                    .setIncludeVoided(false)
+                                    .createEncounterSearchCriteria()
+                    );
 
-                            if (!immunizationEncounters.isEmpty()) {
-                                boolean hbvObsFound = false;
-                                outer:
-                                for (Encounter enc : immunizationEncounters) {
-                                    for (Obs obs : enc.getObs()) {
-                                        if (obs.getConcept().equals(hbvConcept) && obs.getValueCoded() != null) {
-                                            if (obs.getValueCoded().equals(reactiveHbvConcept)) {
-                                                pendingHbvTest = true;
-                                                flagMsg.setLength(0);
-                                                flagMsg.append("Positive HBV");
-                                            }
-                                            hbvObsFound = true;
-                                            break outer;
-                                        }
+                    if (immunizationEncounters.isEmpty()) {
+                        // No immunization encounter at all — HBV test has never been done
+                        showFlag = true;
+                        flagMsg.setLength(0);
+                        flagMsg.append("Due For HBV Test");
+                    } else {
+                        boolean hbvObsFound = false;
+                        outer:
+                        for (Encounter enc : immunizationEncounters) {
+                            for (Obs obs : enc.getObs()) {
+                                if (obs.getConcept().equals(hbvConcept) && obs.getValueCoded() != null) {
+                                    if (obs.getValueCoded().equals(reactiveHbvConcept)) {
+                                        // HBV result is positive/reactive — flag the patient
+                                        showFlag = true;
+                                        flagMsg.setLength(0);
+                                        flagMsg.append("Positive HBV");
                                     }
-                                }
-                                if (!hbvObsFound) {
-                                    pendingHbvTest = true;
-                                    flagMsg.setLength(0);
-                                    flagMsg.append("Due For HBV Test");
+                                    // If value is non-reactive (negative) showFlag stays false — no flag needed
+                                    hbvObsFound = true;
+                                    break outer;
                                 }
                             }
+                        }
+                        if (!hbvObsFound) {
+                            // Encounter exists but no HBV obs recorded — still due for the test
+                            showFlag = true;
+                            flagMsg.setLength(0);
+                            flagMsg.append("Due For HBV Test");
                         }
                     }
                 }
             }
 
-            ret.put(ptId, new BooleanResult(pendingHbvTest, this, context));
+            ret.put(ptId, new BooleanResult(showFlag, this, context));
         }
 
         return ret;
-    }
-
-    private Integer getAgeInMonths(Date birthDate, Date now) {
-        DateTime d1 = new DateTime(birthDate.getTime());
-        DateTime d2 = new DateTime(now.getTime());
-        return Months.monthsBetween(d1, d2).getMonths();
     }
 }
