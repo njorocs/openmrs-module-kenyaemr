@@ -17,6 +17,7 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.joda.time.Months;
+import org.joda.time.Weeks;
 import org.openmrs.CareSetting;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
@@ -292,15 +293,33 @@ public class EmrUtils {
 	}
 
 	public static boolean encounterThatPassCodedAnswer(Encounter enc, Concept question, Concept answer) {
-		boolean passed = false;
+		if (question == null || answer == null) return false;
 		for (Obs obs : enc.getAllObs()) {
 			if (obs.getConcept().getConceptId().intValue() == question.getConceptId().intValue()
+					&& obs.getValueCoded() != null
 					&& obs.getValueCoded().getConceptId().intValue() == answer.getConceptId().intValue()) {
-				passed = true;
-				break;
+				return true;
 			}
 		}
-		return passed;
+		return false;
+	}
+
+	public static boolean hasYesAnswer(Encounter enc, String questionConceptUuid) {
+		for (Obs obs : enc.getAllObs()) {
+			if (obs.getConcept().getUuid().equals(questionConceptUuid) && obs.getValueCoded() != null) {
+				return obs.getValueCoded().getUuid().equals(Dictionary.YES);
+			}
+		}
+		return false;
+	}
+
+	public static boolean encounterHasObsCreatedToday(Encounter enc) {
+		for (Obs obs : enc.getAllObs()) {
+			if (obs.getDateCreated() != null && isToday(obs.getDateCreated())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -535,6 +554,7 @@ public class EmrUtils {
         DateTime d2 = new DateTime(now.getTime());
         return Months.monthsBetween(d1, d2).getMonths();
     }
+	
 	/**
 	 * Extracts a value from a key:value,key:value string (e.g. GreenCardVelocityCalculation result).
 	 * Returns empty string when the key is absent or the value is the literal "null".
@@ -575,4 +595,13 @@ public class EmrUtils {
 			return 0;
 		}
 	}
+
+	public static Integer getAgeInWeeks(Date birthDate, Date now) {
+        if (birthDate == null || now == null) {
+            return null;
+        }
+        DateTime d1 = new DateTime(birthDate.getTime());
+        DateTime d2 = new DateTime(now.getTime());
+        return Weeks.weeksBetween(d1, d2).getWeeks();
+    }
 }
