@@ -535,4 +535,44 @@ public class EmrUtils {
         DateTime d2 = new DateTime(now.getTime());
         return Months.monthsBetween(d1, d2).getMonths();
     }
+	/**
+	 * Extracts a value from a key:value,key:value string (e.g. GreenCardVelocityCalculation result).
+	 * Returns empty string when the key is absent or the value is the literal "null".
+	 */
+	public static String parseKeyValueString(String data, String key) {
+		if (data == null || data.isEmpty()) return "";
+		String prefix = key + ":";
+		int start = data.indexOf(prefix);
+		if (start == -1) return "";
+		start += prefix.length();
+		int end = data.indexOf(",", start);
+		if (end == -1) end = data.length();
+		String value = data.substring(start, end).trim();
+		return "null".equals(value) ? "" : value;
+	}
+
+	/** Parses a boolean value from a key:value string. Returns false when absent. */
+	public static boolean parseKeyValueBoolean(String data, String key) {
+		return "true".equals(parseKeyValueString(data, key));
+	}
+
+	/** Parses a double value from a key:value string. Returns 0.0 when absent or unparseable. */
+	public static double parseKeyValueDouble(String data, String key) {
+		try {
+			String val = parseKeyValueString(data, key);
+			return val.isEmpty() ? 0.0 : Double.parseDouble(val);
+		} catch (NumberFormatException e) {
+			return 0.0;
+		}
+	}
+
+	/** Parses an int value from a key:value string. Returns 0 when absent or unparseable. */
+	public static int parseKeyValueInt(String data, String key) {
+		try {
+			String val = parseKeyValueString(data, key);
+			return val.isEmpty() ? 0 : Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
 }
