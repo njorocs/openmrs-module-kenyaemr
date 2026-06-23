@@ -112,4 +112,10 @@ public class IDSRIndicatorLibrary {
     public CohortIndicator acuteMeningitisCases() {
         return cohortIndicator("Acute Meningitis and Encephalitis", map(idsrCohortLibrary.acuteMeningitisAndEncephalitis(), "startDate=${startDate},endDate=${endDate}"));
     }
+    /**
+     * Suspected Ebola Cases
+     */
+    public CohortIndicator suspectedEbolaCases() {
+        return cohortIndicator("Suspected Ebola Cases", map(idsrCohortLibrary.suspectedEbolaCases(), "startDate=${startDate},endDate=${endDate}")); 
+    }
 }

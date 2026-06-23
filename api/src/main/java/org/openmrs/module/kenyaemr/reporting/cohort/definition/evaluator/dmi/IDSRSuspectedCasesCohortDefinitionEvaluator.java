@@ -87,7 +87,14 @@ public class IDSRSuspectedCasesCohortDefinitionEvaluator implements CohortDefini
 				"   OR (FIND_IN_SET(140238, a.complaint) AND FIND_IN_SET(512, a.complaint) AND FIND_IN_SET(106, a.complaint) AND\n" +
 				"       FIND_IN_SET(516, a.complaint) AND FIND_IN_SET(143264, a.complaint) > 0 AND a.fever_duration_from_days > 2))\n" +
 				"    and date(a.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
-				"group by patient_id;";
+				"group by patient_id\n" +
+				"UNION\n" +
+				"select t.patient_id\n" +
+				"from kenyaemr_etl.etl_patient_triage t\n" +
+				"where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+				"  and t.temperature >= 38\n" +
+				"  and t.voided = 0\n" +
+				"group by t.patient_id;";
 		
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);
