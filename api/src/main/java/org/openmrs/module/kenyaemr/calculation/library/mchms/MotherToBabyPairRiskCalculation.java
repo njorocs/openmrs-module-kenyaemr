@@ -12,7 +12,6 @@ package org.openmrs.module.kenyaemr.calculation.library.mchms;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Months;
-import org.joda.time.Years;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -66,18 +65,15 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 
 		Concept tcaConcept = Dictionary.getConcept(Dictionary.RETURN_VISIT_DATE);
 		Concept stiScreeningConcept = Dictionary.getConcept(Dictionary.STI_SCREENING);
-		Concept hivRiskFactor = Dictionary.getConcept(Dictionary.HIV_RISK_FACTOR);
-		Concept fswConcept = Context.getConceptService().getConcept(166513);
-		Concept pwidConcept = Context.getConceptService().getConcept(105);
-		Concept alcoholUseConcept = Context.getConceptService().getConceptByUuid(Dictionary.ALCOHOL_USE);
-		Concept substanceUseConcept = Context.getConceptService().getConceptByUuid(Dictionary.SUBSTANCE_USE);
-		Concept neverConcept = Context.getConceptService().getConcept(1090);
+		// KEY POP - PWID, FSW
+		Concept keyPopulationConcept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_RISK_FACTOR);
+		Concept peopleWhoInjectDrugsConcept = Context.getConceptService().getConceptByUuid(Dictionary.PEOPLE_WHO_INJECT_DRUGS);
+		Concept fswConcept = Context.getConceptService().getConceptByUuid(Dictionary.FEMALE_SEX_WORKER);
+		Concept usedAlcoholOrSubstanceUseConcept = Context.getConceptService().getConceptByUuid(Dictionary.PEOPLE_WHO_USE_SUBSTANCES);
 
 		CalculationResultMap lastTcaMap = Calculations.lastObs(tcaConcept, allEvaluationIds, context);
 		CalculationResultMap lastStiMap = Calculations.lastObs(stiScreeningConcept, allEvaluationIds, context);
-		CalculationResultMap lastRiskFactorMap = Calculations.lastObs(hivRiskFactor, allEvaluationIds, context);
-		CalculationResultMap lastAlcoholMap = alcoholUseConcept == null ? new CalculationResultMap() : Calculations.lastObs(alcoholUseConcept, allEvaluationIds, context);
-		CalculationResultMap lastSubstanceMap = substanceUseConcept == null ? new CalculationResultMap() : Calculations.lastObs(substanceUseConcept, allEvaluationIds, context);
+		CalculationResultMap lastKeyPopulationMap = Calculations.lastObs(keyPopulationConcept, allEvaluationIds, context);
 
 		Date now = context.getNow();
 		CalculationResultMap ret = new CalculationResultMap();
@@ -85,8 +81,8 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 		for (Integer ptId : cohort) {
 			mtctFlagMessage = "";
 
-			Patient infant = Context.getPatientService().getPatient(ptId);
-			Date birthDate = infant.getBirthdate();
+			Patient patient = Context.getPatientService().getPatient(ptId);
+			Date birthDate = patient.getBirthdate();
 			int infantAgeMonths = (birthDate != null) ? Months.monthsBetween(new DateTime(birthDate), new DateTime(now)).getMonths() : 0;
 			boolean childUnder24Months = infantAgeMonths < 24;
 
@@ -96,9 +92,10 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 			}
 
 			if (motherIds.isEmpty()) {
-				if (!childUnder24Months) {
-					// Cohort member is the mother herself (no guardian relations found, patient is adult).
-					// Evaluate her own risk directly by treating her as her own "mother".
+				boolean isFemale = "F".equalsIgnoreCase(patient.getGender());
+				boolean hasChildren = !EmrUtils.getPersonChildren(patient).isEmpty();
+				if (!childUnder24Months && isFemale && hasChildren) {
+					// Cohort member is the mother herself (female, has children, no guardian relations found).
 					motherIds = Collections.singleton(ptId);
 				} else {
 					ret.put(ptId, new BooleanResult(false, this));
@@ -113,8 +110,7 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 			for (Integer motherId : motherIds) {
 
 				Patient mother = Context.getPatientService().getPatient(motherId);
-				Date motherBirthDate = mother != null ? mother.getBirthdate() : null;
-				int motherAgeYears = (motherBirthDate != null) ? Years.yearsBetween(new DateTime(motherBirthDate), new DateTime(now)).getYears() : Integer.MAX_VALUE;
+				int motherAgeYears = (mother != null && mother.getAge() != null) ? mother.getAge() : Integer.MAX_VALUE;
 				boolean motherAgeUnder19 = motherAgeYears < 19;
 
 				String greenCardResult = "";
@@ -150,14 +146,8 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 					hasRecentSti = daysSinceSti <= 90;
 				}
 
-				Concept riskFactor = EmrCalculationUtils.codedObsResultForPatient(lastRiskFactorMap, motherId);
-				boolean isFswOrPwid = riskFactor != null && (riskFactor.equals(fswConcept) || riskFactor.equals(pwidConcept));
-
-				Concept alcoholAnswer = EmrCalculationUtils.codedObsResultForPatient(lastAlcoholMap, motherId);
-				boolean usesAlcohol = alcoholAnswer != null && !alcoholAnswer.equals(neverConcept);
-
-				Concept substanceAnswer = EmrCalculationUtils.codedObsResultForPatient(lastSubstanceMap, motherId);
-				boolean usesSubstances = substanceAnswer != null && !substanceAnswer.equals(neverConcept);
+				Concept keyPopulation = EmrCalculationUtils.codedObsResultForPatient(lastKeyPopulationMap, motherId);
+				boolean isFswOrPwid = keyPopulation != null && (keyPopulation.equals(fswConcept) || keyPopulation.equals(peopleWhoInjectDrugsConcept) || keyPopulation.equals(usedAlcoholOrSubstanceUseConcept));
 
 				boolean motherHighRisk = motherAgeUnder19
 						&& newlyOnArt
@@ -166,9 +156,7 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 						&& isIIT
 						&& hasRecentSti
 						&& !comorbidityControlled
-						&& isFswOrPwid
-						&& usesAlcohol
-						&& usesSubstances;
+						&& isFswOrPwid;
 
 				boolean motherLowRisk = isVlSuppressed && goodAdherence && comorbidityControlled;
 
@@ -195,8 +183,7 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 
 			if (isSelfEvaluation) {
 				// Mother is the cohort member — propagate the same flag to her children under 24 months
-				Patient motherPatient = Context.getPatientService().getPatient(ptId);
-				for (org.openmrs.Person child : EmrUtils.getPersonChildren(motherPatient)) {
+				for (org.openmrs.Person child : EmrUtils.getPersonChildren(patient)) {
 					Date childBirthDate = child.getBirthdate();
 					int childAgeMonths = (childBirthDate != null) ? Months.monthsBetween(new DateTime(childBirthDate), new DateTime(now)).getMonths() : Integer.MAX_VALUE;
 					if (childAgeMonths < 24) {
