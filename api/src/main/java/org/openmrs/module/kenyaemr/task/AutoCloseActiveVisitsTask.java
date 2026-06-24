@@ -32,6 +32,7 @@ public class AutoCloseActiveVisitsTask extends AbstractTask {
      * @see AbstractTask#execute()
      */
     @Override
+
     public void execute() {
         if (!isExecuting) {
             if (log.isDebugEnabled()) {

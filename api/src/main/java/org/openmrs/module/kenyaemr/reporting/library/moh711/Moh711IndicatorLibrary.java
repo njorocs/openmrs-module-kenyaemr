@@ -169,7 +169,7 @@ public class Moh711IndicatorLibrary {
 	}
 
 	public CohortIndicator clientNotScreenedTB() {
-		return cohortIndicator("No. Not screened for TB", map(moh711Cohorts.clientTbNotScreenedTBForm(), "startDate=${startDate},endDate=${endDate}"));
+		return cohortIndicator("No. Not screened for TB", map(moh711Cohorts.clientTbNotScreened(), "startDate=${startDate},endDate=${endDate}"));
 	}
 	/**
 	 * No.screened for cacx HPV positive
@@ -515,6 +515,24 @@ public class Moh711IndicatorLibrary {
 	public CohortIndicator sepsis(Integer motherCondition) {
 		return cohortIndicator("Sepsis", ReportUtils.map(moh711Cohorts.sepsis(motherCondition), "startDate=${startDate},endDate=${endDate}"));
 	}
+
+	/**
+	 * 	Maternity referral from
+	 * @param motherCondition
+	 * @return
+	 */
+	public CohortIndicator maternityReferralsFrom(Integer motherCondition) {
+		return cohortIndicator("Maternity Referrals From", ReportUtils.map(moh711Cohorts.maternityReferralsFrom(motherCondition), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	/**
+	 * Maternity referral to
+	 * @param motherCondition
+	 * @return
+	 */
+	public CohortIndicator maternityReferralsTo(Integer motherCondition) {
+		return cohortIndicator("Maternity Referrals to", ReportUtils.map(moh711Cohorts.maternityReferralsTo(motherCondition), "startDate=${startDate},endDate=${endDate}"));
+	}
 	/**
 	 * Normal Weight for Age
 	 * @return
@@ -581,11 +599,11 @@ public class Moh711IndicatorLibrary {
 	}
 
 	/**
-	 * Stunted
+	 * Height for age : Z score
 	 * @return
 	 */
-	public CohortIndicator stuntedGrowth() {
-		return cohortIndicator("Stunted", ReportUtils.map(moh711Cohorts.stuntedGrowth(), "startDate=${startDate},endDate=${endDate}"));
+	public CohortIndicator heightForAge(String zScore) {
+		return cohortIndicator("Height for Age", ReportUtils.map(moh711Cohorts.heightForAge(zScore), "startDate=${startDate},endDate=${endDate}"));
 	}
 
 	/**
@@ -653,6 +671,18 @@ public class Moh711IndicatorLibrary {
 	 */
 	public CohortIndicator diarrhoeaNoDehydration(List<Integer> noDehydration) {
 		return cohortIndicator("No of children who have diarrhoea with no dehydration", ReportUtils.map(moh711Cohorts.diarrhoeaNoDehydration(noDehydration), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	/**
+	 * No of children who have diarrhoea and Treated with ORS and Zinc Copack
+	 * @return
+	 */
+	public CohortIndicator diarrhoeaTreatedWithORSAndZincCopack() {
+		return cohortIndicator("No of children who have diarrhoea and Treated with ORS and Zinc Copack", ReportUtils.map(moh711Cohorts.diarrhoeaTreatedWithORSAndZincCopack(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator pneumoniaTreatedWithAmoxycillinDT() {
+		return cohortIndicator("No of children who have Pneumonia and Treated with Amoxycillin DT", ReportUtils.map(moh711Cohorts.pneumoniaTreatedWithAmoxycillinDT(), "startDate=${startDate},endDate=${endDate}"));
 	}
 	/**
 	 * Child Mortality
@@ -765,6 +795,9 @@ public class Moh711IndicatorLibrary {
 	public CohortIndicator postPartumFP(int postPartum) {
 		return cohortIndicator("Received FP services", ReportUtils.map(moh711Cohorts.postPartumFP(postPartum), "startDate=${startDate},endDate=${endDate}"));
 	}
+	public CohortIndicator postPartumFP4To6Weeks() {
+		return cohortIndicator("Received FP services 4 =-6 weeks after delivery", ReportUtils.map(moh711Cohorts.postPartumFP4To6Weeks(), "startDate=${startDate},endDate=${endDate}"));
+	}
 	public CohortIndicator psychosocialCounselling() {
 		return cohortIndicator("Psychosocial Counselling", ReportUtils.map(moh711Cohorts.psychosocialCounselling(), "startDate=${startDate},endDate=${endDate}"));
 	}
@@ -804,5 +837,25 @@ public class Moh711IndicatorLibrary {
 
 	public CohortIndicator preAndPostnatalTx() {
 		return cohortIndicator("Treated for pre and post natal physiotherapy", ReportUtils.map(moh711Cohorts.preAndPostnatalTx(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator pwdsReceivedPhysiotherapyOPD() {
+		return cohortIndicator("PWDs received physiotherapy at OPD", ReportUtils.map(moh711Cohorts.pwdsReceivedPhysiotherapyOPD(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator pwdsReceivedPhysiotherapyIPD() {
+		return cohortIndicator("PWDs received physiotherapy at IPD", ReportUtils.map(moh711Cohorts.pwdsReceivedPhysiotherapyIPD(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator nonPWDsReceivedPhysiotherapyOPD() {
+		return cohortIndicator("Non-PWDs received physiotherapy at OPD", ReportUtils.map(moh711Cohorts.nonPWDsReceivedPhysiotherapyOPD(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator nonPWDsReceivedPhysiotherapyIPD() {
+		return cohortIndicator("Non-PWDs received physiotherapy at IPD", ReportUtils.map(moh711Cohorts.nonPWDsReceivedPhysiotherapyIPD(), "startDate=${startDate},endDate=${endDate}"));
+	}
+
+	public CohortIndicator totalPhysiotherapyTreatments() {
+		return cohortIndicator("Total Treated for physiotherapy", ReportUtils.map(moh711Cohorts.totalPhysiotherapyTreatments(), "startDate=${startDate},endDate=${endDate}"));
 	}
 }

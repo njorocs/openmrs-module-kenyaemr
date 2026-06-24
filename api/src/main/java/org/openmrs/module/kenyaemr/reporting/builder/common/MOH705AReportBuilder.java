@@ -57,7 +57,7 @@ public class MOH705AReportBuilder extends AbstractReportBuilder {
 	static final int SUSPECTED_ANTHRAX= 121555;
 	static final int HYPOXAEMIA= 2006141;
 	static final int SUSPECTED_MALARIA = 2002652;
-	static final int PNEUMONIA = 114100;
+	public static final int PNEUMONIA = 114100;
 	static final int ASTHMA = 121375;
 	static final int EAR_INFECTION = 149609;
 	static final int MALNUTRITION = 2004984;

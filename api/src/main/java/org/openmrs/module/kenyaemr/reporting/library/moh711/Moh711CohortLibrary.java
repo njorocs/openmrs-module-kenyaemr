@@ -11,8 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.library.moh711;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.MohReportUtils.DiagnosisLists;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH705.MOH705CohortLibrary;
-import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH717.Moh705CohortLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -21,8 +21,11 @@ import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static org.openmrs.module.kenyaemr.reporting.builder.common.MOH705AReportBuilder.PNEUMONIA;
 
 /**
  * Library of cohort definitions used specifically in the MOH711 report
@@ -32,6 +35,8 @@ public class Moh711CohortLibrary {
     @Autowired
     private ETLMoh731GreenCardCohortLibrary moh731GreenCardCohort;
 
+    @Autowired
+    private MOH705CohortLibrary moh705CohortLibrary;
 /**
  * Latest MCH enrollment at ANC
  */
@@ -1584,6 +1589,30 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         return cd;
     }
 
+    public CohortDefinition maternityReferralsFrom(Integer referredFrom){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="SELECT d.patient_id FROM kenyaemr_etl.etl_mchs_delivery d WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "AND d.referred_from = "+referredFrom+";";
+        cd.setName("Maternity Referred from");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Maternity Referred from");
+
+        return cd;
+    }
+    public CohortDefinition maternityReferralsTo(Integer referredTo){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="SELECT d.patient_id FROM kenyaemr_etl.etl_mchs_delivery d WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "AND d.referred_to = "+referredTo+";";
+        cd.setName("Maternity Referred to");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Maternity Referred to");
+
+        return cd;
+    }
     /**
      * Normal Weight for Age
      * @return
@@ -1705,17 +1734,17 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         return cd;
     }
     /**
-     * Stunted
+     * Height for Age
      * @return
      */
-    public CohortDefinition stuntedGrowth(){
+    public CohortDefinition heightForAge(String zScore){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.stunted=164085;";
-        cd.setName("Stunted");
+        String sqlQuery ="SELECT t.patient_id FROM kenyaemr_etl.etl_patient_triage t WHERE DATE(:startDate) BETWEEN DATE(:endDate) AND t.z_score "+zScore+";";
+        cd.setName("Height for Age");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Stunted");
+        cd.setDescription("Height for Age");
 
         return cd;
     }
@@ -1855,7 +1884,86 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         cd.setCompositionString("cwcVisit AND diarrNoDehydration");
         return cd;
     }
+    /**
+     *  Treated with ORS Zinc Co-pack
+     * @return
+     */
+    public CohortDefinition treatedWithORSZincCopack(){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="SELECT d.patient_id\n" +
+                "FROM medication_dispense d\n" +
+                "WHERE d.drug_id = 7970\n" +
+                "  AND DATE (date_handed_over)\n" +
+                "    BETWEEN DATE (:startDate)\n" +
+                "  AND DATE (:endDate);";
+        cd.setName("ORS Zinc CO-pack");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("ORS Zinc CO-pack");
 
+        return cd;
+    }
+    /**
+        *  Patients diagnosis
+        * @param diagnosisList
+        * @return
+        */
+    public CohortDefinition patientDiagnosis(List<Integer> diagnosisList) {
+        String diagnosis = String.valueOf(diagnosisList).replaceAll("\\[", "(").replaceAll("\\]",")");
+        String sqlQuery = "SELECT ce.patient_id\n" +
+                "FROM kenyaemr_etl.etl_clinical_encounter ce\n" +
+                "         INNER JOIN kenyaemr_etl.etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
+                "         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
+                "WHERE date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
+                "  AND ce.voided = 0\n" +
+                "  AND ed.dx_rank = 2\n" +
+                "  AND ed.diagnosis_coded in " + diagnosis + ";";
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        cd.setName("patientsDiagnosis");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Patients diagnosis");
+        return cd;
+    }
+    public CohortDefinition diarrhoeaTreatedWithORSAndZincCopack() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("treatedWithORSZincCopack", ReportUtils.map(treatedWithORSZincCopack(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrNoDehydration", ReportUtils.map(patientDiagnosis(DiagnosisLists.getDiarrheaWithNoDehydrationDiagnosisList()), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrSomeDehydration", ReportUtils.map(patientDiagnosis(DiagnosisLists.getDiarrheaWithSomeDehydrationDiagnosisList()), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diarrSevereDehydration", ReportUtils.map(patientDiagnosis(DiagnosisLists.getDiarrheaWithSevereDehydrationDiagnosisList()), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("treatedWithORSZincCopack AND (diarrNoDehydration OR diarrSomeDehydration OR diarrSevereDehydration)");
+        return cd;
+    }
+    public CohortDefinition treatedWithAmoxycillinDT(){
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery ="SELECT d.patient_id\n" +
+                "FROM medication_dispense d\n" +
+                "WHERE d.drug_id = 4988\n" +
+                "  AND DATE (date_handed_over)\n" +
+                "    BETWEEN DATE (:startDate)\n" +
+                "  AND DATE (:endDate);";
+        cd.setName("Amoxycillin DT");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Amoxycillin DT");
+
+        return cd;
+    }
+    public CohortDefinition pneumoniaTreatedWithAmoxycillinDT() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.addSearch("treatedWithAmoxycilinDT", ReportUtils.map(treatedWithAmoxycillinDT(), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diagnosedWithPneumonia", ReportUtils.map(patientDiagnosis(Collections.singletonList(PNEUMONIA)), "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("diagnosedWithSeverePneumonia", ReportUtils.map(patientDiagnosis(DiagnosisLists.getSeverePneumoniaList()), "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("treatedWithAmoxycilinDT AND (diagnosedWithPneumonia OR diagnosedWithSeverePneumonia)");
+        return cd;
+    }
     /**
      * MNPs_Supplementation
      * @return
@@ -2082,10 +2190,38 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      * Total Number of people not screened (TB Form)
      * @return
      */
-    public CohortDefinition clientTbNotScreenedTBForm(){
+    public CohortDefinition clientTbNotScreened(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tbs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
-                "                      and tbs.resulting_tb_status=160737 or tbs.resulting_tb_status is null group by tbs.patient_id;";
+        String sqlQuery ="SELECT v.patient_id\n" +
+                "FROM (\n" +
+                "         -- ANC visits with no TB screening\n" +
+                "         SELECT a.patient_id\n" +
+                "         FROM kenyaemr_etl.etl_mch_antenatal_visit a\n" +
+                "         WHERE a.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "           AND a.tb_screening IS NULL\n" +
+                "         UNION\n" +
+                "         -- PNC visits with no TB screening\n" +
+                "         SELECT p.patient_id\n" +
+                "         FROM kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "         WHERE p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "           AND (\n" +
+                "             p.tb_screening IS NULL\n" +
+                "                 OR p.tb_screening = 160737\n" +
+                "             )\n" +
+                "         UNION\n" +
+                "         -- Delivery visits\n" +
+                "         SELECT d.patient_id\n" +
+                "         FROM kenyaemr_etl.etl_mchs_delivery d\n" +
+                "         WHERE d.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "     ) v\n" +
+                "WHERE NOT EXISTS (\n" +
+                "    SELECT 1\n" +
+                "    FROM kenyaemr_etl.etl_tb_screening t\n" +
+                "    WHERE t.patient_id = v.patient_id\n" +
+                "      AND t.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "      AND t.resulting_tb_status IS NOT NULL\n" +
+                "      AND t.resulting_tb_status <> 160737\n" +
+                ");";
         cd.setName("Total Number of people not screened (TB Form)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2373,6 +2509,24 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
         return cd;
     }
+
+    public CohortDefinition postPartumFP4To6Weeks() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT fp.patient_id\n" +
+                "FROM kenyaemr_etl.etl_family_planning fp\n" +
+                "         JOIN kenyaemr_etl.etl_mch_postnatal_visit p\n" +
+                "              ON fp.patient_id = p.patient_id\n" +
+                "WHERE p.delivery_date IS NOT NULL\n" +
+                "  AND TIMESTAMPDIFF(WEEK, p.delivery_date, fp.visit_date) BETWEEN 4 AND 6\n" +
+                "  AND fp.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
+        cd.setName("postPartumFP4To6Weeks");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Post partum FP 4-6 weeks after delivery");
+
+        return cd;
+    }
     public CohortDefinition psychosocialCounselling() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
@@ -2643,6 +2797,114 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.setDescription("preAndPostnatalTx");
+
+        return cd;
+    }
+
+    public CohortDefinition pwdsReceivedPhysiotherapyOPD() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT p.patient_id\n" +
+                "FROM kenyaemr_etl.etl_physiotherapy p\n" +
+                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "                    ON p.patient_id = d.patient_id\n" +
+                "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "  AND p.date_of_admission IS NULL\n" +
+                "  AND d.is_disabled = 1065\n" +
+                "  AND d.disability_type = 164538\n" +
+                "  AND NOT EXISTS (\n" +
+                "    SELECT 1\n" +
+                "    FROM openmrs.bed_patient_assignment_map bam\n" +
+                "    WHERE bam.patient_id = p.patient_id\n" +
+                "      AND p.visit_date >= bam.date_started\n" +
+                "      AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped)\n" +
+                ");";
+        cd.setName("pwdsReceivedPhysiotherapyOPD");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("pwdsReceivedPhysiotherapyOPD");
+
+        return cd;
+    }
+    public CohortDefinition pwdsReceivedPhysiotherapyIPD() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT p.patient_id\n" +
+                "FROM kenyaemr_etl.etl_physiotherapy p\n" +
+                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "                    ON p.patient_id = d.patient_id\n" +
+                "         LEFT JOIN openmrs.bed_patient_assignment_map bam\n" +
+                "                   ON p.patient_id = bam.patient_id\n" +
+                "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "  AND (\n" +
+                "    (DATE(bam.date_started) <= p.visit_date AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped))\n" +
+                "        OR\n" +
+                "    (p.date_of_admission BETWEEN DATE(:startDate) AND DATE(:endDate))\n" +
+                "    )\n" +
+                "  AND d.is_disabled = 1065\n" +
+                "  AND d.disability_type = 164538;";
+        cd.setName("pwdsReceivedPhysiotherapyIPD");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("pwdsReceivedPhysiotherapyIPD");
+
+        return cd;
+    }
+    public CohortDefinition nonPWDsReceivedPhysiotherapyOPD() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT p.patient_id\n" +
+                "FROM kenyaemr_etl.etl_physiotherapy p\n" +
+                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "                    ON p.patient_id = d.patient_id\n" +
+                "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "  AND p.date_of_admission IS NULL\n" +
+                "  AND (d.is_disabled IS NULL OR d.is_disabled = 1066)\n" +
+                "  AND NOT EXISTS (\n" +
+                "    SELECT 1\n" +
+                "    FROM openmrs.bed_patient_assignment_map bam\n" +
+                "    WHERE bam.patient_id = p.patient_id\n" +
+                "      AND p.visit_date >= bam.date_started\n" +
+                "      AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped)\n" +
+                ");";
+        cd.setName("nonPWDsReceivedPhysiotherapyOPD");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("nonPWDsReceivedPhysiotherapyOPD");
+
+        return cd;
+    }
+    public CohortDefinition nonPWDsReceivedPhysiotherapyIPD() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT p.patient_id\n" +
+                "FROM kenyaemr_etl.etl_physiotherapy p\n" +
+                "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "                    ON p.patient_id = d.patient_id\n" +
+                "         LEFT JOIN openmrs.bed_patient_assignment_map bam\n" +
+                "                   ON p.patient_id = bam.patient_id\n" +
+                "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "  AND (\n" +
+                "    (DATE(bam.date_started) <= p.visit_date AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped))\n" +
+                "        OR\n" +
+                "    (p.date_of_admission BETWEEN DATE(:startDate) AND DATE(:endDate))\n" +
+                "    )\n" +
+                "  AND (d.is_disabled IS NULL OR d.is_disabled = 1066);";
+        cd.setName("nonPWDsReceivedPhysiotherapyIPD");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("nonPWDsReceivedPhysiotherapyIPD");
+
+        return cd;
+    }
+    public CohortDefinition totalPhysiotherapyTreatments() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT p.patient_id FROM kenyaemr_etl.etl_physiotherapy p WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
+        cd.setName("totalPhysiotherapyTreatments");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("totalPhysiotherapyTreatments");
 
         return cd;
     }

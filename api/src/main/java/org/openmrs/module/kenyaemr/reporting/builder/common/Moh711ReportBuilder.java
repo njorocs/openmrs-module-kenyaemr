@@ -59,6 +59,16 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     static final int NORMAL_DELIVERY = 1170, CAESAREAN_SECTION = 1171, BREECH_DELIVERY = 1172, ASSISTED_VAGINAL_DELIVERY = 118159;
     //Life Status
     static final int ALIVE = 160429, DEAD = 134612;
+
+    static final Integer OTHER_HEALTH_FACILITY = 164407;
+
+    static final Integer COMMUNITY_UNIT = 1000478;
+    static final String NORMAL_HIEGHT_FOR_AGE = ">= -2";
+    static final String STUNTED = "BETWEEN -3 AND -2";
+    static final String SEVERELY_STUNTED = " < -3";
+
+
+
     @Autowired
     private CommonDimensionLibrary commonDimensions;
 
@@ -97,11 +107,14 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(createTBScreeningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(familyPlanningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(PsychiatryDataSet(), "startDate=${startDate},endDate=${endDate}"),
-                ReportUtils.map(PhysiologyDataSet(), "startDate=${startDate},endDate=${endDate}")
+                ReportUtils.map(PhysiologyDataSet(), "startDate=${startDate},endDate=${endDate}"),
+                ReportUtils.map(PhysiotherapyDataSet(), "startDate=${startDate},endDate=${endDate}")
         );
     }
 
+    ColumnParameters all0_4 = new ColumnParameters(null, "0-4 years", "age=0-4");
     ColumnParameters all0_9 = new ColumnParameters(null, "0-9 years", "age=0-9");
+    ColumnParameters all5_19 = new ColumnParameters(null, "5-19 years", "age=5-19");
     ColumnParameters f10_14 = new ColumnParameters(null, "10-14 years", "gender=F|age=10-14");
     ColumnParameters all10_14 = new ColumnParameters(null, "10-14 years", "age=10-14");
     ColumnParameters all10_17 = new ColumnParameters(null, "10-17 years", "age=10-17");
@@ -110,6 +123,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     ColumnParameters all20_24 = new ColumnParameters(null, "20-24 years", "age=20-24");
     ColumnParameters all18_49 = new ColumnParameters(null, "18-49 years", "age=18-49");
     ColumnParameters f20_24 = new ColumnParameters(null, "20-24 years", "gender=F|age=20-24");
+    ColumnParameters all20_And_Above = new ColumnParameters(null, "20+ years", "age=20+");
     ColumnParameters f25AndAbove = new ColumnParameters(null, "25+ years", "gender=F|age=25+");
     ColumnParameters all25_And_Above = new ColumnParameters(null, "25+ years", "age=25+");
 
@@ -120,6 +134,12 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
 
     ColumnParameters f0To5Months = new ColumnParameters(null, "0-5 months, Female", "gender=F|age=0-5");
     ColumnParameters m0To5Months = new ColumnParameters(null, "0-5 months, Male", "gender=M|age=0-5");
+    ColumnParameters f0To6Months = new ColumnParameters(null, "0-6 months, Female", "gender=F|age=0-6");
+    ColumnParameters m0To6Months = new ColumnParameters(null, "0-6 months, Male", "gender=M|age=0-6");
+
+    ColumnParameters f7To23Months = new ColumnParameters(null, "7-23 months, Female", "gender=F|age=7-23");
+    ColumnParameters m7To23Months = new ColumnParameters(null, "7-23 months, Male", "gender=M|age=7-23");
+
     ColumnParameters f6To23Months = new ColumnParameters(null, "6-23 months, Female", "gender=F|age=6-23");
     ColumnParameters m6To23Months = new ColumnParameters(null, "6-23 months, Male", "gender=M|age=6-23");
     ColumnParameters f24To59Months = new ColumnParameters(null, "24-59 months, Female", "gender=F|age=24-59");
@@ -146,7 +166,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     List<ColumnParameters> maternalAgeDisaggregations = Arrays.asList(f10_14, f15_19, f20_24, f25AndAbove);
     List<ColumnParameters> childWeightAgeDisaggregations = Arrays.asList(f0To5Months, m0To5Months, f6To23Months,
             m6To23Months, f24To59Months, m24To59Months, colTotal);
-    List<ColumnParameters> childGrowthAgeDisaggregations = Arrays.asList(f24To59Months, m24To59Months, colTotal);
+    List<ColumnParameters> childGrowthAgeDisaggregations = Arrays.asList(f0To6Months, m0To6Months, f7To23Months, m7To23Months,f24To59Months, m24To59Months, colTotal);
     List<ColumnParameters> childFollowupTypeAgeDisaggregations = Arrays.asList(f0To59Months, m0To59Months, colTotal);
     List<ColumnParameters> childExclusiveBFAgeDisaggregations = Arrays.asList(f0To5Months, m0To5Months, colTotal);
     List<ColumnParameters> childMUACAgeDisaggregations = Arrays.asList(f6To59Months, m6To59Months, colTotal);
@@ -155,6 +175,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     List<ColumnParameters> childDelayedGrowthAgeDisaggregations = Arrays.asList(fTo59Months,mTo59Months);
     List<ColumnParameters> sgbvAgeDisaggregation = Arrays.asList(all0_9, all10_17, all18_49, all50AndAbove);
     List<ColumnParameters> familyPlanningAgeDisaggregation = Arrays.asList(all10_14, all15_19, all20_24, all25_And_Above);
+    List<ColumnParameters> physiotherapyAgeDisaggregation = Arrays.asList(all0_4,all5_19,all20_And_Above);
 
     /**
      * A. ANC / PMCT
@@ -299,6 +320,11 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Obstructed Labour Dead", "", ReportUtils.map(moh711Indicators.obstructedLabour(DEAD), indParams), "");
         dsd.addColumn("Sepsis Alive", "", ReportUtils.map(moh711Indicators.sepsis(ALIVE), indParams), "");
         dsd.addColumn("Sepsis Dead", "", ReportUtils.map(moh711Indicators.sepsis(DEAD), indParams), "");
+        dsd.addColumn("Maternity Referrals from Other Health Facility", "", ReportUtils.map(moh711Indicators.maternityReferralsFrom(OTHER_HEALTH_FACILITY), indParams), "");
+        dsd.addColumn("Maternal Referrals to Other Health Facility", "", ReportUtils.map(moh711Indicators.maternityReferralsTo(OTHER_HEALTH_FACILITY), indParams), "");
+        dsd.addColumn("Maternal Referrals from Community Unit", "", ReportUtils.map(moh711Indicators.maternityReferralsFrom(COMMUNITY_UNIT), indParams), "");
+        dsd.addColumn("Maternal Referrals to Community Unit", "", ReportUtils.map(moh711Indicators.maternityReferralsTo(COMMUNITY_UNIT), indParams), "");
+
         //dsd.addColumn("Number of Mothers with delivery complications associated with FGM", "Alive", ReportUtils.map(moh711Indicators.ancClientsWithFGMRelatedComplications(), indParams), "");
         //dsd.addColumn("Number of Mothers with delivery complications associated with FGM", "Dead", ReportUtils.map(moh711Indicators.ancClientsWithFGMRelatedComplications(), indParams), "");
 
@@ -327,7 +353,9 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "MUAC_Normal(Green)", "", ReportUtils.map(moh711Indicators.normalMUAC(), indParams), childMUACAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "MUAC_Moderate(Yellow)", "", ReportUtils.map(moh711Indicators.moderateMUAC(), indParams), childMUACAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "MUAC_Severe(Red)", "", ReportUtils.map(moh711Indicators.severeMUAC(), indParams), childMUACAgeDisaggregations, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd, "Stunted", "", ReportUtils.map(moh711Indicators.stuntedGrowth(), indParams), childGrowthAgeDisaggregations, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd, "Normal Height for Age", "", ReportUtils.map(moh711Indicators.heightForAge(NORMAL_HIEGHT_FOR_AGE), indParams), childGrowthAgeDisaggregations, Arrays.asList("01", "02", "03", "04", "05", "06", "07"));
+        EmrReportingUtils.addRow(dsd, "Stunted", "", ReportUtils.map(moh711Indicators.heightForAge(STUNTED), indParams), childGrowthAgeDisaggregations, Arrays.asList("01", "02", "03", "04", "05", "06", "07"));
+        EmrReportingUtils.addRow(dsd, "Severely Stunted", "", ReportUtils.map(moh711Indicators.heightForAge(SEVERELY_STUNTED), indParams), childGrowthAgeDisaggregations, Arrays.asList("01", "02", "03", "04", "05", "06", "07"));
         //EmrReportingUtils.addRow(dsd, "Total_Measured", "", ReportUtils.map(moh711Indicators.totalMeasured(), indParams), childAgeDisaggregations, Arrays.asList("01", "02", "03","04"));
         EmrReportingUtils.addRow(dsd, "New_Enrollment", "", ReportUtils.map(moh711Indicators.newlyEnrolledMchs(), indParams), childFollowupTypeAgeDisaggregations, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "Followup_type_Kwashiorkor", "", ReportUtils.map(moh711Indicators.kwashiorkor(), indParams), childFollowupTypeAgeDisaggregations, Arrays.asList("01", "02", "03"));
@@ -341,6 +369,9 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Child Mortality", "", ReportUtils.map(moh711Indicators.childrenDiscontinuationReasonDied(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
         EmrReportingUtils.addRow(dsd, "Children_With_Disability_Any_Form", "", ReportUtils.map(moh711Indicators.childrenWithDisability(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
         EmrReportingUtils.addRow(dsd, "Children_with_delayed_developmental_milestones", "", ReportUtils.map(moh711Indicators.childrenWithDelayedDevelopmentalMilestones(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Children with diarrhea treated with ORS and Zinc (Co-pack)", "", ReportUtils.map(moh711Indicators.diarrhoeaTreatedWithORSAndZincCopack(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+        EmrReportingUtils.addRow(dsd, "Children with pneumonia treated with Amoxycillin DT", "", ReportUtils.map(moh711Indicators.pneumoniaTreatedWithAmoxycillinDT(), indParams), childDelayedGrowthAgeDisaggregations, Arrays.asList("01","02"));
+
         return dsd;
     }
 
@@ -425,7 +456,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Receiving FP services (New)", "", ReportUtils.map(moh711Indicators.receivingFamilyPlanningServicesByVisitType(NEW_VISIT, FIRST_INSERTION), indParams), familyPlanningAgeDisaggregation,Arrays.asList("01","02","03","04"));
         EmrReportingUtils.addRow(dsd, "Receiving FP services (Revisit)", "", ReportUtils.map(moh711Indicators.receivingFamilyPlanningServicesByVisitType(RE_VISIT, RE_INSERTION), indParams), familyPlanningAgeDisaggregation,Arrays.asList("01","02","03","04"));
         dsd.addColumn("Receiving immediate postpartum FP (within 48 hrs)", "", ReportUtils.map(moh711Indicators.postPartumFP(POSTPARTUM_WITHIN_48_HRS), indParams), "");
-        dsd.addColumn("Receiving immediate postpartum FP (4 weeks to 6 weeks)", "", ReportUtils.map(moh711Indicators.postPartumFP(POSTPARTUM_3_DAYS_TO_6_WEEKS), indParams), "");
+        dsd.addColumn("Receiving immediate postpartum FP (4 weeks to 6 weeks)", "", ReportUtils.map(moh711Indicators.postPartumFP4To6Weeks(), indParams), "");
         dsd.addColumn("Receiving post abortion FP Method", "", ReportUtils.map(moh711Indicators.postPartumFP(POST_ABORTION_FP), indParams), "");
         return dsd;
     }
@@ -479,4 +510,21 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
 
         return dsd;
     }
+    private DataSetDefinition PhysiotherapyDataSet() {
+
+        CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
+        dsd.setName("Physiotherapy");
+        dsd.setDescription("Physiotherapy Service");
+        dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        EmrReportingUtils.addRow(dsd, "Number of PWDs identified and received physiotherapy (OPD)", "", ReportUtils.map(moh711Indicators.pwdsReceivedPhysiotherapyOPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd, "Number of PWDs identified and received physiotherapy (IPD)", "", ReportUtils.map(moh711Indicators.pwdsReceivedPhysiotherapyIPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd, "Number of other clients/patients receiving physiotherapy (OPD)", "", ReportUtils.map(moh711Indicators.nonPWDsReceivedPhysiotherapyOPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd, "Number of other clients/patients receiving physiotherapy (IPD)", "", ReportUtils.map(moh711Indicators.nonPWDsReceivedPhysiotherapyIPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd, "Total number of treatments", "", ReportUtils.map(moh711Indicators.totalPhysiotherapyTreatments(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
+
+        return dsd;
+    }
+
 }
