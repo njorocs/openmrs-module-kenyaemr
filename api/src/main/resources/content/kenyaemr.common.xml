@@ -1539,7 +1539,7 @@
 			</set>
 		</property>
 		<property name="template" value="kenyaemr:financials/monthly_revenue_summary.xls" />
-		<property name="repeatingSection" value="sheet:1,row:12,dataset:M1" />
+		<property name="repeatingSection" value="sheet:1,row:13,dataset:M1" />
 	</bean>
 	<bean id="kenyaemr.ehrReports.report.717" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
 		<property name="targetUuid" value="b4b6feab-f8d5-4cdd-95f8-5dba6f959471" />
