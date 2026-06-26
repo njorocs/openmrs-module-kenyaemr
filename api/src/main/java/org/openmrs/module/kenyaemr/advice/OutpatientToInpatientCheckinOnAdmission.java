@@ -15,6 +15,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.Visit;
+import org.openmrs.VisitAttribute;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
@@ -74,7 +75,8 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
 
             if (enc != null && enc.getVisit() != null
                     && enc.getVisit().getVisitType().getUuid().equals(CommonMetadata._VisitType.OUTPATIENT)
-                    && enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())) {
+                    && enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+                    && !hasInsuranceSchemeSha(enc.getVisit())) {
 
                 /*
                  * inpatientStart = enc.getEncounterDatetime()
@@ -173,6 +175,25 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                 }
             }
         }
+    }
+
+    /**
+     * Checks if the visit has an Insurance scheme visit attribute with value "SHA".
+     * Such visits are exempted from automatic OPD closure on admission
+     * They also remain in OPD queue & anD IPD visit is NOT auto-created
+     * @param visit the visit to check
+     * @return true if the visit has an Insurance scheme attribute set to "SHA"
+     */
+    private boolean hasInsuranceSchemeSha(Visit visit) {
+        if (visit.getAttributes() != null) {
+            for (VisitAttribute attr : visit.getAttributes()) {
+                if (attr.getAttributeType().getUuid().equals(CommonMetadata._VisitAttributeType.INSURANCE_SCHEME)
+                        && "SHA".equalsIgnoreCase(attr.getValueReference())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
