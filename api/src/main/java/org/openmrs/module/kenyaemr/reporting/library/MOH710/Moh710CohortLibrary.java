@@ -925,6 +925,7 @@ public class Moh710CohortLibrary {
 		cd.setQuery(sqlQuery);
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cd.addParameter(new Parameter("dayIndex", "Day Index", Integer.class));
 		cd.setDescription("Given BCG");
 
 		return cd;
@@ -1346,6 +1347,42 @@ public class Moh710CohortLibrary {
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
 		cd.setDescription("Squint/White Eye Reflection under 1 year");
+
+		return cd;
+	}
+	/**
+	 * Unique children vaccinated on a specific calendar day of the month with age filter as-of that day
+	 * @param vaccineColumn the column in etl_immunization
+	 * @param minAge the minimum age in years
+	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @return the cohort definition
+	 */
+	public CohortDefinition vaccinatedOnDay(String vaccineColumn, Integer minAge, Integer maxAge) {
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+
+		String sql = "SELECT i.patient_id\n" +
+				"FROM kenyaemr_etl.etl_immunization i\n" +
+				"INNER JOIN kenyaemr_etl.etl_patient_demographics p ON p.patient_id = i.patient_id\n" +
+				"INNER JOIN (\n" +
+				"    SELECT DATE_ADD(\n" +
+				"        DATE_SUB(DATE(:startDate), INTERVAL DAYOFMONTH(:startDate)-1 DAY),\n" +
+				"        INTERVAL :dayOfMonth-1 DAY\n" +
+				"    ) AS target_date\n" +
+				") d_ref\n" +
+				"WHERE DATE(i." + vaccineColumn + ") = d_ref.target_date\n" +
+				(minAge != null
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, d_ref.target_date) >= " + minAge + "\n"
+						: "") +
+				(maxAge != null
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, d_ref.target_date) < " + maxAge + "\n"
+						: "") +
+				"GROUP BY i.patient_id";
+
+		cd.setQuery(sql);
+
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cd.addParameter(new Parameter("dayOfMonth", "Day of Month", Integer.class));
 
 		return cd;
 	}

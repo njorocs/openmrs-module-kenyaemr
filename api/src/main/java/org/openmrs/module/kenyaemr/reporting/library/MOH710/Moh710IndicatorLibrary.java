@@ -190,7 +190,7 @@ public class Moh710IndicatorLibrary {
 	/*Given BCG*/
 	public CohortIndicator givenBCGVaccine() {
 
-		return cohortIndicator("Given BCG",map(moh710CohortLibrary.givenBCGVaccineCl(), "startDate=${startDate},endDate=${endDate}")
+		return cohortIndicator("Given BCG",map(moh710CohortLibrary.givenBCGVaccineCl(), "startDate=${startDate},endDate=${endDate},dayIndex=${dayIndex}")
 		);
 	}
 
@@ -396,6 +396,11 @@ public class Moh710IndicatorLibrary {
 
 		return cohortIndicator(null,map(moh710CohortLibrary.squintWhiteEyeReflectionCl(), "startDate=${startDate},endDate=${endDate}")
 		);
+	}
+	public CohortIndicator vaccinatedOnDay(String vaccineColumn, Integer minAge, Integer maxAge) {
+		CohortIndicator ind = cohortIndicator(null, map(moh710CohortLibrary.vaccinatedOnDay(vaccineColumn, minAge, maxAge), "startDate=${startDate},endDate=${endDate},dayOfMonth=${dayOfMonth}"));
+		ind.addParameter(new org.openmrs.module.reporting.evaluation.parameter.Parameter("dayOfMonth", "Day of Month", Integer.class));
+		return ind;
 	}
 }
 
