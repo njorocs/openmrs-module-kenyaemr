@@ -2813,7 +2813,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
                 "  AND d.disability_type = 164538\n" +
                 "  AND NOT EXISTS (\n" +
                 "    SELECT 1\n" +
-                "    FROM openmrs.bed_patient_assignment_map bam\n" +
+                "    FROM bed_patient_assignment_map bam\n" +
                 "    WHERE bam.patient_id = p.patient_id\n" +
                 "      AND p.visit_date >= bam.date_started\n" +
                 "      AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped)\n" +
@@ -2832,7 +2832,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
                 "FROM kenyaemr_etl.etl_physiotherapy p\n" +
                 "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
                 "                    ON p.patient_id = d.patient_id\n" +
-                "         LEFT JOIN openmrs.bed_patient_assignment_map bam\n" +
+                "         LEFT JOIN bed_patient_assignment_map bam\n" +
                 "                   ON p.patient_id = bam.patient_id\n" +
                 "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "  AND (\n" +
@@ -2861,7 +2861,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
                 "  AND (d.is_disabled IS NULL OR d.is_disabled = 1066)\n" +
                 "  AND NOT EXISTS (\n" +
                 "    SELECT 1\n" +
-                "    FROM openmrs.bed_patient_assignment_map bam\n" +
+                "    FROM bed_patient_assignment_map bam\n" +
                 "    WHERE bam.patient_id = p.patient_id\n" +
                 "      AND p.visit_date >= bam.date_started\n" +
                 "      AND (bam.date_stopped IS NULL OR p.visit_date <= bam.date_stopped)\n" +
@@ -2880,7 +2880,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
                 "FROM kenyaemr_etl.etl_physiotherapy p\n" +
                 "         INNER JOIN kenyaemr_etl.etl_patient_demographics d\n" +
                 "                    ON p.patient_id = d.patient_id\n" +
-                "         LEFT JOIN openmrs.bed_patient_assignment_map bam\n" +
+                "         LEFT JOIN bed_patient_assignment_map bam\n" +
                 "                   ON p.patient_id = bam.patient_id\n" +
                 "WHERE DATE(p.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "  AND (\n" +

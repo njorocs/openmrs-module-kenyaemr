@@ -19,7 +19,6 @@ import org.openmrs.module.kenyaemr.reporting.ColumnParameters;
 import org.openmrs.module.kenyaemr.reporting.EmrReportingUtils;
 import org.openmrs.module.kenyaemr.reporting.MohReportUtils.DiagnosisLists;
 import org.openmrs.module.kenyaemr.reporting.library.moh711.Moh711IndicatorLibrary;
-import org.openmrs.module.kenyaemr.reporting.library.moh717.Moh717IndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonDimensionLibrary;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
@@ -75,9 +74,6 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     @Autowired
     private Moh711IndicatorLibrary moh711Indicators;
 
-    @Autowired
-    private Moh717IndicatorLibrary moh717Indicators;
-
     /**
      * @see org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder#getParameters(org.openmrs.module.kenyacore.report.ReportDescriptor)
      */
@@ -107,7 +103,6 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(createTBScreeningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(familyPlanningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(PsychiatryDataSet(), "startDate=${startDate},endDate=${endDate}"),
-                ReportUtils.map(PhysiologyDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(PhysiotherapyDataSet(), "startDate=${startDate},endDate=${endDate}")
         );
     }
@@ -137,9 +132,6 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     ColumnParameters f0To6Months = new ColumnParameters(null, "0-6 months, Female", "gender=F|age=0-6");
     ColumnParameters m0To6Months = new ColumnParameters(null, "0-6 months, Male", "gender=M|age=0-6");
 
-    ColumnParameters f7To23Months = new ColumnParameters(null, "7-23 months, Female", "gender=F|age=7-23");
-    ColumnParameters m7To23Months = new ColumnParameters(null, "7-23 months, Male", "gender=M|age=7-23");
-
     ColumnParameters f6To23Months = new ColumnParameters(null, "6-23 months, Female", "gender=F|age=6-23");
     ColumnParameters m6To23Months = new ColumnParameters(null, "6-23 months, Male", "gender=M|age=6-23");
     ColumnParameters f24To59Months = new ColumnParameters(null, "24-59 months, Female", "gender=F|age=24-59");
@@ -150,14 +142,6 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     ColumnParameters m0To59Months = new ColumnParameters(null, "0-59 months, Male", "gender=M|age=0-59");
     ColumnParameters f12To59Months = new ColumnParameters(null, "12-59 months, Female", "gender=F|age=12-59");
     ColumnParameters m12To59Months = new ColumnParameters(null, "12-59 months, Male", "gender=M|age=12-59");
-    ColumnParameters mTo59Months = new ColumnParameters(null, "0-59 months", "gender=M|age=0-59");
-    ColumnParameters fTo59Months = new ColumnParameters(null, "0-59 months", "gender=F|age=0-59");
-
-    ColumnParameters funder35 = new ColumnParameters(null, "<35 Years", "gender=F|age=<35");
-    ColumnParameters f35To55 = new ColumnParameters(null, "35-55 Years", "gender=F|age=35-55");
-    ColumnParameters f56AndAbove = new ColumnParameters(null, "56+ Years", "gender=F|age=56+");
-    ColumnParameters allUnder40 = new ColumnParameters(null, "<40 Years", "age=<40");
-    ColumnParameters all40To75 = new ColumnParameters(null, "40-75 Years", "age=40-75");
 
     ColumnParameters colTotal = new ColumnParameters(null, "Total", "");
 
@@ -166,13 +150,13 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
     List<ColumnParameters> maternalAgeDisaggregations = Arrays.asList(f10_14, f15_19, f20_24, f25AndAbove);
     List<ColumnParameters> childWeightAgeDisaggregations = Arrays.asList(f0To5Months, m0To5Months, f6To23Months,
             m6To23Months, f24To59Months, m24To59Months, colTotal);
-    List<ColumnParameters> childGrowthAgeDisaggregations = Arrays.asList(f0To6Months, m0To6Months, f7To23Months, m7To23Months,f24To59Months, m24To59Months, colTotal);
+    List<ColumnParameters> childGrowthAgeDisaggregations = Arrays.asList(f0To5Months, m0To5Months, f6To23Months, m6To23Months,f24To59Months, m24To59Months, colTotal);
     List<ColumnParameters> childFollowupTypeAgeDisaggregations = Arrays.asList(f0To59Months, m0To59Months, colTotal);
-    List<ColumnParameters> childExclusiveBFAgeDisaggregations = Arrays.asList(f0To5Months, m0To5Months, colTotal);
+    List<ColumnParameters> childExclusiveBFAgeDisaggregations = Arrays.asList(f0To6Months, m0To6Months, colTotal);
     List<ColumnParameters> childMUACAgeDisaggregations = Arrays.asList(f6To59Months, m6To59Months, colTotal);
     List<ColumnParameters> childMNPsAgeDisaggregations = Arrays.asList(f6To23Months, m6To23Months, colTotal);
     List<ColumnParameters> childDewormingAgeDisaggregations = Arrays.asList(f12To59Months, m12To59Months, colTotal);
-    List<ColumnParameters> childDelayedGrowthAgeDisaggregations = Arrays.asList(fTo59Months,mTo59Months);
+    List<ColumnParameters> childDelayedGrowthAgeDisaggregations = Arrays.asList(f0To59Months, m0To59Months);
     List<ColumnParameters> sgbvAgeDisaggregation = Arrays.asList(all0_9, all10_17, all18_49, all50AndAbove);
     List<ColumnParameters> familyPlanningAgeDisaggregation = Arrays.asList(all10_14, all15_19, all20_24, all25_And_Above);
     List<ColumnParameters> physiotherapyAgeDisaggregation = Arrays.asList(all0_4,all5_19,all20_And_Above);
@@ -510,6 +494,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
 
         return dsd;
     }
+
     private DataSetDefinition PhysiotherapyDataSet() {
 
         CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
@@ -517,6 +502,7 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         dsd.setDescription("Physiotherapy Service");
         dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        dsd.addDimension("age", map(commonDimensions.datimFineAgeGroups(), "onDate=${endDate}"));
 
         EmrReportingUtils.addRow(dsd, "Number of PWDs identified and received physiotherapy (OPD)", "", ReportUtils.map(moh711Indicators.pwdsReceivedPhysiotherapyOPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd, "Number of PWDs identified and received physiotherapy (IPD)", "", ReportUtils.map(moh711Indicators.pwdsReceivedPhysiotherapyIPD(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
