@@ -20,14 +20,17 @@ import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.calculation.result.SimpleResult;
 import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.util.EmrUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Calculate the date a client was confirmed HIV positive
+ * Calculate the date a client was confirmed HIV positive.
+ * With possible multiple HIV enrollment encounters from disparate forms, order HIV enrollment encounters
+ * in chronological order (ascending) and return the value from the earliest encounter that actually contains the obs.
  */
 public class DateConfirmedHivPositiveCalculation extends AbstractPatientCalculation {
 
@@ -39,18 +42,23 @@ public class DateConfirmedHivPositiveCalculation extends AbstractPatientCalculat
 		EncounterType et = encService.getEncounterTypeByUuid(HivMetadata._EncounterType.HIV_ENROLLMENT);
 		String dateConfirmedPositiveConcept = "160554AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-
 		CalculationResultMap ret = new CalculationResultMap();
 		for (Integer ptId : cohort) {
 
-			Encounter firstHivEnrollment = EmrUtils.firstEncounter(patientService.getPatient(ptId), et);
+			// getEncounters returns encounters ordered ascending by encounter datetime
+			List<Encounter> hivEnrollments = encService.getEncounters(patientService.getPatient(ptId), null, null, null,
+					null, Collections.singleton(et), null, null, null, false);
+
 			Date dateConfirmed = null;
-			if (firstHivEnrollment != null) {
-				for (Obs o : firstHivEnrollment.getObs()) {
-					if (o.getConcept().getUuid().equals(dateConfirmedPositiveConcept)) {
+			for (Encounter enrollment : hivEnrollments) {
+				for (Obs o : enrollment.getObs()) {
+					if (o.getConcept().getUuid().equals(dateConfirmedPositiveConcept) && o.getValueDatetime() != null) {
 						dateConfirmed = o.getValueDatetime();
 						break;
 					}
+				}
+				if (dateConfirmed != null) {
+					break;
 				}
 			}
 			ret.put(ptId, new SimpleResult(dateConfirmed, this, context));
