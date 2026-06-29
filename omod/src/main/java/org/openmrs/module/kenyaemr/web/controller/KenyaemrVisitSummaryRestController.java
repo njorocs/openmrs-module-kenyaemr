@@ -95,7 +95,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	private static final String K_MUAC         = "muac";
 
 	private static final String FHIR_INTERP_SYSTEM =
-		"http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
+			"http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
 	private static final String K_INTERPRETATION = "interpretation";
 	private static final String K_VALUE          = "value";
 	private static final String K_UNIT           = "unit";
@@ -155,19 +155,19 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		} catch (IOException e) {
 			log.error("Failed to generate visit summary PDF for visit " + visitUuid, e);
 			return new ResponseEntity<>(("PDF generation failed: " + e.getMessage()).getBytes(),
-				new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+					new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	private SimpleObject buildVitals(Visit visit, Date visitEnd, ConceptService cs) {
 		List<Concept> vitalConcepts = conceptList(cs, WEIGHT, HEIGHT, TEMPERATURE, PULSE_RATE,
-			BP_SYSTOLIC, BP_DIASTOLIC, RESPIRATORY_RATE, OXYGEN_SAT, MUAC);
+				BP_SYSTOLIC, BP_DIASTOLIC, RESPIRATORY_RATE, OXYGEN_SAT, MUAC);
 
 		List<Obs> obsList = Context.getObsService().getObservations(
-			Arrays.asList(Context.getPersonService().getPerson(visit.getPatient().getPersonId())),
-			null, vitalConcepts, null, null, null,
-			Arrays.asList("obsId"), null, null,
-			visit.getStartDatetime(), visitEnd, false
+				Arrays.asList(Context.getPersonService().getPerson(visit.getPatient().getPersonId())),
+				null, vitalConcepts, null, null, null,
+				Arrays.asList("obsId"), null, null,
+				visit.getStartDatetime(), visitEnd, false
 		);
 
 		Map<Concept, String> keyMap = buildVitalConceptKeyMap(cs);
@@ -223,7 +223,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 			entry.put(K_UNIT, unit);
 			if (cn != null && (cn.getLowNormal() != null || cn.getHiNormal() != null)) {
 				entry.put(K_INTERPRETATION, fhirInterpretation(
-					value, cn.getLowCritical(), cn.getLowNormal(), cn.getHiNormal(), cn.getHiCritical()));
+						value, cn.getLowCritical(), cn.getLowNormal(), cn.getHiNormal(), cn.getHiCritical()));
 			} else {
 				entry.put(K_INTERPRETATION, null);
 			}
@@ -260,7 +260,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 			return null;
 		}
 		return interpCode(obs.getValueNumeric(),
-			cn.getLowCritical(), cn.getLowNormal(), cn.getHiNormal(), cn.getHiCritical());
+				cn.getLowCritical(), cn.getLowNormal(), cn.getHiNormal(), cn.getHiCritical());
 	}
 
 	private String worstCode(String a, String b) {
@@ -315,15 +315,15 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 			}
 			if (allowedTypes.contains(enc.getEncounterType())) {
 				collectComplaintsFromEncounter(enc, groupConcept, complaintCon,
-					durationCon, durationUnitsCon, onsetStatusCon, otherTextCon, complaints);
+						durationCon, durationUnitsCon, onsetStatusCon, otherTextCon, complaints);
 			}
 		}
 		return complaints;
 	}
 
 	private void collectComplaintsFromEncounter(Encounter enc, Concept groupConcept, Concept complaintCon,
-			Concept durationCon, Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon,
-			List<SimpleObject> complaints) {
+												Concept durationCon, Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon,
+												List<SimpleObject> complaints) {
 		for (Obs topObs : enc.getObsAtTopLevel(false)) {
 			if (topObs.getConcept().equals(groupConcept) && topObs.hasGroupMembers()) {
 				SimpleObject entry = buildComplaintEntry(topObs, complaintCon, durationCon, durationUnitsCon, onsetStatusCon, otherTextCon);
@@ -335,7 +335,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	}
 
 	private SimpleObject buildComplaintEntry(Obs groupObs, Concept complaintCon, Concept durationCon,
-			Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon) {
+											 Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon) {
 		SimpleObject complaint = new SimpleObject();
 		Double durationValue = null;
 		String durationUnit  = "days";
@@ -380,8 +380,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private SimpleObject buildConditionEntry(Condition condition, Date onset) {
 		String name = condition.getCondition().getCoded() != null
-			? condition.getCondition().getCoded().getName().getName()
-			: condition.getCondition().getNonCoded();
+				? condition.getCondition().getCoded().getName().getName()
+				: condition.getCondition().getNonCoded();
 		SimpleObject obj = new SimpleObject();
 		obj.put("name", name != null ? name : "");
 		obj.put("onsetDate", formatDate(onset));
@@ -404,7 +404,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	private SimpleObject buildAllergyEntry(Allergy allergy) {
 		Allergen allergen = allergy.getAllergen();
 		String allergenName = allergen.getCodedAllergen() != null
-			? allergen.getCodedAllergen().getName().getName() : allergen.getNonCodedAllergen();
+				? allergen.getCodedAllergen().getName().getName() : allergen.getNonCodedAllergen();
 		String allergenType = allergen.getAllergenType() != null ? allergen.getAllergenType().toString() : "";
 		String severity = allergy.getSeverity() != null ? allergy.getSeverity().getName().getName() : "";
 
@@ -431,7 +431,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	private List<SimpleObject> buildDiagnoses(Visit visit) {
 		List<SimpleObject> diagnoses = new ArrayList<>();
 		List<Diagnosis> visitDiagnoses = Context.getService(DiagnosisService.class)
-			.getDiagnosesByVisit(visit, false, false);
+				.getDiagnosesByVisit(visit, false, false);
 		for (Diagnosis diagnosis : visitDiagnoses) {
 			diagnoses.add(buildDiagnosisEntry(diagnosis));
 		}
@@ -440,10 +440,10 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private SimpleObject buildDiagnosisEntry(Diagnosis diagnosis) {
 		String name = diagnosis.getDiagnosis().getCoded() != null
-			? diagnosis.getDiagnosis().getCoded().getName().getName()
-			: diagnosis.getDiagnosis().getNonCoded();
+				? diagnosis.getDiagnosis().getCoded().getName().getName()
+				: diagnosis.getDiagnosis().getNonCoded();
 		String date = diagnosis.getEncounter() != null
-			? formatDate(diagnosis.getEncounter().getEncounterDatetime()) : "";
+				? formatDate(diagnosis.getEncounter().getEncounterDatetime()) : "";
 
 		SimpleObject obj = new SimpleObject();
 		obj.put("diagnosis", name != null ? name : "");
@@ -510,8 +510,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	private List<SimpleObject> buildClinicalNotes(Visit visit) {
 		List<SimpleObject> notes = new ArrayList<>();
 		Set<String> noteTypes = new HashSet<>(Arrays.asList(
-			CommonMetadata._EncounterType.CONSULTATION,
-			CommonMetadata._EncounterType.NURSING_CARE_PLAN
+				CommonMetadata._EncounterType.CONSULTATION,
+				CommonMetadata._EncounterType.NURSING_CARE_PLAN
 		));
 		for (Encounter enc : visit.getEncounters()) {
 			if (!Boolean.TRUE.equals(enc.getVoided()) && noteTypes.contains(enc.getEncounterType().getUuid())) {
@@ -561,8 +561,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private boolean isImagingOrder(Order order) {
 		return order.getConcept() != null
-			&& order.getConcept().getConceptClass() != null
-			&& IMAGING_CONCEPT_CLASS_UUID.equals(order.getConcept().getConceptClass().getUuid());
+				&& order.getConcept().getConceptClass() != null
+				&& IMAGING_CONCEPT_CLASS_UUID.equals(order.getConcept().getConceptClass().getUuid());
 	}
 
 	private List<SimpleObject> buildProcedures(Visit visit) {
@@ -638,7 +638,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private Procedure getLinkedProcedure(Order order) {
 		List<Procedure> procedures = Context.getService(ProcedureService.class)
-			.getProceduresByOrderUuid(order.getUuid());
+				.getProceduresByOrderUuid(order.getUuid());
 		return procedures.isEmpty() ? null : procedures.get(0);
 	}
 
@@ -647,10 +647,10 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		for (Obs obs : allVisitObs) {
 			if (!Boolean.TRUE.equals(obs.getVoided()) && order.equals(obs.getOrder())) {
 				String conceptClassUuid = obs.getConcept().getConceptClass() != null
-					? obs.getConcept().getConceptClass().getUuid() : "";
+						? obs.getConcept().getConceptClass().getUuid() : "";
 				boolean isProcedureResult = PROCEDURE_CONCEPT_CLASS_UUID.equals(conceptClassUuid)
-					|| IMAGING_CONCEPT_CLASS_UUID.equals(conceptClassUuid)
-					|| order.getConcept().equals(obs.getConcept());
+						|| IMAGING_CONCEPT_CLASS_UUID.equals(conceptClassUuid)
+						|| order.getConcept().equals(obs.getConcept());
 				if (isProcedureResult) {
 					SimpleObject result = new SimpleObject();
 					result.put("finding", obs.getConcept().getName().getName());
@@ -705,11 +705,11 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 		}
 		Date endDate = visit.getStopDatetime() != null ? visit.getStopDatetime() : new Date();
 		List<Person> persons = Collections.singletonList(
-			Context.getPersonService().getPerson(visit.getPatient().getPersonId()));
+				Context.getPersonService().getPerson(visit.getPatient().getPersonId()));
 
 		List<Obs> allLabObs = Context.getObsService().getObservations(
-			persons, null, labConcepts, null, null, null, null,
-			null, null, visit.getStartDatetime(), endDate, false);
+				persons, null, labConcepts, null, null, null, null,
+				null, null, visit.getStartDatetime(), endDate, false);
 
 		List<SimpleObject> results = new ArrayList<>();
 		for (Obs obs : allLabObs) {
@@ -775,8 +775,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 				obj.put("hiCritical", cn.getHiCritical());
 				if (obs.getValueNumeric() != null && (cn.getLowNormal() != null || cn.getHiNormal() != null)) {
 					obj.put(K_INTERPRETATION, fhirInterpretation(
-						obs.getValueNumeric(), cn.getLowCritical(), cn.getLowNormal(),
-						cn.getHiNormal(), cn.getHiCritical()));
+							obs.getValueNumeric(), cn.getLowCritical(), cn.getLowNormal(),
+							cn.getHiNormal(), cn.getHiCritical()));
 				}
 			}
 		}
@@ -813,7 +813,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private SimpleObject buildExaminationFindings(Visit visit) {
 		EncounterType consultType = Context.getEncounterService()
-			.getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
+				.getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
 		SimpleObject result = new SimpleObject();
 
 		if (consultType == null) return result;
@@ -887,7 +887,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 	}
 
 	private void addSystemEntry(List<SimpleObject> systems, Map<String, List<Obs>> obsMap,
-	                            String label, String findingsUuid, String notesUuid) {
+								String label, String findingsUuid, String notesUuid) {
 		List<String> findings = new ArrayList<>();
 		for (Obs o : obsMap.getOrDefault(findingsUuid, Collections.emptyList())) {
 			if (o.getValueCoded() != null) findings.add(o.getValueCoded().getName().getName());
@@ -936,7 +936,7 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 
 	private String codedValueName(Obs obs) {
 		return obs.getValueCoded() != null && obs.getValueCoded().getName() != null
-			? obs.getValueCoded().getName().getName() : null;
+				? obs.getValueCoded().getName().getName() : null;
 	}
 
 	private List<Concept> conceptList(ConceptService cs, String... uuids) {
