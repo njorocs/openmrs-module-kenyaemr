@@ -14,7 +14,6 @@
 
 package org.openmrs.module.kenyaemr.reporting.air;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,7 +28,6 @@ import org.openmrs.module.facilityreporting.api.restUtil.DatasetIndicatorDetails
 import org.openmrs.module.facilityreporting.api.restUtil.FacilityReporting;
 import org.openmrs.module.facilityreporting.api.restUtil.ReportDatasetValueEntryMapper;
 import org.openmrs.module.kenyaemr.EmrConstants;
-import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.reporting.config.ReportDescriptor;
 import org.openmrs.module.reporting.dataset.DataSet;
@@ -53,8 +51,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * Configurable ADX generation strategy that reads configuration from global properties
  */
-@Component
-public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy {
+    @Component
+    public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy {
     private static final Log log = LogFactory.getLog(ConfigurableAdxGenerationStrategy.class);
 
     private static final String MOH_731_REPORT_NAME = "Revised MOH 731";
@@ -676,7 +674,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
      */
     private String getDatasetName(AdxConfiguration.AdxDatasetMapping datasetMapping, String dsKey, String reportName) {
         if (datasetMapping != null) {
-            if (MONTHLY_REPORT_NAME.equals(reportName)) {
+          if (MONTHLY_REPORT_NAME.equals(reportName)) {
                 return datasetMapping.get3pmName();
             } else {
                 // For other reports, use dhisName as default
@@ -740,7 +738,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
             // Remove trailing slash if present
             if (baseUrl.endsWith("/")) {
                 baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-                //  log.debug("Removed trailing slash from base URL: {}", baseUrl);
+              //  log.debug("Removed trailing slash from base URL: {}", baseUrl);
             }
 
             // Check if any dataset has field mappings
@@ -770,7 +768,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
         } catch (Exception e) {
             log.error("Error building endpoint URL for report: " + reportName, e);
             String fallbackUrl = getBaseUrl() + "/api/dataValueSets?dataElementIdScheme=code&orgUnitIdScheme=code&dataSetIdScheme=uid";
-            //  log.warn("Using fallback endpoint URL: {}", fallbackUrl);
+          //  log.warn("Using fallback endpoint URL: {}", fallbackUrl);
             return fallbackUrl;
         }
     }
@@ -798,8 +796,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
     public AdxConfiguration getConfigurationForReport(String reportName) {
         try {
             // First check DHIS2 ADX mapping
-            String dhisConfigJson = EmrUtils.getGlobalPropertyValue(EmrConstants.GP_DHIS2_DATASET_MAPPING);
-            AdxConfiguration config = findConfigInJson(dhisConfigJson, reportName);
+            AdxConfiguration config = findConfig(AdxMappingConfigStore.getDhis2Configurations(), reportName);
 
             if (config != null) {
                 log.debug("Found configuration for report '" + reportName + "' in DHIS2 mapping");
@@ -807,8 +804,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
             }
 
             // If not found, check 3PM ADX mapping
-            String threePmConfigJson = EmrUtils.getGlobalPropertyValue(EmrConstants.GP_3PM_DATASET_MAPPING);
-            config = findConfigInJson(threePmConfigJson, reportName);
+            config = findConfig(AdxMappingConfigStore.getThreePmConfigurations(), reportName);
 
             if (config != null) {
                 log.debug("Found configuration for report '" + reportName + "' in 3PM mapping");
@@ -818,35 +814,21 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
             log.debug("No configuration found for report: " + reportName);
 
         } catch (Exception e) {
-            log.error("Error parsing ADX configuration for report: " + reportName, e);
+            log.error("Error resolving ADX configuration for report: " + reportName, e);
         }
 
         return null;
     }
 
-    private AdxConfiguration findConfigInJson(String configJson, String reportName) {
-        try {
-            if (StringUtils.isBlank(configJson)) {
-                return null;
-            }
-
-            // Parse JSON array of configurations
-            JsonNode rootNode = objectMapper.readTree(configJson);
-            if (rootNode.isArray()) {
-                for (JsonNode configNode : rootNode) {
-                    AdxConfiguration config = objectMapper.treeToValue(configNode, AdxConfiguration.class);
-                    if (reportName.equals(config.getReportName())) {
-                        return config;
-                    }
-                }
-            } else {
-                log.warn("ADX configuration is not a JSON array: " + configJson);
-            }
-
-        } catch (Exception e) {
-            log.error("Error parsing JSON configuration: " + configJson, e);
+    private AdxConfiguration findConfig(List<AdxConfiguration> configurations, String reportName) {
+        if (configurations == null) {
+            return null;
         }
-
+        for (AdxConfiguration config : configurations) {
+            if (reportName.equals(config.getReportName())) {
+                return config;
+            }
+        }
         return null;
     }
 
@@ -1163,7 +1145,7 @@ public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy 
     }
 
     private void writeFacilityReportingJsonData(ArrayNode dataValuesArray, Date reportDate, Date endDate,
-                                                AdxMetadata metadata, AdxConfiguration config, String reportName) throws IOException {
+                                               AdxMetadata metadata, AdxConfiguration config, String reportName) throws IOException {
         Integer facilityReportId = getFacilityReportIdForReport(reportName);
         if (facilityReportId == null) {
             log.info("No facility reporting configured for report: " + reportName);

@@ -1,0 +1,2302 @@
+[
+  {
+    "reportName": "Revised MOH 731",
+    "prefix": "Y23_",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "1"
+    },
+    "datasets": [
+      {
+        "name": "1",
+        "dhisName": "OaIjkmzEeNO"
+      },
+      {
+        "name": "2",
+        "dhisName": "L7hIEAumRnQ"
+      },
+      {
+        "name": "3",
+        "dhisName": "gtDFQTNBp7y"
+      },
+      {
+        "name": "4",
+        "dhisName": "SoiOUE3lOJd"
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 705A Outpatient summary",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "2"
+    },
+    "datasets": [
+      {
+        "name": "MOH705A",
+        "dhisName": "EnZokILHOeN",
+        "fieldMappings": {
+          "DWND-32": "JcgMuSM3NnI|lHl2rmXpHse",
+          "DWSOD-32": "ZI3qZ2mfBER|lHl2rmXpHse",
+          "DWSED-32": "hGhUdN3KgrK|lHl2rmXpHse",
+          "CLC-32": "NF4v45pwFCW|lHl2rmXpHse",
+          "DYC-32": "V6AhoeTTClY|lHl2rmXpHse",
+          "GAS-32": "t7wQCrIA1dS|lHl2rmXpHse",
+          "PNC-32": "QgiADNKtauy|lHl2rmXpHse",
+          "SP-32": "EEVfLW0M8vU|lHl2rmXpHse",
+          "URC-32": "wGK0P9twEkx|lHl2rmXpHse",
+          "LTI-32": "GZz30dqmjkH|lHl2rmXpHse",
+          "ASC-32": "L82lvvxVaqt|lHl2rmXpHse",
+          "TCP-32": "e09lZ1Fw97l|lHl2rmXpHse",
+          "SMC-32": "Lt0FqtnHraW|lHl2rmXpHse",
+          "TMC-32": "siOyOiOJpI8|lHl2rmXpHse",
+          "CMC-32": "OoakJhWiyZp|lHl2rmXpHse",
+          "EIC-32": "Rmp6V00K85F|lHl2rmXpHse",
+          "MNC-32": "WXSCo6wvs74|lHl2rmXpHse",
+          "ANC-32": "kkUHOwGMawD|lHl2rmXpHse",
+          "MCC-32": "IVfyP8yAazg|lHl2rmXpHse",
+          "OMC-32": "ad9sUgPPQgl|lHl2rmXpHse",
+          "NS-32": "BmWgF3GJgIs|lHl2rmXpHse",
+          "NNC-32": "pDCorm17eRG|lHl2rmXpHse",
+          "PMC-32": "w4b50UCz14b|lHl2rmXpHse",
+          "CPC-32": "FW3WUJbzhEG|lHl2rmXpHse",
+          "MSC-32": "VuXfcCV7RtR|lHl2rmXpHse",
+          "HPC-32": "QUA6XTNIaNH|lHl2rmXpHse",
+          "AM-32": "RFXxRcQc9nP|lHl2rmXpHse",
+          "MPC-32": "vmzl4T728PC|lHl2rmXpHse",
+          "TYC-32": "NGUR6mazihN|lHl2rmXpHse",
+          "BLC-32": "ojFSHMwbkHK|lHl2rmXpHse",
+          "IWC-32": "UIG9ROMuecP|lHl2rmXpHse",
+          "EC-32": "mzcuI8nQYpW|lHl2rmXpHse",
+          "TSC-32": "SZ8Krtxc2XB|lHl2rmXpHse",
+          "UTC-32": "WvOlW7FmLiq|lHl2rmXpHse",
+          "MDC-32": "HmgfJSVUOOr|lHl2rmXpHse",
+          "DDC-32": "MRYnOLO78oa|lHl2rmXpHse",
+          "JIC-32": "W4Hz8qcZHLC|lHl2rmXpHse",
+          "DOC-32": "yoqQDZq28Vk|lHl2rmXpHse",
+          "DS-32": "LjFNZQdRmMa|lHl2rmXpHse",
+          "PC-32": "qlCRXb7XPuW|lHl2rmXpHse",
+          "RTC-32": "I5611kWZgh8|lHl2rmXpHse",
+          "DRTC-32": "HRCgiAVAyfP|lHl2rmXpHse",
+          "VRC-32": "IJcsSSeoIok|lHl2rmXpHse",
+          "OIC-32": "PiwEyf7dVC9|lHl2rmXpHse",
+          "SAC-32": "vp0neVlUNfU|lHl2rmXpHse",
+          "BC-32": "dkEYL9Sous9|lHl2rmXpHse",
+          "SBC-32": "WcDWC41StU4|lHl2rmXpHse",
+          "DBC-32": "egePEON9p3V|lHl2rmXpHse",
+          "OBC-32": "Inct3WT9StF|lHl2rmXpHse",
+          "DTC-32": "D923dTnerdk|lHl2rmXpHse",
+          "EPC-32": "FiiYdxMrqzs|lHl2rmXpHse",
+          "OCDC-32": "VUGxFGzFcZX|lHl2rmXpHse",
+          "RF-32": "QzYjhf0gmHd|lHl2rmXpHse",
+          "BRC-32": "nb9cfWgxYFc|lHl2rmXpHse",
+          "RKC-32": "KbTbZVtZIPv|lHl2rmXpHse",
+          "CRPC-32": "nwMuDW4tTdA|lHl2rmXpHse",
+          "ATC-32": "L529r3Wvtcf|lHl2rmXpHse",
+          "TRC-32": "zCOc8HOzP2u|lHl2rmXpHse",
+          "YFC-32": "P3Yvm3iber7|lHl2rmXpHse",
+          "VHC-32": "EM3rikEV3Bu|lHl2rmXpHse",
+          "RVF-32": "RiwsjyO1UjU|lHl2rmXpHse",
+          "CKU-32": "hYUfNXB88D5|lHl2rmXpHse",
+          "DENF-32": "lxSWq0xftsT|lHl2rmXpHse",
+          "KLC-32": "FD93RcbEm3Y|lHl2rmXpHse",
+          "CL-32": "NHJeBCgG7x7|lHl2rmXpHse",
+          "ANT-32": "oP15tZBjsvN|lHl2rmXpHse",
+          "SCC-32": "IH1S4eBz8oa|lHl2rmXpHse",
+          "HYPO-32": "XktzVlcfJnf|lHl2rmXpHse",
+          "TC-32": "e09lZ1Fw97l|lHl2rmXpHse",
+          "NFAC-32": "IxhbkNwhcvE|lHl2rmXpHse",
+          "RAC-32": "BwROYFIiXKG|lHl2rmXpHse",
+          "RFHC-32": "OOTyIyTXnDi|lHl2rmXpHse",
+          "RFCC-32": "s4yI7oKQ8A6|lHl2rmXpHse",
+          "AODC-32": "KxT47tbKHsd|lHl2rmXpHse"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 705B Outpatient summary",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "3"
+    },
+    "datasets": [
+      {
+        "name": "MOH705B",
+        "dhisName": "Uylp8xlm2Lg",
+        "fieldMappings": {
+          "DA-32": "tovFNTW5b9K|SeDaCnHi3m5",
+          "TBA-32": "e09lZ1Fw97l|SeDaCnHi3m5",
+          "DYA-32": "V6AhoeTTClY|SeDaCnHi3m5",
+          "CLA-32": "NF4v45pwFCW|SeDaCnHi3m5",
+          "MMA-32": "IVfyP8yAazg|SeDaCnHi3m5",
+          "MOA-32": "ad9sUgPPQgl|SeDaCnHi3m5",
+          "NTA-32": "TFH9YB9VdC8|SeDaCnHi3m5",
+          "PMA-32": "w4b50UCz14b|SeDaCnHi3m5",
+          "CPA-32": "FW3WUJbzhEG|SeDaCnHi3m5",
+          "MEA-32": "VuXfcCV7RtR|SeDaCnHi3m5",
+          "HEA-32": "QUA6XTNIaNH|SeDaCnHi3m5",
+          "MPSA-32": "vmzl4T728PC|SeDaCnHi3m5",
+          "TMC-32": "siOyOiOJpI8|SeDaCnHi3m5",
+          "SUA-32": "Lt0FqtnHraW|SeDaCnHi3m5",
+          "COA-32": "OoakJhWiyZp|SeDaCnHi3m5",
+          "MPA-32": "gvZmXInRLuD|SeDaCnHi3m5",
+          "AM-32": "RFXxRcQc9nP|SeDaCnHi3m5",
+          "TYA-32": "NGUR6mazihN|SeDaCnHi3m5",
+          "STIA-32": "FcMziA2C3AG|SeDaCnHi3m5",
+          "URA-32": "WvOlW7FmLiq|SeDaCnHi3m5",
+          "BIA-32": "ojFSHMwbkHK|SeDaCnHi3m5",
+          "INA-32": "UIG9ROMuecP|SeDaCnHi3m5",
+          "MLA-32": "WXSCo6wvs74|SeDaCnHi3m5",
+          "ANEA-32": "kkUHOwGMawD|SeDaCnHi3m5",
+          "EYA-32": "mzcuI8nQYpW|SeDaCnHi3m5",
+          "EIA-32": "Rmp6V00K85F|SeDaCnHi3m5",
+          "UPA-32": "wGK0P9twEkx|SeDaCnHi3m5",
+          "ASA-32": "L82lvvxVaqt|SeDaCnHi3m5",
+          "PNA-32": "PHXPCqYlS5v|SeDaCnHi3m5",
+          "OTRA-32": "T2tgkrJ2Mkw|SeDaCnHi3m5",
+          "ABA-32": "IrWSgk9GsUm|SeDaCnHi3m5",
+          "DPA-32": "kHlUIMlk1t2|SeDaCnHi3m5",
+          "HYA-32": "lVNKL5UQ8Sb|SeDaCnHi3m5",
+          "MDA-32": "HmgfJSVUOOr|SeDaCnHi3m5",
+          "DEA-32": "MRYnOLO78oa|SeDaCnHi3m5",
+          "JIA-32": "W4Hz8qcZHLC|SeDaCnHi3m5",
+          "DSA-32": "yoqQDZq28Vk|SeDaCnHi3m5",
+          "AJPA-32": "waNhWrS3HL6|SeDaCnHi3m5",
+          "POA-32": "qlCRXb7XPuW|SeDaCnHi3m5",
+          "ROA-32": "I5611kWZgh8|SeDaCnHi3m5",
+          "DRA-32": "HRCgiAVAyfP|SeDaCnHi3m5",
+          "OIA-32": "PiwEyf7dVC9|SeDaCnHi3m5",
+          "SEA-32": "vp0neVlUNfU|SeDaCnHi3m5",
+          "VRA-32": "IJcsSSeoIok|SeDaCnHi3m5",
+          "BUA-32": "dkEYL9Sous9|SeDaCnHi3m5",
+          "SNA-32": "WcDWC41StU4|SeDaCnHi3m5",
+          "DOA-32": "egePEON9p3V|SeDaCnHi3m5",
+          "OBA-32": "Inct3WT9StF|SeDaCnHi3m5",
+          "DTA-32": "D923dTnerdk|SeDaCnHi3m5",
+          "EPA-32": "FiiYdxMrqzs|SeDaCnHi3m5",
+          "BRLA-32": "nb9cfWgxYFc|SeDaCnHi3m5",
+          "CAA-32": "sZETzNe1To8|SeDaCnHi3m5",
+          "CNSA-32": "JWK8I0pQHvx|SeDaCnHi3m5",
+          "OVA-32": "mkB4Fr4dGH1|SeDaCnHi3m5",
+          "PHA-32": "x4jtwRTnwyk|SeDaCnHi3m5",
+          "TRA-32": "zCOc8HOzP2u|SeDaCnHi3m5",
+          "RVF-32": "RiwsjyO1UjU|SeDaCnHi3m5",
+          "YEA-32": "P3Yvm3iber7|SeDaCnHi3m5",
+          "VHA-32": "EM3rikEV3Bu|SeDaCnHi3m5",
+          "CKU-32": "hYUfNXB88D5|SeDaCnHi3m5",
+          "DENF-32": "lxSWq0xftsT|SeDaCnHi3m5",
+          "KAA-32": "FD93RcbEm3Y|SeDaCnHi3m5",
+          "CL-32": "NHJeBCgG7x7|SeDaCnHi3m5",
+          "ANT-32": "oP15tZBjsvN|SeDaCnHi3m5",
+          "MSA-32": "DLrdoumm9BC|SeDaCnHi3m5",
+          "FIA-32": "eydEATkJcvi|SeDaCnHi3m5",
+          "NSA-32": "KQE3bWynYbh|SeDaCnHi3m5",
+          "AODA-32": "KxT47tbKHsd|SeDaCnHi3m5",
+          "NFAA-32": "IxhbkNwhcvE|SeDaCnHi3m5",
+          "RETA-32": "BwROYFIiXKG|SeDaCnHi3m5",
+          "RFHA-32": "OOTyIyTXnDi|SeDaCnHi3m5",
+          "RFCA-32": "s4yI7oKQ8A6|SeDaCnHi3m5"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH-743 Report",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "4"
+    },
+    "datasets": [
+      {
+        "name": "Positive Result",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "microscopy": "E64sUrp6DrX|QKy6jjocOLj",
+          "rdt": "E64sUrp6DrX|hH6R0ZkxiK0",
+          "aged_15_yrs_and_above": "D22rEpfzkG1|nMdzDFMrcWt",
+          "under_5yrs": "D22rEpfzkG1|GZydNfj2qSU",
+          "aged_5-14": "D22rEpfzkG1|oro2RfSwXDe"
+        }
+      },
+      {
+        "name": "Negative Result",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "microscopy": "TSgMfWzStx6|QKy6jjocOLj",
+          "rdt": "TSgMfWzStx6|hH6R0ZkxiK0",
+          "aged_15_yrs_and_above": "da1a1XwgSPL|nMdzDFMrcWt",
+          "under_5yrs": "da1a1XwgSPL|GZydNfj2qSU",
+          "aged_5-14": "da1a1XwgSPL|oro2RfSwXDe"
+        }
+      },
+      {
+        "name": "Invalid Result",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "microscopy": "FJV0d0Ie4Z1|QKy6jjocOLj",
+          "rdt": "FJV0d0Ie4Z1|hH6R0ZkxiK0",
+          "aged_15_yrs_and_above": "stcSYjm0Uza|nMdzDFMrcWt",
+          "under_5yrs": "stcSYjm0Uza|GZydNfj2qSU",
+          "aged_5-14": "stcSYjm0Uza|oro2RfSwXDe"
+        }
+      },
+      {
+        "name": "Total Tested",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "microscopy": "W1wy1EMqfjY|QKy6jjocOLj",
+          "rdt": "W1wy1EMqfjY|hH6R0ZkxiK0"
+        }
+      },
+      {
+        "name": "Clients given IPT 1st Dose",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "value": "gAKCshSgSH3"
+        }
+      },
+      {
+        "name": "Clients given IPT 2nd Dose",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "value": "EHGBrVPiG3N"
+        }
+      },
+      {
+        "name": "Clients given IPT 3rd Dose",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "value": "N931F2wuVVO"
+        }
+      },
+      {
+        "name": "Number of Pregnant women receiving IPTp",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "value": "F5h7TTizV7T"
+        }
+      },
+      {
+        "name": "Days facility did NOT have ANY of the AL Packs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "value": "bP3jaezC5g5"
+        }
+      },
+      {
+        "name": "LLINs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "f0AIAR5pJ2F|yuvCdaFqdCW",
+          "stck_take": "f0AIAR5pJ2F|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "f0AIAR5pJ2F|iVuuwYeI4rW",
+          "days_out_of_stock": "f0AIAR5pJ2F|DV8l1KuASLR",
+          "opening_balance": "f0AIAR5pJ2F|HWtHCLAwprR",
+          "pos_adj": "f0AIAR5pJ2F|CckV73xy6HB",
+          "quantity_requested_for_resupply": "f0AIAR5pJ2F|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "f0AIAR5pJ2F|lWysQ1ZqF0W",
+          "neg_adj": "f0AIAR5pJ2F|unVIt2C0cdW",
+          "curr_loss": "f0AIAR5pJ2F|rqzfl66VFyd",
+          "curr_dispensed": "f0AIAR5pJ2F|w77uMi1KzOH",
+          "date": "PveAUFAN01f"
+        }
+      },
+      {
+        "name": "Artemether-Lumefantrine 20/120 Tabs 6s",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "BnGDrFwyQp9|yuvCdaFqdCW",
+          "stck_take": "BnGDrFwyQp9|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "BnGDrFwyQp9|iVuuwYeI4rW",
+          "days_out_of_stock": "BnGDrFwyQp9|DV8l1KuASLR",
+          "opening_balance": "BnGDrFwyQp9|HWtHCLAwprR",
+          "pos_adj": "BnGDrFwyQp9|CckV73xy6HB",
+          "quantity_requested_for_resupply": "BnGDrFwyQp9|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "BnGDrFwyQp9|lWysQ1ZqF0W",
+          "neg_adj": "BnGDrFwyQp9|unVIt2C0cdW",
+          "curr_loss": "BnGDrFwyQp9|rqzfl66VFyd",
+          "curr_dispensed": "BnGDrFwyQp9|w77uMi1KzOH",
+          "date": "odbKhOUjLtr"
+        }
+      },
+      {
+        "name": "Artemether-Lumefantrine 20/120 Tabs 12s",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "c0MB4RmVjxk|yuvCdaFqdCW",
+          "stck_take": "c0MB4RmVjxk|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "c0MB4RmVjxk|iVuuwYeI4rW",
+          "days_out_of_stock": "c0MB4RmVjxk|DV8l1KuASLR",
+          "opening_balance": "c0MB4RmVjxk|HWtHCLAwprR",
+          "pos_adj": "c0MB4RmVjxk|CckV73xy6HB",
+          "quantity_requested_for_resupply": "c0MB4RmVjxk|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "c0MB4RmVjxk|lWysQ1ZqF0W",
+          "neg_adj": "c0MB4RmVjxk|unVIt2C0cdW",
+          "curr_loss": "c0MB4RmVjxk|rqzfl66VFyd",
+          "curr_dispensed": "c0MB4RmVjxk|w77uMi1KzOH",
+          "date": "KKpf4YhJk7N"
+        }
+      },
+      {
+        "name": "Artemether-Lumefantrine 20/120 Tabs 18s",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "qnZmg5tNSMy|yuvCdaFqdCW",
+          "stck_take": "qnZmg5tNSMy|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "qnZmg5tNSMy|iVuuwYeI4rW",
+          "days_out_of_stock": "qnZmg5tNSMy|DV8l1KuASLR",
+          "opening_balance": "qnZmg5tNSMy|HWtHCLAwprR",
+          "pos_adj": "qnZmg5tNSMy|CckV73xy6HB",
+          "quantity_requested_for_resupply": "qnZmg5tNSMy|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "qnZmg5tNSMy|lWysQ1ZqF0W",
+          "neg_adj": "qnZmg5tNSMy|unVIt2C0cdW",
+          "curr_loss": "qnZmg5tNSMy|rqzfl66VFyd",
+          "curr_dispensed": "qnZmg5tNSMy|w77uMi1KzOH",
+          "date": "N6a6nxEDAMQ"
+        }
+      },
+      {
+        "name": "Artemether-Lumefantrine 20/120 Tabs 24s",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "gVp1KSFI69G|yuvCdaFqdCW",
+          "stck_take": "gVp1KSFI69G|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "gVp1KSFI69G|iVuuwYeI4rW",
+          "days_out_of_stock": "gVp1KSFI69G|DV8l1KuASLR",
+          "opening_balance": "gVp1KSFI69G|HWtHCLAwprR",
+          "pos_adj": "gVp1KSFI69G|CckV73xy6HB",
+          "quantity_requested_for_resupply": "gVp1KSFI69G|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "gVp1KSFI69G|lWysQ1ZqF0W",
+          "neg_adj": "gVp1KSFI69G|unVIt2C0cdW",
+          "curr_loss": "gVp1KSFI69G|rqzfl66VFyd",
+          "curr_dispensed": "gVp1KSFI69G|w77uMi1KzOH",
+          "date": "kcZ4EN4VpVk"
+        }
+      },
+      {
+        "name": "Artesunate Injection",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "iOARK31NdLp|yuvCdaFqdCW",
+          "stck_take": "iOARK31NdLp|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "iOARK31NdLp|iVuuwYeI4rW",
+          "days_out_of_stock": "iOARK31NdLp|DV8l1KuASLR",
+          "opening_balance": "iOARK31NdLp|HWtHCLAwprR",
+          "pos_adj": "iOARK31NdLp|CckV73xy6HB",
+          "quantity_requested_for_resupply": "iOARK31NdLp|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "iOARK31NdLp|lWysQ1ZqF0W",
+          "neg_adj": "iOARK31NdLp|unVIt2C0cdW",
+          "curr_loss": "iOARK31NdLp|rqzfl66VFyd",
+          "curr_dispensed": "iOARK31NdLp|w77uMi1KzOH",
+          "date": "OvhSDrOlXiC"
+        }
+      },
+      {
+        "name": "Dihydroartemesinin/piperaquine 160mg Tabs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "lRdys3z7YNI|yuvCdaFqdCW",
+          "stck_take": "lRdys3z7YNI|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "lRdys3z7YNI|iVuuwYeI4rW",
+          "days_out_of_stock": "lRdys3z7YNI|DV8l1KuASLR",
+          "opening_balance": "lRdys3z7YNI|HWtHCLAwprR",
+          "pos_adj": "lRdys3z7YNI|CckV73xy6HB",
+          "quantity_requested_for_resupply": "lRdys3z7YNI|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "lRdys3z7YNI|lWysQ1ZqF0W",
+          "neg_adj": "lRdys3z7YNI|unVIt2C0cdW",
+          "curr_loss": "lRdys3z7YNI|rqzfl66VFyd",
+          "curr_dispensed": "lRdys3z7YNI|w77uMi1KzOH",
+          "date": "wZ1SPbAtQxF"
+        }
+      },
+      {
+        "name": "Dihydroartemesinin/piperaquine 320mg Tabs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "wja80wk33jw|yuvCdaFqdCW",
+          "stck_take": "wja80wk33jw|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "wja80wk33jw|iVuuwYeI4rW",
+          "days_out_of_stock": "wja80wk33jw|DV8l1KuASLR",
+          "opening_balance": "wja80wk33jw|HWtHCLAwprR",
+          "pos_adj": "wja80wk33jw|CckV73xy6HB",
+          "quantity_requested_for_resupply": "wja80wk33jw|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "wja80wk33jw|lWysQ1ZqF0W",
+          "neg_adj": "wja80wk33jw|unVIt2C0cdW",
+          "curr_loss": "wja80wk33jw|rqzfl66VFyd",
+          "curr_dispensed": "wja80wk33jw|w77uMi1KzOH",
+          "date": "A6JvpKjY1Qi"
+        }
+      },
+      {
+        "name": "Quinine (200mg) Tabs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "TH5xz4WcRI7|yuvCdaFqdCW",
+          "stck_take": "TH5xz4WcRI7|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "TH5xz4WcRI7|iVuuwYeI4rW",
+          "days_out_of_stock": "TH5xz4WcRI7|DV8l1KuASLR",
+          "opening_balance": "TH5xz4WcRI7|HWtHCLAwprR",
+          "pos_adj": "TH5xz4WcRI7|CckV73xy6HB",
+          "quantity_requested_for_resupply": "TH5xz4WcRI7|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "TH5xz4WcRI7|lWysQ1ZqF0W",
+          "neg_adj": "TH5xz4WcRI7|unVIt2C0cdW",
+          "curr_loss": "TH5xz4WcRI7|rqzfl66VFyd",
+          "curr_dispensed": "TH5xz4WcRI7|w77uMi1KzOH",
+          "date": "xhBOPA1OUzn"
+        }
+      },
+      {
+        "name": "Quinine (300mg) Tabs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "EjdfgUUAfJO|yuvCdaFqdCW",
+          "stck_take": "EjdfgUUAfJO|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "EjdfgUUAfJO|iVuuwYeI4rW",
+          "days_out_of_stock": "EjdfgUUAfJO|DV8l1KuASLR",
+          "opening_balance": "EjdfgUUAfJO|HWtHCLAwprR",
+          "pos_adj": "EjdfgUUAfJO|CckV73xy6HB",
+          "quantity_requested_for_resupply": "EjdfgUUAfJO|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "EjdfgUUAfJO|lWysQ1ZqF0W",
+          "neg_adj": "EjdfgUUAfJO|unVIt2C0cdW",
+          "curr_loss": "EjdfgUUAfJO|rqzfl66VFyd",
+          "curr_dispensed": "EjdfgUUAfJO|w77uMi1KzOH",
+          "date": "qOoS0HC7SAO"
+        }
+      },
+      {
+        "name": "Quinine inj (600mg/2ml) Amps",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "qeK4CnBmpBQ|yuvCdaFqdCW",
+          "stck_take": "qeK4CnBmpBQ|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "qeK4CnBmpBQ|iVuuwYeI4rW",
+          "days_out_of_stock": "qeK4CnBmpBQ|DV8l1KuASLR",
+          "opening_balance": "qeK4CnBmpBQ|HWtHCLAwprR",
+          "pos_adj": "qeK4CnBmpBQ|CckV73xy6HB",
+          "quantity_requested_for_resupply": "qeK4CnBmpBQ|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "qeK4CnBmpBQ|lWysQ1ZqF0W",
+          "neg_adj": "qeK4CnBmpBQ|unVIt2C0cdW",
+          "curr_loss": "qeK4CnBmpBQ|rqzfl66VFyd",
+          "curr_dispensed": "qeK4CnBmpBQ|w77uMi1KzOH",
+          "date": "AlNFK4wnGrF"
+        }
+      },
+      {
+        "name": "Rapid Diagnostic Tests",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "cPlWFYbBacW|yuvCdaFqdCW",
+          "stck_take": "cPlWFYbBacW|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "cPlWFYbBacW|iVuuwYeI4rW",
+          "days_out_of_stock": "cPlWFYbBacW|DV8l1KuASLR",
+          "opening_balance": "cPlWFYbBacW|HWtHCLAwprR",
+          "pos_adj": "cPlWFYbBacW|CckV73xy6HB",
+          "quantity_requested_for_resupply": "cPlWFYbBacW|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "cPlWFYbBacW|lWysQ1ZqF0W",
+          "neg_adj": "cPlWFYbBacW|unVIt2C0cdW",
+          "curr_loss": "cPlWFYbBacW|rqzfl66VFyd",
+          "curr_dispensed": "cPlWFYbBacW|w77uMi1KzOH",
+          "date": "aLJ1xcLs9QL"
+        }
+      },
+      {
+        "name": "Sulphadoxine Pyrimethamine Tabs",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "curr_receipts": "imheYfA1Kiw|yuvCdaFqdCW",
+          "stck_take": "imheYfA1Kiw|rPAsF4cpNxm",
+          "medicines_with_6_months_to_expiry": "imheYfA1Kiw|iVuuwYeI4rW",
+          "days_out_of_stock": "imheYfA1Kiw|DV8l1KuASLR",
+          "opening_balance": "imheYfA1Kiw|HWtHCLAwprR",
+          "pos_adj": "imheYfA1Kiw|CckV73xy6HB",
+          "quantity_requested_for_resupply": "imheYfA1Kiw|n6wkG1oodMN",
+          "quantity_of_expired_drugs": "imheYfA1Kiw|lWysQ1ZqF0W",
+          "neg_adj": "imheYfA1Kiw|unVIt2C0cdW",
+          "curr_loss": "imheYfA1Kiw|rqzfl66VFyd",
+          "curr_dispensed": "imheYfA1Kiw|w77uMi1KzOH",
+          "date": "rwoLOEw1QhT"
+        }
+      },
+      {
+        "name": "Patients on AL by Weight Band Summary Report",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "weighing_15_to_24_kgs": "zB1NW37bi46|Y91nbvpppbG",
+          "weighing_10_to_14_kgs": "zB1NW37bi46|h9407ByGv89",
+          "weighing_20_to_25_kgs": "zB1NW37bi46|vvw3hDUEbjV",
+          "weighing_35_kgs_and_above": "zB1NW37bi46|abmGKYBTUWU",
+          "weighing_5_to_9_kgs": "zB1NW37bi46|lALCHrXxxvr",
+          "weighing_15_to_19_kgs": "zB1NW37bi46|EjStN2UnKW5",
+          "weighing_5_to_14_kgs": "zB1NW37bi46|LGF6iqCIERd",
+          "weighing_35_and_above_kgs": "zB1NW37bi46|Uza8eELFYQi",
+          "weighing_30_to_35_kgs": "zB1NW37bi46|d96uJFWTo1M",
+          "weighing_25_to_29_kgs": "zB1NW37bi46|Q9AMFcm1wVN",
+          "weighing_25_to_34_kgs": "zB1NW37bi46|lBMSm0aBgXs"
+        }
+      },
+      {
+        "name": "Patients Given an ACT by Weight Band Category",
+        "dhisName": "RRnz4uPHXdl",
+        "fieldMappings": {
+          "under_5_years_5_to_under_10_kg": "t1TfFFoI6jw|zHzNf3FE8zg",
+          "aged_5_years_and_above_5_to_under_10_kg": "t1TfFFoI6jw|FRGYzvp9s4H",
+          "under_5_years_10_to_under_15_kg": "t1TfFFoI6jw|rgnMrFH0UgV",
+          "aged_5_years_and_above_10_to_under_15_kg": "t1TfFFoI6jw|RZPo5iMz7tq",
+          "under_5_years_15_to_under_20_kg": "t1TfFFoI6jw|k82A0qGTkjB",
+          "aged_5_years_and_above_15_to_under_20_kg": "t1TfFFoI6jw|h6XBmIiObaQ",
+          "under_5_years_20_to_under_25_kg": "t1TfFFoI6jw|tG0RhCmDF1s",
+          "aged_5_years_and_above_20_to_under_25_kg": "t1TfFFoI6jw|hLC7yy1FhwQ",
+          "under_5_years_25_to_under_30_kg": "t1TfFFoI6jw|z01HoHSLzIS",
+          "aged_5_years_and_above_25_to_under_30_kg": "t1TfFFoI6jw|NG9LkFWSVig",
+          "under_5_years_30_to_under_35_kg": "t1TfFFoI6jw|L3psDtC3WyT",
+          "aged_5_years_and_above_30_to_under_35_kg": "t1TfFFoI6jw|QiLKNYkbENu",
+          "under_5_years_35_to_under_60_kg": "t1TfFFoI6jw|rLPO0NDHMFY",
+          "aged_5_years_and_above_35_to_under_60_kg": "t1TfFFoI6jw|tlL5xymmV34",
+          "under_5_years_60_to_under_80_kg": "t1TfFFoI6jw|Druu16H9vLy",
+          "aged_5_years_and_above_60_to_under_80_kg": "t1TfFFoI6jw|XpYAGG71UWk",
+          "under_5_years_80_and_above_kg": "t1TfFFoI6jw|pJrBMrvhbbl",
+          "aged_5_years_and_above_80_and_above_kg": "t1TfFFoI6jw|VvoUt2Q9K3U"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 706",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "5"
+    },
+    "datasets": [
+      {
+        "name": "MOH706",
+        "dhisName": "sfiNZ7atsK8",
+        "fieldMappings": {
+          "UAGLT": "vi9W8cThS6M|NARbklOooeR",
+          "UAGLP": "vi9W8cThS6M|snus2Q1IB3J",
+          "UAKETT": "ib4VoJ8THa2|NARbklOooeR",
+          "UAKETP": "ib4VoJ8THa2|snus2Q1IB3J",
+          "UAPT": "N5wopWFWGB6|NARbklOooeR",
+          "UAPP": "N5wopWFWGB6|snus2Q1IB3J",
+          "UAPCT": "jlrtFpAy6D7|P0pPa5SxaHn",
+          "UAPCP": "jlrtFpAy6D7|YDmZbRQg6jq",
+          "UAHT": "Da9tH6tUP4g|P0pPa5SxaHn",
+          "UAHP": "Da9tH6tUP4g|YDmZbRQg6jq",
+          "UATVT": "u7dpFqi7OtB|YDmZbRQg6jq",
+          "UATVP": "u7dpFqi7OtB|P0pPa5SxaHn",
+          "UAYCT": "En5DePENNkL|P0pPa5SxaHn",
+          "UAYCP": "En5DePENNkL|YDmZbRQg6jq",
+          "UABT": "Gav2ZKciu2H|P0pPa5SxaHn",
+          "UABP": "Gav2ZKciu2H|YDmZbRQg6jq",
+          "BST": "pacXvg8XEYT|TZ7UnG134RW",
+          "BSP": "pacXvg8XEYT|nwpzSJ8o7hD",
+          "BSRT": "CceLQEL5Q4p|TZ7UnG134RW",
+          "BSRTP": "CceLQEL5Q4p|nwpzSJ8o7hD",
+          "TSPPT": "QcAldRqUg3G|ldeqsc1r2zV",
+          "TSPPP": "QcAldRqUg3G|SJa8nlqm2qh",
+          "HNNT": "Lyg041arjWC|ldeqsc1r2zV",
+          "HNNP": "Lyg041arjWC|SJa8nlqm2qh",
+          "HOWT": "v4tmYFRahDQ|ldeqsc1r2zV",
+          "HOWP": "v4tmYFRahDQ|SJa8nlqm2qh",
+          "RWT": "a9TJvCqqIR1|ldeqsc1r2zV",
+          "RWP": "a9TJvCqqIR1|SJa8nlqm2qh",
+          "SMT": "DUAQP8J0eA1|ldeqsc1r2zV",
+          "SMP": "DUAQP8J0eA1|SJa8nlqm2qh",
+          "TTT": "|",
+          "TTP": "r9WJUlTQpWf|NhSoXUMPK2K",
+          "AMBT": "T7eaRDUj8b8|ldeqsc1r2zV",
+          "AMBP": "T7eaRDUj8b8|SJa8nlqm2qh",
+          "VDRLT": "cBwG3LENZoo|iKBQSBSnHVM",
+          "VDRLP": "cBwG3LENZoo|VEI1ryMCZhN",
+          "TPHAT": "ZVf6gJ24rHx|iKBQSBSnHVM",
+          "TPHAP": "ZVf6gJ24rHx|VEI1ryMCZhN",
+          "ASOTT": "MsRYxIQORab|iKBQSBSnHVM",
+          "ASOTP": "MsRYxIQORab|VEI1ryMCZhN",
+          "HIVT": "AL0dzl1zuc8|iKBQSBSnHVM",
+          "HIVP": "AL0dzl1zuc8|VEI1ryMCZhN",
+          "BRUT": "AGzzhiuPrkR|iKBQSBSnHVM",
+          "BRUP": "AGzzhiuPrkR|VEI1ryMCZhN",
+          "RFT": "nwFlCYS6SZk|iKBQSBSnHVM",
+          "RFP": "nwFlCYS6SZk|VEI1ryMCZhN",
+          "HPT": "btLze8KHB7u|iKBQSBSnHVM",
+          "HPP": "btLze8KHB7u|VEI1ryMCZhN",
+          "HPAT": "MjuX8GeVqTV|iKBQSBSnHVM",
+          "HPAP": "MjuX8GeVqTV|VEI1ryMCZhN",
+          "HPBT": "oDfGdAcQW0f|iKBQSBSnHVM",
+          "HPBP": "oDfGdAcQW0f|NhSoXUMPK2K",
+          "HPCT": "w36YhAdDJAz|iKBQSBSnHVM",
+          "HPCP": "w36YhAdDJAz|VEI1ryMCZhN",
+          "HCGT": "PtnBoYdXAKj|iKBQSBSnHVM",
+          "HCGP": "PtnBoYdXAKj|VEI1ryMCZhN",
+          "FBCT": "P9D2LoWDfrI|NhSoXUMPK2K",
+          "HB5": "QHbkUbOKXQl|NhSoXUMPK2K",
+          "HB510": "YHQ2fvjLaIy|NhSoXUMPK2K",
+          "CD4T": "cv2JYPIp9eX|NhSoXUMPK2K",
+          "CD4T500": "yWibzEveSoa|NhSoXUMPK2K",
+          "STT": "UevukTUPV2C|NhSoXUMPK2K",
+          "STP": "IUL92Ks3edF|NhSoXUMPK2K",
+          "PBFT": "D3MPbflo9EA|NhSoXUMPK2K",
+          "BMAT": "ZcPKomkmCXI|NhSoXUMPK2K",
+          "COAGT": "E6SafHFrnr5|NhSoXUMPK2K",
+          "RCT": "gco53u6A5iX|NhSoXUMPK2K",
+          "ESRT": "HeecBdEvzqa|NhSoXUMPK2K",
+          "ESRP": "ZPmQ8R3VaK8|NhSoXUMPK2K",
+          "BGT": "nAmzXhpdkay|JUggFJaMynh",
+          "BUGT": "g7YghpOMKMr|NhSoXUMPK2K",
+          "BSHIVP": "FqdZ54jGbKT|NhSoXUMPK2K",
+          "BSHPBP": "WiybLjeBZkG|NhSoXUMPK2K",
+          "BSHPCP": "JeA8Tc3tHIA|NhSoXUMPK2K",
+          "BSSP": "WFkgkRy935c|NhSoXUMPK2K",
+          "BCBST": "gTK8kZgOQ1e|NhSoXUMPK2K",
+          "BCBSL": "QJUync5DZoy|NhSoXUMPK2K",
+          "BCBSH": "tgbDsXUj2I0|NhSoXUMPK2K",
+          "OGTT": "iurCetYzazS|NhSoXUMPK2K",
+          "OGTTL": "wFnVa14Gbvb|NhSoXUMPK2K",
+          "OGTTH": "KbuPt8F5BL9|NhSoXUMPK2K",
+          "BCCT": "MsjjUAr5DJg|U9YyhDQVdsC",
+          "BCLC": "MsjjUAr5DJg|HHWCv6AinWN",
+          "BCHC": "MsjjUAr5DJg|Cg8F10lHneq",
+          "BCUT": "Z4hQ6P94cO0|U9YyhDQVdsC",
+          "BCLU": "Z4hQ6P94cO0|HHWCv6AinWN",
+          "BCHU": "Z4hQ6P94cO0|Cg8F10lHneq",
+          "BCST": "ukqcXNp5trZ|U9YyhDQVdsC",
+          "BCLS": "ukqcXNp5trZ|HHWCv6AinWN",
+          "BCHS": "ukqcXNp5trZ|Cg8F10lHneq",
+          "BCPT": "NCyBGTtLyaO|U9YyhDQVdsC",
+          "BCLP": "NCyBGTtLyaO|HHWCv6AinWN",
+          "BCHP": "NCyBGTtLyaO|Cg8F10lHneq",
+          "BCCHT": "yGTElNkH5SC|U9YyhDQVdsC",
+          "BCLCH": "yGTElNkH5SC|HHWCv6AinWN",
+          "BCHCH": "yGTElNkH5SC|Cg8F10lHneq",
+          "LFTTBT": "VpzEzUYIa6r|FDrqcQzOXvJ",
+          "LFTLTB": "VpzEzUYIa6r|RJ9F5jep8hB",
+          "LFTHTB": "VpzEzUYIa6r|lJ3fHkAWQan",
+          "LFTASATT": "PigyudhPCXV|FDrqcQzOXvJ",
+          "LFTLASAT": "PigyudhPCXV|RJ9F5jep8hB",
+          "LFTHASAT": "PigyudhPCXV|lJ3fHkAWQan",
+          "LFTSGPTT": "VWJXDkBnEEm|FDrqcQzOXvJ",
+          "LFTLSGPT": "VWJXDkBnEEm|RJ9F5jep8hB",
+          "LFTHSGPT": "VWJXDkBnEEm|lJ3fHkAWQan",
+          "LFTSPT": "rU5cMrgKmBE|FDrqcQzOXvJ",
+          "LFTLSP": "rU5cMrgKmBE|RJ9F5jep8hB",
+          "LFTHSP": "rU5cMrgKmBE|lJ3fHkAWQan",
+          "LFTAT": "pNQJ9M9xNx8|FDrqcQzOXvJ",
+          "LFTLA": "pNQJ9M9xNx8|RJ9F5jep8hB",
+          "LFTHA": "pNQJ9M9xNx8|lJ3fHkAWQan",
+          "LFTAPT": "i1iC6ljROVv|FDrqcQzOXvJ",
+          "LFTLAP": "i1iC6ljROVv|RJ9F5jep8hB",
+          "LFTHAP": "i1iC6ljROVv|lJ3fHkAWQan",
+          "LPTTC": "h8JGqkfZhdM|rHLCPPneQpX",
+          "LPTLC": "h8JGqkfZhdM|wSecCSirxPQ",
+          "LFTHC": "h8JGqkfZhdM|oxyBXUiEeuf",
+          "LPTT": "c6JgpoTUQlb|rHLCPPneQpX",
+          "LPTLT": "c6JgpoTUQlb|wSecCSirxPQ",
+          "LPTHT": "c6JgpoTUQlb|oxyBXUiEeuf",
+          "LPTLDL": "vaxmIwzpNxN|rHLCPPneQpX",
+          "LPTLLDL": "vaxmIwzpNxN|wSecCSirxPQ",
+          "LPTHLDL": "vaxmIwzpNxN|oxyBXUiEeuf",
+          "HTTT3": "PZbYSEb0DSL|gfI4eY8AgRg",
+          "HTLT3": "PZbYSEb0DSL|aV67vC7vaWG",
+          "HTHT3": "PZbYSEb0DSL|nic5fvBq6ch",
+          "HTTT4": "uiYynGhddkQ|gfI4eY8AgRg",
+          "HTLT4": "uiYynGhddkQ|aV67vC7vaWG",
+          "HTHT4": "uiYynGhddkQ|nic5fvBq6ch",
+          "HTTTSH": "rq2LCTXdx1D|gfI4eY8AgRg",
+          "HTLTSH": "rq2LCTXdx1D|aV67vC7vaWG",
+          "HTHTSH": "rq2LCTXdx1D|nic5fvBq6ch",
+          "HTTPSA": "JXYfQy06HUP |NhSoXUMPK2K",
+          "HTHPSA": "Pdr2OZgYneN|NhSoXUMPK2K",
+          "TMTCEA": "b71H7hdDLYb|NhSoXUMPK2K",
+          "TMHCEA": "xdsfAzdjMrZ|NhSoXUMPK2K",
+          "CSFTP": "nfWKlvPsUzs|NhSoXUMPK2K",
+          "CSFLP": "Ilkm9Q9u2tw|NhSoXUMPK2K",
+          "CSFHP": "xeAupmsYdzn|NhSoXUMPK2K",
+          "CSFTG": "H1TzvJxEiP1|NhSoXUMPK2K",
+          "CSFLG": "AvQXdkPtFCD|NhSoXUMPK2K",
+          "CSFHG": "lNDA2TNOzNK|NhSoXUMPK2K"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 717",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "6"
+    },
+    "datasets": [
+      {
+        "name": "MOH717",
+        "dhisName": "cvyzaRp8OlE",
+        "fieldMappings": {
+          "General OP New (Male <5)": "F6AwnxbwiK2|wBWcFk7k1qY",
+          "General OP New (Female <5)": "Ha96SBKI06u|wBWcFk7k1qY",
+          "General OP New (Male 5-59)": "rIkD2jIDqPh|wBWcFk7k1qY",
+          "General OP New (Female 5-59)": "zXzBILTVJzD|wBWcFk7k1qY",
+          "General OP New (60+)": "ixNhGQrVorC|wBWcFk7k1qY",
+          "General OP RE-ATT (Male <5)": "F6AwnxbwiK2|K4WLOEhtcvC",
+          "General OP RE-ATT (Female <5)": "Ha96SBKI06u|K4WLOEhtcvC",
+          "General OP RE-ATT (Male 5-59)": "rIkD2jIDqPh|K4WLOEhtcvC",
+          "General OP RE-ATT (Female 5-59)": "zXzBILTVJzD|K4WLOEhtcvC",
+          "General OP RE-ATT (60+)": "ixNhGQrVorC|K4WLOEhtcvC",
+          "New CWC Visits": "EsfvxFcltV0|wBWcFk7k1qY",
+          "CWC RE-ATT": "EsfvxFcltV0|K4WLOEhtcvC",
+          "New ANC Visits": "uTQOSp7rx5h|wBWcFk7k1qY",
+          "ANC RE-ATT": "uTQOSp7rx5h|K4WLOEhtcvC",
+          "New PNC Visits": "QStt76mU06X|wBWcFk7k1qY",
+          "PNC RE-ATT": "QStt76mU06X|K4WLOEhtcvC",
+          "FP NEW": "SyUQl638r5P|wBWcFk7k1qY",
+          "FP RE-ATT": "SyUQl638r5P|K4WLOEhtcvC",
+          "Normal Deliveries": "jaPrPmor6WV|NhSoXUMPK2K",
+          "Caesarean sections": "rAZBTMa7Jy3|NhSoXUMPK2K",
+          "Breech Deliveries": "sMqM8DwiAaj|NhSoXUMPK2K",
+          "Assisted Vaginal Delivery": "Kx64gGqaFVq|NhSoXUMPK2K",
+          "Born before arrival": "Frn3kxlRk6r|NhSoXUMPK2K",
+          "Maternal deaths": "HTstlNrwDAH|NhSoXUMPK2K",
+          "Maternal deaths Audited": "kAp7ViUXEKh|NhSoXUMPK2K",
+          "Live births": "HNl64GqRCd5|NhSoXUMPK2K",
+          "Still births": "Ye28rnsRe3q|NhSoXUMPK2K",
+          "Neonatal deaths": "GAr6xu6f1n7|NhSoXUMPK2K",
+          "Low Birth weight babies": "syjjPqXbjTm|NhSoXUMPK2K",
+          "Total Discharges (new born)": "zVTIzkATPDS|NhSoXUMPK2K",
+          "Number of Laboratory tests": "fYuBN8sxV47|NhSoXUMPK2K",
+          "ENT Clinic (New)": "hAH08l33p9B|wBWcFk7k1qY",
+          "ENT Clinic (Re_Att)": "hAH08l33p9B|K4WLOEhtcvC",
+          "Eye Clinic (New)": "JGbmLfjZPEf|wBWcFk7k1qY",
+          "Eye Clinic (Re_Att)": "JGbmLfjZPEf|K4WLOEhtcvC",
+          "TB and Leprosy Clinic (New)": "WEW9Bjga52F|wBWcFk7k1qY",
+          "TB and Leprosy Clinic (Re_Att)": "WEW9Bjga52F|K4WLOEhtcvC",
+          "CCC Clinic (New)": "uD5QMzjrHw0|wBWcFk7k1qY",
+          "CCC Clinic (Re_Att)": "uD5QMzjrHw0|K4WLOEhtcvC",
+          "Psychiatry Clinic (New)": "DpR59HXC0jW|wBWcFk7k1qY",
+          "Psychiatry Clinic (Re_Att)": "DpR59HXC0jW|K4WLOEhtcvC",
+          "Orthopaedic Clinic (New)": "T22hPVk4yGZ|wBWcFk7k1qY",
+          "Orthopaedic Clinic (Re_Att)": "T22hPVk4yGZ|K4WLOEhtcvC",
+          "Occupational Therapy Clinic (New)": "OYSFd2DqOPN|wBWcFk7k1qY",
+          "Occupational Therapy Clinic (Re_Att)": "OYSFd2DqOPN|K4WLOEhtcvC",
+          "Physiotherapy Therapy Clinic (New)": "oZWvITIip2r|wBWcFk7k1qY",
+          "Physiotherapy Therapy Clinic (Re_Att)": "oZWvITIip2r|K4WLOEhtcvC",
+          "Medical Clinics (New)": "YyKbS5UrJlQ|wBWcFk7k1qY",
+          "Medical Clinics (Re_Att)": "YyKbS5UrJlQ|K4WLOEhtcvC",
+          "Surgical Clinics (New)": "Izvuj3rkju4|wBWcFk7k1qY",
+          "Surgical Clinics (Re_Att)": "Izvuj3rkju4|K4WLOEhtcvC",
+          "Paediatrics (New)": "aMKXyBh2GcE|wBWcFk7k1qY",
+          "Paediatrics (Re_Att)": "aMKXyBh2GcE|K4WLOEhtcvC",
+          "Obstetrics and Gynaecology (New)": "nqysBKopEhA|wBWcFk7k1qY",
+          "Obstetrics and Gynaecology (Re_Att)": "nqysBKopEhA|K4WLOEhtcvC",
+          "Nutrition Clinic (New)": "Pt64kYEr78h|wBWcFk7k1qY",
+          "Nutrition Clinic (Re_Att)": "Pt64kYEr78h|K4WLOEhtcvC",
+          "Oncology Clinic (New)": "zEn9tWUgR5P|wBWcFk7k1qY",
+          "Oncology Clinic (Re_Att)": "zEn9tWUgR5P|K4WLOEhtcvC",
+          "Renal Clinic (New)": "pSWtrq3aY9C|wBWcFk7k1qY",
+          "Renal Clinic (Re_Att)": "pSWtrq3aY9C|K4WLOEhtcvC",
+          "All other special Clinics (New)": "Dx3XYket0sf|wBWcFk7k1qY",
+          "All other special Clinics (Re_Att)": "Dx3XYket0sf|K4WLOEhtcvC",
+          "Dental Attendances (New)": "aq64ukEqs2N|wBWcFk7k1qY",
+          "Dental Attendances (RE_ATT)": "aq64ukEqs2N|K4WLOEhtcvC",
+          "Dental Fillings (New)": "d3jNYZueSmn|wBWcFk7k1qY",
+          "Dental Fillings (RE_ATT)": "d3jNYZueSmn|K4WLOEhtcvC",
+          "Dental Extractions (New)": "JQkE0bN9OTB|wBWcFk7k1qY",
+          "Dental Extractions (RE_ATT)": "JQkE0bN9OTB|K4WLOEhtcvC",
+          "Dressings": "yNeFQlrPflq|NhSoXUMPK2K",
+          "Removal of Stitches": "jQBxaAGqV08|NhSoXUMPK2K",
+          "Injections": "GuqtqOUKwch|NhSoXUMPK2K",
+          "Stitching": "NQAVJqp70md|NhSoXUMPK2K",
+          "Physiotherapy Treatments": "bfXM1LDDO0d|NhSoXUMPK2K",
+          "Occupational Therapy Treatments": "imIut2Er4rJ|NhSoXUMPK2K",
+          "Plain XRay without contrast enhancement": "K81uksQek8u|NhSoXUMPK2K",
+          "General ultrasound": "fSdVBnJlDCZ|NhSoXUMPK2K",
+          "Contrast enhanced examinations": "ldTL0RNg8yu|NhSoXUMPK2K",
+          "Magnetic Resonance Imaging": "IutTZQTJFGz|NhSoXUMPK2K",
+          "Computerized Tomography": "CzIHu2uh7vd|NhSoXUMPK2K",
+          "Mammography": "AMsHNDkRKtW|NhSoXUMPK2K",
+          "Obstetric ultrasound": "lVI2lnYz30Q|NhSoXUMPK2K",
+          "Casts Fixed (New Under 5)": "hrizXiyGvom|XqYKLDmJa1F",
+          "Casts Fixed (New 5+)": "hrizXiyGvom|zze22Ci7XyD",
+          "Casts Fixed (Revisit Under 5)": "hrizXiyGvom|E3MYSf8AAV6",
+          "Casts Fixed (Revisit 5+)": "hrizXiyGvom|KIEJMY4crnt",
+          "Tractions Fixed (New Under 5)": "uybnpBUS3np|XqYKLDmJa1F",
+          "Tractions Fixed (New 5+)": "uybnpBUS3np|zze22Ci7XyD",
+          "Closed Reductions (New Under 5)": "uOC56DfVqib|XqYKLDmJa1F",
+          "Closed Reductions (New 5+)": "uOC56DfVqib|zze22Ci7XyD",
+          "Closed Reductions (Revisit Under 5)": "uOC56DfVqib|E3MYSf8AAV6",
+          "Closed Reductions (Revisit 5+)": "uOC56DfVqib|KIEJMY4crnt",
+          "Cast Removal (Under 5)": "Kg9hiOXlIKg|lHl2rmXpHse",
+          "Cast Removal (5+)": "Kg9hiOXlIKg|SeDaCnHi3m5",
+          "Tractions Removal (Under 5)": "TMZfrOY1OJG|lHl2rmXpHse",
+          "Tractions Removal (5+)": "TMZfrOY1OJG|SeDaCnHi3m5",
+          "Ex Fixator Removal (5+)": "Gjn4bEoaFZK|SeDaCnHi3m5",
+          "Discharges (Medical)": "o6RJFSXIelv|Lj5arkL7GL8",
+          "Discharges (Surgical)": "o6RJFSXIelv|KFmqREu0VSL",
+          "Discharges (Obst And Gyn)": "o6RJFSXIelv|rYfAgBnJKnj",
+          "Discharges (Paediatrics)": "o6RJFSXIelv|ObiJr399QRt",
+          "Discharges (Maternity)": "o6RJFSXIelv|bPNw3Km3Ug7",
+          "Discharges (Eye)": "o6RJFSXIelv|oJ6IUNugflo",
+          "Discharges (Nursery And Newborn)": "o6RJFSXIelv|vr2WcWaojbO",
+          "Discharges (Orthopaedic)": "o6RJFSXIelv|B0ji6ZY2zJ3",
+          "Discharges (Isolation)": "o6RJFSXIelv|szjWdpjHTDe",
+          "Discharges (Amenity)": "o6RJFSXIelv|JUI7tesx6as",
+          "Discharges (Psychiatry)": "o6RJFSXIelv|O68sxX0pJMT",
+          "Discharges (ICU)": "o6RJFSXIelv|tMEFFDHQCAW",
+          "Discharges (Renal)": "o6RJFSXIelv|R99ctw9w6Kt",
+          "Discharges (Other Wards)": "o6RJFSXIelv|Qy5yADe3SiB",
+          "Deaths (Medical)": "JbfEjiVnE6z|Lj5arkL7GL8",
+          "Deaths (Surgical)": "JbfEjiVnE6z|KFmqREu0VSL",
+          "Deaths (Obst And Gyn)": "JbfEjiVnE6z|rYfAgBnJKnj",
+          "Deaths (Paediatrics)": "JbfEjiVnE6z|ObiJr399QRt",
+          "Deaths (Maternity)": "JbfEjiVnE6z|bPNw3Km3Ug7",
+          "Deaths (Eye)": "JbfEjiVnE6z|oJ6IUNugflo",
+          "Deaths (Nursery And Newborn)": "JbfEjiVnE6z|vr2WcWaojbO",
+          "Deaths (Orthopaedic)": "JbfEjiVnE6z|B0ji6ZY2zJ3",
+          "Deaths (Isolation)": "JbfEjiVnE6z|szjWdpjHTDe",
+          "Deaths (Amenity)": "JbfEjiVnE6z|JUI7tesx6as",
+          "Deaths (Psychiatry)": "JbfEjiVnE6z|O68sxX0pJMT",
+          "Deaths (ICU)": "JbfEjiVnE6z|tMEFFDHQCAW",
+          "Deaths (Renal)": "JbfEjiVnE6z|R99ctw9w6Kt",
+          "Deaths (Other Wards)": "JbfEjiVnE6z|Qy5yADe3SiB",
+          "Abscondees (Medical)": "GM77KVNoX6u|Lj5arkL7GL8",
+          "Abscondees (Surgical)": "GM77KVNoX6u|KFmqREu0VSL",
+          "Abscondees (Obst And Gyn)": "GM77KVNoX6u|rYfAgBnJKnj",
+          "Abscondees (Paediatrics)": "GM77KVNoX6u|ObiJr399QRt",
+          "Abscondees (Maternity)": "GM77KVNoX6u|bPNw3Km3Ug7",
+          "Abscondees (Eye)": "GM77KVNoX6u|oJ6IUNugflo",
+          "Abscondees (Nursery And Newborn)": "GM77KVNoX6u|vr2WcWaojbO",
+          "Abscondees (Orthopaedic)": "GM77KVNoX6u|B0ji6ZY2zJ3",
+          "Abscondees (Isolation)": "GM77KVNoX6u|szjWdpjHTDe",
+          "Abscondees (Amenity)": "GM77KVNoX6u|JUI7tesx6as",
+          "Abscondees (Psychiatry)": "GM77KVNoX6u|O68sxX0pJMT",
+          "Abscondees (ICU)": "GM77KVNoX6u|tMEFFDHQCAW",
+          "Abscondees (Renal)": "GM77KVNoX6u|R99ctw9w6Kt",
+          "Abscondees (Other Wards)": "GM77KVNoX6u|Qy5yADe3SiB",
+          "Referrals Out of the Facility (Medical)": "qkpKYng8Omx|Lj5arkL7GL8",
+          "Referrals Out of the Facility (Surgical)": "qkpKYng8Omx|KFmqREu0VSL",
+          "Referrals Out of the Facility (Obst And Gyn)": "qkpKYng8Omx|rYfAgBnJKnj",
+          "Referrals Out of the Facility (Paediatrics)": "qkpKYng8Omx|ObiJr399QRt",
+          "Referrals Out of the Facility (Maternity)": "qkpKYng8Omx|bPNw3Km3Ug7",
+          "Referrals Out of the Facility (Eye)": "qkpKYng8Omx|oJ6IUNugflo",
+          "Referrals Out of the Facility (Nursery And Newborn)": "qkpKYng8Omx|vr2WcWaojbO",
+          "Referrals Out of the Facility (Orthopaedic)": "qkpKYng8Omx|B0ji6ZY2zJ3",
+          "Referrals Out of the Facility (Isolation)": "qkpKYng8Omx|szjWdpjHTDe",
+          "Referrals Out of the Facility (Amenity)": "qkpKYng8Omx|JUI7tesx6as",
+          "Referrals Out of the Facility (Psychiatry)": "qkpKYng8Omx|O68sxX0pJMT",
+          "Referrals Out of the Facility (ICU)": "qkpKYng8Omx|tMEFFDHQCAW",
+          "Referrals Out of the Facility (Renal)": "qkpKYng8Omx|R99ctw9w6Kt",
+          "Referrals Out of the Facility (Other Wards)": "qkpKYng8Omx|Qy5yADe3SiB",
+          "Admissions (Medical Under 5)": "cvJuw6Fbuiw|Lj5arkL7GL8",
+          "Admissions (Medical 5+)": "r7LJ3kCX8EZ|Lj5arkL7GL8",
+          "Admissions (Surgical Under 5)": "cvJuw6Fbuiw|KFmqREu0VSL",
+          "Admissions (Surgical 5+)": "r7LJ3kCX8EZ|KFmqREu0VSL",
+          "Admissions (Obst And Gyn Under 5)": "cvJuw6Fbuiw|rYfAgBnJKnj",
+          "Admissions (Obst And Gyn 5+)": "r7LJ3kCX8EZ|rYfAgBnJKnj",
+          "Admissions (Paediatrics Under 5)": "cvJuw6Fbuiw|ObiJr399QRt",
+          "Admissions (Paediatrics 5+)": "r7LJ3kCX8EZ|ObiJr399QRt",
+          "Admissions (Maternity Under 5)": "cvJuw6Fbuiw|bPNw3Km3Ug7",
+          "Admissions (Maternity 5+)": "r7LJ3kCX8EZ|bPNw3Km3Ug7",
+          "Admissions (Eye Under 5)": "cvJuw6Fbuiw|oJ6IUNugflo",
+          "Admissions (Eye 5+)": "r7LJ3kCX8EZ|oJ6IUNugflo",
+          "Admissions (Nursery And Newborn Under 5)": "cvJuw6Fbuiw|vr2WcWaojbO",
+          "Admissions (Nursery And Newborn 5+)": "r7LJ3kCX8EZ|vr2WcWaojbO",
+          "Admissions (Orthopaedic Under 5)": "cvJuw6Fbuiw|B0ji6ZY2zJ3",
+          "Admissions (Orthopaedic 5+)": "r7LJ3kCX8EZ|B0ji6ZY2zJ3",
+          "Admissions (Isolation Under 5)": "cvJuw6Fbuiw|szjWdpjHTDe",
+          "Admissions (Isolation 5+)": "r7LJ3kCX8EZ|szjWdpjHTDe",
+          "Admissions (Amenity Under 5)": "cvJuw6Fbuiw|JUI7tesx6as",
+          "Admissions (Amenity 5+)": "r7LJ3kCX8EZ|JUI7tesx6as",
+          "Admissions (Psychiatry Under 5)": "cvJuw6Fbuiw|O68sxX0pJMT",
+          "Admissions (Psychiatry 5+)": "r7LJ3kCX8EZ|O68sxX0pJMT",
+          "Admissions (ICU Under 5)": "cvJuw6Fbuiw|tMEFFDHQCAW",
+          "Admissions (ICU 5+)": "r7LJ3kCX8EZ|tMEFFDHQCAW",
+          "Admissions (Renal Under 5)": "cvJuw6Fbuiw|R99ctw9w6Kt",
+          "Admissions (Renal 5+)": "r7LJ3kCX8EZ|R99ctw9w6Kt",
+          "Admissions (Other Wards Under 5)": "cvJuw6Fbuiw|Qy5yADe3SiB",
+          "Admissions (Other Wards 5+)": "r7LJ3kCX8EZ|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "AmountWaived",
+        "dhisName": "S1DtMS1kOlW",
+        "fieldMappings": {
+          "total_waived": "S1DtMS1kOlW|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "AmountExempted",
+        "dhisName": "X3VvPqb5wcb",
+        "fieldMappings": {
+          "total_exempted": "X3VvPqb5wcb|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "AmountCollected",
+        "dhisName": "ATyGBKX8Iuj",
+        "fieldMappings": {
+          "total_amount_collected": "ATyGBKX8Iuj|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "AmountReceived",
+        "dhisName": "xjDJo33huyl",
+        "fieldMappings": {
+          "total_amount_received": "xjDJo33huyl|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "clientsWaived",
+        "dhisName": "F9Jckipi2Fk",
+        "fieldMappings": {
+          "clients_waived": "F9Jckipi2Fk|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "clientsExempted",
+        "dhisName": "xl82xjM38Fn",
+        "fieldMappings": {
+          "clients_exempted": "xl82xjM38Fn|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Paediatrics Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Maternity Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Psychiatry Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Eye Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Surgical Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Amenity Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Medical Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Renal Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Orthopaedic Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Isolation Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Nursery And Newborn Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (ICU Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Other Wards)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Occupied Bed Days SHA Members And other Insurers (Obst And Gyn Ward)",
+        "dhisName": "R6Z03VUZ0YU",
+        "fieldMappings": {
+          "occupied_bed_days": "R6Z03VUZ0YU|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Paediatrics Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Maternity Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Psychiatry Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Eye Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Surgical Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Amenity Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Medical Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Renal Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Orthopaedic Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Isolation Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Nursery And Newborn Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (ICU Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Other Wards)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Occupied Bed Days Cash (Obst And Gyn Ward)",
+        "dhisName": "KeluwzeRirR",
+        "fieldMappings": {
+          "occupied_bed_days": "KeluwzeRirR|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Authorized Beds (Paediatrics Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Authorized Beds (Maternity Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Authorized Beds (Psychiatry Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Authorized Beds (Eye Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Authorized Beds (Surgical Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Authorized Beds (Amenity Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Authorized Beds (Medical Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Authorized Beds (Renal Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Authorized Beds (Orthopaedic Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Authorized Beds (Isolation Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Authorized Beds (Nursery And Newborn Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Authorized Beds (ICU Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Authorized Beds (Other Wards)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Authorized Beds (Obst And Gyn Ward)",
+        "dhisName": "nyP99EFVQ4O",
+        "fieldMappings": {
+          "authorized_beds": "nyP99EFVQ4O|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Authorized Cots (Paediatrics Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Authorized Cots (Maternity Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Authorized Cots (Psychiatry Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Authorized Cots (Eye Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Authorized Cots (Surgical Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Authorized Cots (Amenity Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Authorized Cots (Medical Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Authorized Cots (Renal Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Authorized Cots (Orthopaedic Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Authorized Cots (Isolation Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Authorized Cots (Nursery And Newborn Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Authorized Cots (ICU Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Authorized Cots (Other Wards)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Authorized Cots (Obst And Gyn Ward)",
+        "dhisName": "llz3RvgtwIO",
+        "fieldMappings": {
+          "authorized_beds": "llz3RvgtwIO|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Paediatrics Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Maternity Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "clientsExempted": "razMxh2OV13|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Psychiatry Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Eye Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Surgical Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Amenity Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Medical Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Renal Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Orthopaedic Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Isolation Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Nursery And Newborn Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Authorized Incubators (ICU Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Other Wards)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Authorized Incubators (Obst And Gyn Ward)",
+        "dhisName": "razMxh2OV13",
+        "fieldMappings": {
+          "authorized_beds": "razMxh2OV13|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Actual Beds (Paediatrics Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Actual Beds (Maternity Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Actual Beds (Psychiatry Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Actual Beds (Eye Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Actual Beds (Surgical Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Actual Beds (Amenity Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Actual Beds (Medical Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Actual Beds (Renal Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Actual Beds (Orthopaedic Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Actual Beds (Isolation Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Actual Beds (Nursery And Newborn Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Actual Beds (ICU Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Actual Beds (Other Wards)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Actual Beds (Obst And Gyn Ward)",
+        "dhisName": "K3i0LumP9MU",
+        "fieldMappings": {
+          "number_of_beds": "K3i0LumP9MU|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Actual Cots (Paediatrics Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Actual Cots (Maternity Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Actual Cots (Psychiatry Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Actual Cots (Eye Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Actual Cots (Surgical Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Actual Cots (Amenity Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "clientsExempted": "Q9bZ7fvL0c3|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Actual Cots (Medical Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Actual Cots (Renal Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Actual Cots (Orthopaedic Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Actual Cots (Isolation Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Actual Cots (Nursery And Newborn Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Actual Cots (ICU Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Actual Cots (Other Wards)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Actual Cots (Obst And Gyn Ward)",
+        "dhisName": "Q9bZ7fvL0c3",
+        "fieldMappings": {
+          "number_of_beds": "Q9bZ7fvL0c3|rYfAgBnJKnj"
+        }
+      },
+      {
+        "name": "Actual Incubators (Paediatrics Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|ObiJr399QRt"
+        }
+      },
+      {
+        "name": "Actual Incubators (Maternity Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|bPNw3Km3Ug7"
+        }
+      },
+      {
+        "name": "Actual Incubators (Psychiatry Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|O68sxX0pJMT"
+        }
+      },
+      {
+        "name": "Actual Incubators (Eye Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|oJ6IUNugflo"
+        }
+      },
+      {
+        "name": "Actual Incubators (Surgical Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|KFmqREu0VSL"
+        }
+      },
+      {
+        "name": "Actual Incubators (Amenity Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|JUI7tesx6as"
+        }
+      },
+      {
+        "name": "Actual Incubators (Medical Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|Lj5arkL7GL8"
+        }
+      },
+      {
+        "name": "Actual Incubators (Renal Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|R99ctw9w6Kt"
+        }
+      },
+      {
+        "name": "Actual Incubators (Orthopaedic Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|B0ji6ZY2zJ3"
+        }
+      },
+      {
+        "name": "Actual Incubators (Isolation Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|szjWdpjHTDe"
+        }
+      },
+      {
+        "name": "Actual Incubators (Nursery And Newborn Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|vr2WcWaojbO"
+        }
+      },
+      {
+        "name": "Actual Incubators (ICU Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|tMEFFDHQCAW"
+        }
+      },
+      {
+        "name": "Actual Incubators (Other Wards)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|Qy5yADe3SiB"
+        }
+      },
+      {
+        "name": "Actual Incubators (Obst And Gyn Ward)",
+        "dhisName": "XAROKFzWP9C",
+        "fieldMappings": {
+          "number_of_beds": "XAROKFzWP9C|rYfAgBnJKnj"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 711",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "7"
+    },
+    "datasets": [
+      {
+        "name": "ANC_PMTCT",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "New ANC Clients": "f9vesk5d4IY|NhSoXUMPK2K",
+          "Revisiting ANC Clients": "hxXwYIgT8rI|NhSoXUMPK2K",
+          "Clients given IPT (1st dose)": "gAKCshSgSH3|NhSoXUMPK2K",
+          "Clients given IPT (2nd dose)": "EHGBrVPiG3N|NhSoXUMPK2K",
+          "Clients given IPT (3rd dose)": "N931F2wuVVO|NhSoXUMPK2K",
+          "Clients with Hb less than 11 g per dl": "T59McmnP4FJ|NhSoXUMPK2K",
+          "Clients with 1st ANC Contact within 12 weeks": "etbuJ3chcZL|NhSoXUMPK2K",
+          "Clients completed 4 Antenatal Visits": "Fz0LzxMT1vV|NhSoXUMPK2K",
+          "Clients completed 8 Antenatal Visits": "cKr5133RFuN|NhSoXUMPK2K",
+          "LLINs distributed to under 1 year": "adV5ma0IRHU|NhSoXUMPK2K",
+          "LLINs distributed to ANC clients": "eIvn8VgI5Zx|NhSoXUMPK2K",
+          "Clients tested for Syphilis": "uvBuzBj0AbL|NhSoXUMPK2K",
+          "Clients tested Positive for Syphilis": "zIiDTYhg8K5|NhSoXUMPK2K",
+          "Total women done breast examination": "COXeamXMWPL|NhSoXUMPK2K",
+          "ANC1-01": "chMsCa5zcn7|NhSoXUMPK2K",
+          "ANC1-02": "uHBmKxktYk0|NhSoXUMPK2K",
+          "ANC1-03": "T6B5TXBX3Mj|NhSoXUMPK2K",
+          "Women presenting with pregnancy at 1ST ANC in the First Trimeseter(<= 12 Weeks)": "etbuJ3chcZL|NhSoXUMPK2K",
+          "Clients issued with Iron": "QgjmGMoIcGu|NhSoXUMPK2K",
+          "Clients issued with Folic": "JbcvbCEBnu6|NhSoXUMPK2K",
+          "Clients issued with Combined Ferrous Folate": "NTLdyLadTk1|NhSoXUMPK2K",
+          "Pregnant women presenting in ANC FGM complications": "Xs5zGg7dxVb|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "CACX-SCREENING",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "CACX_VIA_VILI_HPV-01": "G9COyloYLYa|qWama2bwQZR",
+          "CACX_VIA_VILI_HPV-02": "G9COyloYLYa|FqagtL5h8ni",
+          "CACX_VIA_VILI_HPV-03": "G9COyloYLYa|o5wFoYOOApk",
+          "CACX_Pap_Smear-01": "kl4RvWOGb7x|qWama2bwQZR",
+          "CACX_Pap_Smear-02": "kl4RvWOGb7x|FqagtL5h8ni",
+          "CACX_Pap_Smear-03": "kl4RvWOGb7x|o5wFoYOOApk",
+          "CACX_HPV-01": "ommbnTANmGo|qWama2bwQZR",
+          "CACX_HPV-02": "ommbnTANmGo|FqagtL5h8ni",
+          "CACX_HPV-03": "ommbnTANmGo|o5wFoYOOApk",
+          "VIA_VILI-01": "dBdw7Inlq2C|qWama2bwQZR",
+          "VIA_VILI-02": "dBdw7Inlq2C|FqagtL5h8ni",
+          "VIA_VILI-03": "dBdw7Inlq2C|o5wFoYOOApk",
+          "Pap_Smear-01": "|",
+          "Pap_Smear-02": "|",
+          "Pap_Smear-03": "|",
+          "HPV-01": "LI2g0vO0xvx|qWama2bwQZR",
+          "HPV-02": "LI2g0vO0xvx|FqagtL5h8ni",
+          "HPV-03": "LI2g0vO0xvx|o5wFoYOOApk",
+          "Suspicious_CACX_Lessions-01": "FC5BbFDsdCa|qWama2bwQZR",
+          "Suspicious_CACX_Lessions-02": "FC5BbFDsdCa|FqagtL5h8ni",
+          "Suspicious_CACX_Lessions-03": "FC5BbFDsdCa|o5wFoYOOApk",
+          "Cryotherapy-01": "UAbmyzuI2UE|qWama2bwQZR",
+          "Cryotherapy-02": "UAbmyzuI2UE|FqagtL5h8ni",
+          "Cryotherapy-03": "UAbmyzuI2UE|o5wFoYOOApk",
+          "LEEP-01": "TSlyElHZw9d|qWama2bwQZR",
+          "LEEP-02": "TSlyElHZw9d|FqagtL5h8ni",
+          "LEEP-03": "TSlyElHZw9d|o5wFoYOOApk",
+          "HIV+_CACX_Screened-01": "n8Z1XFaeS1t|qWama2bwQZR",
+          "HIV+_CACX_Screened-02": "n8Z1XFaeS1t|FqagtL5h8ni",
+          "HIV+_CACX_Screened-03": "n8Z1XFaeS1t|o5wFoYOOApk",
+          "Screened_for_Breast_Cancer-01": "eYQF9fhuQS7|esaCR2o7mbC",
+          "Screened_for_Breast_Cancer-02": "eYQF9fhuQS7|XdJoea4cHHA",
+          "Screened_for_Breast_Cancer-03": "eYQF9fhuQS7|FL2Kwslx3EH",
+          "Screened_for_Colorectal_Cancer-01": "fcXsGgoEAoG|PKCjvGFqrxI",
+          "Screened_for_Colorectal_Cancer-02": "fcXsGgoEAoG|E13xbxLFXbN"
+        }
+      },
+      {
+        "name": "PNC",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "New PNC Clients": "Gw8C0uUQade|NhSoXUMPK2K",
+          "Revisiting PNC Clients": "pp5FTNgUXmf|NhSoXUMPK2K",
+          "Mothers received PostParturm care within 48 hrs": "qahRo2120r8|NhSoXUMPK2K",
+          "Mothers received PostParturm care btw 3 days and 6 weeks": "Lp9qb2iKLMJ|NhSoXUMPK2K",
+          "Mothers received PostParturm care after 6 weeks": "vA361bfq3S8|NhSoXUMPK2K",
+          "Mothers counselled PostParturm FP": "pCzJoIz7rCZ|NhSoXUMPK2K",
+          "Mothers received PostParturm FP": "vwswA8HF4ce|NhSoXUMPK2K",
+          "Babies received PostParturm care within 48 hrs": "wxg6cuH9cXF|NhSoXUMPK2K",
+          "Babies received PostParturm care btw 3 days and 6 weeks": "VT8eVxvtphF|NhSoXUMPK2K",
+          "Babies received PostParturm care after 6 weeks": "mdNncoz3lFe|NhSoXUMPK2K",
+          "Number of Cases of Fistula": "PxhvYOS2emu|NhSoXUMPK2K",
+          "No Referred from the community unit for PNC": "itfA1doKHSL|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "Maternity_Newborn",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "Normal Deliveries": "jaPrPmor6WV|NhSoXUMPK2K",
+          "Caesarean Sections": "rAZBTMa7Jy3|NhSoXUMPK2K",
+          "Breech Delivery": "sMqM8DwiAaj|NhSoXUMPK2K",
+          "Assisted Vaginal Deliveries (Vacuum Extraction)": "Kx64gGqaFVq|NhSoXUMPK2K",
+          "Number of Mothers given uterotonics-oxytocin": "gu6nc27W456|NhSoXUMPK2K",
+          "Number of Mothers given uterotonics-carbatosin": "hHQtzb7pwK7|NhSoXUMPK2K",
+          "Live Births": "UqKC1DJnymn|NhSoXUMPK2K",
+          "Low birth weight Babies (below 2500 grams)": "syjjPqXbjTm|NhSoXUMPK2K",
+          "Births with deformities": "bVuDPMufEyv|NhSoXUMPK2K",
+          "Neonates given Vit K": "HccwgsIZjnN|NhSoXUMPK2K",
+          "Babies applied chlorhexidine": "bPpRMDzpXXN|NhSoXUMPK2K",
+          "Infants initiated on Kangaroo Mother Care": "AxqwEdpy6AH|NhSoXUMPK2K",
+          "Babies given tetracycline at birth": "xCFQ0pftS2u|NhSoXUMPK2K",
+          "Pre-Term babies": "Hh4daYAcb49|NhSoXUMPK2K",
+          "Babies discharged alive": "zVTIzkATPDS|NhSoXUMPK2K",
+          "Infants initiated on breastfeeding within 1 hour after birth": "UiGlnkNmCut|NhSoXUMPK2K",
+          "Total Deliveries from HIV+ mother": "KuMX8VqCejs|NhSoXUMPK2K",
+          "Perinatal Deaths (Fresh still birth)": "rYn8RCcHJg1|NhSoXUMPK2K",
+          "Perinatal Deaths(Macerated still birth)": "wZtDYVBa41h|NhSoXUMPK2K",
+          "Perinatal Deaths 0 to 7 days": "Sw2AEIBtrFz|NhSoXUMPK2K",
+          "Neonatal Deaths": "GAr6xu6f1n7|NhSoXUMPK2K",
+          "Maternal deaths-01": "KDFtI6rqYwI|NhSoXUMPK2K",
+          "Maternal deaths-02": "BYMSIbnUzXQ|NhSoXUMPK2K",
+          "Maternal deaths-03": "AC1Iorxdijc|NhSoXUMPK2K",
+          "Maternal deaths-04": "dPRCstLVkZu|NhSoXUMPK2K",
+          "Maternal deaths audited within 7 days": "kAp7ViUXEKh|NhSoXUMPK2K",
+          "Ante Partum Haemorrhage(APH) Alive": "JzM8Q9sIc9i|fSBuHxtTRsq",
+          "Ante Partum Haemorrhage(APH) Dead": "JzM8Q9sIc9i|rPmrwiK4go8",
+          "Post Partum Haemorrhage(PPH) Alive": "xAAEwRrU8EH|fSBuHxtTRsq",
+          "Post Partum Haemorrhage(PPH) Dead": "xAAEwRrU8EH|rPmrwiK4go8",
+          "Eclampsia Alive": "d4KC4RIwpKH|fSBuHxtTRsq",
+          "Eclampsia Dead": "d4KC4RIwpKH|rPmrwiK4go8",
+          "Ruptured Uterus Alive": "jF2Uk71SaYC|fSBuHxtTRsq",
+          "Ruptured Uterus Dead": "jF2Uk71SaYC|rPmrwiK4go8",
+          "Obstructed Labour Alive": "FwsTJpdxT4C|fSBuHxtTRsq",
+          "Obstructed Labour Dead": "FwsTJpdxT4C|rPmrwiK4go8",
+          "Sepsis Alive": "qrTk1w6Y5Bk|fSBuHxtTRsq",
+          "Sepsis Dead": "qrTk1w6Y5Bk|rPmrwiK4go8"
+        }
+      },
+      {
+        "name": "Child_Health_Nutrition",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "Normal_Weight_for_Age-01": "twpy25QKLk9|a57uWFr3dUy",
+          "Normal_Weight_for_Age-02": "twpy25QKLk9|MJAGUpeHkpn",
+          "Normal_Weight_for_Age-03": "ikI4r8YuZZ0|a57uWFr3dUy",
+          "Normal_Weight_for_Age-04": "ikI4r8YuZZ0|MJAGUpeHkpn",
+          "Normal_Weight_for_Age-05": "qoEPwxCNrll|a57uWFr3dUy",
+          "Normal_Weight_for_Age-06": "qoEPwxCNrll|MJAGUpeHkpn",
+          "Underweight-01": "AIduSzrilaz|a57uWFr3dUy",
+          "Underweight-02": "AIduSzrilaz|MJAGUpeHkpn",
+          "Underweight-03": "uYBa6RU8wUZ|a57uWFr3dUy",
+          "Underweight-04": "uYBa6RU8wUZ|MJAGUpeHkpn",
+          "Underweight-05": "AYT1IPxFRZx|a57uWFr3dUy",
+          "Underweight-06": "AYT1IPxFRZx|MJAGUpeHkpn",
+          "Severe_Underweight-01": "ENjll6PbaI8|a57uWFr3dUy",
+          "Severe_Underweight-02": "ENjll6PbaI8|MJAGUpeHkpn",
+          "Severe_Underweight-03": "Ype6qUApdlR|a57uWFr3dUy",
+          "Severe_Underweight-04": "Ype6qUApdlR|MJAGUpeHkpn",
+          "Severe_Underweight-05": "HlZXTFN2B61|a57uWFr3dUy",
+          "Severe_Underweight-06": "HlZXTFN2B61|MJAGUpeHkpn",
+          "Overweight-01": "QCNHvzgxurQ|a57uWFr3dUy",
+          "Overweight-02": "QCNHvzgxurQ|MJAGUpeHkpn",
+          "Overweight-03": "k3xX4NKJaaY|a57uWFr3dUy",
+          "Overweight-04": "k3xX4NKJaaY|MJAGUpeHkpn",
+          "Overweight-05": "mv0ICssqScK|a57uWFr3dUy",
+          "Overweight-06": "mv0ICssqScK|MJAGUpeHkpn",
+          "Obese-01": "lvyOQjZaXZ3|a57uWFr3dUy",
+          "Obese-02": "lvyOQjZaXZ3|MJAGUpeHkpn",
+          "Obese-03": "PW4W1Fa7b5b|a57uWFr3dUy",
+          "Obese-04": "PW4W1Fa7b5b|MJAGUpeHkpn",
+          "Obese-05": "zels3jARvGQ|a57uWFr3dUy",
+          "Obese-06": "zels3jARvGQ|MJAGUpeHkpn",
+          "MUAC_Normal(Green)-01": "BZbUjXynxfr |MJAGUpeHkpn",
+          "MUAC_Normal(Green)-02": "BZbUjXynxfr |a57uWFr3dUy",
+          "MUAC_Moderate(Yellow)-01": "i2eE15DhmMB |MJAGUpeHkpn ",
+          "MUAC_Moderate(Yellow)-02": "i2eE15DhmMB |a57uWFr3dUy ",
+          "MUAC_Severe(Red)-01": "sTjfhcH5iXK |MJAGUpeHkpn ",
+          "MUAC_Severe(Red)-02": "sTjfhcH5iXK |a57uWFr3dUy ",
+          "Stunted-01": "RPzVMvOLClz|a57uWFr3dUy",
+          "Stunted-02": "RPzVMvOLClz|MJAGUpeHkpn",
+          "New_Enrollment-01": "YvAmz4L0a1d|MJAGUpeHkpn",
+          "New_Enrollment-02": "YvAmz4L0a1d|a57uWFr3dUy",
+          "Followup_type_Kwashiorkor-01": "TkwjrwghYVF|MJAGUpeHkpn",
+          "Followup_type_Kwashiorkor-02": "TkwjrwghYVF|a57uWFr3dUy",
+          "Followup_type_Marasmus-01": "IV9vOoO4Mo4|MJAGUpeHkpn",
+          "Followup_type_Marasmus-02": "IV9vOoO4Mo4|a57uWFr3dUy",
+          "Exclusive_breast_feeding-01": "QUueF25THDC|a57uWFr3dUy",
+          "Exclusive_breast_feeding-02": "QUueF25THDC|MJAGUpeHkpn",
+          "Dewormed-01": "NXl959cFhDr|MJAGUpeHkpn",
+          "Dewormed-02": "NXl959cFhDr|a57uWFr3dUy",
+          "MNPs_Supplementation-01": "z3kr3nMK3RI|MJAGUpeHkpn",
+          "MNPs_Supplementation-02": "z3kr3nMK3RI|a57uWFr3dUy",
+          "Child Mortality-01": "BA4dSFQINJq|a57uWFr3dUy",
+          "Child Mortality-02": "BA4dSFQINJq|MJAGUpeHkpn",
+          "Children_With_Disability_Any_Form-01": "vjarDji33iQ|a57uWFr3dUy",
+          "Children_With_Disability_Any_Form-02": "vjarDji33iQ|MJAGUpeHkpn",
+          "Children_with_delayed_developmental_milestones-01": "PfepqFEnOTP|a57uWFr3dUy",
+          "Children_with_delayed_developmental_milestones-02": "PfepqFEnOTP|MJAGUpeHkpn"
+        }
+      },
+      {
+        "name": "TB_Screening",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "Total Number of people screened": "YeTvzQAPnJr|NhSoXUMPK2K",
+          "Total Number of presumptive TB cases": "vO2j8iioGgD|NhSoXUMPK2K",
+          "Total Number already on TB treatment": "AB8xR1lzEIv|NhSoXUMPK2K",
+          "Total Number of people not screened": "yzeN0tCrun2|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "SGBV",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "Total SGBV survivors-01": "AC54kgHb6gP|GY3d7gUKxBW",
+          "Total SGBV survivors-02": "AC54kgHb6gP|d0OuDX2lHIV",
+          "Total SGBV survivors-03": "AC54kgHb6gP|HO0EhCMnB2t",
+          "Total SGBV survivors-04": "AC54kgHb6gP|c5Xrqf6h3I5",
+          "Number of SGBV survivors presenting within 72 hrs-01": "bmEuZWOFtH6|GY3d7gUKxBW",
+          "Number of SGBV survivors presenting within 72 hrs-02": "bmEuZWOFtH6|d0OuDX2lHIV",
+          "Number of SGBV survivors presenting within 72 hrs-03": "bmEuZWOFtH6|HO0EhCMnB2t",
+          "Number of SGBV survivors presenting within 72 hrs-04": "bmEuZWOFtH6|c5Xrqf6h3I5",
+          "Number of eligible SGBV survivors initiating PEP-01": "OPgVWhBBpmS|GY3d7gUKxBW",
+          "Number of eligible SGBV survivors initiating PEP-02": "OPgVWhBBpmS|d0OuDX2lHIV",
+          "Number of eligible SGBV survivors initiating PEP-03": "OPgVWhBBpmS|HO0EhCMnB2t",
+          "Number of eligible SGBV survivors initiating PEP-04": "OPgVWhBBpmS|c5Xrqf6h3I5",
+          "Number of eligible SGBV survivors completed PEP-01": "KJrta8tjcOZ|GY3d7gUKxBW",
+          "Number of eligible SGBV survivors completed PEP-02": "KJrta8tjcOZ|d0OuDX2lHIV",
+          "Number of eligible SGBV survivors completed PEP-03": "KJrta8tjcOZ|HO0EhCMnB2t",
+          "Number of eligible SGBV survivors completed PEP-04": "KJrta8tjcOZ|c5Xrqf6h3I5",
+          "Number of SGBV survivors seroconverting 3 months after exposure-01": "EvGD68D5qPZ |GY3d7gUKxBW ",
+          "Number of SGBV survivors seroconverting 3 months after exposure-02": "EvGD68D5qPZ |d0OuDX2lHIV ",
+          "Number of SGBV survivors seroconverting 3 months after exposure-03": "EvGD68D5qPZ |HO0EhCMnB2t ",
+          "Number of SGBV survivors seroconverting 3 months after exposure-04": "EvGD68D5qPZ |c5Xrqf6h3I5 ",
+          "Number of SGBV survivors eligible for ECP-01": "kKfOnqC7m6D |GY3d7gUKxBW ",
+          "Number of SGBV survivors eligible for ECP-02": "kKfOnqC7m6D |d0OuDX2lHIV ",
+          "Number of SGBV survivors eligible for ECP-03": "kKfOnqC7m6D |HO0EhCMnB2t ",
+          "Number of SGBV survivors eligible for ECP-04": "kKfOnqC7m6D |c5Xrqf6h3I5 ",
+          "Number of eligible SGBV survivors who received ECP-01": "QdfVQogUqI6 |GY3d7gUKxBW ",
+          "Number of eligible SGBV survivors who received ECP-02": "QdfVQogUqI6 |d0OuDX2lHIV ",
+          "Number of eligible SGBV survivors who received ECP-03": "QdfVQogUqI6 |HO0EhCMnB2t ",
+          "Number of eligible SGBV survivors who received ECP-04": "QdfVQogUqI6 |c5Xrqf6h3I5 ",
+          "Number of rape or defilement Survivors Pregnant after 4 weeks-01": "zRMSKyIOLj5 |GY3d7gUKxBW ",
+          "Number of rape or defilement Survivors Pregnant after 4 weeks-02": "zRMSKyIOLj5 |d0OuDX2lHIV ",
+          "Number of rape or defilement Survivors Pregnant after 4 weeks-03": "zRMSKyIOLj5 |HO0EhCMnB2t ",
+          "Number of rape or defilement Survivors Pregnant after 4 weeks-04": "zRMSKyIOLj5 |c5Xrqf6h3I5 ",
+          "Number of RC or IPV clients seen-01": "xJXICwOrD5W |GY3d7gUKxBW ",
+          "Number of RC or IPV clients seen-02": "xJXICwOrD5W |d0OuDX2lHIV ",
+          "Number of RC or IPV clients seen-03": "xJXICwOrD5W |HO0EhCMnB2t ",
+          "Number of RC or IPV clients seen-04": "xJXICwOrD5W |c5Xrqf6h3I5 ",
+          "Number of SGBV survivors with disability-01": "jcXFVshqbGm |GY3d7gUKxBW ",
+          "Number of SGBV survivors with disability-02": "jcXFVshqbGm |d0OuDX2lHIV ",
+          "Number of SGBV survivors with disability-03": "jcXFVshqbGm |HO0EhCMnB2t ",
+          "Number of SGBV survivors with disability-04": "jcXFVshqbGm |c5Xrqf6h3I5 "
+        }
+      },
+      {
+        "name": "FP",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "First ever users of contraceptive": "UkWqkzAJxNR|wBWcFk7k1qY",
+          "Progestin only pills (New)": "uHM6lzLXDBd|wBWcFk7k1qY",
+          "Progestin only pills (Revisit)": "uHM6lzLXDBd|K4WLOEhtcvC",
+          "Combined Oral Contraceptive pills (New)": "BQmcVE8fex4|wBWcFk7k1qY",
+          "Combined Oral Contraceptive pills (Revisit)": "BQmcVE8fex4|K4WLOEhtcvC",
+          "Emergency contraceptive pill": "paDQStynGGD|wBWcFk7k1qY",
+          "DMPA-IM (New)": "PgQIx7Hq1kp|wBWcFk7k1qY",
+          "DMPA-IM (Revisit)": "PgQIx7Hq1kp|K4WLOEhtcvC",
+          "DMPA-SC (New)": "NMCIxSeGpS3|wBWcFk7k1qY",
+          "DMPA-SC (Revisit)": "NMCIxSeGpS3|K4WLOEhtcvC",
+          "Received Male condoms (New)": "cV4qoKSYiBs|wBWcFk7k1qY",
+          "Received Male condoms (Revisit)": "cV4qoKSYiBs|K4WLOEhtcvC",
+          "Received Female condoms (New)": "Fxb4iVJdw2g|wBWcFk7k1qY",
+          "Received Female condoms (Revisit)": "Fxb4iVJdw2g|K4WLOEhtcvC",
+          "Received Male And Female condoms (New)": "BW2T5DsuZuX|wBWcFk7k1qY",
+          "Received Male And Female condoms (Revisit)": "BW2T5DsuZuX|K4WLOEhtcvC",
+          "Counselled on Natural FP": "OiuBpHJw4kf |wBWcFk7k1qY ",
+          "Given cycle beads": "fYCo4peO0yE|wBWcFk7k1qY",
+          "Implant 1 Rod (1st time insertion)": "CJdFYcZ1zOq|DTYqflFj4uE",
+          "Implant 1 Rod (Reinsertion)": "CJdFYcZ1zOq|xiLt33hq7so",
+          "Implant 2 Rods (1st time insertion)": "TUHzoPGLM3t|DTYqflFj4uE",
+          "Implant 2 Rods (Reinsertion)": "TUHzoPGLM3t|xiLt33hq7so",
+          "Hormonal IUCD (1st time insertion)": "Wv02gixbRpT|DTYqflFj4uE",
+          "Hormonal IUCD (Reinsertion)": "Wv02gixbRpT|xiLt33hq7so",
+          "Non hormonal IUCD (1st time insertion)": "hRktPfPEegP|DTYqflFj4uE",
+          "Non hormonal IUCD (Reinsertion)": "hRktPfPEegP|xiLt33hq7so",
+          "BTL": "g6Wk32DjOez|DTYqflFj4uE",
+          "Vasectomy": "q5G4zR4872u|DTYqflFj4uE",
+          "IUCD Removal": "IjrWNuj9rzt|NhSoXUMPK2K",
+          "Implant Removal": "M4RzpOew1Im|NhSoXUMPK2K",
+          "Receiving FP services (New)-01": "B2Pfs8oAuiy|wBWcFk7k1qY",
+          "Receiving FP services (New)-02": "YD9L08SeDPE|wBWcFk7k1qY",
+          "Receiving FP services (New)-03": "kfuGsBdD3rp|wBWcFk7k1qY",
+          "Receiving FP services (New)-04": "qcKLKy25k4G|wBWcFk7k1qY",
+          "Receiving FP services (Revisit)-01": "B2Pfs8oAuiy|K4WLOEhtcvC",
+          "Receiving FP services (Revisit)-02": "YD9L08SeDPE|K4WLOEhtcvC",
+          "Receiving FP services (Revisit)-03": "kfuGsBdD3rp|K4WLOEhtcvC",
+          "Receiving FP services (Revisit)-04": "qcKLKy25k4G|K4WLOEhtcvC",
+          "Receiving immediate postpartum FP (within 48 hrs)": "|",
+          "Receiving immediate postpartum FP (3 days to 6 weeks)": "|",
+          "Receiving post abortion FP Method": "Mr1ik8OTOZq|wBWcFk7k1qY"
+        }
+      },
+      {
+        "name": "Psychiatry",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "PsychoSocial Counselling": "lHaBsXI3ckz|NhSoXUMPK2K",
+          "Alcohol and Drug Abuse": "KyZVYTVZI2p|NhSoXUMPK2K",
+          "Bipolar disorder": "e3eYYyUOfGI|NhSoXUMPK2K",
+          "Depression": "IZKawBQOpWZ|NhSoXUMPK2K",
+          "Schizophernia and psychotic disorder": "EbJiOLCBynW|NhSoXUMPK2K",
+          "Psycho-Social Assessments and Investigation": "TTK4jRWaP4H|NhSoXUMPK2K",
+          "Psycho-Social rehabilitation": "IUXoxjQqdTA|NhSoXUMPK2K",
+          "Outreach services and Health Talks": "sB0Ve37FNJn|NhSoXUMPK2K",
+          "Psychiatric referrals": "ufDI8Yj5ZSu|NhSoXUMPK2K"
+        }
+      },
+      {
+        "name": "Physiology",
+        "dhisName": "UpS2bTVcClZ",
+        "fieldMappings": {
+          "Neurological disorders receiving physiotherapy (New)": "yuwV28XyCLD|QexF05bsFOI",
+          "Neurological disorders receiving physiotherapy (Revisit)": "yuwV28XyCLD|yhfeQx79tQa",
+          "Peripheral nerve disorders attending physiotherapy (New)": "UNLMUwlyHUM|QexF05bsFOI",
+          "Peripheral nerve disorders attending physiotherapy (Revisit)": "UNLMUwlyHUM|yhfeQx79tQa",
+          "Post traumatic injuries attending physiotherapy (New)": "VUpfPdx45Lw|QexF05bsFOI",
+          "Post traumatic injuries attending physiotherapy (Revisit)": "VUpfPdx45Lw|yhfeQx79tQa",
+          "Degenerative orthopedic disorders attending physiotherapy (New)": "FkYeq9DZC6H|QexF05bsFOI",
+          "Degenerative orthopedic disorders attending physiotherapy (Revisit)": "FkYeq9DZC6H|yhfeQx79tQa",
+          "Cardio-respiratory disorders receiving physiotherapy (New)": "Lvsoq0oExIh|QexF05bsFOI",
+          "Cardio-respiratory disorders receiving physiotherapy (Revisit)": "Lvsoq0oExIh|yhfeQx79tQa",
+          "Women of reproductive age attending pre and post natal physiotherapy (New)": "VENYlGMbeHu|QexF05bsFOI",
+          "Women of reproductive age attending pre and post natal physiotherapy (Revisit)": "VENYlGMbeHu|yhfeQx79tQa",
+          "Treated for Neurological disorders": "yuwV28XyCLD|Ze3hNKt5An3",
+          "Treated for Peripheral nerve disorders": "UNLMUwlyHUM|Ze3hNKt5An3",
+          "Treated for Post traumatic injuries": "VUpfPdx45Lw|Ze3hNKt5An3",
+          "Treated for Degenerative orthopedic disorders": "FkYeq9DZC6H|Ze3hNKt5An3",
+          "Treated for Cardio-respiratory disorders": "Lvsoq0oExIh|Ze3hNKt5An3",
+          "Treated for pre and post natal physiotherapy": "VENYlGMbeHu|Ze3hNKt5An3"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 710",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "8"
+    },
+    "datasets": [
+      {
+        "name": "Immunizations",
+        "dhisName": "XoHnrLBL1qB",
+        "fieldMappings": {
+          "BCG-01": "O3qECFGrzeF|ieuodyY5ybC",
+          "BCG-02": "O3qECFGrzeF|bCfwecaPx2W",
+          "OPV-0-01": "iX5pEjcJowF|ieuodyY5ybC",
+          "OPV-0-02": "iX5pEjcJowF|bCfwecaPx2W",
+          "OPV-1-01": "t3QKFZbCf2B|ieuodyY5ybC",
+          "OPV-1-02": "t3QKFZbCf2B|bCfwecaPx2W",
+          "OPV-2-01": "OLlWZUfLtsR|ieuodyY5ybC",
+          "OPV-2-02": "OLlWZUfLtsR|bCfwecaPx2W",
+          "OPV-3-01": "c2Gm5hW3I4i|ieuodyY5ybC",
+          "OPV-3-02": "c2Gm5hW3I4i|bCfwecaPx2W",
+          "IPV-01": "gw4Zog5qvBy|ieuodyY5ybC",
+          "IPV-02": "gw4Zog5qvBy|bCfwecaPx2W",
+          "DHH-1-01": "ku80YRejJPg|ieuodyY5ybC",
+          "DHH-1-02": "ku80YRejJPg|bCfwecaPx2W",
+          "DHH-2-01": "K1Zzhafeukq|ieuodyY5ybC",
+          "DHH-2-02": "K1Zzhafeukq|bCfwecaPx2W",
+          "DHH-3-01": "OyddF1qflzP|ieuodyY5ybC",
+          "DHH-3-02": "OyddF1qflzP|bCfwecaPx2W",
+          "PCV-1-01": "L2dPeH9VkBc|ieuodyY5ybC",
+          "PCV-1-02": "L2dPeH9VkBc|bCfwecaPx2W",
+          "PCV-2-01": "xiaJWeXNYif|ieuodyY5ybC",
+          "PCV-2-02": "xiaJWeXNYif|bCfwecaPx2W",
+          "PCV-3-01": "h1GlCYbIQvU|ieuodyY5ybC",
+          "PCV-3-02": "h1GlCYbIQvU|bCfwecaPx2W",
+          "ROTA-1-01": "KLmFbdqADgn|ieuodyY5ybC",
+          "ROTA-1-02": "KLmFbdqADgn|bCfwecaPx2W",
+          "ROTA-2-01": "ZbGbUEnRxs1|ieuodyY5ybC",
+          "ROTA-2-02": "ZbGbUEnRxs1|bCfwecaPx2W",
+          "ROTA-3-01": "EsbbHHhwz5r|ieuodyY5ybC",
+          "ROTA-3-02": "EsbbHHhwz5r|bCfwecaPx2W",
+          "VA6M-01": "MAGmTkOIZus|ieuodyY5ybC",
+          "VA6M-02": "MAGmTkOIZus|bCfwecaPx2W",
+          "YF-01": "PJCUSyQ6Ahv|ieuodyY5ybC",
+          "YF-02": "PJCUSyQ6Ahv|bCfwecaPx2W",
+          "MR-1-01": "sRbqc5gBQhI|ieuodyY5ybC",
+          "MR-1-02": "sRbqc5gBQhI|bCfwecaPx2W",
+          "FIC-01": "tBPGQFhWB7M|ieuodyY5ybC",
+          "FIC-02": "tBPGQFhWB7M|bCfwecaPx2W",
+          "VA-1Y-01": "|",
+          "VA-1Y-02": "|",
+          "VA-1.5Y-01": "|",
+          "VA-1.5Y-02": "|",
+          "VA-2Y-5Y-01": "|",
+          "VA-2Y-5Y-02": "cPeaV6caNqJ|NhSoXUMPK2K",
+          "MR-2 Months-01": "|",
+          "MR-2 Months-02": "|",
+          "MR-2 Years-01": "Jw3alL29ZEi|NhSoXUMPK2K",
+          "MR-2 Years-02": "ivRgbmpCYTx|NhSoXUMPK2K"
+        }
+      }
+    ]
+  },
+  {
+    "reportName": "MOH 745",
+    "prefix": "",
+    "outputFormat": "json",
+    "metadata": {
+      "facilityReportId": "9"
+    },
+    "datasets": [
+      {
+        "name": "1",
+        "dhisName": "WWh5hbCmvND ",
+        "fieldMappings": {
+          "VIA/VILI-01-01": "rFtB3keaVWm|bSFRz4appAT",
+          "VIA/VILI-01-02": "rFtB3keaVWm|fxXNsn1ppIe",
+          "VIA/VILI-01-03": "rFtB3keaVWm|r1itkRYXnZh",
+          "PAP SMEAR-01-01": "gQro1y7Rsbq|bSFRz4appAT",
+          "PAP SMEAR-01-02": "gQro1y7Rsbq|fxXNsn1ppIe",
+          "PAP SMEAR-01-03": "gQro1y7Rsbq|r1itkRYXnZh",
+          "HPV Test-01-01": "VR7vdS7P0Gb|bSFRz4appAT",
+          "HPV Test-01-02": "VR7vdS7P0Gb|fxXNsn1ppIe",
+          "HPV Test-01-03": "VR7vdS7P0Gb|r1itkRYXnZh",
+          "Positive VIA or VIA/VILI-01-01": "xBjAMa2KFwD|bSFRz4appAT",
+          "Positive VIA or VIA/VILI-01-02": "xBjAMa2KFwD|fxXNsn1ppIe",
+          "Positive VIA or VIA/VILI-01-03": "xBjAMa2KFwD|r1itkRYXnZh",
+          "Positive Cytology-01-01": "wYHt86csbhn|wYHt86csbhn",
+          "Positive Cytology-01-02": "wYHt86csbhn|fxXNsn1ppIe",
+          "Positive Cytology-01-03": "wYHt86csbhn|r1itkRYXnZh",
+          "Positive HPV-01-01": "KLQZDP0ycOY|bSFRz4appAT",
+          "Positive HPV-01-02": "KLQZDP0ycOY|fxXNsn1ppIe",
+          "Positive HPV-01-03": "KLQZDP0ycOY|r1itkRYXnZh",
+          "Suspicious Cancer Lesions-01-01": "La4v1gAs5cp|bSFRz4appAT",
+          "Suspicious Cancer Lesions-01-02": "La4v1gAs5cp|fxXNsn1ppIe",
+          "Suspicious Cancer Lesions-01-03": "La4v1gAs5cp|r1itkRYXnZh",
+          "Cryotherapy Treatment-01-01": "Yv6LiN65lCJ|bSFRz4appAT",
+          "Cryotherapy Treatment-01-02": "Yv6LiN65lCJ|fxXNsn1ppIe",
+          "Cryotherapy Treatment-01-03": "Yv6LiN65lCJ|r1itkRYXnZh",
+          "Thermocoagulation Treatment-01-01": "MIQ3HgFlHnS|bSFRz4appAT",
+          "Thermocoagulation Treatment-01-02": "MIQ3HgFlHnS|fxXNsn1ppIe",
+          "Thermocoagulation Treatment-01-03": "MIQ3HgFlHnS|r1itkRYXnZh",
+          "LEEP Treatment-01-01": "uXi8AjF8YR0|bSFRz4appAT",
+          "LEEP Treatment-01-02": "uXi8AjF8YR0|fxXNsn1ppIe",
+          "LEEP Treatment-01-03": "uXi8AjF8YR0|r1itkRYXnZh",
+          "Other Treatment-01-01": "lx4fx2bluTm|bSFRz4appAT",
+          "Other Treatment-01-02": "lx4fx2bluTm|fxXNsn1ppIe",
+          "Other Treatment-01-03": "lx4fx2bluTm|r1itkRYXnZh",
+          "HIV Positive Clients Screened-01-01": "htFuvGJRW1X|bSFRz4appAT",
+          "HIV Positive Clients Screened-01-02": "htFuvGJRW1X|fxXNsn1ppIe",
+          "HIV Positive Clients Screened-01-03": "htFuvGJRW1X|r1itkRYXnZh",
+          "HIV Positive With Positive Screening Results-01-01": "joXHDIBe8I2|bSFRz4appAT",
+          "HIV Positive With Positive Screening Results-01-02": "joXHDIBe8I2|fxXNsn1ppIe",
+          "HIV Positive With Positive Screening Results-01-03": "joXHDIBe8I2|r1itkRYXnZh"
+        }
+      },
+      {
+        "name": "2",
+        "dhisName": "WWh5hbCmvND ",
+        "fieldMappings": {
+          "VIA/VILI-02-01": "rFtB3keaVWm|QgiVkhdlO2u",
+          "VIA/VILI-02-02": "rFtB3keaVWm|gLkLCkCx1Ad",
+          "VIA/VILI-02-03": "rFtB3keaVWm|Qw3yiIgRXob",
+          "PAP SMEAR-02-01": "gQro1y7Rsbq|QgiVkhdlO2u",
+          "PAP SMEAR-02-02": "gQro1y7Rsbq|gLkLCkCx1Ad",
+          "PAP SMEAR-02-03": "gQro1y7Rsbq|Qw3yiIgRXob ",
+          "HPV Test-02-01": "VR7vdS7P0Gb|QgiVkhdlO2u ",
+          "HPV Test-02-02": "VR7vdS7P0Gb|gLkLCkCx1Ad ",
+          "HPV Test-02-03": "VR7vdS7P0Gb|Qw3yiIgRXob ",
+          "Positive VIA or VIA/VILI-02-01": "xBjAMa2KFwD|QgiVkhdlO2u",
+          "Positive VIA or VIA/VILI-02-02": "xBjAMa2KFwD|gLkLCkCx1Ad",
+          "Positive VIA or VIA/VILI-02-03": "xBjAMa2KFwD|Qw3yiIgRXob",
+          "Positive Cytology-02-01": "wYHt86csbhn|QgiVkhdlO2u",
+          "Positive Cytology-02-02": "wYHt86csbhn|gLkLCkCx1Ad",
+          "Positive Cytology-02-03": "wYHt86csbhn|Qw3yiIgRXob",
+          "Positive HPV-02-01": "KLQZDP0ycOY|QgiVkhdlO2u",
+          "Positive HPV-02-02": "KLQZDP0ycOY|gLkLCkCx1Ad",
+          "Positive HPV-02-03": "KLQZDP0ycOY|Qw3yiIgRXob",
+          "Suspicious Cancer Lesions-02-01": "La4v1gAs5cp|QgiVkhdlO2u",
+          "Suspicious Cancer Lesions-02-02": "La4v1gAs5cp|gLkLCkCx1Ad",
+          "Suspicious Cancer Lesions-02-03": "La4v1gAs5cp|Qw3yiIgRXob",
+          "Cryotherapy Treatment-02-01": "Yv6LiN65lCJ|QgiVkhdlO2u",
+          "Cryotherapy Treatment-02-02": "Yv6LiN65lCJ|gLkLCkCx1Ad",
+          "Cryotherapy Treatment-02-03": "Yv6LiN65lCJ|Qw3yiIgRXob",
+          "Thermocoagulation Treatment-02-01": "MIQ3HgFlHnS|QgiVkhdlO2u",
+          "Thermocoagulation Treatment-02-02": "MIQ3HgFlHnS|gLkLCkCx1Ad",
+          "Thermocoagulation Treatment-02-03": "MIQ3HgFlHnS|Qw3yiIgRXob",
+          "LEEP Treatment-02-01": "uXi8AjF8YR0|QgiVkhdlO2u",
+          "LEEP Treatment-02-02": "uXi8AjF8YR0|gLkLCkCx1Ad",
+          "LEEP Treatment-02-03": "uXi8AjF8YR0|Qw3yiIgRXob",
+          "Other Treatment-02-01": "lx4fx2bluTm|QgiVkhdlO2u",
+          "Other Treatment-02-02": "lx4fx2bluTm|gLkLCkCx1Ad",
+          "Other Treatment-02-03": "lx4fx2bluTm|Qw3yiIgRXob",
+          "HIV Positive Clients Screened-02-01": "htFuvGJRW1X|QgiVkhdlO2u",
+          "HIV Positive Clients Screened-02-02": "htFuvGJRW1X|gLkLCkCx1Ad",
+          "HIV Positive Clients Screened-02-03": "htFuvGJRW1X|Qw3yiIgRXob",
+          "HIV Positive With Positive Screening Results-02-01": "joXHDIBe8I2|QgiVkhdlO2u",
+          "HIV Positive With Positive Screening Results-02-02": "joXHDIBe8I2|gLkLCkCx1Ad",
+          "HIV Positive With Positive Screening Results-02-03": "joXHDIBe8I2|Qw3yiIgRXob"
+        }
+      },
+      {
+        "name": "3",
+        "dhisName": "WWh5hbCmvND",
+        "fieldMappings": {
+          "VIA/VILI-03-01": "rFtB3keaVWm|p830auWrSqe",
+          "VIA/VILI-03-02": "rFtB3keaVWm|SMt1XYz1xId",
+          "VIA/VILI-03-03": "rFtB3keaVWm|HOZwYuTL1lz",
+          "PAP SMEAR-03-01": "gQro1y7Rsbq|p830auWrSqe",
+          "PAP SMEAR-03-02": "gQro1y7Rsbq|SMt1XYz1xId",
+          "PAP SMEAR-03-03": "gQro1y7Rsbq|HOZwYuTL1lz",
+          "HPV Test-03-01": "VR7vdS7P0Gb|p830auWrSqe",
+          "HPV Test-03-02": "VR7vdS7P0Gb|SMt1XYz1xId",
+          "HPV Test-03-03": "VR7vdS7P0Gb|HOZwYuTL1lz",
+          "Positive VIA or VIA/VILI-03-01": "xBjAMa2KFwD|p830auWrSqe",
+          "Positive VIA or VIA/VILI-03-02": "xBjAMa2KFwD|SMt1XYz1xId",
+          "Positive VIA or VIA/VILI-03-03": "xBjAMa2KFwD|HOZwYuTL1lz",
+          "Positive Cytology-03-01": "wYHt86csbhn|p830auWrSqe",
+          "Positive Cytology-03-02": "wYHt86csbhn|SMt1XYz1xId",
+          "Positive Cytology-03-03": "wYHt86csbhn|HOZwYuTL1lz",
+          "Positive HPV-03-01": "KLQZDP0ycOY|p830auWrSqe",
+          "Positive HPV-03-02": "KLQZDP0ycOY|SMt1XYz1xId",
+          "Positive HPV-03-03": "KLQZDP0ycOY|HOZwYuTL1lz",
+          "Suspicious Cancer Lesions-03-01": "La4v1gAs5cp|p830auWrSq",
+          "Suspicious Cancer Lesions-03-02": "La4v1gAs5cp|SMt1XYz1xId",
+          "Suspicious Cancer Lesions-03-03": "La4v1gAs5cp|HOZwYuTL1lz",
+          "Cryotherapy Treatment-03-01": "Yv6LiN65lCJ|p830auWrSqe",
+          "Cryotherapy Treatment-03-02": "Yv6LiN65lCJ|SMt1XYz1xId",
+          "Cryotherapy Treatment-03-03": "Yv6LiN65lCJ|HOZwYuTL1lz",
+          "Thermocoagulation Treatment-03-01": "MIQ3HgFlHnS|p830auWrSqe",
+          "Thermocoagulation Treatment-03-02": "MIQ3HgFlHnS|SMt1XYz1xId",
+          "Thermocoagulation Treatment-03-03": "MIQ3HgFlHnS|HOZwYuTL1lz",
+          "LEEP Treatment-03-01": "uXi8AjF8YR0|p830auWrSqe",
+          "LEEP Treatment-03-02": "uXi8AjF8YR0|SMt1XYz1xId",
+          "LEEP Treatment-03-03": "uXi8AjF8YR0|HOZwYuTL1lz",
+          "Other Treatment-03-01": "lx4fx2bluTm|p830auWrSqe",
+          "Other Treatment-03-02": "lx4fx2bluTm|SMt1XYz1xId",
+          "Other Treatment-03-03": "lx4fx2bluTm|HOZwYuTL1lz",
+          "HIV Positive Clients Screened-03-01": "htFuvGJRW1X|p830auWrSqe",
+          "HIV Positive Clients Screened-03-02": "htFuvGJRW1X|SMt1XYz1xId",
+          "HIV Positive Clients Screened-03-03": "htFuvGJRW1X|HOZwYuTL1lz",
+          "HIV Positive With Positive Screening Results-03-01": "joXHDIBe8I2|p830auWrSqe",
+          "HIV Positive With Positive Screening Results-03-02": "joXHDIBe8I2|SMt1XYz1xId",
+          "HIV Positive With Positive Screening Results-03-03": "joXHDIBe8I2|HOZwYuTL1lz"
+        }
+      }
+    ]
+  }
+]
