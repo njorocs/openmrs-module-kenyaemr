@@ -134,8 +134,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		EmrReportingUtils.addRow(dsd,"VA-1.5Y", "Vitamin A at 1 1/2 years(200,000 IU)", ReportUtils.map(moh710Indicators.givenVitAAt18Months(), indParams), moh710Disaggregations, Arrays.asList("01", "02"));
 		EmrReportingUtils.addRow(dsd,"VA-2Y-5Y", "Vitamin A at 2 years to 5 years (200,000IU)", ReportUtils.map(moh710Indicators.givenVitAAt2To5Years(), indParams), moh710Disaggregations, Arrays.asList("01", "02"));
 		//EmrReportingUtils.addRow(dsd,"VAS", "Vitamin A Supplemental Lactating Mothers(200,000 IU)", ReportUtils.map(moh710Indicators.givenVitASupplemental(), indParams),moh710Disaggregations, Arrays.asList("01", "02"));
-		EmrReportingUtils.addRow(dsd,"MR-2", "Measles - Rubella 2 (in Months)", ReportUtils.map(moh710Indicators.givenMeaslesRubella2VaccineAge18To24Months(), indParams), moh710DisaggregationsMR, Arrays.asList("01", "02"));
-		EmrReportingUtils.addRow(dsd,"MR-2", "Measles - Rubella 2 (Years)", ReportUtils.map(moh710Indicators.givenMeaslesRubellaVaccine2AndAgedOver2Years(), indParams), moh710DisaggregationsMR, Arrays.asList("01", "02"));
+		EmrReportingUtils.addRow(dsd,"MR-2", "Measles - Rubella 2 (in Months)", ReportUtils.map(moh710Indicators.givenMeaslesRubella2Vaccine(), indParams), moh710DisaggregationsMR, Arrays.asList("01", "02"));
 		//EmrReportingUtils.addRow(dsd,"SER-<1Y", "Squint/White Eye Reflection under 1 year", ReportUtils.map(moh710Indicators.squintWhiteEyeReflection(), indParams), moh710Disaggregations, Arrays.asList("01", "02"));
 		//dsd.addColumn("TTX_FPW-1st", "Tetanus Toxoid for pregnant women first dose", ReportUtils.map(moh710Indicators.givenTTXFirstDose(), indParams),"");
 		//dsd.addColumn("TTX_FPW-2nd", "Tetanus Toxoid for pregnant women second dose", ReportUtils.map(moh710Indicators.givenTTXSecondDose(), indParams), "");

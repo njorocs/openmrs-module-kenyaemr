@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.MOH710;
 
+import static org.openmrs.module.kenyacore.report.ReportUtils.map;
+import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
+
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static org.openmrs.module.kenyacore.report.ReportUtils.map;
-import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
 @Component
 public class Moh710IndicatorLibrary {
@@ -348,17 +348,10 @@ public class Moh710IndicatorLibrary {
 		);
 	}
 
-	/*Measles - Rubella 2(at 1 1/2 - 2 years)*/
-	public CohortIndicator givenMeaslesRubella2VaccineAge18To24Months() {
+	/*Measles - Rubella 2*/
+	public CohortIndicator givenMeaslesRubella2Vaccine() {
 
-		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubella2VaccineAge18To24MonthsCl(), "startDate=${startDate},endDate=${endDate}")
-		);
-	}
-
-	/*Measles-Rubella 2 Above 2 years*/
-	public CohortIndicator givenMeaslesRubellaVaccine2AndAgedOver2Years() {
-
-		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubellaVaccine2AndAgedOver2YearsCl(), "startDate=${startDate},endDate=${endDate}")
+		return cohortIndicator(null,map(moh710CohortLibrary.givenMeaslesRubella2Vaccine(), "startDate=${startDate},endDate=${endDate}")
 		);
 	}
 
