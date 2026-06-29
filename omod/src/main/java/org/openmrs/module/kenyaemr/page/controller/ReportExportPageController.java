@@ -9,6 +9,15 @@
  */
 package org.openmrs.module.kenyaemr.page.controller;
 
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.io.FileUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.CoreUtils;
@@ -25,6 +34,10 @@ import org.openmrs.module.kenyaemr.wrapper.Facility;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.SharedPage;
 import org.openmrs.module.reporting.common.ContentType;
+import org.openmrs.module.reporting.dataset.DataSet;
+import org.openmrs.module.reporting.dataset.DataSetColumn;
+import org.openmrs.module.reporting.dataset.DataSetRow;
+import org.openmrs.module.reporting.dataset.MapDataSet;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.ReportDesign;
@@ -60,6 +73,7 @@ public class ReportExportPageController {
 	private static final String EXPORT_TYPE_CSV = "csv";
 	private static final String EXPORT_TYPE_ADX = "adx";
 	private static final String EXPORT_TYPE_JSON = "json";
+	private static final String EXPORT_TYPE_PDF = "pdf";
 
 	/**
 	 * Exports report data as the given type
@@ -79,6 +93,16 @@ public class ReportExportPageController {
 
 		ReportData reportData = reportService.loadReportData(reportRequest);
 
+		return render(report, reportData, type, resourceFactory);
+	}
+
+	/**
+	 * Renders report data as the requested export type.
+	 */
+	public FileDownload render(ReportDescriptor report,
+							   ReportData reportData,
+							   String type,
+							   ResourceFactory resourceFactory) throws IOException {
 		if (EXPORT_TYPE_EXCEL.equals(type)) {
 			return renderAsExcel(report, reportData, resourceFactory);
 		}
@@ -90,6 +114,9 @@ public class ReportExportPageController {
 		}
 		else if (EXPORT_TYPE_JSON.equals(type)) {
 			return renderAsJson(report, reportData);
+		}
+		else if (EXPORT_TYPE_PDF.equals(type)) {
+			return renderAsPdf(report, reportData);
 		}
 		else {
 			throw new RuntimeException("Unrecognised export type: " + type);
@@ -252,6 +279,72 @@ public class ReportExportPageController {
 		renderer.render(data, null, out);
 
 		return new FileDownload(getDownloadFilename(report.getTarget(), data.getContext(), "json"), "application/json", out.toByteArray());
+	}
+
+	protected FileDownload renderAsPdf(ReportDescriptor report, ReportData data) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		PdfDocument pdf = new PdfDocument(new PdfWriter(out));
+		Document document = new Document(pdf, PageSize.A4.rotate());
+		document.setMargins(24, 24, 24, 24);
+
+		document.add(new Paragraph(data.getDefinition().getName()).setBold().setFontSize(14));
+
+		for (String dataSetKey : data.getDataSets().keySet()) {
+			DataSet dataSet = data.getDataSets().get(dataSetKey);
+			document.add(new Paragraph(dataSetKey).setBold().setMarginTop(12));
+
+			if (dataSet instanceof MapDataSet) {
+				addMapDataSetTable(document, (MapDataSet) dataSet);
+			}
+			else {
+				addRowDataSetTable(document, dataSet);
+			}
+		}
+
+		document.close();
+		return new FileDownload(getDownloadFilename(report.getTarget(), data.getContext(), "pdf"), "application/pdf", out.toByteArray());
+	}
+
+	private void addMapDataSetTable(Document document, MapDataSet dataSet) {
+		Table table = new Table(UnitValue.createPercentArray(new float[] { 30, 70 })).useAllAvailableWidth();
+		addHeaderCell(table, "Indicator");
+		addHeaderCell(table, "Value");
+		for (DataSetColumn column : dataSet.getMetaData().getColumns()) {
+			table.addCell(valueCell(column.getLabel() != null ? column.getLabel() : column.getName()));
+			table.addCell(valueCell(dataSet.getData(column)));
+		}
+		document.add(table);
+	}
+
+	private void addRowDataSetTable(Document document, DataSet dataSet) {
+		int columnCount = dataSet.getMetaData().getColumns().size();
+		if (columnCount == 0) {
+			document.add(new Paragraph("No columns").setItalic());
+			return;
+		}
+
+		Table table = new Table(UnitValue.createPercentArray(columnCount)).useAllAvailableWidth();
+		for (DataSetColumn column : dataSet.getMetaData().getColumns()) {
+			addHeaderCell(table, column.getLabel() != null ? column.getLabel() : column.getName());
+		}
+
+		for (DataSetRow row : dataSet) {
+			for (DataSetColumn column : dataSet.getMetaData().getColumns()) {
+				table.addCell(valueCell(row.getColumnValue(column)));
+			}
+		}
+		document.add(table);
+	}
+
+	private void addHeaderCell(Table table, String value) {
+		table.addHeaderCell(new Cell()
+				.add(new Paragraph(value != null ? value : ""))
+				.setBold()
+				.setTextAlignment(TextAlignment.LEFT));
+	}
+
+	private Cell valueCell(Object value) {
+		return new Cell().add(new Paragraph(value != null ? value.toString() : ""));
 	}
 
 	/**
