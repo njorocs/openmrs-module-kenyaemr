@@ -62,6 +62,9 @@ public class MOH705IndicatorLibrary {
 		return cohortIndicator("referralsToOtherFacilities", ReportUtils.map(moh705CohortLibrary.referralsToOtherFacilities(age), "startDate=${startDate},endDate=${endDate}"));
 	}
 
+	public CohortIndicator referralsFromCommunityUnit(String age) {
+		return cohortIndicator("referralsFromCommunityUnit", ReportUtils.map(moh705CohortLibrary.referralsFromCommunityUnit(age), "startDate=${startDate},endDate=${endDate}"));
+	}
 	/**
 	 * Deaths due to Road Traffic Injuries (Tag this to  Outcome as Death and check if Diagnosis is Road Traffic Accident)
 	 */

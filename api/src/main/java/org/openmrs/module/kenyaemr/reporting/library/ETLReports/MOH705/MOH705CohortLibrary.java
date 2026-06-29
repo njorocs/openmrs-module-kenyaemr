@@ -34,14 +34,14 @@ public class MOH705CohortLibrary {
 	public CohortDefinition patientDiagnosis(List<Integer> diagnosisList) {
 		String diagnosis = String.valueOf(diagnosisList).replaceAll("\\[", "(").replaceAll("\\]",")");
 		String sqlQuery = "SELECT ce.patient_id\n" +
-			"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
-			"         INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
-			"         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
-			"WHERE date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
-			"  AND ce.voided = 0\n" +
-			"  AND ed.dx_rank = 2\n" +
-			"  AND ed.diagnosis_coded in " + diagnosis + "\n" +
-			"  AND ce.diagnosis_category = 'New';";
+				"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
+				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
+				"         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
+				"WHERE date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
+				"  AND ce.voided = 0\n" +
+				"  AND ed.dx_rank = 2\n" +
+				"  AND ed.diagnosis_coded in " + diagnosis + "\n" +
+				"  AND ce.diagnosis_category = 'New';";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsDiagnosis");
 		cd.setQuery(sqlQuery);
@@ -67,8 +67,8 @@ public class MOH705CohortLibrary {
 		return cd;
 	}
 
-	
-	
+
+
 	/**
 	 * MOH705A and MOH705B
 	 * Diagnosis per age
@@ -111,7 +111,7 @@ public class MOH705CohortLibrary {
 	public CohortDefinition allOtherDiseasesAboveFive(String age, String  diagnosisList) {
 		String sqlQuery = "SELECT ce.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce inner join encounter_diagnosis x on ce.patient_id = x.patient_id and ce.encounter_id = x.encounter_id\n" +
 				"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on ce.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			    "WHERE x.diagnosis_coded NOT in ("+diagnosisList+") and x.dx_rank = 2 and ce.diagnosis_category = 'New' and date(x.date_created) between date(:startDate) and date(:endDate);\n";
+				"WHERE x.diagnosis_coded NOT in ("+diagnosisList+") and x.dx_rank = 2 and ce.diagnosis_category = 'New' and date(x.date_created) between date(:startDate) and date(:endDate);\n";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("allOtherDiseasesAboveFive");
 		cd.setQuery(sqlQuery);
@@ -172,9 +172,9 @@ public class MOH705CohortLibrary {
 	 */
 	public CohortDefinition referralsFromOtherFacilities(String age) {
 		String sqlQuery = "SELECT v.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
-			"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
-			"WHERE v.referral_to = 'This health facility' and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
+				"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
+				"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
+				"WHERE v.referral_to = 'This health facility' and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("referralsFromOther");
 		cd.setQuery(sqlQuery);
@@ -190,9 +190,9 @@ public class MOH705CohortLibrary {
 	 */
 	public CohortDefinition referralsToOtherFacilities(String age) {
 		String sqlQuery = "SELECT v.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
-			"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
-			"WHERE v.referral_to = 'Other health facility' and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
+				"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
+				"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
+				"WHERE v.referral_to = 'Other health facility' and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("referralsToOther");
 		cd.setQuery(sqlQuery);
@@ -202,6 +202,19 @@ public class MOH705CohortLibrary {
 		return cd;
 	}
 
+	public CohortDefinition referralsFromCommunityUnit(String age) {
+		String sqlQuery = "SELECT v.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+				"INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
+				"INNER JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id AND v.encounter_id = ed.encounter_id\n" +
+				"WHERE v.referred_from = 1759 and ed.dx_rank = 2 and v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+		cd.setName("referralsFromCommunityUnit");
+		cd.setQuery(sqlQuery);
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		cd.setDescription("Patients who are referrals From Community Unit");
+		return cd;
+	}
 	/**
 	 * MOH705
 	 * DeathDueToRoadTrafficInjuries
@@ -209,10 +222,26 @@ public class MOH705CohortLibrary {
 	 */
 	public CohortDefinition deathDueToRoadTrafficInjuries(String age , String  diagnosisList) {
 
-		String sqlQuery = "SELECT x.patient_id FROM encounter_diagnosis x\n" +
-			"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on x.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v on x.encounter_id = v.encounter_id and v.patient_outcome = 159\n" +
-			"  WHERE x.diagnosis_coded in ("+diagnosisList+") and date(x.date_created) between date(:startDate) and date(:endDate);\n";
+		String sqlQuery = "SELECT a.patient_id\n" +
+				"FROM (SELECT x.patient_id\n" +
+				"      FROM encounter_diagnosis x\n" +
+				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"                          ON x.patient_id = d.patient_id\n" +
+				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v ON x.encounter_id = v.encounter_id\n" +
+				"      WHERE x.diagnosis_coded IN\n" +
+				"            ("+diagnosisList+")\n" +
+				"        AND timestampdiff(YEAR, date(d.dob), date(:endDate)) "+age+"\n" +
+				"        AND d.dead = 1\n" +
+				"        AND date(v.visit_date) BETWEEN date(:startDate) AND date(:endDate) AND DATE(d.death_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
+				"      AND (d.cause_of_death IS NULL OR d.cause_of_death = '' OR d.cause_of_death = 1067)\n" +
+				"      UNION\n" +
+				"      SELECT d.patient_id\n" +
+				"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"      WHERE d.dead = 1\n" +
+				"        AND timestampdiff(YEAR, date(d.dob), date(:endDate)) "+age+"\n" +
+				"        AND d.cause_of_death IN\n" +
+				"            ("+diagnosisList+")\n" +
+				"        AND DATE(d.death_date) BETWEEN date(:startDate) AND date(:endDate)) a;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("deathDueToRoadTrafficInjuries");
 		cd.setQuery(sqlQuery);
@@ -230,9 +259,9 @@ public class MOH705CohortLibrary {
 	public CohortDefinition roadTrafficInjuries(String age , String  diagnosisList) {
 
 		String sqlQuery = "SELECT x.patient_id FROM encounter_diagnosis x\n" +
-			"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on x.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
-			"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v on v.patient_id = x.patient_id and x.encounter_id = v.encounter_id and v.patient_outcome != 159\n" +
-			"    WHERE x.diagnosis_coded in ("+diagnosisList+") and x.dx_rank = 2 and v.diagnosis_category = 'New' and date(x.date_created) between date(:startDate) and date(:endDate);\n";
+				"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on x.patient_id = d.patient_id and timestampdiff(YEAR, date(d.dob),date(:endDate)) "+ age +"\n" +
+				"  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v on v.patient_id = x.patient_id and x.encounter_id = v.encounter_id and v.patient_outcome != 159\n" +
+				"    WHERE x.diagnosis_coded in ("+diagnosisList+") and x.dx_rank = 2 and v.diagnosis_category = 'New' and date(x.date_created) between date(:startDate) and date(:endDate);\n";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("roadTrafficInjuries");
 		cd.setQuery(sqlQuery);
@@ -258,8 +287,9 @@ public class MOH705CohortLibrary {
 				"                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
 				"                     where v.diagnosis_category = 'New') v\n" +
 				"                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
-				"where x.lab_test in "+labTest+" and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
-				"group by lab_test;";
+				"where x.lab_test in "+labTest+" and (x.test_result != null or trim(x.test_result) <> '')\n" +
+				"                                       and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
+				"group by x.patient_id,x.lab_test;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsLabTest");
 		cd.setQuery(sqlQuery);
@@ -292,9 +322,9 @@ public class MOH705CohortLibrary {
 	 */
 	public CohortDefinition suspectedMalariaByDiagnosis() {
 		String sqlQuery = "select v.patient_id\n" +
-			"         from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
-			"         inner JOIN encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
-			"where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
+				"         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+				"         inner join encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2\n" +
+				"where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsDiagnosisForSuspectedMalaria");
 		cd.setQuery(sqlQuery);
