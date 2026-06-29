@@ -176,6 +176,7 @@
 				<ref bean="kenyaemr.ehrReports.report.fcdrr" />
 				<ref bean="kenyaemr.ehrReports.report.clinicianWorkloadReport" />
 				<ref bean="kenyaemr.ehrReports.report.moh301InpatientRegister" />
+				<ref bean="kenyaemr.ehrReports.report.moh643" />
 			</set>
 		</property>
 	</bean>
@@ -865,7 +866,7 @@
 
 	<bean id="kenyaemr.etl.common.report.moh731" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
 		<property name="targetUuid" value="a66bf454-2a11-4e51-b28d-3d7ece76aa13" />
-		<property name="name" value="MOH 731 Revised" />
+		<property name="name" value="Revised MOH 731" />
 		<property name="description" value="Comprehensive HIV/AIDS Facility Reporting Form - NASCOP (Y23)" />
 		<property name="apps">
 			<set>
@@ -1355,7 +1356,7 @@
 		</property>
 		<property name="template" value="kenyaemr:dmi/idsr.xls" />
 		<property name="repeatingSection" value="sheet:2,row:6,dataset:idsrSuspectedCases | sheet:3,row:6,dataset:ili | sheet:4,row:6,dataset:sari | sheet:5,row:6,dataset:poliomyelitis | sheet:6,row:6,dataset:viralHaemorrhagicFever | sheet:7,row:6,dataset:mPox | sheet:8,row:6,dataset:jaundice
-		| sheet:9,row:6,dataset:neurological | sheet:10,row:6,dataset:febrileIllness | sheet:11,row:6,dataset:febrileRash | sheet:12,row:6,dataset:meningitis | sheet:13,row:6,dataset:wateryDiarrhoea " />
+		| sheet:9,row:6,dataset:neurological | sheet:10,row:6,dataset:febrileIllness | sheet:11,row:6,dataset:febrileRash | sheet:12,row:6,dataset:meningitis | sheet:13,row:6,dataset:wateryDiarrhoea | sheet:14,row:6,dataset:ebola " />
 	</bean>
 	<bean id="kenyaemr.ehrReports.report.moh204A" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
 		<property name="targetUuid" value="9902f845-8079-484f-8060-e3cf4f5d0f6f" />
@@ -1538,7 +1539,7 @@
 			</set>
 		</property>
 		<property name="template" value="kenyaemr:financials/monthly_revenue_summary.xls" />
-		<property name="repeatingSection" value="sheet:1,row:12,dataset:M1" />
+		<property name="repeatingSection" value="sheet:1,row:13,dataset:M1" />
 	</bean>
 	<bean id="kenyaemr.ehrReports.report.717" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
 		<property name="targetUuid" value="b4b6feab-f8d5-4cdd-95f8-5dba6f959471" />
@@ -1617,5 +1618,16 @@
 		</property>
 		<property name="template" value="kenyaemr:MOH301_IP_register.xls" />
 		<property name="repeatingSection" value="sheet:2,row:6,dataset:admittedPatients" />
+	</bean>
+	<bean id="kenyaemr.ehrReports.report.moh643" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
+		<property name="targetUuid" value="5553e41a-ac5e-4b33-b640-49ea99470ae5" />
+		<property name="name" value="MOH 643" />
+		<property name="description" value="Facility Consumption Data and Request (F-CDRR) for Laboratory Commodities (MoH 643)" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.reports" />
+			</set>
+		</property>
+		<property name="template" value="kenyaemr:MOH_643_FCDRR.xls" />
 	</bean>
 </beans>
