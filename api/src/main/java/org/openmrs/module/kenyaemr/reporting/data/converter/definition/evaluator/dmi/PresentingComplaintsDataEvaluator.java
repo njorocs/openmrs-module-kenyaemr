@@ -39,14 +39,14 @@ public class PresentingComplaintsDataEvaluator implements PersonDataEvaluator {
         String qry = "select a.patient_id,a.complaint\n" +
 			" from (select patient_id, cn.name as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
 			"       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
-			"                inner JOIN concept_name cn on cn.concept_id = c.complaint and cn.locale = 'en'\n" +
+			"                inner join concept_name cn on cn.concept_id = c.complaint and cn.locale = 'en'\n" +
 			"       where c.complaint = 143264\n" +
 			"         and c.complaint_duration < 10\n" +
 			"         and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
 			"       group by patient_id) a\n" +
-			"          join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"          join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"               on a.patient_id = v.patient_id and date(a.visit_date) = date(v.visit_date)\n" +
-			"          join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+			"          join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 			"               on a.patient_id = t.patient_id and date(t.visit_date) = date(v.visit_date) and t.temperature >= 38;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

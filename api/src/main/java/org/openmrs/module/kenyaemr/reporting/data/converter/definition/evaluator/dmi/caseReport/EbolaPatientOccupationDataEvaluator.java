@@ -1,0 +1,63 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
+
+import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaPatientOccupationDataDefinition;
+import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
+import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
+import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
+import org.openmrs.module.reporting.evaluation.EvaluationContext;
+import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
+import org.openmrs.module.reporting.evaluation.service.EvaluationService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.Map;
+
+@Handler(supports = EbolaPatientOccupationDataDefinition.class, order = 50)
+public class EbolaPatientOccupationDataEvaluator implements PersonDataEvaluator {
+
+    @Autowired
+    private EvaluationService evaluationService;
+
+    public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
+        EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
+
+        String qry = "select t.patient_id, " +
+                "    case max(t.occupation) " +
+                "        when 1107    then 'None' " +
+                "        when 2032546 then 'Handler of dead bodies' " +
+                "        when 2032547 then 'Healthcare worker' " +
+                "        when 160579  then 'Commercial sex worker' " +
+                "        when 2032548 then 'Hunter' " +
+                "        when 2032549 then 'Animal handler' " +
+                "        when 2032550 then 'Forest ranger' " +
+                "        when 2032551 then 'Caver' " +
+                "        else null " +
+                "    end as occupation " +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
+                "where date(t.visit_date) between date(:startDate) and date(:endDate) " +
+                "and t.voided = 0 " +
+                "group by t.patient_id";
+
+        SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
+        queryBuilder.append(qry);
+        Date startDate = (Date) context.getParameterValue("startDate");
+        Date endDate = (Date) context.getParameterValue("endDate");
+        queryBuilder.addParameter("endDate", endDate);
+        queryBuilder.addParameter("startDate", startDate);
+        Map<Integer, Object> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Object.class, context);
+        c.setData(data);
+        return c;
+    }
+}

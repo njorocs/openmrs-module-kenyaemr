@@ -337,5 +337,21 @@ public class IDSRCohortLibrary {
 
         return cd;
     }
+    /**
+     * Suspected Ebola Cases
+     */
+    public CohortDefinition suspectedEbolaCases() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String qry="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t \n" +
+                "where t.temperature >= 38 and (t.contact_with_evd_suspected_case = 1065 or t.history_of_travel != 1066 or t.occupation != 1107 ) and date(t.visit_date) between date(:startDate) and date(:endDate) \n" +
+                "and t.voided = 0\n" +
+                "group by t.patient_id";
+        cd.setName("suspectedEbolaCases");
+        cd.setQuery(qry);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Suspected Ebola Cases");
 
+        return cd;
+    }
 }

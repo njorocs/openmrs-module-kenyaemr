@@ -47,19 +47,22 @@ public class JaundiceCohortDefinitionEvaluator implements CohortDefinitionEvalua
 		if (definition == null)
 			return null;
 		Cohort newCohort = new Cohort();
-		String sqlQuery = "SELECT p.patient_id FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_demographics p " +
-				" WHERE EXISTS (" +
-				"    SELECT 1 FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_clinical_encounter c " +
-				"    WHERE c.patient_id = p.patient_id " +
-				"    AND c.general_examination LIKE '%Jaundice%' " +
-				"    AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)" +
-				" ) " +
-				" OR EXISTS (" +
-				"    SELECT 1 FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_hiv_followup h " +
-				"    WHERE h.patient_id = p.patient_id " +
-				"    AND h.general_examination LIKE '%Jaundice%' " +
-				"    AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)" +
-				" )";
+		String sqlQuery = "SELECT a.patient_id\n" +
+				"FROM (\n" +
+				"    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
+				"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c\n" +
+				"    WHERE c.general_examination LIKE '%Jaundice%'\n" +
+				"      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+				"    GROUP BY patient_id\n" +
+				"    UNION ALL\n" +
+				"    SELECT patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
+				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup h\n" +
+				"    WHERE h.general_examination LIKE '%Jaundice%'\n" +
+				"      AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+				"    GROUP BY patient_id\n" +
+				") a\n" +
+				"WHERE a.general_examination IS NOT NULL\n" +
+				"  AND FIND_IN_SET('Jaundice', a.general_examination) > 0;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(sqlQuery);

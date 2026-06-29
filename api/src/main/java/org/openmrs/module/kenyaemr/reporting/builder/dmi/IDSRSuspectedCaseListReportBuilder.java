@@ -23,9 +23,16 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.reporting.calculation.converter.RDQACalculationResultConverter;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.*;
 import org.openmrs.module.kenyaemr.reporting.data.converter.CalculationResultConverter;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MFLCodeDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.AgeAtReportingDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLNextAppointmentDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.*;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.ContactWithEbolaCaseDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaRiskCategorizationDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaPatientOccupationDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientPresentingComplaintsDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientTemperatureDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.TravelCountryDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.library.dmi.IDSRIndicatorLibrary;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.data.DataDefinition;
@@ -33,6 +40,7 @@ import org.openmrs.module.reporting.data.converter.DataConverter;
 import org.openmrs.module.reporting.data.converter.ObjectFormatter;
 import org.openmrs.module.reporting.data.patient.definition.ConvertedPatientDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.AgeDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.ConvertedPersonDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
@@ -80,8 +88,9 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(febrileRashDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(meningitisDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(neurologicalSyndromeDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
-                ReportUtils.map(wateryDiarrhoeaDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}")
-                );
+                ReportUtils.map(wateryDiarrhoeaDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
+                ReportUtils.map(ebolaDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}")
+        );
     }
 
     protected DataSetDefinition caseIdentificationClassificationIndicators() {
@@ -122,6 +131,9 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         cohortDsd.addColumn(
                 "Acute Meningitis and Encephalitis",
                 "", ReportUtils.map(idsrIndicatorLibrary.acuteMeningitisCases(), indParams), "");
+        cohortDsd.addColumn(
+                "Suspected Ebola Cases",
+                "", ReportUtils.map(idsrIndicatorLibrary.suspectedEbolaCases(), indParams), "");
 
         return cohortDsd;
 
@@ -291,7 +303,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("County",new CalculationDataDefinition("County", new CountyAddressCalculation()), "",new CalculationResultConverter());
         dsd.addColumn("Village_Estate_Landmark", new CalculationDataDefinition("Village/Estate/Landmark", new PersonAddressCalculation()), "", new RDQACalculationResultConverter());
         dsd.addColumn("Visit Date", visitDateWithComplaintsDataDefinition, paramMapping);
-       // dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping, new DateConverter(DATE_FORMAT));
+        // dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping, new DateConverter(DATE_FORMAT));
         dsd.addColumn("Presenting Complaints", presentingComplaintsDataDefinition, paramMapping);
         dsd.addColumn("Duration of Presenting Complaints", durationOfComplaintsDataDefinition, paramMapping);
         dsd.addColumn("Date of onset of the current Illness", complaintsOnsetDateDataDefinition, paramMapping);
@@ -973,7 +985,77 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         return dsd;
     }
 
+    protected DataSetDefinition ebolaDataSetDefinitionColumns() {
+        PatientDataSetDefinition dsd = new PatientDataSetDefinition();
+        dsd.setName("ebola");
+        dsd.setDescription("Ebola Suspected Cases");
+        dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        String paramMapping = "startDate=${startDate},endDate=${endDate}";
 
+        PatientIdentifierType upn = MetadataUtils.existing(PatientIdentifierType.class,
+                HivMetadata._PatientIdentifierType.UNIQUE_PATIENT_NUMBER);
+        PatientIdentifierType nupi = MetadataUtils.existing(PatientIdentifierType.class,
+                CommonMetadata._PatientIdentifierType.NATIONAL_UNIQUE_PATIENT_IDENTIFIER);
 
+        DataConverter identifierFormatter = new ObjectFormatter("{identifier}");
+        DataDefinition identifierDef = new ConvertedPatientDataDefinition("identifier",
+                new PatientIdentifierDataDefinition(upn.getName(), upn), identifierFormatter);
+        DataDefinition nupiDef = new ConvertedPatientDataDefinition("identifier",
+                new PatientIdentifierDataDefinition(nupi.getName(), nupi), identifierFormatter);
+
+        DataConverter nameFormatter = new ObjectFormatter("{familyName}, {givenName}");
+        DataDefinition nameDef = new ConvertedPersonDataDefinition("name", new PreferredNameDataDefinition(), nameFormatter);
+
+        EbolaRiskCategorizationDataDefinition riskCategoryDD = new EbolaRiskCategorizationDataDefinition();
+        riskCategoryDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        riskCategoryDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        PatientPresentingComplaintsDataDefinition complaintsDD = new PatientPresentingComplaintsDataDefinition();
+        complaintsDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        complaintsDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        PatientTemperatureDataDefinition temperatureDD = new PatientTemperatureDataDefinition();
+        temperatureDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        temperatureDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        TravelCountryDataDefinition travelCountryDD = new TravelCountryDataDefinition();
+        travelCountryDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        travelCountryDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        EbolaPatientOccupationDataDefinition occupationDD = new EbolaPatientOccupationDataDefinition();
+        occupationDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        occupationDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        ContactWithEbolaCaseDataDefinition contactDD = new ContactWithEbolaCaseDataDefinition();
+        contactDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        contactDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        VisitTypeWithComplaintsDataDefinition visitTypeDataDefinition = new VisitTypeWithComplaintsDataDefinition();
+        visitTypeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        dsd.addColumn("MFL Code", new MFLCodeDataDefinition(), "");
+        dsd.addColumn("id", new PersonIdDataDefinition(), "");
+        dsd.addColumn("Name", nameDef, "");
+        dsd.addColumn("CCC No", identifierDef, "");
+        dsd.addColumn("NUPI", nupiDef, "");
+        dsd.addColumn("Sex", new GenderDataDefinition(), "", null);
+        dsd.addColumn("Age", new AgeDataDefinition(), "");
+        dsd.addColumn("Visit Type", visitTypeDataDefinition, paramMapping);
+        dsd.addColumn("Temperature", temperatureDD, paramMapping);
+        dsd.addColumn("Presenting Complaints", complaintsDD, paramMapping);
+        dsd.addColumn("Country Travelled", travelCountryDD, paramMapping);
+        dsd.addColumn("Occupation", occupationDD, paramMapping);
+        dsd.addColumn("Contact with Ebola case", contactDD, paramMapping);
+        dsd.addColumn("Risk category", riskCategoryDD, paramMapping);
+
+        EbolaCohortDefinition cd = new EbolaCohortDefinition();
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+        dsd.addRowFilter(cd, paramMapping);
+        return dsd;
+    }
 
 }

@@ -64,10 +64,10 @@ public class IDSRSuspectedCasesCohortDefinitionEvaluator implements CohortDefini
 				"                             ',', 1)\n" +
 				"                 END                   AS fever_duration_from_days,\n" +
 				"          c.complaint_duration\n" +
-				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+				"      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"               inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
-				"               inner JOIN visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
-				"               left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+				"               inner join visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
+				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 				"                         on c.patient_id = t.patient_id and\n" +
 				"                            date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"      group by patient_id) a\n" +
@@ -88,7 +88,14 @@ public class IDSRSuspectedCasesCohortDefinitionEvaluator implements CohortDefini
 				"   OR (FIND_IN_SET(140238, a.complaint) AND FIND_IN_SET(512, a.complaint) AND FIND_IN_SET(106, a.complaint) AND\n" +
 				"       FIND_IN_SET(516, a.complaint) AND FIND_IN_SET(143264, a.complaint) > 0 AND a.fever_duration_from_days > 2))\n" +
 				"    and date(a.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
-				"group by patient_id;";
+				"group by patient_id\n" +
+				"UNION\n" +
+				"select t.patient_id\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+				"where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+				"  and t.temperature >= 38\n" +
+				"  and t.voided = 0\n" +
+				"group by t.patient_id;";
 		
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

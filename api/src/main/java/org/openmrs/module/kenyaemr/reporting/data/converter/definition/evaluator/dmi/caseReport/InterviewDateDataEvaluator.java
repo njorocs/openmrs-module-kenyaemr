@@ -37,9 +37,9 @@ public class InterviewDateDataEvaluator implements VisitDataEvaluator {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
         String qry = "select v.visit_id,  DATE_FORMAT(coalesce(e.visit_date, t.visit_date), '%Y-%m-%d %H:%i:%s') as interview_date\n" +
-                "FROM  visit v\n" +
-                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e on v.visit_id = e.visit_id\n" +
-                "         left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on v.visit_id = t.visit_id\n" +
+                "from visit v\n" +
+                "         left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e on v.visit_id = e.visit_id\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on v.visit_id = t.visit_id\n" +
                 "where date(v.date_started) between date(:startDate) and date(:endDate)\n" +
                 "  and v.voided = 0;";
 

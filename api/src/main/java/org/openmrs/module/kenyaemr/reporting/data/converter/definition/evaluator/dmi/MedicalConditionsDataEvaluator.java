@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplaintsOnsetDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.MedicalConditionsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +39,7 @@ public class MedicalConditionsDataEvaluator implements PersonDataEvaluator {
         String qry = "select ci.patient_id,\n" +
 			"     group_concat(cn.name SEPARATOR '|') as ChronicIllness\n" +
 			"                from conditions ci\n" +
-			"                             inner JOIN concept_name cn on cn.concept_id = ci.condition_coded and cn.locale = 'en'\n" +
+			"                             inner join concept_name cn on cn.concept_id = ci.condition_coded and cn.locale = 'en'\n" +
 			"group by ci.patient_id, ci.date_created;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

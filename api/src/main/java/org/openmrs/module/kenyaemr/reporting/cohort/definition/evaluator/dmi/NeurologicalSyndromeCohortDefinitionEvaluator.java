@@ -52,12 +52,12 @@ public class NeurologicalSyndromeCohortDefinitionEvaluator implements CohortDefi
 		String qry = " SELECT a.patient_id\n" +
 				"FROM (\n" +
 				"    SELECT patient_id, c.visit_date, GROUP_CONCAT(c.complaint) AS complaint\n" +
-				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+				"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"    WHERE c.complaint IN (6017, 113054)\n" +
 				"      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"    GROUP BY patient_id\n" +
 				") a\n" +
-				"JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON a.patient_id = d.patient_id\n" +
+				"JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON a.patient_id = d.patient_id\n" +
 				"JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t ON a.patient_id = t.patient_id\n" +
 				"    AND DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"WHERE FIND_IN_SET(6017, a.complaint) > 0\n" +

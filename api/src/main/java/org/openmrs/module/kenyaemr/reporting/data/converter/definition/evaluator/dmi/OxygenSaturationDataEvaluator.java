@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.OxygenSaturationDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.RespiratoryRateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;

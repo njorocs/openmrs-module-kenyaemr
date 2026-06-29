@@ -39,12 +39,12 @@ public class VisitTypeWithComplaintsDataEvaluator implements PersonDataEvaluator
         String qry = "select a.patient_id, if(\n" +
                 "e.patient_outcome in (1693,160429) or v.visit_type_id = 1, 'OPD', if(e.patient_outcome = 1654 or v.visit_type_id = 3, 'IPD','N/A')) as visit_type\n" +
                 "from (select patient_id, c.complaint as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
-                "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
-                "         JOIN visit v\n" +
+                "         join visit v\n" +
                 "              on a.patient_id = v.patient_id and date(a.visit_date) = date(v.date_started)\n" +
-                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+                "         left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "              on a.patient_id = t.patient_id and date(t.visit_date) = date(v.date_started)\n" +
                 "left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
                 "on a.patient_id = e.patient_id and date(a.visit_date) = date(e.visit_date);";

@@ -41,7 +41,7 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                               order_id,\n" +
                 "                               concept_id,\n" +
                 "                               date_activated\n" +
-                "                        FROM  orders\n" +
+                "                        FROM orders\n" +
                 "                        WHERE order_type_id = 3\n" +
                 "                          AND voided = 0\n" +
                 "                        GROUP BY patient_id, concept_id),\n" +
@@ -50,7 +50,7 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                                 c.datatype_id     AS member_datatype,\n" +
                 "                                 c.class_id        AS member_class,\n" +
                 "                                 n.name\n" +
-                "                          FROM  concept_set cs\n" +
+                "                          FROM concept_set cs\n" +
                 "                                   INNER JOIN concept c ON cs.concept_id = c.concept_id\n" +
                 "                                   INNER JOIN concept_name n ON c.concept_id = n.concept_id\n" +
                 "                              AND n.locale = 'en'\n" +
@@ -61,7 +61,7 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                        WHEN lc.member_concept_id IS NOT NULL\n" +
                 "                            THEN CONCAT(COALESCE(lc.name, '-'), '|', DATE_FORMAT(o.date_activated, '%Y-%m-%d %H:%i:%s')) END ORDER BY\n" +
                 "                    lc.member_concept_id SEPARATOR ', ') as Lab_date\n" +
-                "FROM  visit v\n" +
+                "FROM visit v\n" +
                 "         INNER JOIN encounter e\n" +
                 "                    ON e.visit_id = v.visit_id\n" +
                 "         INNER JOIN FilteredOrders o ON o.encounter_id = e.encounter_id\n" +

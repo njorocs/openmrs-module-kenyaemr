@@ -51,16 +51,16 @@ class SariCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
 		
 		String qry = "select a.patient_id\n" +
 			"from (select patient_id, c.complaint as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
-			"      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
+			"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 			"     where c.complaint = 143264\n" +
 			"       and c.complaint_duration < 10\n" +
 			"        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
 			"      group by patient_id) a\n" +
-			"             left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
+			"             left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
 			"                       on a.patient_id = e.patient_id and date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
 			"             left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 			"                       on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate) and t.temperature >= 38\n" +
-			"             JOIN visit v\n" +
+			"             join openmrs.visit v\n" +
 			"                  on a.patient_id = v.patient_id and (v.visit_type_id = 3 or v.visit_type_id = 1) or e.patient_outcome = 1654\n" +
 			"where e.patient_id is not null or t.patient_id is not null;";
 		
