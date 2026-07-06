@@ -1,0 +1,46 @@
+name: Release Backend Module
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release version, for example 19.4.1"
+        required: true
+        type: string
+      development_version:
+        description: "Next development version, for example 19.4.2-SNAPSHOT"
+        required: true
+        type: string
+      branch:
+        description: "Branch to release from"
+        required: false
+        default: "master"
+        type: string
+      create_github_release:
+        description: "Create a GitHub Release after publishing artifacts"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/release-backend-module.yml@main
+    with:
+      release_version: ${{ inputs.release_version }}
+      development_version: ${{ inputs.development_version }}
+      branch: ${{ inputs.branch }}
+      java_version: "8"
+      java_distribution: "temurin"
+      maven_release_server_id: "mks-repo"
+      maven_snapshot_server_id: "mks-repo-snapshots"
+      create_github_release: ${{ inputs.create_github_release }}
+    secrets:
+      MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_TOKEN }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      APP_ID: ${{ secrets.APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      BOT_PAT: ${{ secrets.BOT_PAT }}
