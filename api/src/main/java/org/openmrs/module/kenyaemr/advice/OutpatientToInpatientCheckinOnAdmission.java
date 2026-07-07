@@ -52,6 +52,7 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
     public static final String INPATIENT_ADMISSION_REQUEST_QUESTION_CONCEPT = "160433AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String INPATIENT_ADMISSION_ANSWER_CONCEPT = "1654AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String INPATIENT_ADMISSION_FORM = "49f3686d-b83c-4263-a5a1-89040f643a78";
+    public static final String INPATIENT_VISIT_TYPE_UUID = "a73e2ac6-263b-47fc-99fc-e0f2c09fc914";
 
     String conditionsConfig = Context.getAdministrationService().getGlobalProperty("kenyaemr.conditions.config");
     Set<Integer> CONDITIONS_CONCEPTS = new HashSet<>();
@@ -124,8 +125,33 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                 // Prevent re-attachment of the encounter to the closed OPD visit.
                 EmrVisitAssignmentHandler.setVisitOfEncounter(inpatientVisit, enc);
             }
+			
+			//For SHA patients - update the visit type only to maintain the already added encounters and forms 
+			//This will support generation of requisite attachments from visit summary and procedure notes from the existing unclosed visit
+			//Changing only the visit type will allow admission to inpatient			
 
-            // Auto-populate conditions table from clinical diagnoses
+			if (enc != null && enc.getVisit() != null
+				&& enc.getVisit().getVisitType().getUuid().equals(CommonMetadata._VisitType.OUTPATIENT)
+				&& enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+				&& hasInsuranceSchemeSha(enc.getVisit())) {
+				
+				Date inpatientStart = enc.getEncounterDatetime() != null
+					? enc.getEncounterDatetime()
+					: new Date();
+				Date opdStop = new Date(inpatientStart.getTime() - 1L);
+				Visit visit = enc.getVisit();		
+			
+				//Update the outpatient visit type to inpatient
+				VisitType inpatient = visitService.getVisitTypeByUuid(INPATIENT_VISIT_TYPE_UUID);
+				visit.setVisitType(inpatient);
+				visitService.saveVisit(visit);
+
+				//Remove the patient from outpatient queue
+				removePatientFromOpdQueue(enc.getPatient(), visit, opdStop);
+			}
+
+
+			// Autopopulate conditions table from clinical diagnoses
             if (enc != null && enc.getForm() != null
                     && (CommonMetadata._Form.CLINICAL_ENCOUNTER.equalsIgnoreCase(enc.getForm().getUuid())
                             || HivMetadata._Form.HIV_GREEN_CARD.equalsIgnoreCase(enc.getForm().getUuid()))) {
