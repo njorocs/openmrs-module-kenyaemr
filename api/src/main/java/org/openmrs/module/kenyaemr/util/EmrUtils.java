@@ -72,6 +72,7 @@ public class EmrUtils {
 	private static final String DEFAULT_GLOBAL_PROPERTY_KEY = "facility.mflcode";
 	private static final AdministrationService administrationService = Context.getAdministrationService();
 	public static String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
+	public static final String GP_HIE_FACILITY_REGISTRY_CODE = "kenyaemr.hie.facility.registry.code";
 
 	/**
 	 * Checks whether a date has any time value
@@ -459,6 +460,17 @@ public class EmrUtils {
 		// Return the global property MFL code if available, otherwise fallback to
 		// default
 		return globalPropertyMflCode != null ? globalPropertyMflCode : defaultMflCode;
+	}
+
+	/**
+	 * Gets the facility id stored in the HIE facility registry code global property
+	 * ({@value #GP_HIE_FACILITY_REGISTRY_CODE})
+	 *
+	 * @return the facility id, or null if the global property is not set/empty
+	 */
+	public static String getFacilityId() {
+		String facilityId = administrationService.getGlobalProperty(GP_HIE_FACILITY_REGISTRY_CODE);
+		return StringUtils.isNotBlank(facilityId) ? facilityId.trim() : null;
 	}
 
 	public static String getGlobalPropertyValue(String value) {
