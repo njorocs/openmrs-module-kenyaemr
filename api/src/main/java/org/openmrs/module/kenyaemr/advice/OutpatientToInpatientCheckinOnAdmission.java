@@ -11,7 +11,11 @@ package org.openmrs.module.kenyaemr.advice;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.*;
+import org.openmrs.Encounter;
+import org.openmrs.Patient;
+import org.openmrs.User;
+import org.openmrs.Visit;
+import org.openmrs.VisitAttribute;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
