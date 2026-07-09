@@ -141,17 +141,9 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
 				&& enc.getVisit().getStopDatetime() == null
 				&& CommonMetadata._VisitType.OUTPATIENT.equals(enc.getVisit().getVisitType().getUuid())
 				&& enc.getForm() != null
-				&& (
-				INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
-					|| (
-					CLINICAL_ENCOUNTER_FORM.equalsIgnoreCase(enc.getForm().getUuid())
-						&& admissionOutcome(
-						enc,
-						PATIENT_OUTCOME_CONCEPT,
-						INPATIENT_ADMISSION_ANSWER_CONCEPT
-					)
-				)
-			)) {
+				&& (INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+					|| (CLINICAL_ENCOUNTER_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+						&& admissionOutcome(enc,PATIENT_OUTCOME_CONCEPT,INPATIENT_ADMISSION_ANSWER_CONCEPT)))) {
 			
 				Date inpatientStart = enc.getEncounterDatetime() != null
 					? enc.getEncounterDatetime()
