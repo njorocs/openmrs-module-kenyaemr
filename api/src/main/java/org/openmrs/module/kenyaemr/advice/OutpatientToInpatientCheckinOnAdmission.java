@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.advice;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Encounter;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.Visit;
@@ -54,7 +55,9 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
     public static final String INPATIENT_ADMISSION_ANSWER_CONCEPT = "1654AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String INPATIENT_ADMISSION_FORM = "49f3686d-b83c-4263-a5a1-89040f643a78";
     public static final String INPATIENT_VISIT_TYPE_UUID = "a73e2ac6-263b-47fc-99fc-e0f2c09fc914";
-
+	public static final String CLINICAL_ENCOUNTER_FORM = "e958f902-64df-4819-afd4-7fb061f59308";
+	public static final String PATIENT_OUTCOME_CONCEPT = "160433AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
     String conditionsConfig = Context.getAdministrationService().getGlobalProperty("kenyaemr.conditions.config");
     Set<Integer> CONDITIONS_CONCEPTS = new HashSet<>();
     {
@@ -78,7 +81,7 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
             if (enc != null && enc.getVisit() != null
                     && enc.getVisit().getVisitType().getUuid().equals(CommonMetadata._VisitType.OUTPATIENT)
                     && enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
-                    && !hasInsuranceSchemeSha(enc.getVisit())) {
+                    && !hasInsuranceSchemeSha(enc.getVisit())) {			
 
                 /*
                  * inpatientStart = enc.getEncounterDatetime()
@@ -126,22 +129,35 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                 // Prevent re-attachment of the encounter to the closed OPD visit.
                 EmrVisitAssignmentHandler.setVisitOfEncounter(inpatientVisit, enc);
             }
-			
+
 			//For SHA patients - update the visit type only to maintain the already added encounters and forms 
 			//This will support generation of requisite attachments from visit summary and procedure notes from the existing unclosed visit
-			//Changing only the visit type will allow admission to inpatient			
+			//Changing only the visit type will allow admission to inpatient	
+			//Include Admit button on clinical encounter to be able to switch visit type from outpatient to inpatient
 
-			if (enc != null && enc.getVisit() != null
-				&& enc.getVisit().getVisitType().getUuid().equals(CommonMetadata._VisitType.OUTPATIENT)
-				&& enc.getForm() != null && INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
-				&& hasInsuranceSchemeSha(enc.getVisit())) {
-				
+			String formUuid = enc.getForm().getUuid();
+
+			boolean isAdmissionForm =
+				INPATIENT_ADMISSION_FORM.equalsIgnoreCase(formUuid);
+
+			boolean isClinicalAdmission =
+				CLINICAL_ENCOUNTER_FORM.equalsIgnoreCase(formUuid)
+					&& admissionOutcome(enc, PATIENT_OUTCOME_CONCEPT, INPATIENT_ADMISSION_ANSWER_CONCEPT);
+
+			if (enc != null
+				&& enc.getVisit() != null
+				&& enc.getVisit().getVisitType() != null
+				&& enc.getVisit().getStopDatetime() == null
+				&& CommonMetadata._VisitType.OUTPATIENT.equals(enc.getVisit().getVisitType().getUuid())
+				&& enc.getForm() != null
+				&& (isAdmissionForm || isClinicalAdmission)) {
+			
 				Date inpatientStart = enc.getEncounterDatetime() != null
 					? enc.getEncounterDatetime()
 					: new Date();
 				Date opdStop = new Date(inpatientStart.getTime() - 1L);
-				Visit visit = enc.getVisit();		
-			
+				Visit visit = enc.getVisit();
+
 				//Update the outpatient visit type to inpatient
 				VisitType inpatient = visitService.getVisitTypeByUuid(INPATIENT_VISIT_TYPE_UUID);
 				visit.setVisitType(inpatient);
@@ -262,4 +278,15 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
                     + " (admission will still proceed): " + e.getMessage(), e);
         }
     }
+	private boolean admissionOutcome(Encounter encounter, String conceptUuid, String answerUuid) {
+	 	for (Obs obs : encounter.getAllObs(false)) {
+			if (obs.getConcept() != null
+				&& conceptUuid.equals(obs.getConcept().getUuid())
+				&& obs.getValueCoded() != null
+				&& answerUuid.equals(obs.getValueCoded().getUuid())) {			
+				return true;
+			}
+		}
+		return false;
+	}
 }
