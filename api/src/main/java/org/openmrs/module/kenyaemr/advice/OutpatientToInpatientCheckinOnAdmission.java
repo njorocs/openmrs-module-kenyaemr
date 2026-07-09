@@ -135,22 +135,23 @@ public class OutpatientToInpatientCheckinOnAdmission implements AfterReturningAd
 			//Changing only the visit type will allow admission to inpatient	
 			//Include Admit button on clinical encounter to be able to switch visit type from outpatient to inpatient
 
-			String formUuid = enc.getForm().getUuid();
-
-			boolean isAdmissionForm =
-				INPATIENT_ADMISSION_FORM.equalsIgnoreCase(formUuid);
-
-			boolean isClinicalAdmission =
-				CLINICAL_ENCOUNTER_FORM.equalsIgnoreCase(formUuid)
-					&& admissionOutcome(enc, PATIENT_OUTCOME_CONCEPT, INPATIENT_ADMISSION_ANSWER_CONCEPT);
-
 			if (enc != null
 				&& enc.getVisit() != null
 				&& enc.getVisit().getVisitType() != null
 				&& enc.getVisit().getStopDatetime() == null
 				&& CommonMetadata._VisitType.OUTPATIENT.equals(enc.getVisit().getVisitType().getUuid())
 				&& enc.getForm() != null
-				&& (isAdmissionForm || isClinicalAdmission)) {
+				&& (
+				INPATIENT_ADMISSION_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+					|| (
+					CLINICAL_ENCOUNTER_FORM.equalsIgnoreCase(enc.getForm().getUuid())
+						&& admissionOutcome(
+						enc,
+						PATIENT_OUTCOME_CONCEPT,
+						INPATIENT_ADMISSION_ANSWER_CONCEPT
+					)
+				)
+			)) {
 			
 				Date inpatientStart = enc.getEncounterDatetime() != null
 					? enc.getEncounterDatetime()
