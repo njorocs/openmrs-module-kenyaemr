@@ -10,6 +10,11 @@
 package org.openmrs.module.kenyaemr.metadata;
 
 import org.openmrs.Form;
+import org.openmrs.Concept;
+import org.openmrs.ConceptName;
+import org.openmrs.ConceptDatatype;
+import org.openmrs.ConceptClass;
+import java.util.Locale;
 import org.openmrs.PatientIdentifierType.LocationBehavior;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
@@ -588,6 +593,27 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_PASSWORD) == null) {
     		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
 		}
+        if (administrationService.getGlobalPropertyObject("kenyaemr.ebola.flag.concept.uuid") == null) {
+            install(globalProperty("kenyaemr.ebola.flag.concept.uuid", "Concept UUID for storing Ebola flag obs", "e5d9f5f1-8a2b-4c6f-9c3b-123456789abc"));
+        }
+
+        // Ensure the EBOLA_FLAG concept exists (create if missing)
+        String ebolaFlagUuid = "e5d9f5f1-8a2b-4c6f-9c3b-123456789abc";
+        try {
+            if (Context.getConceptService().getConceptByUuid(ebolaFlagUuid) == null) {
+                ConceptDatatype dt = Context.getConceptService().getConceptDatatypeByName("Text");
+                ConceptClass cc = Context.getConceptService().getConceptClassByName("Misc");
+                Concept c = new Concept();
+                c.setUuid(ebolaFlagUuid);
+                c.setDatatype(dt);
+                c.setConceptClass(cc);
+                ConceptName cn = new ConceptName("Ebola isolation flag", Locale.ENGLISH);
+                c.addName(cn);
+                Context.getConceptService().saveConcept(c);
+            }
+        } catch (Exception ex) {
+            logger.warn("Failed to create EBOLA_FLAG concept: " + ex.getMessage());
+        }
 
 		install(globalProperty("order.drugDosingUnitsConceptUuid", "Drug dosing units concept",
 				"162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));

@@ -34,6 +34,7 @@ import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.caser
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientTemperatureDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.TravelCountryDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.library.dmi.IDSRIndicatorLibrary;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaIsolationFlagDataDefinition;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.data.DataDefinition;
 import org.openmrs.module.reporting.data.converter.DataConverter;
@@ -194,6 +195,11 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Attended By", attendedByDataDefinition, paramMapping);
         dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping);
         dsd.addColumn("Disease", diseaseDataDefinition, paramMapping);
+        // Isolation flag column (shows active isolation flag set by calculation)
+        EbolaIsolationFlagDataDefinition isolationDD = new EbolaIsolationFlagDataDefinition();
+        isolationDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        isolationDD.addParameter(new Parameter("endDate", "End Date", Date.class));
+        dsd.addColumn("Isolation flag", isolationDD, paramMapping);
 
         IDSRSuspectedCasesCohortDefinition cd = new IDSRSuspectedCasesCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1035,7 +1041,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         visitTypeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class)); 
 
-        dsd.addColumn("MFL Code", new MFLCodeDataDefinition(), "");
+        dsd.addColumn("Hospital Unit", new MFLCodeDataDefinition(), "", new org.openmrs.module.kenyaemr.reporting.data.converter.LocationNameConverter());
         dsd.addColumn("id", new PersonIdDataDefinition(), "");
         dsd.addColumn("Name", nameDef, "");
         dsd.addColumn("CCC No", identifierDef, "");
@@ -1043,6 +1049,10 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Sex", new GenderDataDefinition(), "", null);
         dsd.addColumn("Age", new AgeDataDefinition(), "");
         dsd.addColumn("Visit Type", visitTypeDataDefinition, paramMapping);
+        ComplaintAttendantProviderDataDefinition attendedByDataDefinition = new ComplaintAttendantProviderDataDefinition();
+        attendedByDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        attendedByDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+        dsd.addColumn("Attended By", attendedByDataDefinition, paramMapping);
         dsd.addColumn("Temperature", temperatureDD, paramMapping);
         dsd.addColumn("Presenting Complaints", complaintsDD, paramMapping);
         dsd.addColumn("Country Travelled", travelCountryDD, paramMapping);
