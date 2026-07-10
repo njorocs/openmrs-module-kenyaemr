@@ -27,6 +27,10 @@ import org.openmrs.serialization.OpenmrsSerializer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * This class contains the logic that is run every time this module is either
@@ -96,6 +100,9 @@ public class EmrActivator implements ModuleActivator {
 		}
 		gp.setPropertyValue(moduleVersion);
 		administrationService.saveGlobalProperty(gp);
+        // Scheduling is handled by module's DMI scheduler (use the OpenMRS scheduler to register tasks).
+        // The Ebola cleanup task is implemented as an AbstractTask and should be scheduled
+        // via the administration UI or by metadata deployment so it uses the same scheduler as other DMI tasks.
 	}
 
 	/**

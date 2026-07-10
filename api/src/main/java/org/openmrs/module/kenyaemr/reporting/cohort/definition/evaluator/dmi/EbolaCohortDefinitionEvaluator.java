@@ -50,10 +50,16 @@ public class EbolaCohortDefinitionEvaluator implements CohortDefinitionEvaluator
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select patient_id from kenyaemr_etl.etl_patient_triage t \n" + 
-						"where t.temperature >= 38 and (t.contact_with_evd_suspected_case = 1065 or t.history_of_travel != 1066 or t.occupation != 1107 ) and date(t.visit_date) between date(:startDate) and date(:endDate) \n" + 
-						"and t.voided = 0\n" + 
-						"group by t.patient_id";
+		// Criteria:
+		// - Temperature >= 38C at triage
+		// - AND (travel to an affected country OR contact with suspected/probable case)
+		// Note: travel country codes used here follow TravelCountryDataEvaluator mappings (e.g. DRC, Uganda, Other)
+		String qry = "select patient_id from kenyaemr_etl.etl_patient_triage t \n" +
+				"where t.temperature >= 38 \n" +
+				"  and (t.history_of_travel in (165748, 162884, 2032318) or t.contact_with_evd_suspected_case = 1065) \n" +
+				"  and date(t.visit_date) between date(:startDate) and date(:endDate) \n" +
+				"  and t.voided = 0 \n" +
+				"group by t.patient_id";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

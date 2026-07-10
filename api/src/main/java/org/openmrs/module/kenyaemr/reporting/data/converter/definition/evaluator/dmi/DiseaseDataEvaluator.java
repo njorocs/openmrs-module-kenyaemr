@@ -37,6 +37,11 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select a.patient_id,\n" +
                 "                       CASE\n" +
+                "                           WHEN (a.temperature >= 38 AND (a.history_of_travel IN (165748,162884,2032318) OR a.contact_with_case = 1065) AND (\n" +
+                "                                    (select count(distinct c2.complaint) from kenyaemr_etl.etl_allergy_chronic_illness c2\n" +
+                "                                      where c2.patient_id = a.patient_id and c2.complaint in (139084,116334,122983,142412,151)\n" +
+                "                                      and date(c2.visit_date) between date(:startDate) and date(:endDate)) >= 3\n" +
+                "                                 )) THEN 'Suspected Ebola Case'\n" +
                 "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0 THEN 'Acute Meningitis and Encephalitis'\n" +
                 "                           WHEN FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
                 "                                a.complaint_duration > 2\n" +
@@ -67,6 +72,8 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
                 "                             c.visit_date,\n" +
                 "                             v.visit_type_id,\n" +
                 "                             t.temperature,\n" +
+                "                             max(t.history_of_travel) as history_of_travel,\n" +
+                "                             max(t.contact_with_evd_suspected_case) as contact_with_case,\n" +
                 "                             CASE\n" +
                 "                                 WHEN group_concat(concat_ws('|', c.complaint, c.complaint_duration)) LIKE '%140238%' THEN\n" +
                 "                                     SUBSTRING_INDEX(\n" +
