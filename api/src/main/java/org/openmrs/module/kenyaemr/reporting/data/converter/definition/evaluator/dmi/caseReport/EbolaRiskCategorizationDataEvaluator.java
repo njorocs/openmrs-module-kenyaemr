@@ -33,34 +33,33 @@ public class EbolaRiskCategorizationDataEvaluator implements PersonDataEvaluator
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        // Latest triage record per patient drives the categorisation.
-        // Level 1 — "Meets Suspect Criteria": temp >= 38 AND (travel set OR contact set)
-        // Level 2 — "Suspected Ebola Case"        : Level 1 AND (complaint_today set OR occupation is not none)
         String qry =
-            "select t.patient_id, " +
-            "    case " +
-            "        when t.temperature >= 38 " +
-            "             and (t.history_of_travel != 1066 or t.contact_with_evd_suspected_case != 1066) " +
-            "             and ( " +
-            "                 (t.complaint_today is not null and t.complaint_today != '') " +
-            "                 or t.occupation != 1107 " +
-            "             ) " +
-            "        then 'Suspected Ebola Case - Isolate' " +
-            "        when t.temperature >= 38 " +
-            "             and (t.history_of_travel != 1066 or t.contact_with_evd_suspected_case != 1066) " +
-            "        then 'Suspected Ebola Case' " +
-            "        else 'Suspected Ebola Case - Low Risk' " +
-            "    end as risk_category " +
-            "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
-            "inner join ( " +
-            "    select patient_id, max(visit_date) as latest_visit " +
-            "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage " +
-            "    where date(visit_date) between date(:startDate) and date(:endDate) " +
-            "    and voided = 0 " +
-            "    group by patient_id " +
-            ") latest on t.patient_id = latest.patient_id and t.visit_date = latest.latest_visit " +
-            "where t.voided = 0 " +
-            "group by t.patient_id";
+                "select t.patient_id, " +
+                        "    case " +
+                        "        when t.temperature >= 38 " +
+                        "             and (t.history_of_travel in (165748, 162884, 2032318) or t.contact_with_evd_suspected_case = 1065) " +
+                        "             and ( " +
+                        "                 (select count(distinct c.complaint) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c " +
+                        "                     where c.patient_id = t.patient_id " +
+                        "                       and c.complaint in (139084, 116334, 122983, 142412, 151) " +
+                        "                       and date(c.visit_date) between date(:startDate) and date(:endDate)) >= 3 " +
+                        "             ) " +
+                        "        then 'Suspected Ebola Case' " +
+                        "        when t.temperature >= 38 " +
+                        "             and (t.history_of_travel in (165748, 162884, 2032318) or t.contact_with_evd_suspected_case = 1065) " +
+                        "        then 'Suspected Ebola Case' " +
+                        "        else 'Suspected Ebola Case - Low Risk' " +
+                        "    end as risk_category " +
+                        "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
+                        "inner join ( " +
+                        "    select patient_id, max(visit_date) as latest_visit " +
+                        "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage " +
+                        "    where date(visit_date) between date(:startDate) and date(:endDate) " +
+                        "    and voided = 0 " +
+                        "    group by patient_id " +
+                        ") latest on t.patient_id = latest.patient_id and t.visit_date = latest.latest_visit " +
+                        "where t.voided = 0 " +
+                        "group by t.patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

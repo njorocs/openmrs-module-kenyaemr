@@ -49,13 +49,13 @@ public class JaundiceCohortDefinitionEvaluator implements CohortDefinitionEvalua
 		Cohort newCohort = new Cohort();
 		String sqlQuery = "SELECT a.patient_id\n" +
 				"FROM (\n" +
-				"    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
+				"    SELECT patient_id, CONVERT(GROUP_CONCAT(c.general_examination) USING utf8) AS general_examination\n" +
 				"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c\n" +
 				"    WHERE c.general_examination LIKE '%Jaundice%'\n" +
 				"      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				"    GROUP BY patient_id\n" +
 				"    UNION ALL\n" +
-				"    SELECT patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
+				"    SELECT patient_id, CONVERT(GROUP_CONCAT(h.general_examination) USING utf8) AS general_examination\n" +
 				"    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup h\n" +
 				"    WHERE h.general_examination LIKE '%Jaundice%'\n" +
 				"      AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
