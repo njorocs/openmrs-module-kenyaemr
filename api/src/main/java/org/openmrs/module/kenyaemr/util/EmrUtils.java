@@ -41,6 +41,7 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.util.PrivilegeConstants;
 import org.apache.commons.logging.Log;
@@ -72,6 +73,8 @@ public class EmrUtils {
 	private static final String DEFAULT_GLOBAL_PROPERTY_KEY = "facility.mflcode";
 	private static final AdministrationService administrationService = Context.getAdministrationService();
 	public static String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
+	public static final String GP_HIE_FACILITY_REGISTRY_CODE = "kenyaemr.hie.facility.registry.code";
+
 
 	/**
 	 * Checks whether a date has any time value
@@ -345,7 +348,7 @@ public class EmrUtils {
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		StringBuilder q = new StringBuilder();
 		q.append("Select distinct implementation_subcounty ");
-		q.append("from kenyaemr_etl.etl_contact;");
+		q.append("from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_contact;");
 
 		List<List<Object>> subCounties = Context.getAdministrationService().executeSQL(q.toString(), true);
 		if (!subCounties.isEmpty()) {
@@ -459,6 +462,16 @@ public class EmrUtils {
 		// Return the global property MFL code if available, otherwise fallback to
 		// default
 		return globalPropertyMflCode != null ? globalPropertyMflCode : defaultMflCode;
+	}
+	/**
+	 * Gets the facility id stored in the HIE facility registry code global property
+	 * ({@value #GP_HIE_FACILITY_REGISTRY_CODE})
+	 *
+	 * @return the facility id, or null if the global property is not set/empty
+	 */
+	public static String getFacilityId() {
+		String facilityId = administrationService.getGlobalProperty(GP_HIE_FACILITY_REGISTRY_CODE);
+		return StringUtils.isNotBlank(facilityId) ? facilityId.trim() : null;
 	}
 
 	public static String getGlobalPropertyValue(String value) {
