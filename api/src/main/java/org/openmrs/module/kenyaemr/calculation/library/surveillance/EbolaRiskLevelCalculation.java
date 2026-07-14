@@ -38,6 +38,7 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
             Dictionary.CAVER
     );
 
+    private static final String EBOLA_FLAG_LABEL = "Suspected Ebola Case";
     private String flagMessage = "";
 
     @Override
@@ -131,7 +132,7 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
 
             // Patient meets suspect criteria (fever + travel/contact within window) -> move to isolation
             suspected = true;
-            flagMessage = "Meets suspect criteria - Move to isolation";
+            flagMessage = EBOLA_FLAG_LABEL;
 
             // Criterion 3: presenting symptoms
             Concept screeningQuestion = Dictionary.getConcept(Dictionary.PRESENTING_SYMPTOMS_SCREENING_QUESTION);
@@ -172,11 +173,11 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
 
             // If patient presents with >= 3 key symptoms escalate to suspected case (isolate)
             if (symptomCount >= 3) {
-                flagMessage = "Suspected Ebola Case";
+                flagMessage = EBOLA_FLAG_LABEL;
                 suspected = true;
             } else if (hasHighRiskOccupation) {
                 // keep isolation message but note high risk occupation
-                flagMessage = "Meets suspect criteria - Move to isolation";
+                flagMessage = EBOLA_FLAG_LABEL;
             }
 
             // Persist a short-lived flag as an obs on the triage encounter (expires after 24 hours)
@@ -190,7 +191,7 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     } catch (Exception ignored) {}
                 }
                 if (flagConcept == null) {
-                    flagConcept = Dictionary.getConcept("160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // FREE_TEXT_GENERAL
+                    flagConcept = Dictionary.getConcept(Dictionary.FREE_TEXT_GENERAL); // FREE_TEXT_GENERAL
                 }
                 boolean existingUnexpired = false;
                 Date now = new Date();

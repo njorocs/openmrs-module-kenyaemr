@@ -22,6 +22,9 @@ import java.util.List;
  */
 public class Dictionary extends Metadata.Concept {
 
+    // Common concept UUIDs not present in Metadata.Concept
+    public static final String FREE_TEXT_GENERAL = "160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
 	/**
 	 * Gets a concept by an identifier (mapping or UUID)
 	 * @param identifier the identifier
