@@ -24,7 +24,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Evaluates a DiseaseDataDefinition
+ * Evaluates a DiseaseDataDefinition for All IDSR Cases.
+ * Ebola alert criteria (temp &gt;= 38 + travel/contact) maps to {@code Suspected Ebola Case}.
  */
 @Handler(supports= DiseaseDataDefinition.class, order=50)
 public class DiseaseDataEvaluator implements PersonDataEvaluator {
@@ -35,76 +36,97 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select a.patient_id,\n" +
-                "                       CASE\n" +
-                "                           WHEN (a.temperature >= 38 AND (a.history_of_travel IN (165748,162884,2032318) OR a.contact_with_case = 1065) AND (\n" +
-                "                                    (select count(distinct c2.complaint) from kenyaemr_etl.etl_allergy_chronic_illness c2\n" +
-                "                                      where c2.patient_id = a.patient_id and c2.complaint in (139084,116334,122983,142412,151)\n" +
-                "                                      and date(c2.visit_date) between date(:startDate) and date(:endDate)) >= 3\n" +
-                "                                 )) THEN 'Suspected Ebola Case'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0 THEN 'Acute Meningitis and Encephalitis'\n" +
-                "                           WHEN FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
-                "                                a.complaint_duration > 2\n" +
-                "                               THEN 'Cholera'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(143264, a.complaint) > 0 AND a.complaint_duration < 10 AND\n" +
-                "                                date(a.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) AND a.visit_type_id = 3 AND\n" +
-                "                                a.temperature >= 38 THEN 'SARI'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(141830, a.complaint) > 0 AND\n" +
-                "                                FIND_IN_SET(136443, a.complaint) > 0 AND FIND_IN_SET(135367, a.complaint) > 0 AND\n" +
-                "                                a.fever_duration_from_days > 2 THEN 'Rift Valley Fever'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
-                "                                FIND_IN_SET(871, a.complaint) > 0 AND a.fever_duration_from_days > 1 THEN 'Malaria'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(116558, a.complaint) > 0 AND a.temperature > 38.5 AND a.fever_duration_from_days > 2\n" +
-                "                               THEN 'Chikungunya'\n" +
-                "                           WHEN FIND_IN_SET(157498, a.complaint) > 0 AND timestampdiff(YEAR, a.DOB, a.visit_date) <= 15\n" +
-                "                               THEN 'Acute Flaccid Paralysis '\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(162628, a.complaint) > 0 AND\n" +
-                "                                a.fever_duration_from_days >= 3 THEN 'Viral Haemorrhagic Fever'\n" +
-                "                           WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(512, a.complaint) > 0 AND\n" +
-                "                                FIND_IN_SET(106, a.complaint) > 0 AND FIND_IN_SET(516, a.complaint) > 0 AND\n" +
-                "                                FIND_IN_SET(143264, a.complaint) > 0  AND a.fever_duration_from_days > 2 THEN 'Measles'\n" +
-                "                           END AS disease\n" +
-                "                from (select c.patient_id,\n" +
-                "                             group_concat(c.complaint) as complaint,\n" +
-                "                             epd.dob,\n" +
-                "                             DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY),\n" +
-                "                             c.complaint_duration,\n" +
-                "                             c.visit_date,\n" +
-                "                             v.visit_type_id,\n" +
-                "                             t.temperature,\n" +
-                "                             max(t.history_of_travel) as history_of_travel,\n" +
-                "                             max(t.contact_with_evd_suspected_case) as contact_with_case,\n" +
-                "                             CASE\n" +
-                "                                 WHEN group_concat(concat_ws('|', c.complaint, c.complaint_duration)) LIKE '%140238%' THEN\n" +
-                "                                     SUBSTRING_INDEX(\n" +
-                "                                             SUBSTRING_INDEX(group_concat(concat_ws('|', c.complaint, c.complaint_duration)), '|', -1),\n" +
-                "                                             ',', 1)\n" +
-                "                                 END                   AS fever_duration_from_days\n" +
-                "                      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
-                "                               inner join kenyaemr_etl.etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
-                "                               inner join openmrs.visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
-                "                               left join kenyaemr_etl.etl_patient_triage t\n" +
-                "                                         on c.patient_id = t.patient_id and\n" +
-                "                                            date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
-                "                      group by patient_id) a\n" +
-                "                where (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0)\n" +
-                "                   OR (FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
-                "                       a.complaint_duration > 2)\n" +
-                "                   OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(143264, a.complaint) > 0 AND a.complaint_duration < 10 AND\n" +
-                "                       date(a.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) AND a.visit_type_id IN (1, 3) AND\n" +
-                "                       a.temperature >= 38)\n" +
-                "                   OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(141830, a.complaint) > 0 AND\n" +
-                "                       FIND_IN_SET(136443, a.complaint) > 0 AND FIND_IN_SET(135367, a.complaint) > 0 AND a.fever_duration_from_days > 2)\n" +
-                "                   OR (FIND_IN_SET(40238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
-                "                       FIND_IN_SET(871, a.complaint) > 0 AND a.fever_duration_from_days > 1)\n" +
-                "                   OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(116558, a.complaint) > 0 AND a.temperature > 38.5 AND a.fever_duration_from_days > 2)\n" +
-                "                   OR (a.complaint = 157498 AND timestampdiff(YEAR, a.DOB, a.visit_date) <= 15)\n" +
-                "                   OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(162628, a.complaint) > 0 AND\n" +
-                "                       a.fever_duration_from_days >= 3)\n" +
-                "                   OR (FIND_IN_SET(140238, a.complaint) AND FIND_IN_SET(512, a.complaint) AND FIND_IN_SET(106, a.complaint) AND\n" +
-                "                       FIND_IN_SET(516, a.complaint) AND FIND_IN_SET(143264, a.complaint) > 0 AND a.fever_duration_from_days > 2)\n" +
-                "                    and date(a.visit_date) between date(:startDate) and date(:endDate)\n" +
-                "                group by patient_id;";
+        String qry = "select u.patient_id,\n" +
+                "       substring_index(\n" +
+                "               group_concat(u.disease order by if(u.disease = 'Suspected Ebola Case', 0, 1) separator '||'),\n" +
+                "               '||', 1) as disease\n" +
+                "from (\n" +
+                "         select a.patient_id,\n" +
+                "                CASE\n" +
+                "                    WHEN (a.temperature >= 38 AND (a.history_of_travel IN (165748, 162884, 2032318, 5622)\n" +
+                "                        OR a.contact_with_case = 1065))\n" +
+                "                        THEN 'Suspected Ebola Case'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0\n" +
+                "                        THEN 'Acute Meningitis and Encephalitis'\n" +
+                "                    WHEN FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
+                "                         a.complaint_duration > 2\n" +
+                "                        THEN 'Cholera'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(143264, a.complaint) > 0 AND\n" +
+                "                         a.complaint_duration < 10 AND\n" +
+                "                         date(a.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) AND a.visit_type_id = 3 AND\n" +
+                "                         a.temperature >= 38 THEN 'SARI'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(141830, a.complaint) > 0 AND\n" +
+                "                         FIND_IN_SET(136443, a.complaint) > 0 AND FIND_IN_SET(135367, a.complaint) > 0 AND\n" +
+                "                         a.fever_duration_from_days > 2 THEN 'Rift Valley Fever'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
+                "                         FIND_IN_SET(871, a.complaint) > 0 AND a.fever_duration_from_days > 1 THEN 'Malaria'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(116558, a.complaint) > 0 AND\n" +
+                "                         a.temperature > 38.5 AND a.fever_duration_from_days > 2\n" +
+                "                        THEN 'Chikungunya'\n" +
+                "                    WHEN FIND_IN_SET(157498, a.complaint) > 0 AND timestampdiff(YEAR, a.DOB, a.visit_date) <= 15\n" +
+                "                        THEN 'Acute Flaccid Paralysis '\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(162628, a.complaint) > 0 AND\n" +
+                "                         a.fever_duration_from_days >= 3 THEN 'Viral Haemorrhagic Fever'\n" +
+                "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(512, a.complaint) > 0 AND\n" +
+                "                         FIND_IN_SET(106, a.complaint) > 0 AND FIND_IN_SET(516, a.complaint) > 0 AND\n" +
+                "                         FIND_IN_SET(143264, a.complaint) > 0 AND a.fever_duration_from_days > 2 THEN 'Measles'\n" +
+                "                    END AS disease\n" +
+                "         from (select c.patient_id,\n" +
+                "                      group_concat(c.complaint) as complaint,\n" +
+                "                      epd.dob,\n" +
+                "                      DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY),\n" +
+                "                      c.complaint_duration,\n" +
+                "                      c.visit_date,\n" +
+                "                      v.visit_type_id,\n" +
+                "                      t.temperature,\n" +
+                "                      max(t.history_of_travel) as history_of_travel,\n" +
+                "                      max(t.contact_with_evd_suspected_case) as contact_with_case,\n" +
+                "                      CASE\n" +
+                "                          WHEN group_concat(concat_ws('|', c.complaint, c.complaint_duration)) LIKE '%140238%' THEN\n" +
+                "                              SUBSTRING_INDEX(\n" +
+                "                                      SUBSTRING_INDEX(group_concat(concat_ws('|', c.complaint, c.complaint_duration)), '|', -1),\n" +
+                "                                      ',', 1)\n" +
+                "                          END AS fever_duration_from_days\n" +
+                "               from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "                        inner join kenyaemr_etl.etl_patient_demographics epd on c.patient_id = epd.patient_id\n" +
+                "                        inner join openmrs.visit v ON c.patient_id = v.patient_id AND DATE(c.visit_date) = DATE(v.date_started)\n" +
+                "                        left join kenyaemr_etl.etl_patient_triage t\n" +
+                "                                  on c.patient_id = t.patient_id and\n" +
+                "                                     date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "               where date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "                 and c.voided = 0\n" +
+                "               group by patient_id) a\n" +
+                "         where (a.temperature >= 38 AND (a.history_of_travel IN (165748, 162884, 2032318, 5622)\n" +
+                "             OR a.contact_with_case = 1065))\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0)\n" +
+                "            OR (FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
+                "                a.complaint_duration > 2)\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(143264, a.complaint) > 0 AND a.complaint_duration < 10 AND\n" +
+                "                date(a.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) AND a.visit_type_id IN (1, 3) AND\n" +
+                "                a.temperature >= 38)\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(141830, a.complaint) > 0 AND\n" +
+                "                FIND_IN_SET(136443, a.complaint) > 0 AND FIND_IN_SET(135367, a.complaint) > 0 AND a.fever_duration_from_days > 2)\n" +
+                "            OR (FIND_IN_SET(40238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
+                "                FIND_IN_SET(871, a.complaint) > 0 AND a.fever_duration_from_days > 1)\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(116558, a.complaint) > 0 AND a.temperature > 38.5 AND a.fever_duration_from_days > 2)\n" +
+                "            OR (a.complaint = 157498 AND timestampdiff(YEAR, a.DOB, a.visit_date) <= 15)\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(162628, a.complaint) > 0 AND\n" +
+                "                a.fever_duration_from_days >= 3)\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) AND FIND_IN_SET(512, a.complaint) AND FIND_IN_SET(106, a.complaint) AND\n" +
+                "                FIND_IN_SET(516, a.complaint) AND FIND_IN_SET(143264, a.complaint) > 0 AND a.fever_duration_from_days > 2)\n" +
+                "\n" +
+                "         union all\n" +
+                "\n" +
+                "         select t.patient_id, 'Suspected Ebola Case' as disease\n" +
+                "         from kenyaemr_etl.etl_patient_triage t\n" +
+                "         where t.temperature >= 38\n" +
+                "           and (t.history_of_travel in (165748, 162884, 2032318, 5622)\n" +
+                "             or t.contact_with_evd_suspected_case = 1065)\n" +
+                "           and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "           and t.voided = 0\n" +
+                "     ) u\n" +
+                "where u.disease is not null\n" +
+                "group by u.patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

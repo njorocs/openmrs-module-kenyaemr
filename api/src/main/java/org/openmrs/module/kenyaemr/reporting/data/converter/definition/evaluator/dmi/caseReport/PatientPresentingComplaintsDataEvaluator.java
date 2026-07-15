@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * Lists presenting complaints for a patient in the report period (same source as DMI payload:
+ * concept 5219 answers stored in {@code kenyaemr_etl.etl_allergy_chronic_illness}).
+ */
 @Handler(supports = PatientPresentingComplaintsDataDefinition.class, order = 50)
 public class PatientPresentingComplaintsDataEvaluator implements PersonDataEvaluator {
 
@@ -32,11 +36,19 @@ public class PatientPresentingComplaintsDataEvaluator implements PersonDataEvalu
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select t.patient_id, max(t.complaint_today) " +
-                "from kenyaemr_etl.etl_patient_triage t " +
-                "where date(t.visit_date) between date(:startDate) and date(:endDate) " +
-                "and t.voided = 0 " +
-                "group by t.patient_id";
+        // complaint_today on etl_patient_triage is only Yes/No — actual coded complaints live here.
+        String qry = "select i.patient_id, " +
+                "group_concat(distinct cn.name order by cn.name separator ', ') as presenting_complaints " +
+                "from kenyaemr_etl.etl_allergy_chronic_illness i " +
+                "inner join openmrs.concept_name cn on cn.concept_id = i.complaint " +
+                "  and cn.locale = 'en' " +
+                "  and cn.concept_name_type = 'FULLY_SPECIFIED' " +
+                "  and cn.voided = 0 " +
+                "where date(i.visit_date) between date(:startDate) and date(:endDate) " +
+                "  and i.voided = 0 " +
+                "  and i.complaint is not null " +
+                "  and i.complaint not in (1065, 1066) " +
+                "group by i.patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

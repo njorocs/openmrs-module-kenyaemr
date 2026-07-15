@@ -66,15 +66,14 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
             }
 
             Encounter lastTriageEncounter = EmrUtils.lastEncounter(patient, triageEncType, triageScreeningForm);
+            if (lastTriageEncounter == null) {
+                lastTriageEncounter = EmrUtils.lastEncounter(patient, triageEncType);
+            }
 
             if (lastTriageEncounter == null) {
                 ret.put(ptId, new BooleanResult(false, this));
                 continue;
             }
-
-            // NOTE: do not require obs created "today" so recent triage entries trigger the flag.
-
-            // Criterion 1: temperature >= 38 °C
             Concept temperatureConcept = Dictionary.getConcept(Dictionary.TEMPERATURE);
             double temperature = 0.0;
             for (Obs obs : lastTriageEncounter.getAllObs()) {
@@ -83,15 +82,11 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     break;
                 }
             }
-
-            // Criterion 2: travel history (any value) OR contact with suspected case (yes/no)
             Concept travelHistoryConcept = Dictionary.getConcept(Dictionary.TRAVEL_HISTORY);
             boolean hasTravelHistory = false;
             Date triageDate = lastTriageEncounter.getEncounterDatetime();
-            // check travel obs on the last triage encounter (or any travel obs within 21 days prior)
             for (Obs obs : lastTriageEncounter.getAllObs()) {
                 if (obs.getConcept().equals(travelHistoryConcept) && obs.getValueCoded() != null) {
-                    // if travel recorded on this encounter treat as within window; if travel obs from earlier encounters
                     Date obsDate = obs.getObsDatetime() != null ? obs.getObsDatetime() : obs.getEncounter().getEncounterDatetime();
                     long diff = Math.abs(triageDate.getTime() - obsDate.getTime());
                     long days = diff / (1000L * 60 * 60 * 24);
@@ -101,11 +96,9 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     }
                 }
             }
-            // check contact with suspected case within last 21 days across encounters
             boolean hasContactWithCase = false;
             Concept contactConcept = Dictionary.getConcept(Dictionary.CONTACT_WITH_SUSPECTED_CASE);
             if (contactConcept != null) {
-                // scan patient's encounters in the 21 days prior to triage for a yes answer
                 Date windowStart = new Date(triageDate.getTime() - (21L * 24 * 60 * 60 * 1000));
                 List<Encounter> encs = Context.getEncounterService().getEncountersByPatient(patient);
                 for (Encounter e : encs) {
@@ -117,7 +110,6 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                         }
                     }
                 }
-                // also check last triage encounter directly as a fallback
                 if (!hasContactWithCase && EmrUtils.hasYesAnswer(lastTriageEncounter, Dictionary.CONTACT_WITH_SUSPECTED_CASE)) {
                     hasContactWithCase = true;
                 }
@@ -130,33 +122,36 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                 continue;
             }
 
-            // Patient meets suspect criteria (fever + travel/contact within window) -> move to isolation
             suspected = true;
             flagMessage = EBOLA_FLAG_LABEL;
-
-            // Criterion 3: presenting symptoms
             Concept screeningQuestion = Dictionary.getConcept(Dictionary.PRESENTING_SYMPTOMS_SCREENING_QUESTION);
 
-            boolean hasHeadache      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.HEADACHE));
-            boolean hasLethargy      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.LETHARGY));
-            boolean hasBodyAche      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.BODY_ACHE));
-            boolean hasAbdominalPain = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.ABDOMINAL_PAIN));
-            boolean hasVomiting      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.VOMITING));
-            boolean hasDiarrhea      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.DIARRHEA));
-            boolean hasBleeding      = EmrUtils.encounterThatPassCodedAnswer(lastTriageEncounter, screeningQuestion, Dictionary.getConcept(Dictionary.BLEEDING));
+            // Count each Ebola symptom type at most once (Headache x3 still counts as 1).
+            Set<Integer> ebolaSymptomConceptIds = new HashSet<Integer>();
+            for (Concept symptomConcept : Arrays.asList(
+                    Dictionary.getConcept(Dictionary.HEADACHE),
+                    Dictionary.getConcept(Dictionary.LETHARGY),
+                    Dictionary.getConcept(Dictionary.BODY_ACHE),
+                    Dictionary.getConcept(Dictionary.ABDOMINAL_PAIN),
+                    Dictionary.getConcept(Dictionary.VOMITING),
+                    Dictionary.getConcept(Dictionary.DIARRHEA),
+                    Dictionary.getConcept(Dictionary.BLEEDING))) {
+                if (symptomConcept != null && symptomConcept.getConceptId() != null) {
+                    ebolaSymptomConceptIds.add(symptomConcept.getConceptId());
+                }
+            }
+            Set<Integer> uniqueSymptomsPresent = new HashSet<Integer>();
+            for (Obs obs : lastTriageEncounter.getAllObs(false)) {
+                if (obs.getConcept() != null && screeningQuestion != null
+                        && screeningQuestion.equals(obs.getConcept())
+                        && obs.getValueCoded() != null
+                        && obs.getValueCoded().getConceptId() != null
+                        && ebolaSymptomConceptIds.contains(obs.getValueCoded().getConceptId())) {
+                    uniqueSymptomsPresent.add(obs.getValueCoded().getConceptId());
+                }
+            }
+            int symptomCount = uniqueSymptomsPresent.size();
 
-            int symptomCount = 0;
-            if (hasHeadache) symptomCount++;
-            if (hasLethargy) symptomCount++;
-            if (hasBodyAche) symptomCount++;
-            if (hasAbdominalPain) symptomCount++;
-            if (hasVomiting) symptomCount++;
-            if (hasDiarrhea) symptomCount++;
-            if (hasBleeding) symptomCount++;
-
-            // symptomCount used below to determine escalation
-
-            // Criterion 4: high-risk occupation
             boolean hasHighRiskOccupation = false;
             Concept occupationConcept = Dictionary.getConcept(Dictionary.OCCUPATION);
 
@@ -170,19 +165,14 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     }
                 }
             }
-
-            // If patient presents with >= 3 key symptoms escalate to suspected case (isolate)
+            
             if (symptomCount >= 3) {
                 flagMessage = EBOLA_FLAG_LABEL;
                 suspected = true;
             } else if (hasHighRiskOccupation) {
-                // keep isolation message but note high risk occupation
                 flagMessage = EBOLA_FLAG_LABEL;
             }
-
-            // Persist a short-lived flag as an obs on the triage encounter (expires after 24 hours)
             try {
-                // Prefer a configured dedicated concept for storing Ebola flags. Fallback to FREE_TEXT_GENERAL.
                 String gpFlagConceptUuid = Context.getAdministrationService().getGlobalProperty("kenyaemr.ebola.flag.concept.uuid");
                 Concept flagConcept = null;
                 if (gpFlagConceptUuid != null && !gpFlagConceptUuid.trim().isEmpty()) {
@@ -191,7 +181,7 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     } catch (Exception ignored) {}
                 }
                 if (flagConcept == null) {
-                    flagConcept = Dictionary.getConcept(Dictionary.FREE_TEXT_GENERAL); // FREE_TEXT_GENERAL
+                    flagConcept = Dictionary.getConcept(Dictionary.FREE_TEXT_GENERAL);
                 }
                 boolean existingUnexpired = false;
                 Date now = new Date();
@@ -208,7 +198,6 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                                 if (expiry.after(now)) {
                                     existingUnexpired = true;
                                 } else {
-                                    // void expired flag
                                     o.setVoided(true);
                                     o.setVoidReason("expired flag");
                                     Context.getObsService().saveObs(o, "void expired");
@@ -227,7 +216,6 @@ public class EbolaRiskLevelCalculation extends AbstractPatientCalculation implem
                     Context.getObsService().saveObs(obs, "created by ebola calculation");
                 }
             } catch (Exception e) {
-                // don't let persistence errors stop the calculation
                 System.err.println("Failed to persist Ebola flag obs: " + e.getMessage());
             }
 
