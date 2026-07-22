@@ -222,6 +222,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	public static String VMMC_PROGRAM_UUID = "228538f4-cad9-476b-84c3-ab0086150bcc";
 	public static String PREP_PROGRAM_UUID = "214cad1c-bb62-4d8e-b927-810a046daf62";
 	public static String KP_PROGRAM_UUID = "7447305a-18a7-11e9-ab14-d663bd873d93";
+	public static String MENTAL_HEALTH_PROGRAM_UUID = "4b6c5ea4-49c6-454e-9fa1-44838e3a4f40";
 	public static final String KP_CLIENT_ENROLMENT = "185dec84-df6f-4fc7-a370-15aa8be531ec";
 	public static final String KP_CLIENT_DISCONTINUATION = "1f76643e-2495-11e9-ab14-d663bd873d93";
 
@@ -232,6 +233,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	public static final String MCH_DELIVERY_FORM_UUID = "496c7cc3-0eea-4e84-a04c-2292949e2f7f";
 
 	public static final String MCH_DISCHARGE_FORM_UUID = "af273344-a5f9-11e8-98d0-529269fb1459";
+
+	public static final String MENTAL_HEALTH_INITIAL_FORM_UUID = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 
 	public static final Locale LOCALE = Locale.ENGLISH;
 
@@ -1885,6 +1888,25 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					programDetails.put("enrollmentFormName", "KP Enrollment");
 					programDetails.put("discontinuationFormUuid", KP_CLIENT_DISCONTINUATION);
 					programDetails.put("discontinuationFormName", "KP Discontinuation");
+				}
+				// mental health program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(MENTAL_HEALTH_PROGRAM_UUID)) {
+					Enrollment mentalHealthEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter mentalHealthEnrollmentEncounter = mentalHealthEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+
+					if (mentalHealthEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", mentalHealthEnrollmentEncounter.getUuid());
+					}
+					if (defaultCompletionForm != null) {
+						Encounter mentalHealthDiscontinuationEncounter = mentalHealthEnrollment
+								.lastEncounter(defaultCompletionForm.getEncounterType());
+						if (mentalHealthDiscontinuationEncounter != null) {
+							programDetails.put("discontinuationEncounterUuid", mentalHealthDiscontinuationEncounter.getUuid());
+						}
+					}
+					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
+					programDetails.put("enrollmentFormName", "Mental Health Initial Form");
 				}
 
 				programDetails.put("programName", patientProgramEnrollment.getProgram().getName());

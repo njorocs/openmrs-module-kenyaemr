@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- ===================== Program ===================== -->
+
+	<bean id="kenyaemr.mentalhealth.program" class="org.openmrs.module.kenyacore.program.ProgramDescriptor">
+		<property name="targetUuid" value="4b6c5ea4-49c6-454e-9fa1-44838e3a4f40" />
+		<property name="eligibilityCalculation" value="org.openmrs.module.kenyaemr.calculation.library.mentalhealth.EligibleForMentalHealthProgramCalculation" />
+		<property name="defaultEnrollmentForm" ref="kenyaemr.mentalhealth.form.initial" />
+		<property name="visitForms">
+			<set>
+				<ref bean="kenyaemr.mentalhealth.form.followup" />
+			</set>
+		</property>
+		<property name="reports">
+			<set>
+			</set>
+		</property>
+		<property name="fragments">
+			<map>
+				<entry key="enrollment-summary" value="" />
+				<entry key="care-panel" value="" />
+				<entry key="completion-summary" value="" />
+			</map>
+		</property>
+		<property name="order" value="700" />
+	</bean>
+
+	<!-- ===================== Forms ===================== -->
+
+	<!-- Mental Health Initial form -->
+	<bean id="kenyaemr.mentalhealth.form.initial" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+		<property name="targetUuid" value="18c209ac-0787-4b51-b9aa-aa8b1581239c" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.registration" />
+				<ref bean="kenyaemr.app.intake" />
+				<ref bean="kenyaemr.app.clinician" />
+				<ref bean="kenyaemr.app.chart" />
+			</set>
+		</property>
+		<property name="icon" value="kenyaui:forms/generic.png" />
+		<property name="htmlform" value="kenyaemr:mentalhealth/formDoesNotExistOn2x.html" />
+	</bean>
+
+	<!-- Mental Health Followup form -->
+	<bean id="kenyaemr.mentalhealth.form.followup" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+		<property name="targetUuid" value="825d118c-8991-478f-840e-d622959238ca" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.clinician" />
+				<ref bean="kenyaemr.app.chart" />
+			</set>
+		</property>
+		<property name="icon" value="kenyaui:forms/generic.png" />
+		<property name="htmlform" value="kenyaemr:mentalhealth/formDoesNotExistOn2x.html" />
+	</bean>
+
+	<!-- ===================== Reports ===================== -->
+
+</beans>
