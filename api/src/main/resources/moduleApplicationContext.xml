@@ -32,6 +32,7 @@
 	<import resource="content/kenyaemr.gbv.xml" />
 	<import resource="content/kenyaemr.ncd.xml" />
 	<import resource="content/kenyaemr.preconception.xml" />
+	<import resource="content/kenyaemr.mentalhealth.xml" />
 
 	<!-- ===================== App descriptors ===================== -->
 
