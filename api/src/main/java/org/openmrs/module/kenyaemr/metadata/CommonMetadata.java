@@ -201,6 +201,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String NUTRITION = "b8357314-0f6a-4fc9-a5b7-339f47095d62";
 		public static final String ONCOLOGY_FORM = "31a371c6-3cfe-431f-94db-4acadad8d209";
 		public static final String PSYCHIATRIC_FORM = "1fbd26f1-0478-437c-be1e-b8468bd03ffa";
+		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 		public static final String AUDIOLOGY_FORM = "d9f74419-e179-426e-9aff-ec97f334a075";
 		public static final String GOPC_FORM = "35ab0825-33af-49e7-ac01-bb0b05753732";
 		public static final String MOPC_FORM = "00aa7662-e3fd-44a5-8f3a-f73eb7afa437";
@@ -262,7 +263,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String THERAPEUTIC_PLAY_FORM = "8424097e-2d07-4ce7-b231-617bf4c7c6a6";
 
 		public static final String MENTAL_HEALTH_FOLLOWUP_FORM = "825d118c-8991-478f-840e-d622959238ca";
-		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 		public static final String MENTAL_HEALTH_ENROLLMENT_FORM = "e2633aa9-4a45-4b8b-8263-37a71817b7bf";
 	}
 
@@ -411,7 +411,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				_EncounterType.PROCEDURE_RESULTS));
 		install(encounterType("Nutrition", "Nutrition encounter type", _EncounterType.NUTRITION));
 		install(encounterType("Audiology", "Audiology encounter type", _EncounterType.AUDIOLOGY));
-		install(encounterType("Psychiatric", "Psychiatric encounter type", _EncounterType.PSYCHIATRIC));
 		install(encounterType("Oncology", "Oncology encounter type", _EncounterType.ONCOLOGY));
 		install(encounterType("Physiotherapy", "Physiotherapy encounter type", _EncounterType.PHYSIOTHERAPY));
 		install(encounterType("GOPC", "GOPC encounter type", _EncounterType.GOPC));
@@ -462,6 +461,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ATP Disclosure Tracking", "ATP Disclosure Tracking", _EncounterType.ATP_DISCLOSURE_TRACKING));
 		install(encounterType("Transfusion Services", "Blood Transfusion Services", _EncounterType.TRANSFUSION_SERVICES));
 		install(encounterType("Therapeutic Play", "Therapeutic Play encounter type ", _EncounterType.THERAPEUTIC_PLAY));
+		install(encounterType("Psychiatric", "Psychiatric encounter type", _EncounterType.PSYCHIATRIC));
 		install(encounterType(("Mental Health Enrollment"), "Mental Health Enrollment encounter type ", _EncounterType.MENTAL_HEALTH_ENROLLMENT));
 		install(encounterType("Mental Health Followup", "Mental Health Followup Encounter Type ", _EncounterType.MENTAL_HEALTH_FOLLOWUP));
 
@@ -512,8 +512,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					_Form.SARI_SURVEILLANCE_FORM));
 			install(form("Nutrition Form", "Form for Nutrition", _EncounterType.NUTRITION, "1", _Form.NUTRITION));
 			install(form("Audiology", "Form for Audiology", _EncounterType.AUDIOLOGY, "1", _Form.AUDIOLOGY_FORM));
-			install(form("Psychiatric Form", "Form for Psychiatric", _EncounterType.PSYCHIATRIC, "1",
-					_Form.PSYCHIATRIC_FORM));
+			install(form("Physiotherapy Form", "Form for Physiotherapy", _EncounterType.PHYSIOTHERAPY, "1",
+					_Form.PHYSIOTHERAPY_FORM));
 			install(form("Oncology Form", "Form for Oncology", _EncounterType.ONCOLOGY, "1", _Form.ONCOLOGY_FORM));
 			install(form("GOPC Form", "Form for GOPC", _EncounterType.GOPC, "1", _Form.GOPC_FORM));
 			install(form("MOPC Form", "Form for MOPC", _EncounterType.MOPC, "1", _Form.MOPC_FORM));
@@ -577,9 +577,9 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("PreOperative Questionnare For Anaesthesia Form", "A form used to capture PreOperative Questionnare For Anaesthesia", _EncounterType.SOPC, "1", _Form.PREOPERATIVE_QUESTIONNAIRE_FORM));
 			install(form("Blood Transfusion Services Form", "A form collecting blood transfusion details", _EncounterType.TRANSFUSION_SERVICES, "1", _Form.BLOOD_TRANSFUSION_FORM));
 			install(form("Therapeutic Play Form", "Form for recording Therapeutic Play ", _EncounterType.THERAPEUTIC_PLAY, "1.0", _Form.THERAPEUTIC_PLAY_FORM));
-			install(form("Mental Health Initial Form", "Form for Mental Health Initial", _EncounterType.PSYCHIATRIC, "1",
-					_Form.PHYSIOTHERAPY_FORM));
-			install(form("Mental Health Followup Form", "Form for Mental Health Followup", _EncounterType.MENTAL_HEALTH_FOLLOWUP, "1",
+			install(form("Psychiatric Form", "Form for Psychiatric", _EncounterType.PSYCHIATRIC, "1",
+					_Form.PSYCHIATRIC_FORM));
+			install(form("Psychiatry Follow up Form", "Form for Mental Health Followup", _EncounterType.MENTAL_HEALTH_FOLLOWUP, "1",
 					_Form.MENTAL_HEALTH_FOLLOWUP_FORM));
 			install(form("Mental Health Enrollment Form", "Form for Mental Health Enrollment", _EncounterType.MENTAL_HEALTH_ENROLLMENT, "1",
 					_Form.MENTAL_HEALTH_ENROLLMENT_FORM));
