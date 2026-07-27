@@ -1148,8 +1148,6 @@
 		<property name="description" value="Current on ART - Viral Suppression status" />
 		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
 	</bean>
-	<!-- Ebola flag concept global property -->
-	<bean id="kenyaemr.ebola.flag.concept.uuid" class="org.openmrs.module.kenyacore.report.CalculationReportDescriptor" />
 
 	<bean id="kenyaemr.hiv.report.monthly_tx_curr_gain_loss_analysis_linelist" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
 		<property name="targetUuid" value="f0305a84-30ee-11e9-b210-d663bd873d93" />
