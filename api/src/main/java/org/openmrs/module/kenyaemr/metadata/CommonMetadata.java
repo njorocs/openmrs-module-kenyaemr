@@ -99,6 +99,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 
 	public static final class _Program {
 		public static final String NUTRITION = Metadata.Program.NUTRITION;
+		public static final String MENTAL_HEALTH = Metadata.Program.MENTAL_HEALTH;
 	}
 
 	public static final class _EncounterType {
@@ -168,6 +169,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ATP_DISCLOSURE_TRACKING = "109fd691-d78d-4a0e-ac15-b31954bf9a0a";
 		public static final String TRANSFUSION_SERVICES = "e506db7f-0b95-48ad-bd50-88fb2fad3fe5";
 		public static final String THERAPEUTIC_PLAY = "0623ef8d-4374-41c3-a425-90add8fcc568";
+		public static final String MENTAL_HEALTH_ENROLLMENT = "5fa0cb92-b8c4-4900-8681-fdb43840ea96";
+		public static final String MENTAL_HEALTH_FOLLOWUP = "4aa66381-665f-4ed9-bb7d-25566d63b49f";
 	}
 
 	public static final class _Form {
@@ -199,7 +202,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String ONCOLOGY_FORM = "31a371c6-3cfe-431f-94db-4acadad8d209";
 		public static final String PSYCHIATRIC_FORM = "1fbd26f1-0478-437c-be1e-b8468bd03ffa";
 		public static final String AUDIOLOGY_FORM = "d9f74419-e179-426e-9aff-ec97f334a075";
-		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 		public static final String GOPC_FORM = "35ab0825-33af-49e7-ac01-bb0b05753732";
 		public static final String MOPC_FORM = "00aa7662-e3fd-44a5-8f3a-f73eb7afa437";
 		public static final String SOPC_FORM = "da1f7e74-5371-4997-8a02-b7b9303ddb61";
@@ -258,6 +260,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PREOPERATIVE_QUESTIONNAIRE_FORM = "77a06fb9-0035-474e-8b2b-c247ac75d2e7";
 		public static final String BLOOD_TRANSFUSION_FORM = "ed5ec662-5326-4873-b60c-43d22ad5fb5f";
 		public static final String THERAPEUTIC_PLAY_FORM = "8424097e-2d07-4ce7-b231-617bf4c7c6a6";
+
+		public static final String MENTAL_HEALTH_FOLLOWUP_FORM = "825d118c-8991-478f-840e-d622959238ca";
+		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
+		public static final String MENTAL_HEALTH_ENROLLMENT_FORM = "e2633aa9-4a45-4b8b-8263-37a71817b7bf";
 	}
 
 	public static final class _OrderType {
@@ -381,6 +387,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		boolean installPrograms = shouldInstallPrograms();
 		if(installPrograms) {
 			install(program("Nutrition", "Nutrition program",Dictionary.NUTRITION_PROGRAM, _Program.NUTRITION));
+			install(program("Mental Health", "Mental Health program", Dictionary.MENTAL_HEALTH_PROGRAM, _Program.MENTAL_HEALTH));
 		}
 
 		install(encounterType("Consultation", "Collection of clinical data during the main consultation",
@@ -459,6 +466,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ATP Disclosure Tracking", "ATP Disclosure Tracking", _EncounterType.ATP_DISCLOSURE_TRACKING));
 		install(encounterType("Transfusion Services", "Blood Transfusion Services", _EncounterType.TRANSFUSION_SERVICES));
 		install(encounterType("Therapeutic Play", "Therapeutic Play encounter type ", _EncounterType.THERAPEUTIC_PLAY));
+		install(encounterType(("Mental Health Enrollment"), "Mental Health Enrollment encounter type ", _EncounterType.MENTAL_HEALTH_ENROLLMENT));
+		install(encounterType("Mental Health Followup", "Mental Health Followup Encounter Type ", _EncounterType.MENTAL_HEALTH_FOLLOWUP));
 
 
 
@@ -511,8 +520,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("Psychiatric Form", "Form for Psychiatric", _EncounterType.PSYCHIATRIC, "1",
 					_Form.PSYCHIATRIC_FORM));
 			install(form("Oncology Form", "Form for Oncology", _EncounterType.ONCOLOGY, "1", _Form.ONCOLOGY_FORM));
-			install(form("Physiotherapy Form", "Form for Physiotherapy", _EncounterType.PHYSIOTHERAPY, "1",
-					_Form.PHYSIOTHERAPY_FORM));
 			install(form("GOPC Form", "Form for GOPC", _EncounterType.GOPC, "1", _Form.GOPC_FORM));
 			install(form("MOPC Form", "Form for MOPC", _EncounterType.MOPC, "1", _Form.MOPC_FORM));
 			install(form("SOPC Form", "Form for SOPC", _EncounterType.SOPC, "1", _Form.SOPC_FORM));
@@ -575,6 +582,12 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("PreOperative Questionnare For Anaesthesia Form", "A form used to capture PreOperative Questionnare For Anaesthesia", _EncounterType.SOPC, "1", _Form.PREOPERATIVE_QUESTIONNAIRE_FORM));
 			install(form("Blood Transfusion Services Form", "A form collecting blood transfusion details", _EncounterType.TRANSFUSION_SERVICES, "1", _Form.BLOOD_TRANSFUSION_FORM));
 			install(form("Therapeutic Play Form", "Form for recording Therapeutic Play ", _EncounterType.THERAPEUTIC_PLAY, "1.0", _Form.THERAPEUTIC_PLAY_FORM));
+			install(form("Mental Health Initial Form", "Form for Mental Health Initial", _EncounterType.PSYCHIATRIC, "1",
+					_Form.PHYSIOTHERAPY_FORM));
+			install(form("Mental Health Followup Form", "Form for Mental Health Followup", _EncounterType.MENTAL_HEALTH_FOLLOWUP, "1",
+					_Form.MENTAL_HEALTH_FOLLOWUP_FORM));
+			install(form("Mental Health Enrollment Form", "Form for Mental Health Enrollment", _EncounterType.MENTAL_HEALTH_ENROLLMENT, "1",
+					_Form.MENTAL_HEALTH_ENROLLMENT_FORM));
 
 
 		} else {
