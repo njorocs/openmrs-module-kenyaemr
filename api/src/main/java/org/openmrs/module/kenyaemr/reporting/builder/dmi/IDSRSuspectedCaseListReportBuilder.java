@@ -29,7 +29,6 @@ import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLNe
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.*;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.ContactWithEbolaCaseDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaRiskCategorizationDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaPatientOccupationDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientPresentingComplaintsDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientTemperatureDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.TravelCountryDataDefinition;
@@ -1029,10 +1028,6 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         travelCountryDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
         travelCountryDD.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-        EbolaPatientOccupationDataDefinition occupationDD = new EbolaPatientOccupationDataDefinition();
-        occupationDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        occupationDD.addParameter(new Parameter("endDate", "End Date", Date.class));
-
         ContactWithEbolaCaseDataDefinition contactDD = new ContactWithEbolaCaseDataDefinition();
         contactDD.addParameter(new Parameter("startDate", "Start Date", Date.class));
         contactDD.addParameter(new Parameter("endDate", "End Date", Date.class));
@@ -1056,7 +1051,6 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("Temperature", temperatureDD, paramMapping);
         dsd.addColumn("Presenting Complaints", complaintsDD, paramMapping);
         dsd.addColumn("Country Travelled", travelCountryDD, paramMapping);
-        dsd.addColumn("Occupation", occupationDD, paramMapping);
         dsd.addColumn("Contact with Ebola case", contactDD, paramMapping);
         dsd.addColumn("Risk category", riskCategoryDD, paramMapping);
 
