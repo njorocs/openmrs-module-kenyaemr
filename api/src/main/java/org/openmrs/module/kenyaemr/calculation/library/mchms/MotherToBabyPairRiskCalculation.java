@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Months;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
@@ -26,6 +27,7 @@ import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.GreenCardVelocityCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.LastReturnVisitDateCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.mchcs.InfantMotherGuardianRelationsCalculation;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 
@@ -75,6 +77,8 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 		Concept goodAdherenceAnswerConcept = Context.getConceptService().getConceptByUuid(Dictionary.GOOD_ADHERENCE);
 
 		CalculationResultMap lastReturnVisitMap = calculate(new LastReturnVisitDateCalculation(), allEvaluationIds, context);
+		CalculationResultMap lastEncounterMap = Calculations.lastEncounter(null, allEvaluationIds, context);
+		CalculationResultMap artStartDateMap = calculate(new InitialArtStartDateCalculation(), allEvaluationIds, context);
 		CalculationResultMap lastStiMap = Calculations.lastObs(stiScreeningConcept, allEvaluationIds, context);
 		CalculationResultMap lastKeyPopulationMap = Calculations.lastObs(keyPopulationConcept, allEvaluationIds, context);
 		CalculationResultMap lastAdherenceMap = Calculations.lastObs(adherenceQuestionConcept, allEvaluationIds, context);
@@ -156,11 +160,29 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 				if (lastReturnVisitMap.get(motherId) != null && lastReturnVisitMap.get(motherId).getValue() != null) {
 					returnVisitDate = (Date) lastReturnVisitMap.get(motherId).getValue();
 				}
-				boolean isIIT = false;
+
+				boolean isRtc = false;
 				int daysPastTca = -1;
 				if (returnVisitDate != null) {
 					daysPastTca = Days.daysBetween(new DateTime(returnVisitDate), new DateTime(now)).getDays();
-					isIIT = daysPastTca > 90;
+					boolean missedAppointment = daysPastTca >= 30;
+
+					Encounter lastEncounter = EmrCalculationUtils.encounterResultForPatient(lastEncounterMap, motherId);
+					Date lastActualReturnDate = lastEncounter != null ? lastEncounter.getEncounterDatetime() : null;
+					boolean hasReturnedSinceMissedVisit = lastActualReturnDate != null && lastActualReturnDate.after(returnVisitDate);
+
+					isRtc = missedAppointment && hasReturnedSinceMissedVisit;
+				}
+
+				Date artStartDate = null;
+				if (artStartDateMap.get(motherId) != null && artStartDateMap.get(motherId).getValue() != null) {
+					artStartDate = (Date) artStartDateMap.get(motherId).getValue();
+				}
+
+				boolean newOnArt = false;
+				if (artStartDate != null) {
+					int daysSinceArtStart = Days.daysBetween(new DateTime(artStartDate), new DateTime(now)).getDays();
+					newOnArt = daysSinceArtStart < 180;
 				}
 
 				Obs stiObs = EmrCalculationUtils.obsResultForPatient(lastStiMap, motherId);
@@ -177,14 +199,11 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 				boolean motherHighRisk = motherAgeUnder19
 						&& (vlAvailable && !isVlSuppressed)
 						&& !goodAdherence
-						&& isIIT
-						&& !comorbidityControlled
 						&& hasRecentSti
-						&& isFswOrPwid;
+						&& isFswOrPwid
+						&& newOnArt;
 
 				boolean motherLowRisk = isVlSuppressed && goodAdherence && comorbidityControlled;
-
-				System.out.println("MTCT [ptId=" + ptId + " motherId=" + motherId + "] motherHighRisk=" + motherHighRisk + " motherLowRisk=" + motherLowRisk);
 
 				if (motherHighRisk) {
 					anyMotherHighRisk = true;
@@ -205,10 +224,6 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 			// Self-evaluation (ptId is the mother): always apply the flag.
 			// Infant in cohort: only apply the flag if the infant is under 24 months.
 			boolean flagCohortMember = isSelfEvaluation || childUnder24Months;
-			System.out.println("MTCT [ptId=" + ptId + "] anyMotherHighRisk=" + anyMotherHighRisk + " anyMotherLowRisk=" + anyMotherLowRisk
-					+ " showFlag=" + showFlag + " isSelfEvaluation=" + isSelfEvaluation
-					+ " flagCohortMember=" + flagCohortMember + " finalResult=" + (flagCohortMember && showFlag)
-					+ " message=" + mtctFlagMessage);
 			ret.put(ptId, new BooleanResult(flagCohortMember && showFlag, this));
 
 			if (isSelfEvaluation) {
