@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Months;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
@@ -25,6 +26,8 @@ import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
 import org.openmrs.module.kenyaemr.calculation.library.hiv.GreenCardVelocityCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.LastReturnVisitDateCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
 import org.openmrs.module.kenyaemr.calculation.library.mchcs.InfantMotherGuardianRelationsCalculation;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 
@@ -63,17 +66,22 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 
 		CalculationResultMap greenCardMap = calculate(new GreenCardVelocityCalculation(), allEvaluationIds, context);
 
-		Concept tcaConcept = Dictionary.getConcept(Dictionary.RETURN_VISIT_DATE);
 		Concept stiScreeningConcept = Dictionary.getConcept(Dictionary.STI_SCREENING);
 		// KEY POP - PWID, FSW
 		Concept keyPopulationConcept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_RISK_FACTOR);
 		Concept peopleWhoInjectDrugsConcept = Context.getConceptService().getConceptByUuid(Dictionary.PEOPLE_WHO_INJECT_DRUGS);
 		Concept fswConcept = Context.getConceptService().getConceptByUuid(Dictionary.FEMALE_SEX_WORKER);
 		Concept usedAlcoholOrSubstanceUseConcept = Context.getConceptService().getConceptByUuid(Dictionary.PEOPLE_WHO_USE_SUBSTANCES);
+		// Adherence: question concept 1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, good-adherence answer 159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+		Concept adherenceQuestionConcept = Context.getConceptService().getConceptByUuid(Dictionary.ARV_ADHERENCE);
+		Concept goodAdherenceAnswerConcept = Context.getConceptService().getConceptByUuid(Dictionary.GOOD_ADHERENCE);
 
-		CalculationResultMap lastTcaMap = Calculations.lastObs(tcaConcept, allEvaluationIds, context);
+		CalculationResultMap lastReturnVisitMap = calculate(new LastReturnVisitDateCalculation(), allEvaluationIds, context);
+		CalculationResultMap lastEncounterMap = Calculations.lastEncounter(null, allEvaluationIds, context);
+		CalculationResultMap artStartDateMap = calculate(new InitialArtStartDateCalculation(), allEvaluationIds, context);
 		CalculationResultMap lastStiMap = Calculations.lastObs(stiScreeningConcept, allEvaluationIds, context);
 		CalculationResultMap lastKeyPopulationMap = Calculations.lastObs(keyPopulationConcept, allEvaluationIds, context);
+		CalculationResultMap lastAdherenceMap = Calculations.lastObs(adherenceQuestionConcept, allEvaluationIds, context);
 
 		Date now = context.getNow();
 		CalculationResultMap ret = new CalculationResultMap();
@@ -83,20 +91,35 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 
 			Patient patient = Context.getPatientService().getPatient(ptId);
 			Date birthDate = patient.getBirthdate();
-			int infantAgeMonths = (birthDate != null) ? Months.monthsBetween(new DateTime(birthDate), new DateTime(now)).getMonths() : 0;
-			boolean childUnder24Months = infantAgeMonths < 24;
+			int patientAgeMonths = (birthDate != null) ? Months.monthsBetween(new DateTime(birthDate), new DateTime(now)).getMonths() : 0;
+			boolean isPatientUnder24Months = patientAgeMonths < 24;
 
 			Set<Integer> motherIds = Collections.emptySet();
 			if (infantRelationsMap.get(ptId) != null && infantRelationsMap.get(ptId).getValue() != null) {
 				motherIds = (Set<Integer>) infantRelationsMap.get(ptId).getValue();
 			}
 
+			// infantAgeMonths: for infant-in-cohort equals the infant's own age;
+			// for self-evaluation updated below to the youngest child's age.
+			int infantAgeMonths = patientAgeMonths;
+			boolean childUnder24Months = isPatientUnder24Months;
+
 			if (motherIds.isEmpty()) {
 				boolean isFemale = "F".equalsIgnoreCase(patient.getGender());
 				boolean hasChildren = !EmrUtils.getPersonChildren(patient).isEmpty();
-				if (!childUnder24Months && isFemale && hasChildren) {
+				if (!isPatientUnder24Months && isFemale && hasChildren) {
 					// Cohort member is the mother herself (female, has children, no guardian relations found).
 					motherIds = Collections.singleton(ptId);
+					int youngest = Integer.MAX_VALUE;
+					for (org.openmrs.Person child : EmrUtils.getPersonChildren(patient)) {
+						Date childBirthDate = child.getBirthdate();
+						if (childBirthDate != null) {
+							int age = Months.monthsBetween(new DateTime(childBirthDate), new DateTime(now)).getMonths();
+							if (age < youngest) youngest = age;
+						}
+					}
+					infantAgeMonths = (youngest != Integer.MAX_VALUE) ? youngest : 0;
+					childUnder24Months = infantAgeMonths < 24;
 				} else {
 					ret.put(ptId, new BooleanResult(false, this));
 					continue;
@@ -118,45 +141,67 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 					greenCardResult = greenCardMap.get(motherId).getValue().toString();
 				}
 
-				boolean onArt = EmrUtils.parseKeyValueBoolean(greenCardResult, "onART");
-				int artDurationMonths = EmrUtils.parseKeyValueInt(greenCardResult, "duration");
 				double vlResult = EmrUtils.parseKeyValueDouble(greenCardResult, "vlResult");
 				String ldlResult = EmrUtils.parseKeyValueString(greenCardResult, "ldlResult");
-				boolean goodAdherence = EmrUtils.parseKeyValueBoolean(greenCardResult, "goodAdherence");
 				String firstIllnessControl = EmrUtils.parseKeyValueString(greenCardResult, "firstChronicIllnessControl");
 				String secondIllnessControl = EmrUtils.parseKeyValueString(greenCardResult, "secondChronicIllnessControl");
 
-				boolean newlyOnArt = onArt && artDurationMonths < 6;
+				Obs adherenceObs = EmrCalculationUtils.obsResultForPatient(lastAdherenceMap, motherId);
+				boolean goodAdherence = false;
+				if (adherenceObs != null && goodAdherenceAnswerConcept != null) {
+					goodAdherence = goodAdherenceAnswerConcept.equals(adherenceObs.getValueCoded());
+				}
 				boolean vlAvailable = "LDL".equals(ldlResult) || vlResult > 0.0;
 				boolean isVlSuppressed = "LDL".equals(ldlResult) || (vlResult > 0.0 && vlResult <= 50.0);
 				boolean comorbidityControlled = (firstIllnessControl.isEmpty() || "Controlled".equalsIgnoreCase(firstIllnessControl))
 						&& (secondIllnessControl.isEmpty() || "Controlled".equalsIgnoreCase(secondIllnessControl));
 
-				Obs tcaObs = EmrCalculationUtils.obsResultForPatient(lastTcaMap, motherId);
-				boolean isIIT = false;
-				if (tcaObs != null && tcaObs.getValueDatetime() != null) {
-					int daysPastTca = Days.daysBetween(new DateTime(tcaObs.getValueDatetime()), new DateTime(now)).getDays();
-					isIIT = daysPastTca > 90;
+				Date returnVisitDate = null;
+				if (lastReturnVisitMap.get(motherId) != null && lastReturnVisitMap.get(motherId).getValue() != null) {
+					returnVisitDate = (Date) lastReturnVisitMap.get(motherId).getValue();
+				}
+
+				boolean isRtc = false;
+				int daysPastTca = -1;
+				if (returnVisitDate != null) {
+					daysPastTca = Days.daysBetween(new DateTime(returnVisitDate), new DateTime(now)).getDays();
+					boolean missedAppointment = daysPastTca >= 30;
+
+					Encounter lastEncounter = EmrCalculationUtils.encounterResultForPatient(lastEncounterMap, motherId);
+					Date lastActualReturnDate = lastEncounter != null ? lastEncounter.getEncounterDatetime() : null;
+					boolean hasReturnedSinceMissedVisit = lastActualReturnDate != null && lastActualReturnDate.after(returnVisitDate);
+
+					isRtc = missedAppointment && hasReturnedSinceMissedVisit;
+				}
+
+				Date artStartDate = null;
+				if (artStartDateMap.get(motherId) != null && artStartDateMap.get(motherId).getValue() != null) {
+					artStartDate = (Date) artStartDateMap.get(motherId).getValue();
+				}
+
+				boolean newOnArt = false;
+				if (artStartDate != null) {
+					int daysSinceArtStart = Days.daysBetween(new DateTime(artStartDate), new DateTime(now)).getDays();
+					newOnArt = daysSinceArtStart < 180;
 				}
 
 				Obs stiObs = EmrCalculationUtils.obsResultForPatient(lastStiMap, motherId);
 				boolean hasRecentSti = false;
+				int daysSinceSti = -1;
 				if (stiObs != null) {
-					int daysSinceSti = Math.abs(Days.daysBetween(new DateTime(stiObs.getObsDatetime()), new DateTime(now)).getDays());
-					hasRecentSti = daysSinceSti <= 90;
+					daysSinceSti = Math.abs(Days.daysBetween(new DateTime(stiObs.getObsDatetime()), new DateTime(now)).getDays());
+					hasRecentSti = daysSinceSti <= 180;
 				}
 
 				Concept keyPopulation = EmrCalculationUtils.codedObsResultForPatient(lastKeyPopulationMap, motherId);
 				boolean isFswOrPwid = keyPopulation != null && (keyPopulation.equals(fswConcept) || keyPopulation.equals(peopleWhoInjectDrugsConcept) || keyPopulation.equals(usedAlcoholOrSubstanceUseConcept));
 
 				boolean motherHighRisk = motherAgeUnder19
-						&& newlyOnArt
 						&& (vlAvailable && !isVlSuppressed)
 						&& !goodAdherence
-						&& isIIT
 						&& hasRecentSti
-						&& !comorbidityControlled
-						&& isFswOrPwid;
+						&& isFswOrPwid
+						&& newOnArt;
 
 				boolean motherLowRisk = isVlSuppressed && goodAdherence && comorbidityControlled;
 
