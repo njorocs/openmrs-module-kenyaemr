@@ -33,10 +33,7 @@ import java.util.*;
 public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalculation implements PatientFlagCalculation {
 	protected static final Log log = LogFactory.getLog(EligibleForIDSRSymptomsFlagsCalculation.class);
 
-	List<String> idsrMessage = new ArrayList<String>();
-	String idsrMessageString = "";
-	private AdministrationService administrationService = Context.getAdministrationService();
-	final String isDmi = (administrationService.getGlobalProperty("kenyaemr.isDmi"));
+	private String idsrMessageString = "";
 	public static final EncounterType triageEncType = MetadataUtils.existing(EncounterType.class, CommonMetadata._EncounterType.TRIAGE);
 	public static final Form triageScreeningForm = MetadataUtils.existing(Form.class, CommonMetadata._Form.TRIAGE);
 	public static final EncounterType consultationEncType = MetadataUtils.existing(EncounterType.class, CommonMetadata._EncounterType.CONSULTATION);
@@ -78,20 +75,34 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 	String MYALGIA = "121AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	String BACKPAIN = "148035AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	String NECK_STIFFNESS = "112721AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	/**
-	 * Evaluates the calculation
-	 */
+
+	// Ebola-related UUIDs
+	String EBOLA_HEADACHE = "139084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String EBOLA_LETHARGY = "116334AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String EBOLA_BODY_ACHE = "cbe63c88-0bee-4a32-85dc-2c378a306731";
+	String EBOLA_ABDOMINAL_PAIN = "151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String EBOLA_VOMITING = "122983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String EBOLA_DIARRHEA = "142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String EBOLA_BLEEDING = "d5305f4f-745a-45ff-87ac-3d1fbad7d339";
+	String TRAVEL_HISTORY_QUESTION = "155deedc-3623-4fb1-a3ef-88bfe2b95ecc";
+	String TRAVEL_DRC = "165748AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String TRAVEL_UGANDA = "162884AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String TRAVEL_OTHER = "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	String CONTACT_WITH_SUSPECTED_CASE = "eb42f103-6d87-4c1e-a5f8-1c74dff5840d";
+	String YES_ANSWER = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 	@Override
 	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 
 		CalculationResultMap ret = new CalculationResultMap();
-		if (isDmi.equals("true")) {
+		String isDmi = Context.getAdministrationService().getGlobalProperty("kenyaemr.isDmi");
+		if ("true".equalsIgnoreCase(isDmi)) {
 			Set<Integer> alive = Filters.alive(cohort, context);
 			PatientService patientService = Context.getPatientService();
 
 			for (Integer ptId : alive) {
 				boolean eligible = false;
+				List<String> idsrMessage = new ArrayList<String>();
 				List<Visit> activeVisits = Context.getVisitService().getActiveVisitsByPatient(patientService.getPatient(ptId));
 				if (!activeVisits.isEmpty()) {
 					Date currentDate = new Date();
@@ -425,9 +436,57 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 									}
 								}
 
+					}
+						//11. Ebola - requires: temp >= 38 AND (travel to DRC/Uganda/Other OR contact Yes) AND >= 3 symptoms
+						if (tempValue != null && tempValue >= 38.0) {
+							ConceptService csEbola = Context.getConceptService();
+							Concept travelHistoryQ = csEbola.getConceptByUuid(TRAVEL_HISTORY_QUESTION);
+							Concept contactQ = csEbola.getConceptByUuid(CONTACT_WITH_SUSPECTED_CASE);
+							Concept yesAnswer = csEbola.getConceptByUuid(YES_ANSWER);
+							Set<String> validTravelDestinations = new HashSet<String>(Arrays.asList(TRAVEL_DRC, TRAVEL_UGANDA, TRAVEL_OTHER));
+							boolean hasTravelHistory = false;
+							boolean hasContactWithCase = false;
+							for (Obs obs : lastTriageEncounter.getObs()) {
+								if (obs.getConcept().equals(travelHistoryQ) && obs.getValueCoded() != null) {
+									if (validTravelDestinations.contains(obs.getValueCoded().getUuid())) {
+										hasTravelHistory = true;
+									}
+								}
+								if (obs.getConcept().equals(contactQ) && obs.getValueCoded() != null) {
+									if (obs.getValueCoded().equals(yesAnswer)) {
+										hasContactWithCase = true;
+									}
+								}
+							}
+							if (hasTravelHistory || hasContactWithCase) {
+								Set<String> ebolaSymptomUuids = new HashSet<String>(Arrays.asList(
+										EBOLA_HEADACHE, EBOLA_LETHARGY, EBOLA_BODY_ACHE,
+										EBOLA_ABDOMINAL_PAIN, EBOLA_VOMITING, EBOLA_DIARRHEA, EBOLA_BLEEDING));
+								Set<String> symptomsFound = new HashSet<String>();
+								for (Obs obs : lastTriageEncounter.getObs()) {
+									if (obs.getConcept().equals(screeningQuestion) && obs.getValueCoded() != null) {
+										if (ebolaSymptomUuids.contains(obs.getValueCoded().getUuid())) {
+											symptomsFound.add(obs.getValueCoded().getUuid());
+										}
+									}
+								}
+								if (symptomsFound.size() >= 3) {
+									for (Obs obs : lastTriageEncounter.getObs()) {
+										dateCreated = obs.getDateCreated();
+										if (dateCreated != null) {
+											String createdDate = dateFormat.format(dateCreated);
+											if (createdDate.equals(todayDate)) {
+												eligible = true;
+												idsrMessage.add("Ebola");
+												break;
+											}
+										}
+									}
+								}
+							}
 						}
 					}
-					//Hiv followup encounter
+				//Hiv followup encounter
 					if (lastHivFollowUpEncounter != null) {
 						//1. ILI
 						if (hivFollowupEncounterHasCough) {
@@ -560,12 +619,12 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 								}
 							}
 						}
-						//7. Neurological Syndrome
-						if (hivFollowupEncounterHasRefusalToFeed && hivFollowupEncounterHasConvulsions) {
-							DateTime birthDate = new DateTime(patient.getBirthdate());
-							int ageInDays = Days.daysBetween(birthDate, new DateTime()).getDays();
-							if (ageInDays >= 2 && ageInDays <= 28) {
-								for (Obs obs : lastTriageEncounter.getObs()) {
+					//7. Neurological Syndrome
+					if (hivFollowupEncounterHasRefusalToFeed && hivFollowupEncounterHasConvulsions) {
+						DateTime birthDate = new DateTime(patient.getBirthdate());
+						int ageInDays = Days.daysBetween(birthDate, new DateTime()).getDays();
+						if (ageInDays >= 2 && ageInDays <= 28) {
+							for (Obs obs : lastHivFollowUpEncounter.getObs()) {
 									dateCreated = obs.getDateCreated();
 									if (dateCreated != null) {
 										String createdDate = dateFormat.format(dateCreated);
@@ -639,8 +698,56 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 								}
 							}
 						}
+						//11. Ebola
+						if (tempValue != null && tempValue >= 38.0) {
+							ConceptService csEbola = Context.getConceptService();
+							Concept travelHistoryQ = csEbola.getConceptByUuid(TRAVEL_HISTORY_QUESTION);
+							Concept contactQ = csEbola.getConceptByUuid(CONTACT_WITH_SUSPECTED_CASE);
+							Concept yesAnswer = csEbola.getConceptByUuid(YES_ANSWER);
+							Set<String> validTravelDestinations = new HashSet<String>(Arrays.asList(TRAVEL_DRC, TRAVEL_UGANDA, TRAVEL_OTHER));
+							boolean hasTravelHistory = false;
+							boolean hasContactWithCase = false;
+							for (Obs obs : lastHivFollowUpEncounter.getObs()) {
+								if (obs.getConcept().equals(travelHistoryQ) && obs.getValueCoded() != null) {
+									if (validTravelDestinations.contains(obs.getValueCoded().getUuid())) {
+										hasTravelHistory = true;
+									}
+								}
+								if (obs.getConcept().equals(contactQ) && obs.getValueCoded() != null) {
+									if (obs.getValueCoded().equals(yesAnswer)) {
+										hasContactWithCase = true;
+									}
+								}
+							}
+							if (hasTravelHistory || hasContactWithCase) {
+								Set<String> ebolaSymptomUuids = new HashSet<String>(Arrays.asList(
+										EBOLA_HEADACHE, EBOLA_LETHARGY, EBOLA_BODY_ACHE,
+										EBOLA_ABDOMINAL_PAIN, EBOLA_VOMITING, EBOLA_DIARRHEA, EBOLA_BLEEDING));
+								Set<String> symptomsFound = new HashSet<String>();
+								for (Obs obs : lastHivFollowUpEncounter.getObs()) {
+									if (obs.getConcept().equals(screeningQuestion) && obs.getValueCoded() != null) {
+										if (ebolaSymptomUuids.contains(obs.getValueCoded().getUuid())) {
+											symptomsFound.add(obs.getValueCoded().getUuid());
+										}
+									}
+								}
+								if (symptomsFound.size() >= 3) {
+									for (Obs obs : lastHivFollowUpEncounter.getObs()) {
+										dateCreated = obs.getDateCreated();
+										if (dateCreated != null) {
+											String createdDate = dateFormat.format(dateCreated);
+											if (createdDate.equals(todayDate)) {
+												eligible = true;
+												idsrMessage.add("Ebola");
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
 					}
-					//Clinical Encounter
+				//Clinical Encounter
 					if (lastClinicalEncounter != null) {
 						//1.  ILI
 						if (clinicalEncounterHasCough) {
@@ -852,6 +959,54 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 								}
 							}
 						}
+						//11. Ebola
+						if (tempValue != null && tempValue >= 38.0) {
+							ConceptService csEbola = Context.getConceptService();
+							Concept travelHistoryQ = csEbola.getConceptByUuid(TRAVEL_HISTORY_QUESTION);
+							Concept contactQ = csEbola.getConceptByUuid(CONTACT_WITH_SUSPECTED_CASE);
+							Concept yesAnswer = csEbola.getConceptByUuid(YES_ANSWER);
+							Set<String> validTravelDestinations = new HashSet<String>(Arrays.asList(TRAVEL_DRC, TRAVEL_UGANDA, TRAVEL_OTHER));
+							boolean hasTravelHistory = false;
+							boolean hasContactWithCase = false;
+							for (Obs obs : lastClinicalEncounter.getObs()) {
+								if (obs.getConcept().equals(travelHistoryQ) && obs.getValueCoded() != null) {
+									if (validTravelDestinations.contains(obs.getValueCoded().getUuid())) {
+										hasTravelHistory = true;
+									}
+								}
+								if (obs.getConcept().equals(contactQ) && obs.getValueCoded() != null) {
+									if (obs.getValueCoded().equals(yesAnswer)) {
+										hasContactWithCase = true;
+									}
+								}
+							}
+							if (hasTravelHistory || hasContactWithCase) {
+								Set<String> ebolaSymptomUuids = new HashSet<String>(Arrays.asList(
+										EBOLA_HEADACHE, EBOLA_LETHARGY, EBOLA_BODY_ACHE,
+										EBOLA_ABDOMINAL_PAIN, EBOLA_VOMITING, EBOLA_DIARRHEA, EBOLA_BLEEDING));
+								Set<String> symptomsFound = new HashSet<String>();
+								for (Obs obs : lastClinicalEncounter.getObs()) {
+									if (obs.getConcept().equals(screeningQuestion) && obs.getValueCoded() != null) {
+										if (ebolaSymptomUuids.contains(obs.getValueCoded().getUuid())) {
+											symptomsFound.add(obs.getValueCoded().getUuid());
+										}
+									}
+								}
+								if (symptomsFound.size() >= 3) {
+									for (Obs obs : lastClinicalEncounter.getObs()) {
+										dateCreated = obs.getDateCreated();
+										if (dateCreated != null) {
+											String createdDate = dateFormat.format(dateCreated);
+											if (createdDate.equals(todayDate)) {
+												eligible = true;
+												idsrMessage.add("Ebola");
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
 
 					}
 
@@ -859,8 +1014,10 @@ public class EligibleForIDSRSymptomsFlagsCalculation extends AbstractPatientCalc
 				}
 
 				if (idsrMessage.size() > 0) {
-					idsrMessageString = StringUtils.join(idsrMessage, ",");
-
+					Set<String> uniqueMessages = new LinkedHashSet<String>(idsrMessage);
+					idsrMessageString = StringUtils.join(uniqueMessages, ",");
+				} else {
+					idsrMessageString = "";
 				}
 				ret.put(ptId, new BooleanResult(eligible, this));
 			}

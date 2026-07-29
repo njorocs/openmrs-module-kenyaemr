@@ -346,10 +346,20 @@ public class IDSRCohortLibrary {
      */
     public CohortDefinition suspectedEbolaCases() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String qry="select patient_id from kenyaemr_etl.etl_patient_triage t \n" + 
-						"where t.temperature >= 38 and (t.contact_with_evd_suspected_case = 1065 or t.history_of_travel != 1066 or t.occupation != 1107 ) and date(t.visit_date) between date(:startDate) and date(:endDate) \n" + 
-						"and t.voided = 0\n" + 
-						"group by t.patient_id";
+        String qry="select patient_id from kenyaemr_etl.etl_patient_triage t \n" +
+                "where t.temperature >= 38\n" +
+                "  and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065)\n" +
+                "  and (\n" +
+                "    select count(distinct c.complaint)\n" +
+                "    from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "    where c.patient_id = t.patient_id\n" +
+                "      and c.complaint in (139084, 116334, 2032542, 151, 122983, 142412, 162628)\n" +
+                "      and c.voided = 0\n" +
+                "      and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "  ) >= 3\n" +
+                "  and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "  and t.voided = 0\n" +
+                "group by t.patient_id";
         cd.setName("suspectedEbolaCases");
         cd.setQuery(qry);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
