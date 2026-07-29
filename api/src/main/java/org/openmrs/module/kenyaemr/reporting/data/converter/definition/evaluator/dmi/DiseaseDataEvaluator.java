@@ -38,14 +38,11 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select u.patient_id,\n" +
                 "       substring_index(\n" +
-                "               group_concat(u.disease order by if(u.disease = 'Suspected Ebola Case', 0, 1) separator '||'),\n" +
+                "               group_concat(u.disease separator '||'),\n" +
                 "               '||', 1) as disease\n" +
                 "from (\n" +
                 "         select a.patient_id,\n" +
                 "                CASE\n" +
-                "                    WHEN (a.temperature >= 38 AND (a.history_of_travel IN (165748, 162884, 2032318, 5622)\n" +
-                "                        OR a.contact_with_case = 1065))\n" +
-                "                        THEN 'Suspected Ebola Case'\n" +
                 "                    WHEN FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0\n" +
                 "                        THEN 'Acute Meningitis and Encephalitis'\n" +
                 "                    WHEN FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
@@ -96,9 +93,7 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
                 "               where date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                 and c.voided = 0\n" +
                 "               group by patient_id) a\n" +
-                "         where (a.temperature >= 38 AND (a.history_of_travel IN (165748, 162884, 2032318, 5622)\n" +
-                "             OR a.contact_with_case = 1065))\n" +
-                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0)\n" +
+                "         where (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(112721, a.complaint) > 0)\n" +
                 "            OR (FIND_IN_SET(142412, a.complaint) > 0 AND FIND_IN_SET(122983, a.complaint) > 0 AND\n" +
                 "                a.complaint_duration > 2)\n" +
                 "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(143264, a.complaint) > 0 AND a.complaint_duration < 10 AND\n" +
@@ -106,7 +101,7 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
                 "                a.temperature >= 38)\n" +
                 "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(141830, a.complaint) > 0 AND\n" +
                 "                FIND_IN_SET(136443, a.complaint) > 0 AND FIND_IN_SET(135367, a.complaint) > 0 AND a.fever_duration_from_days > 2)\n" +
-                "            OR (FIND_IN_SET(40238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
+                "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(139084, a.complaint) > 0 AND\n" +
                 "                FIND_IN_SET(871, a.complaint) > 0 AND a.fever_duration_from_days > 1)\n" +
                 "            OR (FIND_IN_SET(140238, a.complaint) > 0 AND FIND_IN_SET(116558, a.complaint) > 0 AND a.temperature > 38.5 AND a.fever_duration_from_days > 2)\n" +
                 "            OR (a.complaint = 157498 AND timestampdiff(YEAR, a.DOB, a.visit_date) <= 15)\n" +
@@ -122,6 +117,14 @@ public class DiseaseDataEvaluator implements PersonDataEvaluator {
                 "         where t.temperature >= 38\n" +
                 "           and (t.history_of_travel in (165748, 162884, 2032318, 5622)\n" +
                 "             or t.contact_with_evd_suspected_case = 1065)\n" +
+                "           and (\n" +
+                "             select count(distinct c.complaint)\n" +
+                "             from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "             where c.patient_id = t.patient_id\n" +
+                "               and c.complaint in (139084, 116334, 2032542, 151, 122983, 142412, 162628)\n" +
+                "               and c.voided = 0\n" +
+                "               and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "           ) >= 3\n" +
                 "           and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "           and t.voided = 0\n" +
                 "     ) u\n" +

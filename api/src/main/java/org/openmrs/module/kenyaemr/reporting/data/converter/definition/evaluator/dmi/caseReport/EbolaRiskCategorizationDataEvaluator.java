@@ -33,33 +33,30 @@ public class EbolaRiskCategorizationDataEvaluator implements PersonDataEvaluator
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry =
-            "select t.patient_id, " +
-            "    case " +
-            "        when t.temperature >= 38 " +
-            "             and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065) " +
-            "             and ( " +
-            "                 (select count(distinct c.complaint) from kenyaemr_etl.etl_allergy_chronic_illness c " +
-            "                     where c.patient_id = t.patient_id " +
-            "                       and c.complaint in (139084, 116334, 2032542, 122983, 142412, 151, 162628) " +
-            "                       and c.voided = 0 " +
-            "                       and date(c.visit_date) between date(:startDate) and date(:endDate)) >= 3 " +
-            "             ) " +
-            "        then 'Suspected Ebola Case' " +
-            "        when t.temperature >= 38 " +
-            "             and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065) " +
-            "        then 'Suspected Ebola Case' " +
-            "        else 'Suspected Ebola Case - Low Risk' " +
-            "    end as risk_category " +
-            "from kenyaemr_etl.etl_patient_triage t " +
-            "inner join ( " +
-            "    select patient_id, max(visit_date) as latest_visit " +
-            "    from kenyaemr_etl.etl_patient_triage " +
-            "    where date(visit_date) between date(:startDate) and date(:endDate) " +
-            "    and voided = 0 " +
-            "    group by patient_id " +
-            ") latest on t.patient_id = latest.patient_id and t.visit_date = latest.latest_visit " +
-            "where t.voided = 0 " +
-            "group by t.patient_id";
+                "select t.patient_id, " +
+                        "    case " +
+                        "        when t.temperature >= 38 " +
+                        "             and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065) " +
+                        "             and ( " +
+                        "                 (select count(distinct c.complaint) from kenyaemr_etl.etl_allergy_chronic_illness c " +
+                        "                     where c.patient_id = t.patient_id " +
+                        "                       and c.complaint in (139084, 116334, 2032542, 122983, 142412, 151, 162628) " +
+                        "                       and c.voided = 0 " +
+                        "                       and date(c.visit_date) between date(:startDate) and date(:endDate)) >= 3 " +
+                        "             ) " +
+                        "        then 'Suspected Ebola Case' " +
+                        "        else null " +
+                        "    end as risk_category " +
+                        "from kenyaemr_etl.etl_patient_triage t " +
+                        "inner join ( " +
+                        "    select patient_id, max(visit_date) as latest_visit " +
+                        "    from kenyaemr_etl.etl_patient_triage " +
+                        "    where date(visit_date) between date(:startDate) and date(:endDate) " +
+                        "    and voided = 0 " +
+                        "    group by patient_id " +
+                        ") latest on t.patient_id = latest.patient_id and t.visit_date = latest.latest_visit " +
+                        "where t.voided = 0 " +
+                        "group by t.patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
