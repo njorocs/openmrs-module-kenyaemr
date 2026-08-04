@@ -15,6 +15,7 @@ import org.openmrs.Allergen;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
 import org.openmrs.Concept;
+import org.openmrs.ConceptName;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Condition;
 import org.openmrs.Diagnosis;
@@ -338,7 +339,8 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 											 Concept durationUnitsCon, Concept onsetStatusCon, Concept otherTextCon) {
 		SimpleObject complaint = new SimpleObject();
 		Double durationValue = null;
-		String durationUnit  = "days";
+		String durationUnit = Context.getMessageSourceService().getMessage("kenyaemr.duration.days");
+
 
 		for (Obs member : groupObs.getGroupMembers(false)) {
 			Concept mc = member.getConcept();
@@ -349,7 +351,11 @@ public class KenyaemrVisitSummaryRestController extends BaseRestController {
 				durationValue = member.getValueNumeric();
 			} else if (durationUnitsCon != null && mc.equals(durationUnitsCon)
 					&& member.getValueCoded() != null && member.getValueCoded().getName() != null) {
-				durationUnit = member.getValueCoded().getName().getName();
+				Concept durationUnitConcept = member.getValueCoded();
+				ConceptName localizedName = durationUnitConcept.getPreferredName(Context.getLocale());
+				durationUnit = localizedName != null
+						? localizedName.getName()
+						: durationUnitConcept.getName().getName();
 			} else if (onsetStatusCon != null && mc.equals(onsetStatusCon)
 					&& member.getValueCoded() != null && member.getValueCoded().getName() != null) {
 				complaint.put("onsetStatus", member.getValueCoded().getName().getName());
