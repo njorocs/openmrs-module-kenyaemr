@@ -1009,7 +1009,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                       SUM(\n" +
                 "                               IFNULL(r.cash_receipts_cash, 0) +\n" +
                 "                               IFNULL(r.cash_receipts_mobile_money, 0) +\n" +
-                "                               IFNULL(r.cash_receipts_insurance, 0)\n" +
+                "                               IFNULL(r.cash_receipts_insurance, 0) +\n" +
                 "                               IFNULL(r.cash_receipt_other_debtors_receipt, 0)\n" +
                 "                       ),\n" +
                 "                       0) AS SIGNED\n" +
