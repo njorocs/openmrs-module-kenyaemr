@@ -1007,8 +1007,9 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.setSqlQuery("SELECT CAST(\n" +
                 "               IFNULL(\n" +
                 "                       SUM(\n" +
-                "                               IFNULL(r.cash_receipts_cash_from_daily_services, 0) +\n" +
-                "                               IFNULL(r.cash_receipt_nhif_receipt, 0) +\n" +
+                "                               IFNULL(r.cash_receipts_cash, 0) +\n" +
+                "                               IFNULL(r.cash_receipts_mobile_money, 0) +\n" +
+                "                               IFNULL(r.cash_receipts_insurance, 0) +\n" +
                 "                               IFNULL(r.cash_receipt_other_debtors_receipt, 0)\n" +
                 "                       ),\n" +
                 "                       0) AS SIGNED\n" +
@@ -1022,7 +1023,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.setName("clientsWaived");
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
-        sqlDataSetDefinition.setSqlQuery("select CAST(IFNULL(count(ifnull(r.revenue_not_collected_patient_not_yet_paid_waivers, 0)),\n" +
+        sqlDataSetDefinition.setSqlQuery("select CAST(IFNULL(count(ifnull(r.cash_receipts_waiver, 0)),\n" +
                 "                   0) AS SIGNED) as clients_waived\n" +
                 "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
@@ -1033,7 +1034,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.setName("AmountWaived");
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
-        sqlDataSetDefinition.setSqlQuery("select CAST(ifnull(sum(ifnull(r.revenue_not_collected_patient_not_yet_paid_waivers, 0)), 0) AS SIGNED) as total_waived\n" +
+        sqlDataSetDefinition.setSqlQuery("select CAST(ifnull(sum(ifnull(r.cash_receipts_waiver, 0)), 0) AS SIGNED) as total_waived\n" +
                 "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
