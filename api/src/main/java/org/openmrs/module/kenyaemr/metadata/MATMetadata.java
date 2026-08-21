@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.encounterType;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.form;
-import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.globalProperty;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.program;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * HIV metadata bundle
@@ -63,8 +63,11 @@ public class MATMetadata extends AbstractMetadataBundle {
 	 */
 	@Override
 	public void install() {
+		boolean installPrograms = shouldInstallPrograms();
 
-		install(program("MAT", "Methadone Assisted Therapy", Dictionary.MAT_PROGRAM, _Program.MAT));
+		if (installPrograms) {
+			install(program("MAT", "Methadone Assisted Therapy", Dictionary.MAT_PROGRAM, _Program.MAT));
+		}
 		install(encounterType("MAT Clinical Encounter", "MAT Clinical Encounter", _EncounterType.MAT_CLINICAL_ENCOUNTER));
 		install(encounterType("MAT Cessation Encounter", "MAT Cessation Encounter", _EncounterType.MAT_CESSATION_ENCOUNTER));
 		install(encounterType("MAT Clinical eligibility assessment", "MAT Clinical Encounter", _EncounterType.MAT_CLINICAL_ELIGIBILITY_ASSESSMENT_AND_REFERRAL_ENCOUNTER));

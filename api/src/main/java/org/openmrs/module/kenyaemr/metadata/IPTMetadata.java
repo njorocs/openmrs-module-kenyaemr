@@ -24,6 +24,7 @@ import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.form;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.patientIdentifierType;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.program;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * TPT metadata bundle
@@ -79,7 +80,11 @@ public class IPTMetadata extends AbstractMetadataBundle {
 		install(patientIdentifierType("Subcounty Registration Number", "Assigned to every IPT patient",
 				null, null, null,
 				LocationBehavior.NOT_USED, false, _PatientIdentifierType.DISTRICT_REG_NUMBER));
+		boolean installPrograms = shouldInstallPrograms();
 
-		install(program("TPT", "Tuberculosis Preventive Therapy (TPT)", Dictionary.TUBERCULOSIS_TREATMENT_PROGRAM, _Program.IPT));
+
+		if (installPrograms) {
+			install(program("TPT", "Tuberculosis Preventive Therapy (TPT)", Dictionary.TUBERCULOSIS_TREATMENT_PROGRAM, _Program.IPT));
+		}
 	}
 }

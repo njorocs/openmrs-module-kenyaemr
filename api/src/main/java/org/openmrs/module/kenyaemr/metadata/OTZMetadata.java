@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 
 /**
  * OTZ metadata bundle
@@ -70,9 +71,11 @@ public class OTZMetadata extends AbstractMetadataBundle {
 		} else {
 			logger.info("=== OTZMetadata: SKIPPING form installation because shouldInstallForms() returned false ===");
 		}
+		boolean installPrograms = shouldInstallPrograms();
 
-		install(program("OTZ", "OTZ program", _Concept.OTZ, _Program.OTZ));
-
+		if (installPrograms) {
+			install(program("OTZ", "OTZ program", _Concept.OTZ, _Program.OTZ));
+		}
 
 	}
 }

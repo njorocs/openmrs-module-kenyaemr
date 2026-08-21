@@ -15,6 +15,11 @@ import org.openmrs.ConceptName;
 import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptClass;
 import java.util.Locale;
+import org.openmrs.Concept;
+import org.openmrs.ConceptName;
+import org.openmrs.ConceptDatatype;
+import org.openmrs.ConceptClass;
+import java.util.Locale;
 import org.openmrs.PatientIdentifierType.LocationBehavior;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
@@ -29,8 +34,6 @@ import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
 import org.openmrs.module.kenyaemr.util.EmrDatabaseUtil;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
-
-
 
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
@@ -162,7 +165,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String NURSING_CARE_PLAN = "b6569074-3b8c-43ba-bd4a-98c445405035";
 		public static final String AEFI_INVESTIGATION = "036a0ef4-8197-41ad-bfbf-802e79a14606";
 		public static final String IN_PATIENT_ADMISSION = "e22e39fd-7db2-45e7-80f1-60fa0d5a4378";
-		public static final String MORTALITY  = "d5a9963b-5656-4c20-9b6b-1a195650c8d8";
+		public static final String MORTALITY = "d5a9963b-5656-4c20-9b6b-1a195650c8d8";
 		public static final String ATP_DISCLOSURE_READINESS_ASSESSMENT = "e016fcd1-08ad-4504-9d95-6e220d97f37c";
 		public static final String ATP_TAKING_CHARGE_TRACKING = "07c3d8c4-6fc7-4bdd-a0d9-626d030dc41f";
 		public static final String ATP_TRANSITION_READINESS = "2f184ba2-7582-411f-95d0-9cba4023dd46";
@@ -379,6 +382,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String DATATOOLS_DATABASE = EmrDatabaseUtil.getDataToolsSchema();
 
 	}
+
 	/**
 	 * @see org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle#install()
 	 */
@@ -415,7 +419,6 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				_EncounterType.PROCEDURE_RESULTS));
 		install(encounterType("Nutrition", "Nutrition encounter type", _EncounterType.NUTRITION));
 		install(encounterType("Audiology", "Audiology encounter type", _EncounterType.AUDIOLOGY));
-		install(encounterType("Psychiatric", "Psychiatric encounter type", _EncounterType.PSYCHIATRIC));
 		install(encounterType("Oncology", "Oncology encounter type", _EncounterType.ONCOLOGY));
 		install(encounterType("Physiotherapy", "Physiotherapy encounter type", _EncounterType.PHYSIOTHERAPY));
 		install(encounterType("GOPC", "GOPC encounter type", _EncounterType.GOPC));
@@ -426,29 +429,46 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("Speech and Language", "Speech and Language encounter type",
 				_EncounterType.SPEECHANDLANGUAGE));
 		install(encounterType("Family Planning", "Family Planning encounter type", _EncounterType.FAMILY_PLANNING));
-		install(encounterType("Diabetic Clinic", "Diabetic Clinic encounter type", _EncounterType.DIABETICCONSULTATION));
-		install(encounterType("Adverse Drug Reaction", "Adverse Drug Reaction encounter type", _EncounterType.ADVERSEDRUGREACTION));
+		install(encounterType("Diabetic Clinic", "Diabetic Clinic encounter type",
+				_EncounterType.DIABETICCONSULTATION));
+		install(encounterType("Adverse Drug Reaction", "Adverse Drug Reaction encounter type",
+				_EncounterType.ADVERSEDRUGREACTION));
 		install(encounterType("Dermatology Clinic", "Dermatology clinical encounter type", _EncounterType.DERMATOLOGY));
 		install(encounterType("Urology Clinic", "Urology clinical encounter type", _EncounterType.UROLOGY));
-		install(encounterType("Hearing Screening Clinic", "Hearing Screening clinical encounter type", _EncounterType.HEARING_SCREENING));
+		install(encounterType("Hearing Screening Clinic", "Hearing Screening clinical encounter type",
+				_EncounterType.HEARING_SCREENING));
 		install(encounterType("Neurology Clinic", "Neurology clinical encounter type", _EncounterType.NEUROLOGY));
 		install(encounterType("Post-Mortem", "Post-Mortem clinical encounter type", _EncounterType.POST_MORTEM));
-		install(encounterType("Mortuary Admission", "Morgue admission clinical encounter type", _EncounterType.MORGUE_ADMISSION));
-		install(encounterType("Mortuary Discharge", "Morgue discharge clinical encounter type", _EncounterType.MORGUE_DISCHARGE));
-		install(encounterType("Infectious Disease", "Infectious disease clinical encounter type", _EncounterType.INFECTIOUS_DISEASE));
-		install(encounterType("IPD Procedure", "Inpatient procedure clinical encounter type", _EncounterType.IPD_PROCEDURE));
-		install(encounterType("Nursing Cardex", "Nursing cardex clinical encounter type", _EncounterType.NURSING_CARDEX));
+		install(encounterType("Mortuary Admission", "Morgue admission clinical encounter type",
+				_EncounterType.MORGUE_ADMISSION));
+		install(encounterType("Mortuary Discharge", "Morgue discharge clinical encounter type",
+				_EncounterType.MORGUE_DISCHARGE));
+		install(encounterType("Infectious Disease", "Infectious disease clinical encounter type",
+				_EncounterType.INFECTIOUS_DISEASE));
+		install(encounterType("IPD Procedure", "Inpatient procedure clinical encounter type",
+				_EncounterType.IPD_PROCEDURE));
+		install(encounterType("Nursing Cardex", "Nursing cardex clinical encounter type",
+				_EncounterType.NURSING_CARDEX));
 		install(encounterType("Doctor's Note", "Doctor's note clinical encounter type", _EncounterType.DOCTORS_NOTE));
-		install(encounterType("Post Operation", "Post operation clinical encounter type", _EncounterType.POST_OPERATION));
-		install(encounterType("Pre-Operation Checklist", "Pre-Operation checklist clinical encounter type", _EncounterType.PRE_OPERATION_CHECKLIST));
-		install(encounterType("New born admission", "New born admission clinical encounter type", _EncounterType.NEW_BORN_ADMISSION));
-		install(encounterType("Plastic Surgery Clinic", "Plastic surgery clinical encounter type", _EncounterType.PLASTIC_SURGERY));
+		install(encounterType("Post Operation", "Post operation clinical encounter type",
+				_EncounterType.POST_OPERATION));
+		install(encounterType("Pre-Operation Checklist", "Pre-Operation checklist clinical encounter type",
+				_EncounterType.PRE_OPERATION_CHECKLIST));
+		install(encounterType("New born admission", "New born admission clinical encounter type",
+				_EncounterType.NEW_BORN_ADMISSION));
+		install(encounterType("Plastic Surgery Clinic", "Plastic surgery clinical encounter type",
+				_EncounterType.PLASTIC_SURGERY));
 		install(encounterType("IIT Score", "IIT Score clinical encounter type", _EncounterType.IIT_SCORE));
-		install(encounterType("IPD Discharge", "Inpatient department clinical discharge encounter type", _EncounterType.IPD_DISCHARGE));
-		install(encounterType("Leprosy Initial", "Leprosy Initial Clinical encounter type", _EncounterType.LEPROSY_INITIAL));
-		install(encounterType("Leprosy Followup", "Leprosy Followup Clinical encounter type", _EncounterType.LEPROSY_FOLLOWUP));
-		install(encounterType("Leprosy Postoperative", "Leprosy Postoperative Clinical encounter type", _EncounterType.LEPROSY_POSTOPERATIVE));
-		install(encounterType("Fluid Intake and Output", "Fluid Intake and Output Clinical encounter type", _EncounterType.FLUID_INTAKE));
+		install(encounterType("IPD Discharge", "Inpatient department clinical discharge encounter type",
+				_EncounterType.IPD_DISCHARGE));
+		install(encounterType("Leprosy Initial", "Leprosy Initial Clinical encounter type",
+				_EncounterType.LEPROSY_INITIAL));
+		install(encounterType("Leprosy Followup", "Leprosy Followup Clinical encounter type",
+				_EncounterType.LEPROSY_FOLLOWUP));
+		install(encounterType("Leprosy Postoperative", "Leprosy Postoperative Clinical encounter type",
+				_EncounterType.LEPROSY_POSTOPERATIVE));
+		install(encounterType("Fluid Intake and Output", "Fluid Intake and Output Clinical encounter type",
+				_EncounterType.FLUID_INTAKE));
 		install(encounterType("ADR Assessment Tool", "Adverse Drug Reaction Assessment Tool Clinical encounter type",
 				_EncounterType.ADR_ASSESSMENT_TOOL));
 		install(encounterType("Initial Nursing Cardex", "Initial Nursing Cardex Clinical encounter type", _EncounterType.INITIAL_NURSING_CARDEX));
@@ -466,9 +486,9 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("ATP Disclosure Tracking", "ATP Disclosure Tracking", _EncounterType.ATP_DISCLOSURE_TRACKING));
 		install(encounterType("Transfusion Services", "Blood Transfusion Services", _EncounterType.TRANSFUSION_SERVICES));
 		install(encounterType("Therapeutic Play", "Therapeutic Play encounter type ", _EncounterType.THERAPEUTIC_PLAY));
+		install(encounterType("Psychiatric", "Psychiatric encounter type", _EncounterType.PSYCHIATRIC));
 		install(encounterType(("Mental Health Enrollment"), "Mental Health Enrollment encounter type ", _EncounterType.MENTAL_HEALTH_ENROLLMENT));
 		install(encounterType("Mental Health Followup", "Mental Health Followup Encounter Type ", _EncounterType.MENTAL_HEALTH_FOLLOWUP));
-
 
 
 
@@ -487,7 +507,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					_Form.SURGICAL_AND_MEDICAL_HISTORY));
 			install(form("Triage", null, _EncounterType.TRIAGE, "1", _Form.TRIAGE));
 			install(form("Generalized Anxiety Disorder Assessment",
-					"Anxiety Screening using Generalized Anxiety Disorder Assessment (GAD-7)", _EncounterType.GAD_7, "1",
+					"Anxiety Screening using Generalized Anxiety Disorder Assessment (GAD-7)", _EncounterType.GAD_7,
+					"1",
 					_Form.GAD_7));
 			install(form("HTS Initial Form", "Form for HTS testing services ", _EncounterType.HTS, "1",
 					_Form.HTS_INITIAL_TEST));
@@ -496,9 +517,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("HTS Linkage Form", "Form for HTS linkage", _EncounterType.HTS, "1", _Form.HTS_LINKAGE));
 			install(form("Contact Listing Form", "Lists all contacts for a patient", _EncounterType.HTS, "1",
 					_Form.CONTACT_LISTING));
-			install(form("Registration Form", "Initial data collection for a patient/client, not specific to any program",
+			install(form("Registration Form",
+					"Initial data collection for a patient/client, not specific to any program",
 					_EncounterType.REGISTRATION, "1", _Form.BASIC_REGISTRATION));
-			install(form("Drug Regimen Editor", null, _EncounterType.DRUG_REGIMEN_EDITOR, "1", _Form.DRUG_REGIMEN_EDITOR));
+			install(form("Drug Regimen Editor", null, _EncounterType.DRUG_REGIMEN_EDITOR, "1",
+					_Form.DRUG_REGIMEN_EDITOR));
 			install(form("HTS Client Tracing Form", "Form for tracing hts clients", _EncounterType.HTS, "1",
 					_Form.HTS_CLIENT_TRACING));
 			install(form("HTS Client Referral Form", "Form for HTS linkage referral", _EncounterType.HTS, "1",
@@ -517,15 +540,21 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					_Form.SARI_SURVEILLANCE_FORM));
 			install(form("Nutrition Form", "Form for Nutrition", _EncounterType.NUTRITION, "1", _Form.NUTRITION));
 			install(form("Audiology", "Form for Audiology", _EncounterType.AUDIOLOGY, "1", _Form.AUDIOLOGY_FORM));
+			install(form("Physiotherapy Form", "Form for Physiotherapy", _EncounterType.PHYSIOTHERAPY, "1",
+					_Form.PHYSIOTHERAPY_FORM));
+			install(form("Oncology Form", "Form for Oncology", _EncounterType.ONCOLOGY, "1", _Form.ONCOLOGY_FORM));
 			install(form("Psychiatric Form", "Form for Psychiatric", _EncounterType.PSYCHIATRIC, "1",
 					_Form.PSYCHIATRIC_FORM));
 			install(form("Oncology Form", "Form for Oncology", _EncounterType.ONCOLOGY, "1", _Form.ONCOLOGY_FORM));
 			install(form("GOPC Form", "Form for GOPC", _EncounterType.GOPC, "1", _Form.GOPC_FORM));
 			install(form("MOPC Form", "Form for MOPC", _EncounterType.MOPC, "1", _Form.MOPC_FORM));
 			install(form("SOPC Form", "Form for SOPC", _EncounterType.SOPC, "1", _Form.SOPC_FORM));
-			install(form("Surgical Safety Checklist (Sign In) Form", "Form for Surgical Safety Checklist (Sign In)", _EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_SIGN_IN_FORM));
-			install(form("Surgical Safety Checklist (Sign Out) Form", "Form for Surgical Safety Checklist (Sign Out)", _EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_SIGN_OUT_FORM));
-			install(form("Surgical Safety Checklist (Time Out) Form", "Form for Surgical Safety Checklist (Time Out)", _EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_TIME_OUT_FORM));
+			install(form("Surgical Safety Checklist (Sign In) Form", "Form for Surgical Safety Checklist (Sign In)",
+					_EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_SIGN_IN_FORM));
+			install(form("Surgical Safety Checklist (Sign Out) Form", "Form for Surgical Safety Checklist (Sign Out)",
+					_EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_SIGN_OUT_FORM));
+			install(form("Surgical Safety Checklist (Time Out) Form", "Form for Surgical Safety Checklist (Time Out)",
+					_EncounterType.SOPC, "1", _Form.SURGICAL_SAFETY_CHECKLIST_TIME_OUT_FORM));
 			install(form("Family Planning", "Form for family planning", _EncounterType.FAMILY_PLANNING, "1",
 					_Form.FAMILY_PLANNING));
 			install(form("POPC Form", "Form for Oncology", _EncounterType.POPC, "1", _Form.POPC_FORM));
@@ -582,13 +611,13 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("PreOperative Questionnare For Anaesthesia Form", "A form used to capture PreOperative Questionnare For Anaesthesia", _EncounterType.SOPC, "1", _Form.PREOPERATIVE_QUESTIONNAIRE_FORM));
 			install(form("Blood Transfusion Services Form", "A form collecting blood transfusion details", _EncounterType.TRANSFUSION_SERVICES, "1", _Form.BLOOD_TRANSFUSION_FORM));
 			install(form("Therapeutic Play Form", "Form for recording Therapeutic Play ", _EncounterType.THERAPEUTIC_PLAY, "1.0", _Form.THERAPEUTIC_PLAY_FORM));
-			install(form("Mental Health Initial Form", "Form for Mental Health Initial", _EncounterType.PSYCHIATRIC, "1",
-					_Form.PHYSIOTHERAPY_FORM));
-			install(form("Mental Health Followup Form", "Form for Mental Health Followup", _EncounterType.MENTAL_HEALTH_FOLLOWUP, "1",
+			install(form("Psychiatric Form", "Form for Psychiatric", _EncounterType.PSYCHIATRIC, "1",
+					_Form.PSYCHIATRIC_FORM));
+			install(form("Psychiatry Follow up Form", "Form for Mental Health Followup", _EncounterType.MENTAL_HEALTH_FOLLOWUP, "1",
 					_Form.MENTAL_HEALTH_FOLLOWUP_FORM));
 			install(form("Mental Health Enrollment Form", "Form for Mental Health Enrollment", _EncounterType.MENTAL_HEALTH_ENROLLMENT, "1",
 					_Form.MENTAL_HEALTH_ENROLLMENT_FORM));
-
+			
 
 		} else {
 			logger.info("=== SKIPPING form installation because shouldInstallForms() returned false ===");
@@ -605,12 +634,14 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		AdministrationService administrationService = Context.getAdministrationService();
 
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {
-			install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
+    		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
 		}
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_PASSWORD) == null) {
-			install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+    		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
 		}
-
+        if (administrationService.getGlobalPropertyObject("kenyaemr.ebola.flag.concept.uuid") == null) {
+            install(globalProperty("kenyaemr.ebola.flag.concept.uuid", "Concept UUID for storing Ebola flag obs", "e5d9f5f1-8a2b-4c6f-9c3b-123456789abc"));
+        }      
 
 		install(globalProperty("order.drugDosingUnitsConceptUuid", "Drug dosing units concept",
 				"162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -626,105 +657,160 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_GET_END_POINT) == null) {
 			install(globalProperty(GP_CLIENT_VERIFICATION_GET_END_POINT, "A GET API for getting client information at the client registry", "https://afyakenyaapi.health.go.ke/partners/registry/search"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_END_POINT) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_END_POINT, "A GET API for getting SHA client information from the client registry", "http://127.0.0.1:9342/api/shaPatientResource"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_END_POINT) == null) {
+			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_END_POINT,
+					"A GET API for getting SHA client information from the client registry",
+					"http://127.0.0.1:9342/api/shaPatientResource"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_HIE_BASE_END_POINT_URL) == null) {
+		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_HIE_BASE_END_POINT_URL) == null) {
 			install(globalProperty(GP_HIE_BASE_END_POINT_URL, "A GET API for HIE registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_END_POINT) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_END_POINT, "A GET API for getting SHA Health Worker information from Healthcare Worker registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_END_POINT) == null) {
+			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_END_POINT,
+					"A GET API for getting SHA Health Worker information from Healthcare Worker registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER, "API user for for connecting to the SHA provider registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER) == null) {
+			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER,
+					"API user for for connecting to the SHA provider registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET, "API secret token for for connecting to the SHA provider registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET) == null) {
+			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET,
+					"API secret token for for connecting to the SHA provider registry", ""));
 		}
 
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_USER) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_USER, "API user for for connecting to the SHA client registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_USER) == null) {
+			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_USER,
+					"API user for for connecting to the SHA client registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET, "API secret token for for connecting to the SHA client registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET) == null) {
+			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET,
+					"API secret token for for connecting to the SHA client registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_HIE_API_USER) == null) {
+		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_HIE_API_USER) == null) {
 			install(globalProperty(GP_HIE_API_USER, "API user for for connecting to the SHA Facility registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET, "API secret token for for connecting to the SHA facility registry", ""));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET) == null) {
+			install(globalProperty(GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET,
+					"API secret token for for connecting to the SHA facility registry", ""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_POST_END_POINT) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_POST_END_POINT, "A POST API for posting client information to the client registry", "https://afyakenyaapi.health.go.ke/partners/registry"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_POST_END_POINT) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_POST_END_POINT,
+					"A POST API for posting client information to the client registry",
+					"https://afyakenyaapi.health.go.ke/partners/registry"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_API_TOKEN) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_API_TOKEN, "API token for connecting to the client registry", ""));
+		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_API_TOKEN) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_API_TOKEN, "API token for connecting to the client registry",
+					""));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_TOKEN_URL) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_TOKEN_URL, "client registry authorization token URL", "https://afyakenyaidentityapi.health.go.ke/connect/token"));
+		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_TOKEN_URL) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_TOKEN_URL, "client registry authorization token URL",
+					"https://afyakenyaidentityapi.health.go.ke/connect/token"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID, "client registry authorization client ID", "palladium.partner.client"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID, "client registry authorization client ID",
+					"palladium.partner.client"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET, "client registry authorization client secret", "28f95b2a"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET,
+					"client registry authorization client secret", "28f95b2a"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_SCOPE) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_SCOPE, "client registry authorization scope", "DHP.Gateway DHP.Partners"));
+		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_SCOPE) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_SCOPE, "client registry authorization scope",
+					"DHP.Gateway DHP.Partners"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_QUERY_UPI_END_POINT) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_QUERY_UPI_END_POINT, "A GET API for getting client information at the client registry using NUPI number", "https://afyakenyaapi.health.go.ke/partners/registry/search/upi"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_QUERY_UPI_END_POINT) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_QUERY_UPI_END_POINT,
+					"A GET API for getting client information at the client registry using NUPI number",
+					"https://afyakenyaapi.health.go.ke/partners/registry/search/upi"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_QUERY_CCC_END_POINT) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_QUERY_CCC_END_POINT, "A GET API for getting client information at the client registry using CCC number", "https://afyakenyaapi.health.go.ke/partners/registry/search/ccc"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_QUERY_CCC_END_POINT) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_QUERY_CCC_END_POINT,
+					"A GET API for getting client information at the client registry using CCC number",
+					"https://afyakenyaapi.health.go.ke/partners/registry/search/ccc"));
 		}
-		if(administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_UPDATE_END_POINT) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_UPDATE_END_POINT, "A PUT API for updating client information at the client registry", "https://dhpstagingapi.health.go.ke/partners/registry"));
+		if (administrationService
+				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_UPDATE_END_POINT) == null) {
+			install(globalProperty(GP_CLIENT_VERIFICATION_UPDATE_END_POINT,
+					"A PUT API for updating client information at the client registry",
+					"https://dhpstagingapi.health.go.ke/partners/registry"));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_JWT_GET_END_POINT) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_JWT_GET_END_POINT, "A GET API for connecting to the SHA JWT Authenticated client registry", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_JWT_GET_END_POINT) == null) {
+			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_JWT_GET_END_POINT,
+					"A GET API for connecting to the SHA JWT Authenticated client registry", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_JWT_GET_END_POINT) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_JWT_GET_END_POINT, "A GET API for connecting to the SHA JWT Authenticated health worker registry", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_JWT_GET_END_POINT) == null) {
+			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_JWT_GET_END_POINT,
+					"A GET API for connecting to the SHA JWT Authenticated health worker registry", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT) == null) {
-			install(globalProperty(GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT, "A GET API for connecting to the SHA JWT Authenticated facility registry", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT) == null) {
+			install(globalProperty(GP_SHA_FACILITY_VERIFICATION_JWT_GET_END_POINT,
+					"A GET API for connecting to the SHA JWT Authenticated facility registry", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_GET_END_POINT) == null) {
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_GET_END_POINT) == null) {
 			install(globalProperty(GP_SHA_JWT_TOKEN_GET_END_POINT, "SHA JWT Authentication token url", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME) == null) {
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME) == null) {
 			install(globalProperty(GP_SHA_JWT_TOKEN_USERNAME, "SHA JWT Authentication token username", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD) == null) {
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD) == null) {
 			install(globalProperty(GP_SHA_JWT_TOKEN_PASSWORD, "SHA JWT Authentication token password", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_INTERVENTIONS) == null) {
+		if (Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_INTERVENTIONS) == null) {
 			install(globalProperty(GP_SHA_INTERVENTIONS, "SHA Interventions url", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_PACKAGES) == null) {
+		if (Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_PACKAGES) == null) {
 			install(globalProperty(GP_SHA_PACKAGES, "SHA packages url", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_REGISTRATION_NUMBER) == null) {
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_REGISTRATION_NUMBER) == null) {
 			install(globalProperty(GP_SHA_FACILITY_REGISTRATION_NUMBER, "SHA facility registration number", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_CLINICAL_ACTION_PERCENTAGE_THRESHOLD) == null) {
-			install(globalProperty(GP_CLINICAL_ACTION_PERCENTAGE_THRESHOLD, "General percentage threshold for clinical action", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_CLINICAL_ACTION_PERCENTAGE_THRESHOLD) == null) {
+			install(globalProperty(GP_CLINICAL_ACTION_PERCENTAGE_THRESHOLD,
+					"General percentage threshold for clinical action", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_CLINICAL_ACTION_HEI_ABSOLUTE_THRESHOLD) == null) {
-			install(globalProperty(GP_CLINICAL_ACTION_HEI_ABSOLUTE_THRESHOLD, "Absolute threshold for clinical action for HEI", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_CLINICAL_ACTION_HEI_ABSOLUTE_THRESHOLD) == null) {
+			install(globalProperty(GP_CLINICAL_ACTION_HEI_ABSOLUTE_THRESHOLD,
+					"Absolute threshold for clinical action for HEI", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_INTERVENTIONS_PAGE_SIZE) == null) {
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_SHA_INTERVENTIONS_PAGE_SIZE) == null) {
 			install(globalProperty(GP_SHA_INTERVENTIONS_PAGE_SIZE, "Page size for SHA interventions per fetch", ""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_POST_ENDPOINT) == null) {
-			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_POST_ENDPOINT, "HIE IL Mediator Authentication token url", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_POST_ENDPOINT) == null) {
+			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_POST_ENDPOINT, "HIE IL Mediator Authentication token url",
+					""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID) == null) {
-			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID, "HIE IL Mediator Authentication token client id", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID) == null) {
+			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID, "HIE IL Mediator Authentication token client id",
+					""));
 		}
-		if(Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET) == null) {
-			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET, "HIE IL Mediator Authentication client secret", ""));
+		if (Context.getAdministrationService()
+				.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET) == null) {
+			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET,
+					"HIE IL Mediator Authentication client secret", ""));
 		}
 
 		install(patientIdentifierType("Old Identification Number", "Identifier given out prior to OpenMRS",
@@ -975,11 +1061,13 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(visitType("Outpatient", "Visit where the patient is not admitted to the hospital",
 				_VisitType.OUTPATIENT));
 		install(visitType("Inpatient", "Visit where the patient is admitted to the hospital", _VisitType.INPATIENT));
-		install(visitType("Casualty/Emergency", "Visit where the patient is admitted to the casualty/emergency department", _VisitType.CASUALTY));
+		install(visitType("Casualty/Emergency",
+				"Visit where the patient is admitted to the casualty/emergency department", _VisitType.CASUALTY));
 		install(visitType("Mortuary", "Visit where the body is admitted to the Mortuary", _VisitType.MORTUARY));
 
-		//Retiring Lab results form
-		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"), "Form deprecated with introduction of Lab orders");
+		// Retiring Lab results form
+		uninstall(possible(Form.class, "7e603909-9ed5-4d0c-a688-26ecb05d8b6e"),
+				"Form deprecated with introduction of Lab orders");
 
 		install(globalProperty(GP_KENYAEMR_VERSION, "The version of the installed KenyaEMR",
 				null));

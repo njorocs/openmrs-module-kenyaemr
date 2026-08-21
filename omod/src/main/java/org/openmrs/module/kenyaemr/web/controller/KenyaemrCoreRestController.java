@@ -1908,6 +1908,25 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
 					programDetails.put("enrollmentFormName", "Mental Health Initial Form");
 				}
+				// mental health program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(MENTAL_HEALTH_PROGRAM_UUID)) {
+					Enrollment mentalHealthEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter mentalHealthEnrollmentEncounter = mentalHealthEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+
+					if (mentalHealthEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", mentalHealthEnrollmentEncounter.getUuid());
+					}
+					if (defaultCompletionForm != null) {
+						Encounter mentalHealthDiscontinuationEncounter = mentalHealthEnrollment
+								.lastEncounter(defaultCompletionForm.getEncounterType());
+						if (mentalHealthDiscontinuationEncounter != null) {
+							programDetails.put("discontinuationEncounterUuid", mentalHealthDiscontinuationEncounter.getUuid());
+						}
+					}
+					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
+					programDetails.put("enrollmentFormName", "Mental Health Initial Form");
+				}
 
 				programDetails.put("programName", patientProgramEnrollment.getProgram().getName());
 				programDetails.put("active", patientProgramEnrollment.getActive());

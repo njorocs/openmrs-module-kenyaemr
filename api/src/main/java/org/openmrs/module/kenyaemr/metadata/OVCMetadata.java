@@ -16,6 +16,8 @@ import org.openmrs.module.metadatadeploy.bundle.Requires;
 import org.springframework.stereotype.Component;
 
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
+import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallRelationshipTypes;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.encounterType;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.form;
 import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.patientIdentifierType;
@@ -79,9 +81,17 @@ public class OVCMetadata extends AbstractMetadataBundle {
 				PatientIdentifierType.LocationBehavior.NOT_USED, false, _PatientIdentifierType.CPIMS_NUMBER));
 
 		//Installing relationship
-		install(relationshipType("Care-giver", "Care-giver", "One that gives care, watches over, or protects", _RelationshipType.CAREGIVER));
+		boolean installRelationshipTypes = shouldInstallRelationshipTypes();
+		if(installRelationshipTypes) {
+			install(relationshipType("Care-giver", "Care-giver", "One that gives care, watches over, or protects", _RelationshipType.CAREGIVER));
+		}
 
-		install(program("OVC", "OVC program", _Concept.OVC, _Program.OVC));
+		boolean installPrograms = shouldInstallPrograms();
+
+
+		if (installPrograms) {
+			install(program("OVC", "OVC program", _Concept.OVC, _Program.OVC));
+		}
 
 
 	}

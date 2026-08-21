@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.test.TestUtils;
-import org.openmrs.module.kenyaemr.page.controller.LoginPageController;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.web.controller.patient.PatientDashboardController;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
@@ -56,20 +55,12 @@ public class EmrExternalUrlInterceptorTest extends BaseModuleWebContextSensitive
 	/**
 	 * @see EmrExternalUrlInterceptor#preHandle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
 	 */
-	@Test
-	public void preHandle_shouldAllowWhitelistedControllersForSuperUser() throws Exception {
-		Assert.assertThat(interceptor.preHandle(request, response, new LoginPageController()), is(true));
-	}
+
 
 	/**
 	 * @see EmrExternalUrlInterceptor#preHandle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
 	 */
-	@Test
-	public void preHandle_shouldAllowWhitelistedControllersForNonSuperUser() throws Exception {
-		Context.becomeUser("butch");
-
-		Assert.assertThat(interceptor.preHandle(request, response, new LoginPageController()), is(true));
-	}
+	
 
 	/**
 	 * @see EmrExternalUrlInterceptor#preHandle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)

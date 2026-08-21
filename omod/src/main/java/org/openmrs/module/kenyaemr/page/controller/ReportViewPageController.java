@@ -32,12 +32,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ReportViewPageController {
 
 	public void get(@RequestParam("request") ReportRequest reportRequest,
-					@RequestParam("returnUrl") String returnUrl,
-					PageRequest pageRequest,
-					PageModel model,
-					@SpringBean ReportManager reportManager,
-					@SpringBean KenyaUiUtils kenyaUi,
-					@SpringBean ReportService reportService) throws Exception {
+			@RequestParam("returnUrl") String returnUrl,
+			PageRequest pageRequest,
+			PageModel model,
+			@SpringBean ReportManager reportManager,
+			@SpringBean KenyaUiUtils kenyaUi,
+			@SpringBean ReportService reportService) throws Exception {
 
 		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
