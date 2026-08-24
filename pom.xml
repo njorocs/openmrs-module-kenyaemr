@@ -469,6 +469,33 @@
             <scope>compile</scope>
         </dependency>
 
+        <!--
+            Jackson 2.x is provided by the OpenMRS platform (openmrs-api 2.6.8 ships 2.14.1).
+            Declare it as provided so the module does NOT bundle its own copy inside the omod;
+            otherwise reporting-api drags in jackson-databind 2.9.x at compile scope and the two
+            copies clash at runtime with a LinkageError (loader constraint violation on TreeNode).
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.14.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.14.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.14.1</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
