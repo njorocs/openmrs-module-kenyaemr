@@ -40,7 +40,7 @@ public class FacilityDashboardUtil {
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
 				"       WHERE av.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL "
 				+ days + " DAY) AND date('" + endDate + "')\n" +
-				"         AND av.final_test_result = 'Positive')\n" +
+				"         AND av.final_test_result = 'Reactive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
@@ -105,7 +105,7 @@ public class FacilityDashboardUtil {
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
 				"       WHERE av.visit_date BETWEEN DATE_SUB(date('" + endDate + "'), INTERVAL "
 				+ days + " DAY) AND date('" + endDate + "')\n" +
-				"         AND av.final_test_result = 'Positive')\n" +
+				"         AND av.final_test_result = 'Reactive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.encounter_id\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
@@ -733,7 +733,7 @@ public class FacilityDashboardUtil {
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
 				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL\n" +
 				"30 DAY) AND '" + endDate +"'\n" +
-				"         AND av.final_test_result = 'Positive')\n" +
+				"         AND av.final_test_result = 'Reactive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
@@ -1201,7 +1201,7 @@ public class FacilityDashboardUtil {
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
 				"                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics a on av.patient_id = a.patient_id\n" +
 				"       WHERE av.visit_date BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY) AND '" + endDate +"'\n" +
-				"         AND av.final_test_result = 'Positive')\n" +
+				"         AND av.final_test_result = 'Reactive')\n" +
 				"      UNION\n" +
 				"      (SELECT d.patient_id, d.encounter_id, d.visit_date\n" +
 				"       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d\n" +
