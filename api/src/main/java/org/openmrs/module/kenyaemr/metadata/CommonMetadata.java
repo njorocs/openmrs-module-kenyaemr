@@ -174,6 +174,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String THERAPEUTIC_PLAY = "0623ef8d-4374-41c3-a425-90add8fcc568";
 		public static final String MENTAL_HEALTH_ENROLLMENT = "5fa0cb92-b8c4-4900-8681-fdb43840ea96";
 		public static final String MENTAL_HEALTH_FOLLOWUP = "4aa66381-665f-4ed9-bb7d-25566d63b49f";
+		public static final String ICU_START_UP_ENCOUNTER = "bd3f7608-376b-4061-8ccf-d7a1318705fe";
 	}
 
 	public static final class _Form {
