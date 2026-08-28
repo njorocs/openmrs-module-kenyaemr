@@ -219,6 +219,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String POST_MORTEM_CLINICAL_FORM = "016beec1-edff-4293-b3ed-817c7dddaa93";
 		public static final String EAR_NOSE_THROAT_CLINICAL_FORM = "c5055956-c3bb-45f2-956f-82e114c57aa7";
 		public static final String ORTHOPAEDIC_CLINICAL_FORM = "beec83df-6606-4019-8223-05a54a52f2b0";
+		public static final String ORTHO_TRAUMA_CLINICAL_FORM = "f3e0c1d9-4a2b-4f8e-9c5b-6f7e8d9a1b2c";
 		public static final String OCCUPATIONAL_THERAPY_CLINICAL_FORM = "062a24b5-728b-4639-8176-197e8f458490";
 		public static final String OBSTETRIC_HISTORY_FORM = "d81e8157-317c-4041-9498-9d2318a1f2ed";
 		public static final String OPHTHAMOLOGY_CLINICAL_FORM = "235900ff-4d4a-4575-9759-96f325f5e291";
@@ -539,6 +540,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 			install(form("Post-Mortem Clinical Form", "Form for Morgue clinical encounter", _EncounterType.POST_MORTEM, "1", _Form.POST_MORTEM_CLINICAL_FORM));
 			install(form("ENT Clinical Form", "Form for ENT clinical encounter", _EncounterType.CONSULTATION, "1", _Form.EAR_NOSE_THROAT_CLINICAL_FORM));
 			install(form("Orthopaedic Clinical Form", "Form for Orthopaedic clinical encounter", _EncounterType.CONSULTATION, "1", _Form.ORTHOPAEDIC_CLINICAL_FORM));
+			install(form("Ortho Trauma Clinical Form", "Form to collect Ortho Trauma notes", _EncounterType.CONSULTATION, "1", _Form.ORTHO_TRAUMA_CLINICAL_FORM));
 			install(form("Occupational Therapy Clinical Form", "Form for Occupational therapy encounter", _EncounterType.CONSULTATION, "1", _Form.OCCUPATIONAL_THERAPY_CLINICAL_FORM));
 			install(form("Obstetric History Form", "Form for Obstetric History", _EncounterType.CONSULTATION, "1", _Form.OBSTETRIC_HISTORY_FORM));
 			install(form("Ophthamology Clinical Form", "Form for Ophthamology encounter ", _EncounterType.CONSULTATION, "1", _Form.OPHTHAMOLOGY_CLINICAL_FORM));
