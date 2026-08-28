@@ -267,12 +267,13 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 		boolean isFswOrPwid = keyPopulation != null && (keyPopulation.equals(maps.fswConcept)
 				|| keyPopulation.equals(maps.peopleWhoInjectDrugsConcept) || keyPopulation.equals(maps.usedAlcoholOrSubstanceUseConcept));
 
-		boolean motherHighRisk = motherAgeUnder19
-				&& (vlAvailable && !isVlSuppressed)
-				&& !goodAdherence
-				&& hasRecentSti
-				&& isFswOrPwid
-				&& newOnArt;
+		boolean motherHighRisk = false;
+		motherHighRisk = motherAgeUnder19
+				|| (vlAvailable && !isVlSuppressed)
+				|| !goodAdherence
+				|| hasRecentSti
+				|| isFswOrPwid
+				|| newOnArt;
 
 		boolean motherLowRisk = isVlSuppressed && goodAdherence && comorbidityControlled;
 
