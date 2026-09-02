@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.TreatmentDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -62,7 +63,7 @@ public class TreatmentDataEvaluator implements PersonDataEvaluator {
                 "                           when 2002379 then 'Sachet(s)' end) ORDER BY\n" +
                 "                               do.drug_name SEPARATOR\n" +
                 "                               ', ') AS treatement\n" +
-                "                FROM kenyaemr_etl.etl_drug_order do\n" +
+                "                FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order do\n" +
                 "                WHERE do.visit_date BETWEEN :startDate AND :endDate\n" +
                 "group by do.patient_id;";
 

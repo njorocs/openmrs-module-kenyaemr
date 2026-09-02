@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsAreaOfServiceDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -47,7 +48,7 @@ public class SpecialClinicsAreaOfServiceDataEvaluator implements EncounterDataEv
                 "           when 167396 then 'NBU(newborn unit)'\n" +
                 "           when 5622 then 'Others'\n" +
                 "           when 159927 then 'Outreach/Mobile Clinic' else '' end) as area_of_service \n" +
-                "from kenyaemr_etl.etl_special_clinics s\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics s\n" +
                 "where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and s.special_clinic_form_uuid = '"+specialClinic+"';";
 

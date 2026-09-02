@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,14 +36,9 @@ public class ETLLastVLDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "SELECT t.patient_id,t.date_test_requested\n" +
-                "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
-                "         INNER JOIN (\n" +
-                "    SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
-                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
-                "    WHERE visit_date <= DATE(:endDate)\n" +
-                "    GROUP BY patient_id\n" +
-                ") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date;";
+        String qry = "select patient_id, date(max(visit_date)) as last_vl_date\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract where lab_test in (1305,856) and test_result is not null and coalesce(date(date_test_requested),date(visit_date)) <= date(:endDate)\n" +
+                "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

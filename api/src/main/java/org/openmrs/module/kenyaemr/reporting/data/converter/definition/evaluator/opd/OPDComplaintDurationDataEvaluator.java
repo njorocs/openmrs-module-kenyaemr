@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDComplaintDurationDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDDangerSignsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -40,8 +40,8 @@ public class OPDComplaintDurationDataEvaluator implements EncounterDataEvaluator
         String qry = "select\n" +
 			"    v.encounter_id,\n" +
 			"    a.complaint_duration\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         LEFT JOIN kenyaemr_etl.etl_allergy_chronic_illness a ON v.patient_id = a.patient_id AND date(v.visit_date) = date(a.visit_date)\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness a ON v.patient_id = a.patient_id AND date(v.visit_date) = date(a.visit_date)\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);\n";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLNextAppointmentDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class ETLNextAppointmentDateDataEvaluator implements PersonDataEvaluator 
 
         String qry = "select patient_id,\n" +
                 "  date(mid(max(concat(visit_date,next_appointment_date, '' )),11)) as next_appointment_date\n" +
-                "  from kenyaemr_etl.etl_patient_hiv_followup where  date(visit_date) <= date(:endDate)\n" +
+                "  from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup where  date(visit_date) <= date(:endDate)\n" +
                 "  GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

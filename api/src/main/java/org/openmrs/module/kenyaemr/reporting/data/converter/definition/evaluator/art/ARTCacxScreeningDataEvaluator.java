@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTCacxScreeningDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -46,18 +47,18 @@ public class ARTCacxScreeningDataEvaluator implements PersonDataEvaluator {
                 "                                WHEN f.cacx_screening = 1175 THEN 'N/A'\n" +
                 "                                END)), 11) AS hiv_screening_result,\n" +
                 "             MAX(f.visit_date)             AS fup_date\n" +
-                "      FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "      FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "      WHERE f.person_present = 978\n" +
                 "        AND DATE(f.visit_date) <= DATE(:endDate)\n" +
                 "      GROUP BY f.patient_id) hiv_subquery\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics p\n" +
+                "         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p\n" +
                 "                    ON p.patient_id = hiv_subquery.patient_id\n" +
                 "                        AND p.voided = 0\n" +
                 "                        AND p.gender = 'F'\n" +
                 "         LEFT JOIN (SELECT v.patient_id,\n" +
                 "                           MID(MAX(CONCAT(v.visit_date, v.cervical_cancer)), 11) AS screened_for_cacx,\n" +
                 "                           MAX(v.visit_date)                                     AS screening_date\n" +
-                "                    FROM kenyaemr_etl.etl_cervical_cancer_screening v\n" +
+                "                    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening v\n" +
                 "                    WHERE DATE(v.visit_date) <= DATE(:endDate)\n" +
                 "                      AND v.cervical_cancer IS NOT NULL\n" +
                 "                    GROUP BY v.patient_id) ccs\n" +

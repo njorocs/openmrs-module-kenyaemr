@@ -14,7 +14,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>kenyaemr</artifactId>
-    <version>19.4.3-SNAPSHOT</version>
+    <version>19.4.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>KenyaEMR</name>
     <description>OpenMRS-based EMR for Kenya</description>
@@ -60,7 +60,7 @@
         <kenyacoreVersion>3.0.2-SNAPSHOT</kenyacoreVersion>
         <kenyadqVersion>1.4.0</kenyadqVersion>
         <kenyauiVersion>3.0.0</kenyauiVersion>
-        <kenyaemrOrderentryVersion>1.8.0</kenyaemrOrderentryVersion>
+        <kenyaemrOrderentryVersion>1.7.1</kenyaemrOrderentryVersion>
         <logicVersion>0.5.2</logicVersion>
         <facilityReportingVersion>1.2.0</facilityReportingVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
@@ -233,7 +233,7 @@
             <version>${facilityReportingVersion}</version>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.bahmni.module</groupId>
             <artifactId>appointments-api</artifactId>
             <version>${bahmniAppointmentsVersion}</version>
@@ -245,7 +245,7 @@
             <version>${reportingcompatibilityVersion}</version>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>queue-api</artifactId>
             <version>${queueVersion}</version>
@@ -257,11 +257,11 @@
             <version>${orderexpansionVersion}</version>
             <scope>provided</scope>
         </dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>3.8.1</version>
-		</dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.8.1</version>
+        </dependency>
 
         <dependency>
 
@@ -295,81 +295,81 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-				<groupId>com.itextpdf</groupId>
-				<artifactId>kernel</artifactId>
-				<version>${itextPdfVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-simple</artifactId>
-					</exclusion>
-				</exclusions>
-		</dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${itextPdfVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
-				<groupId>com.itextpdf</groupId>
-				<artifactId>io</artifactId>
-				<version>${itextPdfVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-simple</artifactId>
-					</exclusion>
-				</exclusions>
-		</dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>${itextPdfVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
-				<groupId>com.itextpdf</groupId>
-				<artifactId>layout</artifactId>
-				<version>${itextPdfVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-simple</artifactId>
-					</exclusion>
-				</exclusions>
-		</dependency>
-            <dependency>
-				<groupId>com.itextpdf</groupId>
-				<artifactId>barcodes</artifactId>
-				<version>${itextPdfVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-simple</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-            <!-- only needed for Asian fonts -->
-			<dependency>
-				<groupId>com.itextpdf</groupId>
-				<artifactId>font-asian</artifactId>
-				<version>${itextPdfVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-simple</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>${itextPdfVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>barcodes</artifactId>
+            <version>${itextPdfVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- only needed for Asian fonts -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>font-asian</artifactId>
+            <version>${itextPdfVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!--        <dependency>
                     <groupId>org.openmrs.module</groupId>
@@ -616,17 +616,17 @@
         </pluginRepository>
     </pluginRepositories>
 
-	<distributionManagement>
-		<repository>
-			<id>mks-repo</id>
-			<name>Mekom Solutions Nexus Releases</name>
-			<url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>mks-repo-snapshots</id>
-			<name>Mekom Solutions Nexus Snapshots</name>
-			<url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>mks-repo</id>
+            <name>Mekom Solutions Nexus Releases</name>
+            <url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>mks-repo-snapshots</id>
+            <name>Mekom Solutions Nexus Snapshots</name>
+            <url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>

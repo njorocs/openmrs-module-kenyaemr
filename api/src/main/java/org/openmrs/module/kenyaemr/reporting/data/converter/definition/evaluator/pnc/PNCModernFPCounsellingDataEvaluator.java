@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCModernFPCounsellingDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,7 +40,7 @@ public class PNCModernFPCounsellingDataEvaluator implements EncounterDataEvaluat
                 "       case v.family_planning_counseling\n" +
                 "           when 1065 then 'Yes'\n" +
                 "           when 1066 then 'No' end as modern_fp_counselling_post_partum\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

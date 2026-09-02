@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.CauseOfDeathDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,7 +41,7 @@ public class CauseOfDeathDataEvaluator implements PersonDataEvaluator {
                 "                                     when 133478 then 'Other natural causes not directly related to HIV'\n" +
                 "                                     when 123812 then 'Non-natural causes'\n" +
                 "                                     when 142917 then 'Unknown cause' else null end\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Map<Integer, Object> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Object.class, context);

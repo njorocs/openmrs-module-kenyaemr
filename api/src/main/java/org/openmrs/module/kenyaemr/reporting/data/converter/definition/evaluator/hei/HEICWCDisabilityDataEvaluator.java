@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCDewormedDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCDisabilityDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +37,7 @@ public class HEICWCDisabilityDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select encounter_id,\n" +
                 "  (case disability when 1065 then \"Yes\" when 1066 then \"No\" else \"\" end) as disability\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

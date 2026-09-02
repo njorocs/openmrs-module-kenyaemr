@@ -10,14 +10,11 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCExclusiveBreastfeeding6MonthsDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCMuacDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
-import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
-import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
-import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
@@ -43,8 +40,8 @@ public class HEICWCExclusiveBreastfeeding6MonthsEvaluator implements EncounterDa
                 "               (case v.infant_feeding  when 5526 then \"Yes\"\n" +
                 "                                       when 1595 then \"No\"\n" +
                 "                                       when 6046 then \"No\" else \"\" end)) as infant_feeding\n" +
-                "             from kenyaemr_etl.etl_hei_follow_up_visit v\n" +
-                "             inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id=v.patient_id;";
+                "             from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit v\n" +
+                "             inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id=v.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

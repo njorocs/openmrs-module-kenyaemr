@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.malaria;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -25,8 +26,8 @@ public class Moh743CohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT a.patient_id " +
                 "FROM (SELECT ce.patient_id, MAX(ce.visit_date) AS visit_date, p.DOB " +
-                "FROM kenyaemr_etl.etl_clinical_encounter ce " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics p " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "ON p.patient_id = ce.patient_id AND p.voided = 0 " +
                 "WHERE DATE(ce.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) " +
                 "AND ce.voided = 0 " +
@@ -46,13 +47,13 @@ public class Moh743CohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT a.patient_id " +
                 "FROM (SELECT ce.patient_id, MAX(ce.visit_date) AS visit_date " +
-                "FROM kenyaemr_etl.etl_clinical_encounter ce " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics p " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "ON p.patient_id = ce.patient_id AND p.voided = 0 " +
                 "WHERE DATE(ce.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) " +
                 "AND ce.voided = 0 " +
                 "GROUP BY ce.patient_id) a " +
-                "INNER JOIN kenyaemr_etl.etl_patient_triage tr " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage tr " +
                 "ON tr.patient_id = a.patient_id " +
                 "AND DATE(tr.visit_date) = DATE(a.visit_date) " +
                 "WHERE tr.weight BETWEEN " + minWeight + " AND " + maxWeight + " " +
@@ -69,14 +70,14 @@ public class Moh743CohortLibrary {
     public CohortDefinition totalPatientsForMalariaDiagnosis(int labTest) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
 String sqlQuery = "select x.patient_id\n" +
-                "from kenyaemr_etl.etl_laboratory_extract x\n" +
-                "inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
-//                "inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
-//                "            from kenyaemr_etl.etl_clinical_encounter v\n" +
-//                "            inner join encounter_diagnosis ed\n" +
-//                "            on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
-//                "            where v.diagnosis_category = 'New') v\n" +
-//                "on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
+                "inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+                "            inner join encounter_diagnosis ed\n" +
+                "            on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
+                "            where v.diagnosis_category = 'New') v\n" +
+                "on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
                 "where x.lab_test in (" + labTest + ") and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
                 "group by x.patient_id, x.lab_test";
         cd.setName("totalPatientsForMalariaDiagnosis");
@@ -92,10 +93,10 @@ String sqlQuery = "select x.patient_id\n" +
     public CohortDefinition totalPatientsForMalariaResultName(String resultName) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select x.patient_id\n" +
-                "from kenyaemr_etl.etl_laboratory_extract x\n" +
-                "inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
                 "inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
-                "            from kenyaemr_etl.etl_clinical_encounter v\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
                 "            inner join encounter_diagnosis ed\n" +
                 "            on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
                 "            where v.diagnosis_category = 'New') v\n" +
@@ -116,8 +117,8 @@ String sqlQuery = "select x.patient_id\n" +
     public CohortDefinition totalPatientsNotTestedMalaria() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id,v.visit_date" +
-                "    from kenyaemr_etl.etl_clinical_encounter v" +
-                "    inner join openmrs.encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2" +
+                "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v" +
+                "    inner JOIN encounter_diagnosis ed on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.diagnosis_coded = 2002652 and ed.dx_rank = 2" +
                 "    where v.diagnosis_category = 'New' and date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("totalPatientsNotTestedMalaria");
         cd.setQuery(sqlQuery);
@@ -131,11 +132,11 @@ String sqlQuery = "select x.patient_id\n" +
     public CohortDefinition totalPatientsSuspectedMalaria() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select x.patient_id\n" +
-                "from kenyaemr_etl.etl_laboratory_extract x\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
+                "         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = x.patient_id and p.voided = 0\n" +
                 "         inner join (select v.patient_id, v.encounter_id, v.visit_date\n" +
-                "                     from kenyaemr_etl.etl_clinical_encounter v\n" +
-                "                              inner join openmrs.encounter_diagnosis ed\n" +
+                "                     from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+                "                              inner JOIN encounter_diagnosis ed\n" +
                 "                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
                 "                     where v.diagnosis_category = 'New') v\n" +
                 "                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
@@ -202,7 +203,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "FROM drug_order do " +
                 "INNER JOIN orders o ON do.order_id = o.order_id " +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics p " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
                 "WHERE do.drug_inventory_id IN (\n" +
                 "  -- Artemether-Lumefantrine (AL) drug IDs\n" +
@@ -233,7 +234,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "FROM drug_order do " +
                 "INNER JOIN orders o ON do.order_id = o.order_id " +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics p " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
                 "WHERE do.drug_inventory_id IN (\n" +
                 " 9580,9581,9583,9584,9593,9595,9596,9598,9604,9605,9607,9608,15620,16288,16289,16298\n" +

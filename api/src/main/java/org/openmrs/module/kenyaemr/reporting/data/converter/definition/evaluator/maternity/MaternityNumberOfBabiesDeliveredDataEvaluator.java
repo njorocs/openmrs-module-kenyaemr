@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityDeliveryModeDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityNumberOfBabieDeliveredDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +38,7 @@ public class MaternityNumberOfBabiesDeliveredDataEvaluator implements PersonData
 
         String qry = "SELECT patient_id,\n" +
                 "       (case delivery_outcome when 159913 then 1 when 159914 then 2 when 159915 then 3 end) as number_of_babies\n" +
-                "FROM kenyaemr_etl.etl_mchs_delivery\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery\n" +
                 "WHERE DATE(visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "GROUP BY patient_id;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.NCDsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -62,10 +63,10 @@ public class NCDSDataEvaluator implements PersonDataEvaluator {
                 "            WHEN 118976 THEN 'Thyroid disease' " +
                 "            WHEN 141623 THEN 'Dyslipidemia' " +
                 "       END SEPARATOR ', ') AS ChronicIllness " +
-                "FROM kenyaemr_etl.etl_allergy_chronic_illness ci " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness ci " +
                 "JOIN ( " +
                 "    SELECT patient_id, MAX(visit_date) AS latest_visit_date " +
-                "    FROM kenyaemr_etl.etl_allergy_chronic_illness " +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness " +
                 "    WHERE visit_date <= DATE(:endDate)" +
                 "    GROUP BY patient_id " +
                 ") latest ON ci.patient_id = latest.patient_id AND ci.visit_date = latest.latest_visit_date " +

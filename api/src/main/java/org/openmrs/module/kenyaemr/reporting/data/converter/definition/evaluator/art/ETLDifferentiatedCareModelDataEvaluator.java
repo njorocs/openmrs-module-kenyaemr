@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLDifferentiatedCareModelDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,9 +40,9 @@ public class ETLDifferentiatedCareModelDataEvaluator implements PersonDataEvalua
                 "     max(f.visit_date)                                               as visit_date,\n" +
                 "     MID(MAX(CONCAT(f.visit_date, f.differentiated_care_group)), 11) AS differentiated_care_group,\n" +
                 "     MID(MAX(CONCAT(f.visit_date, f.differentiated_care)), 11)       AS differentiated_care\n" +
-                "FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "       INNER JOIN\n" +
-                "   kenyaemr_etl.etl_patient_demographics d\n" +
+                "   "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "   ON\n" +
                 "       f.patient_id = d.patient_id\n" +
                 "WHERE f.stability IS NOT NULL\n" +

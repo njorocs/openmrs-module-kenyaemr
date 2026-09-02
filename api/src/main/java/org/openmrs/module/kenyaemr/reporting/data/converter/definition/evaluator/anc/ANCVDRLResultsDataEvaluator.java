@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCSyphilisResultsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class ANCVDRLResultsDataEvaluator implements EncounterDataEvaluator {
                 "            PARTITION BY l.patient_id, DATE(l.visit_date)\n" +
                 "            ORDER BY l.date_test_result_received DESC, l.date_test_requested DESC\n" +
                 "            ) AS rn\n" +
-                "    FROM kenyaemr_etl.etl_laboratory_extract l\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l\n" +
                 "    WHERE l.lab_test = '299'\n" +
                 "      AND DATE(l.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 ")\n" +
@@ -58,7 +59,7 @@ public class ANCVDRLResultsDataEvaluator implements EncounterDataEvaluator {
                 "                        ELSE 'NA'\n" +
                 "                        END\n" +
                 "    ) AS vdrl_results\n" +
-                "FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "         LEFT JOIN lab lo\n" +
                 "                   ON lo.patient_id = v.patient_id\n" +
                 "                       AND lo.visit_date = DATE(v.visit_date)\n" +

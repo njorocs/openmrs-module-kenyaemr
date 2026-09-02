@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDInvestigationRequiredDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -38,12 +39,12 @@ public class OPDInvestigationRequiredDataEvaluator implements ObsDataEvaluator {
 
 		String qry = "select le.obs_id,\n" +
                 "       coalesce(le.result_test_name, le.order_test_name)          as lab_test\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         left join (select ed.date_created,\n" +
                 "                           ed.dx_rank,\n" +
                 "                           ed.patient_id\n" +
-                "                    from openmrs.encounter_diagnosis ed\n" +
-                "                             inner join openmrs.concept_name cn\n" +
+                "                    FROM  encounter_diagnosis ed\n" +
+                "                             inner JOIN concept_name cn\n" +
                 "                                        on cn.concept_id = ed.diagnosis_coded and cn.locale = 'en' and\n" +
                 "                                           cn.concept_name_type = 'FULLY_SPECIFIED' and\n" +
                 "                                           ed.dx_rank = 1\n" +

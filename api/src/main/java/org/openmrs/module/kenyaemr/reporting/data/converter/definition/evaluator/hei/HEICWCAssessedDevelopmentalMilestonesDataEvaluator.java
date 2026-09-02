@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCAssessedDevelopmentalMilestonesDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCDewormedDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -44,7 +44,7 @@ public class HEICWCAssessedDevelopmentalMilestonesDataEvaluator implements Encou
                 "               walking_milestone,\n" +
                 "               standing_milestone,\n" +
                 "               talking_milestone) is not null,\"Yes\",\"No\") as assessed_for_development_milestone\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

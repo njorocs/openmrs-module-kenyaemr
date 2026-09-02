@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsFeedingPractice6_12MonthsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,7 +41,7 @@ public class SpecialClinicsFeedingPractice6_12MonthsDataEvaluator implements Enc
 
         String qry = "select v.encounter_id,\n" +
                 "(case v.second_6_12_months when 5632 then 'Breastfeeding' when 140719 then 'Not Breastfeeding' when 1067 then 'Not Known' when 159854 then 'Began complimentary feeding' else '' end) as second_6_12_months\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "';";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.SupporterPhoneNumberDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class SupporterPhoneNumberDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,hiv.treatment_supporter_telephone as supporter_phone_number from kenyaemr_etl.etl_ipt_initiation init left join kenyaemr_etl.etl_hiv_enrollment hiv\n" +
+        String qry = "select init.patient_id,hiv.treatment_supporter_telephone as supporter_phone_number from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment hiv\n" +
                 "                                                               on init.patient_id = hiv.patient_id where init.voided = 0;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

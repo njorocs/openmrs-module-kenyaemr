@@ -16,11 +16,7 @@ import org.openmrs.module.kenyacore.report.cohort.definition.DateCalculationCoho
 import org.openmrs.module.kenyaemr.ArtAssessmentMethod;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.PregnancyStage;
-import org.openmrs.module.kenyaemr.calculation.library.mchms.AssessedOnFirstVisitCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.mchms.DiscordantCoupleCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.mchms.MchmsFirstVisitDateCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.mchms.MchmsHivTestDateCalculation;
-import org.openmrs.module.kenyaemr.calculation.library.mchms.TestedForHivInMchmsCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.mchms.*;
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;

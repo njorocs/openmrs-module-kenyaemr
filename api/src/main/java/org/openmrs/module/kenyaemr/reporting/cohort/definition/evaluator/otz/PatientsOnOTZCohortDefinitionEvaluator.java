@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.otz.PatientsOnOTZCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -52,10 +53,10 @@ public class PatientsOnOTZCohortDefinitionEvaluator implements CohortDefinitionE
 		String qry="select t.patient_id\n" +
 				"from (\n" +
 				" select e.patient_id, d.patient_id as disc_patient ,max(d.visit_date) as date_discontinued, max(e.visit_date) as enrollment_date\n" +
-				"from kenyaemr_etl.etl_otz_enrollment e\n" +
-				"join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id and p.voided=0 and p.dead=0\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+				"join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id and p.voided=0 and p.dead=0\n" +
 				" left outer JOIN\n" +
-				"(select patient_id,visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"(select patient_id,visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"where program_name='OTZ'\n" +
 				"group by patient_id\n" +
 				") d on d.patient_id = e.patient_id\n" +

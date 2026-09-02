@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.clinicianWorkload;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.clinicianWorkload.TriageDateDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -36,12 +37,12 @@ public class TriageDateDataEvaluator implements VisitDataEvaluator {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
         String qry = "WITH filtered_patients AS (SELECT patient_id\n" +
-                "                           FROM kenyaemr_etl.etl_patient_demographics\n" +
+                "                           FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
                 "                           WHERE voided = 0),\n" +
                 "     checked_in AS (SELECT v.visit_id,\n" +
                 "                           v.patient_id,\n" +
                 "                           v.date_started AS checkin_date\n" +
-                "                    FROM openmrs.visit v\n" +
+                "                    FROM  visit v\n" +
                 "                             JOIN filtered_patients p ON p.patient_id = v.patient_id\n" +
                 "                             JOIN users u ON u.user_id = v.creator\n" +
                 "                    WHERE v.voided = 0\n" +
@@ -49,7 +50,7 @@ public class TriageDateDataEvaluator implements VisitDataEvaluator {
                 "     triage_filtered AS (SELECT t.visit_id,\n" +
                 "                                t.patient_id,\n" +
                 "                                t.visit_date AS triage_date\n" +
-                "                         FROM kenyaemr_etl.etl_patient_triage t\n" +
+                "                         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                                  JOIN filtered_patients p ON p.patient_id = t.patient_id\n" +
                 "                                  LEFT JOIN checked_in v ON v.patient_id = t.patient_id AND v.visit_id = t.visit_id\n" +
                 "                         WHERE t.voided = 0\n" +

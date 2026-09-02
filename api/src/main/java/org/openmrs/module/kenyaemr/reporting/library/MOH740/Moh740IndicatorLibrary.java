@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.MOH740;
 
-import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

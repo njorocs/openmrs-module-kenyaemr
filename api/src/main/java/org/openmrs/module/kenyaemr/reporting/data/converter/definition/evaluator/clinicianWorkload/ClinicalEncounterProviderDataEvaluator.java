@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.clinicianWorkload;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.clinicianWorkload.ClinicalEncounterProviderDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,12 +38,12 @@ public class ClinicalEncounterProviderDataEvaluator implements VisitDataEvaluato
 
         String qry = "WITH filtered_patients AS (\n" +
                 "    SELECT patient_id\n" +
-                "    FROM kenyaemr_etl.etl_patient_demographics\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
                 "    WHERE voided = 0\n" +
                 "),\n" +
                 "     users AS (\n" +
                 "         SELECT u.user_id, u.username, u.person_id, CONCAT_WS(' ', n.given_name, n.middle_name, n.family_name) AS full_name\n" +
-                "         FROM openmrs.users u\n" +
+                "         from users u\n" +
                 "                  inner join person_name n on u.person_id = n.person_id\n" +
                 "         WHERE u.retired = 0\n" +
                 "           AND n.voided = 0\n" +
@@ -54,7 +55,7 @@ public class ClinicalEncounterProviderDataEvaluator implements VisitDataEvaluato
                 "             v.patient_id,\n" +
                 "             full_name AS checked_in_by,\n" +
                 "             v.date_started AS checkin_date\n" +
-                "         FROM openmrs.visit v\n" +
+                "         FROM  visit v\n" +
                 "                  JOIN filtered_patients p ON p.patient_id = v.patient_id\n" +
                 "                  JOIN users u ON u.user_id = v.creator\n" +
                 "         WHERE v.voided = 0\n" +
@@ -66,7 +67,7 @@ public class ClinicalEncounterProviderDataEvaluator implements VisitDataEvaluato
                 "             ce.patient_id,\n" +
                 "             ce.visit_date AS clinical_date,\n" +
                 "             full_name AS clinical_by\n" +
-                "         FROM kenyaemr_etl.etl_clinical_encounter ce\n" +
+                "         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
                 "                  JOIN filtered_patients p ON p.patient_id = ce.patient_id\n" +
                 "                  LEFT JOIN checked_in v ON v.patient_id = ce.patient_id AND v.visit_id = ce.visit_id\n" +
                 "                  JOIN users u ON u.user_id = ce.provider\n" +

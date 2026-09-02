@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLDeceasedPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -46,11 +47,11 @@ public class ETLDeceasedPatientsCohortDefinitionEvaluator implements CohortDefin
 
 		Cohort newCohort = new Cohort();
 		String qry=" SELECT patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
 				"where dead=1 and date(death_date) between date(:startDate) and date(:endDate) \n" +
 				"union\n" +
 				"select patient_id\n" +
-				"from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"where program_name='HIV' and date(date_died) between date(:startDate) and date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

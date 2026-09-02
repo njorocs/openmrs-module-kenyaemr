@@ -10,14 +10,11 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCWeightCategoriesDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEICWCWeightDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
-import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
-import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
-import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
@@ -43,7 +40,7 @@ public class HEICWCWeightCategoriesDataEvaluator implements EncounterDataEvaluat
                 "                        when 126598 then \"Severely Underweight(SUW)\"\n" +
                 "                        when 114413 then \"Overweight(OW)\"\n" +
                 "                        when 115115 then \"Obese(O)\" when 1115 then \"Normal(N)\" else \"\" end) as weight_category\n" +
-                "from kenyaemr_etl.etl_hei_follow_up_visit;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

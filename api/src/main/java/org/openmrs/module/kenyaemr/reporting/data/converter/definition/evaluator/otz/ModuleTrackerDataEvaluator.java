@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.ModuleTrackerDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class ModuleTrackerDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select e.patient_id,concat_ws(',',if(coalesce(e.orientation,a.orientation) = 'Yes',1,null),if(coalesce(e.leadership,a.leadership) = 'Yes',2,null),if(coalesce(e.participation,a.participation) = 'Yes',3,null),if(coalesce(e.treatment_literacy,a.treatment_literacy) = 'Yes',4,null),if(coalesce(e.transition_to_adult_care,a.transition_to_adult_care) = 'Yes',5,null),if(coalesce(e.making_decision_future,a.making_decision_future) = 'Yes',6,null),if(a.srh = 'Yes',7,null),if(coalesce(e.beyond_third_ninety,a.beyond_third_ninety) = 'Yes',8,null)) as modules_completed\n" +
-                "from kenyaemr_etl.etl_otz_enrollment e join kenyaemr_etl.etl_otz_activity a on e.patient_id = a.patient_id group by e.patient_id;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_activity a on e.patient_id = a.patient_id group by e.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");

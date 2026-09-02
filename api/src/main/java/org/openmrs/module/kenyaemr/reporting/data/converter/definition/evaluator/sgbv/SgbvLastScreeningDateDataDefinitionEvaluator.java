@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentDaysMissedDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.SgbvLastScreeningDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +36,7 @@ public class SgbvLastScreeningDateDataDefinitionEvaluator implements PersonDataE
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id, max(visit_date) from kenyaemr_etl.etl_gbv_screening\n" +
+        String qry = "select patient_id, max(visit_date) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening\n" +
                 "  where  date(visit_date) <= date(:endDate)\n" +
                 "  GROUP BY patient_id;";
 

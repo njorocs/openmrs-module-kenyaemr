@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsNutritionalStatusDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -45,8 +46,8 @@ public class SpecialClinicsNutritionalStatusDataEvaluator implements EncounterDa
                 "           when 163302 then 'Severe acute malnutrition'\n" +
                 "           when 114413 then 'Overweight'\n" +
                 "           when 115115 then 'Obese' end as nutritional_status\n" +
-                "from kenyaemr_etl.etl_special_clinics c\n" +
-                "         inner join kenyaemr_etl.etl_patient_triage t on c.patient_id = t.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics c\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on c.patient_id = t.patient_id\n" +
                 "    and c.visit_date = t.visit_date\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and c.special_clinic_form_uuid = '"+specialClinic+"';";

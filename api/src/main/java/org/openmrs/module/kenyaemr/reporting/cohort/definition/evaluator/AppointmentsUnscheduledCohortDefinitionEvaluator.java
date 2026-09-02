@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.AppointmentsUnscheduledCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -48,7 +49,7 @@ public class AppointmentsUnscheduledCohortDefinitionEvaluator implements CohortD
 
 		String qry=" select v.patient_id \n" +
 				"from visit v \n" +
-				"left outer join kenyaemr_etl.etl_patients_booked_today b on b.patient_id = v.patient_id\n" +
+				"left outer join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patients_booked_today b on b.patient_id = v.patient_id\n" +
 				"where v.voided=0 and date(v.date_started) = curdate() and b.patient_id is null;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

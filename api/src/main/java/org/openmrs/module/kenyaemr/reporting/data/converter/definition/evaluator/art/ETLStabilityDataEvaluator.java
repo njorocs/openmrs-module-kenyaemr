@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLStabilityDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -42,7 +43,7 @@ public class ETLStabilityDataEvaluator implements PersonDataEvaluator {
                 "     mid(max(concat(f.visit_date,f.stability)),11) as stability,\n" +
                 "     f.person_present person_present,\n" +
                 "     f.visit_date visit_date\n" +
-                "   from kenyaemr_etl.etl_patient_hiv_followup f\n" +
+                "   from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
                 "   where person_present = 978 and f.voided = 0 and date(visit_date) <= date(:endDate)\n" +
                 "   group by f.patient_id ) fup;";
 

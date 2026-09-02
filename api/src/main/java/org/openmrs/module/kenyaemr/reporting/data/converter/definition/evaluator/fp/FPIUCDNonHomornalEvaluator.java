@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPIUCDNonHomornalDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,11 +41,11 @@ public class FPIUCDNonHomornalEvaluator implements EncounterDataEvaluator {
                         "    fp.encounter_id, " +
                         "    cn.name AS contraceptive_dispensed " +
                         "FROM " +
-                        "    kenyaemr_etl.etl_family_planning fp " +
+                        "    "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp " +
                         "JOIN " +
-                        "    openmrs.concept c ON fp.contraceptive_dispensed = c.concept_id " +
+                        "    concept c ON fp.contraceptive_dispensed = c.concept_id " +
                         "JOIN " +
-                        "    openmrs.concept_name cn ON c.concept_id = cn.concept_id " +
+                        "    concept_name cn ON c.concept_id = cn.concept_id " +
                         "WHERE " +
                         "    cn.locale = 'en' " +
                         "    AND cn.voided = 0 " +

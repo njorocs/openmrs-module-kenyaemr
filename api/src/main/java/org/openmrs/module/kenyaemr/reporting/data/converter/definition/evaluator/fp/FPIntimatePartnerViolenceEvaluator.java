@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
-
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPIntimatePartnerViolenceDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,7 +43,7 @@ public class FPIntimatePartnerViolenceEvaluator implements EncounterDataEvaluato
                         "           WHEN 965 THEN 'Reproductive coercion' " +
                         "           WHEN 1175 THEN 'Not Applicable' " +
                         "       END AS experienced_intimate_partner_violence " +
-                        "FROM kenyaemr_etl.etl_family_planning v " +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
                         "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

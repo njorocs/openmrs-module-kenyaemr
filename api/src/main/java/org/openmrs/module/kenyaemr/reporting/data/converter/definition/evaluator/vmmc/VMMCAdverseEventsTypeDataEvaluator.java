@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCAdverseEventsTypeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class VMMCAdverseEventsTypeDataEvaluator implements PersonDataEvaluator {
         String qry = "select patient_id, GROUP_CONCAT(DISTINCT case adverse_event " +
                 "when 114403 then 'Pain' when 147241 then 'Bleeding' when 135693 then 'Anaesthetic Reaction' " +
                 "when 156911 then 'Damage to the penis' when 167126 then 'Excessive skin removed' else '' END SEPARATOR ', ') AS adverse_event " +
-                "from kenyaemr_etl.etl_adverse_events where form = 'vmmc-procedure' GROUP BY patient_id;";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events where form = 'vmmc-procedure' GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

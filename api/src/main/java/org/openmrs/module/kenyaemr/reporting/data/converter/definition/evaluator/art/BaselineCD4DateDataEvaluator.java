@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.BaselineCD4DateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,7 +40,7 @@ public class BaselineCD4DateDataEvaluator implements PersonDataEvaluator {
 		String qry = "select patient_id,\n"
 		        + "       left(min(concat(coalesce(date(date_test_requested),date(visit_date)),\n"
 		        + "                       if(lab_test = 5497, test_result, if(lab_test = 167718 and test_result = 1254, '>200', if(lab_test = 167718 and test_result = 167717,'<=200',if(lab_test = 730,concat(test_result,'%'),'')))), '')),\n"
-		        + "            10)  as baseline_cd4_date\n" + "from kenyaemr_etl.etl_laboratory_extract\n"
+		        + "            10)  as baseline_cd4_date\n" + "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n"
 		        + "where lab_test in (167718,5497,730)\n" + "GROUP BY patient_id;";
 		
 		SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

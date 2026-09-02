@@ -16,7 +16,6 @@ import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.ColumnParameters;
-import org.openmrs.module.kenyaemr.reporting.EmrReportingUtils;
 import org.openmrs.module.kenyaemr.reporting.library.moh717.Moh717IndicatorLibrary;
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonDimensionLibrary;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
@@ -995,7 +994,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.setSqlQuery("select CAST(IFNULL(sum(ifnull(r.total_sales, 0)), 0) AS SIGNED) as total_amount_collected\n" +
-                "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1014,7 +1013,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                       ),\n" +
                 "                       0) AS SIGNED\n" +
                 "       ) AS total_amount_received\n" +
-                "FROM kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "WHERE DATE(transaction_date) BETWEEN DATE(:startDate) AND DATE(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1025,7 +1024,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.setSqlQuery("select CAST(IFNULL(count(ifnull(r.cash_receipts_waiver, 0)),\n" +
                 "                   0) AS SIGNED) as clients_waived\n" +
-                "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1035,7 +1034,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.setSqlQuery("select CAST(ifnull(sum(ifnull(r.cash_receipts_waiver, 0)), 0) AS SIGNED) as total_waived\n" +
-                "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1045,7 +1044,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.setSqlQuery("select CAST(ifnull(count(ifnull(r.revenue_not_collected_write_offs_exemptions, 0)), 0) AS SIGNED) as clients_exempted\n" +
-                "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1056,7 +1055,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.setSqlQuery("select CAST(IFNULL(sum(ifnull(r.revenue_not_collected_write_offs_exemptions, 0)), 0) AS SIGNED) as total_exempted\n" +
-                "from kenyaemr_etl.etl_daily_revenue_summary r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_daily_revenue_summary r\n" +
                 "where date(transaction_date) between date(:startDate) and date(:endDate);");
         return sqlDataSetDefinition;
     }
@@ -1073,7 +1072,6 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
         sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         sqlDataSetDefinition.addParameter(new Parameter("wardType", "Ward Type UUID", String.class));
         sqlDataSetDefinition.addParameter(new Parameter("paymentModeConceptId", "Payment Mode Concept ID", Integer.class));
-
         sqlDataSetDefinition.setSqlQuery("SELECT \n" +
                 "CAST(ROUND(\n" +
                 "    CAST(COUNT(DISTINCT b.patient_id) AS SIGNED) / \n" +
@@ -1084,7 +1082,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1093,7 +1091,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
                 "            INNER JOIN (SELECT a.patient_id, a.admission_date \n" +
-                "                                FROM kenyaemr_etl.etl_inpatient_admission a \n" +
+                "                                FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a \n" +
                 "                                WHERE DATE(a.admission_date) <= DATE(:endDate) AND a.payment_mode = :paymentModeConceptId) a \n" + // Use :parameterName
                 "                       ON p.patient_id = a.patient_id \n" +
                 "            WHERE date_stopped IS NULL) b \n" +
@@ -1105,7 +1103,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                   m.location_id \n" +
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
-                "            INNER JOIN kenyaemr_etl.etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
+                "            INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
                 "            WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "              OR DATE(p.date_stopped) BETWEEN DATE(:startDate) AND DATE(:endDate)) d \n" +
                 "           ON b.patient_id = d.patient_id \n" +
@@ -1136,7 +1134,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1145,7 +1143,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
                 "            INNER JOIN (SELECT a.patient_id, a.admission_date \n" +
-                "                                FROM kenyaemr_etl.etl_inpatient_admission a \n" +
+                "                                FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a \n" +
                 "                                WHERE DATE(a.admission_date) <= DATE(:endDate) AND a.payment_mode = :paymentModeConceptId) a \n" +
                 "                       ON p.patient_id = a.patient_id \n" +
                 "            WHERE date_stopped IS NULL) b \n" +
@@ -1157,7 +1155,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                   m.location_id \n" +
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
-                "            INNER JOIN kenyaemr_etl.etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
+                "            INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
                 "            WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "              OR DATE(p.date_stopped) BETWEEN DATE(:startDate) AND DATE(:endDate)) d \n" +
                 "           ON b.patient_id = d.patient_id \n" +
@@ -1190,7 +1188,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1199,7 +1197,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
                 "            INNER JOIN (SELECT a.patient_id, a.admission_date \n" +
-                "                                FROM kenyaemr_etl.etl_inpatient_admission a \n" +
+                "                                FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a \n" +
                 "                                WHERE DATE(a.admission_date) <= DATE(:endDate) " +
                 "                                  AND a.payment_mode IN (:cashPaymentModeConceptId, :mobileMoneyPaymentModeConceptId)) a \n" + 
                 "                       ON p.patient_id = a.patient_id \n" +
@@ -1212,7 +1210,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                   m.location_id \n" +
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
-                "            INNER JOIN kenyaemr_etl.etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
+                "            INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
                 "            WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "              OR DATE(p.date_stopped) BETWEEN DATE(:startDate) AND DATE(:endDate)) d \n" +
                 "           ON b.patient_id = d.patient_id \n" +
@@ -1245,7 +1243,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "    * 100, \n" +
                 "0 ) AS SIGNED) AS occupied_bed_days\n" +
                 "FROM location_tag_map ltm \n" +
-                "INNER JOIN openmrs.location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
+                "INNER JOIN location_tag t ON ltm.location_tag_id = t.location_tag_id \n" +
                 "INNER JOIN (SELECT p.patient_id, \n" +
                 "                   p.bed_id, \n" +
                 "                   p.date_started, \n" +
@@ -1254,7 +1252,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
                 "            INNER JOIN (SELECT a.patient_id, a.admission_date \n" +
-                "                                FROM kenyaemr_etl.etl_inpatient_admission a \n" +
+                "                                FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_admission a \n" +
                 "                                WHERE DATE(a.admission_date) <= DATE(:endDate) " +
                 "                                  AND a.payment_mode IN (:cashPaymentModeConceptId, :mobileMoneyPaymentModeConceptId)) a \n" +
                 "                       ON p.patient_id = a.patient_id \n" +
@@ -1267,7 +1265,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
                 "                   m.location_id \n" +
                 "            FROM bed_patient_assignment_map p \n" +
                 "            INNER JOIN bed_location_map m ON p.bed_id = m.bed_id \n" +
-                "            INNER JOIN kenyaemr_etl.etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
+                "            INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d ON p.patient_id = d.patient_id \n" +
                 "            WHERE DATE(d.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "              OR DATE(p.date_stopped) BETWEEN DATE(:startDate) AND DATE(:endDate)) d \n" +
                 "           ON b.patient_id = d.patient_id \n" +
@@ -1343,7 +1341,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
 
         sqlDataSetDefinition.setSqlQuery("select CAST(COUNT(ifnull(bed_id, 0)) AS SIGNED) as number_of_beds\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select m.bed_id, location_id, t.bed_type_id, t.name\n" +
                 "                     from bed_location_map m\n" +
                 "                              inner join bed d on m.bed_id = d.bed_id\n" +
@@ -1368,7 +1366,7 @@ public class MOH717ReportBuilder extends AbstractReportBuilder {
 
         sqlDataSetDefinition.setSqlQuery("select CAST(COUNT(ifnull(bed_id, 0)) AS SIGNED) as number_of_beds\n" +
                 "from location_tag_map ltm\n" +
-                "         inner join openmrs.location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
+                "         inner JOIN location_tag t on ltm.location_tag_id = t.location_tag_id\n" +
                 "         inner join (select m.bed_id, location_id, t.bed_type_id, t.name\n" +
                 "                     from bed_location_map m\n" +
                 "                              inner join bed d on m.bed_id = d.bed_id\n" +

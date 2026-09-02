@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.ContactWithEbolaCaseDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +39,7 @@ public class ContactWithEbolaDataEvaluator implements PersonDataEvaluator {
                 "        when 1066 then 'No' " +
                 "        else null " +
                 "    end as contact_with_case " +
-                "from kenyaemr_etl.etl_patient_triage t " +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
                 "where date(t.visit_date) between date(:startDate) and date(:endDate) " +
                 "and t.voided = 0 " +
                 "group by t.patient_id";

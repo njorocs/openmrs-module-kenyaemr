@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.Moh511CohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -41,8 +42,8 @@ public class Moh511CohortDefinitionEvaluator implements EncounterQueryEvaluator 
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
 		String qry = "select v.encounter_id\n" +
-				"from kenyaemr_etl.etl_hei_follow_up_visit v\n" +
-				"inner join kenyaemr_etl.etl_hei_enrollment e on e.patient_id=v.patient_id\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit v\n" +
+				"inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on e.patient_id=v.patient_id\n" +
 				"where v.visit_date between date(:startDate) and date(:endDate) ;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

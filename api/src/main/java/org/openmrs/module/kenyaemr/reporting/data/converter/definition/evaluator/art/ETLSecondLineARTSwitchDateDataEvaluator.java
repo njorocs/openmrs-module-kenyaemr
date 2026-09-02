@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLSecondLineARTSwitchDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class ETLSecondLineARTSwitchDateDataEvaluator implements PersonDataEvalua
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id,\n" +
-                "date(mid(min(concat(visit_date,date_started, \"\" )),11)) as date_started from kenyaemr_etl.etl_drug_event where program ='HIV' and regimen_line =\"Second line\"\n" +
+                "date(mid(min(concat(visit_date,date_started, \"\" )),11)) as date_started from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event where program ='HIV' and regimen_line =\"Second line\"\n" +
                 "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

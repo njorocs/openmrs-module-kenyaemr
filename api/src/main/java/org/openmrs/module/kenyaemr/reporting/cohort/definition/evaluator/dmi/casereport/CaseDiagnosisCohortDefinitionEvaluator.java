@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.dmi.ca
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.casereport.CaseDiagnosisCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -43,7 +44,7 @@ public class CaseDiagnosisCohortDefinitionEvaluator implements VisitQueryEvaluat
         VisitQueryResult queryResult = new VisitQueryResult(visitQuery, context);
 
         String qry = "select e.visit_id\n" +
-                "from kenyaemr_etl.etl_clinical_encounter e\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
                 "         inner join openmrs.encounter_diagnosis d\n" +
                 "                    on e.encounter_id = d.encounter_id and d.dx_rank = 2 and d.voided = 0\n" +
                 "where e.visit_date between date(:startDate) and date(:endDate)\n" +

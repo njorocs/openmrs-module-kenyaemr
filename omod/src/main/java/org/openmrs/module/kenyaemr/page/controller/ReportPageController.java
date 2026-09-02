@@ -54,15 +54,15 @@ public class ReportPageController {
 	private AdministrationService admService;
 
 	public void get(@RequestParam("reportUuid") String reportUuid,
-			@RequestParam(required = false, value = "startDate") Date startDate,
-			@RequestParam("returnUrl") String returnUrl,
-			PageRequest pageRequest,
-			PageModel model,
-			UiUtils ui,
-			@SpringBean ReportManager reportManager,
-			@SpringBean KenyaUiUtils kenyaUi,
-			@SpringBean ReportService reportService,
-			@SpringBean ReportDefinitionService definitionService) throws Exception {
+					@RequestParam(required = false, value = "startDate") Date startDate,
+					@RequestParam("returnUrl") String returnUrl,
+					PageRequest pageRequest,
+					PageModel model,
+					UiUtils ui,
+					@SpringBean ReportManager reportManager,
+					@SpringBean KenyaUiUtils kenyaUi,
+					@SpringBean ReportService reportService,
+					@SpringBean ReportDefinitionService definitionService) throws Exception {
 
 		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
@@ -174,7 +174,7 @@ public class ReportPageController {
 
 	/**
 	 * Gets the existing requests for the given report
-	 * 
+	 *
 	 * @param definition    the report definition
 	 * @param ui            the UI utils
 	 * @param reportService the report service

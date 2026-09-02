@@ -37,8 +37,6 @@ public class AutoCloseActiveVisitsTask extends AbstractTask {
             if (log.isDebugEnabled()) {
                 log.debug("Starting Auto Close Visits Task...");
             }
-			System.out.println("Starting the close visits task");
-
             String openVisitsQuery = "select visit_id, TIMESTAMPDIFF(HOUR, v.date_started, now()) as visit_duration from visit v\n" +
 					"inner join visit_type vt on vt.visit_type_id = v.visit_type_id and vt.uuid ='3371a4d4-f66f-4454-a86d-92c7b3da990c'\n" +
 					"where v.date_stopped is null having visit_duration > 8;";

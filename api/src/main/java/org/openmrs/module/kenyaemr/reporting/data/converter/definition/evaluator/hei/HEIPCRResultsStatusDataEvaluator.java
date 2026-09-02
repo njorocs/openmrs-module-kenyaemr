@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIPCRResultsStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -34,7 +35,7 @@ public class HEIPCRResultsStatusDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select x.patient_id,case x.test_result when 664 then 'Negative' when 703 then 'Positive' when 1138 then 'Indeterminate' when 1304 then 'Poor sample quality' end from kenyaemr_etl.etl_laboratory_extract x where x.lab_test = 1030 and x.order_reason = 1040;";
+        String qry = "select x.patient_id,case x.test_result when 664 then 'Negative' when 703 then 'Positive' when 1138 then 'Indeterminate' when 1304 then 'Poor sample quality' end from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x where x.lab_test = 1030 and x.order_reason = 1040;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

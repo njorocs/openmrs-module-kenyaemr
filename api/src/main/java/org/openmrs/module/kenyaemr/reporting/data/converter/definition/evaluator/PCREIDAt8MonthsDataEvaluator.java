@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.PCREIDAt8MonthsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -34,10 +35,10 @@ public class PCREIDAt8MonthsDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select d.patient_id,ifnull(coalesce(case x.lab_test when 1030 then 'Yes' else NULL end,case hv.dna_pcr_sample_date when NOT NULL then 'Yes' else NULL end ),'Missing') as initial_EID from kenyaemr_etl.etl_patient_demographics d\n" +
-                "               left join (select x.patient_id,x.lab_test as lab_test,x.date_test_requested as date_test_requested from kenyaemr_etl.etl_laboratory_extract x\n" +
+        String qry = "select d.patient_id,ifnull(coalesce(case x.lab_test when 1030 then 'Yes' else NULL end,case hv.dna_pcr_sample_date when NOT NULL then 'Yes' else NULL end ),'Missing') as initial_EID from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "               left join (select x.patient_id,x.lab_test as lab_test,x.date_test_requested as date_test_requested from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                         ) x on d.patient_id = x.patient_id\n" +
-                "               left join (select hv.patient_id,hv.dna_pcr_sample_date as dna_pcr_sample_date from kenyaemr_etl.etl_hei_follow_up_visit hv)hv on d.patient_id = hv.patient_id\n" +
+                "               left join (select hv.patient_id,hv.dna_pcr_sample_date as dna_pcr_sample_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv)hv on d.patient_id = hv.patient_id\n" +
                 "where (timestampdiff(WEEK,d.DOB,x.date_test_requested) <=8) or\n" +
                 "       (timestampdiff(WEEK,d.DOB,hv.dna_pcr_sample_date) <=8) group by d.patient_id;";
 

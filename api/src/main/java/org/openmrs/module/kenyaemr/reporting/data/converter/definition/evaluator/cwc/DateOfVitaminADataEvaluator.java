@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.cwc;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.cwc.DateOfVaccineDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.cwc.DateOfVitaminADataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,7 +43,7 @@ public class DateOfVitaminADataEvaluator implements EncounterDataEvaluator {
                 "\tif(VitaminA_2_yr != '', STR_TO_DATE(VitaminA_2_yr, '%Y/%m/%d'),\"\"),\n" +
                 "\tif(VitaminA_2_to_5_yr != '', STR_TO_DATE(VitaminA_2_to_5_yr, '%Y/%m/%d'),\"\")\n" +
                 "\t) as dates\n" +
-                "from kenyaemr_etl.etl_immunization ";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

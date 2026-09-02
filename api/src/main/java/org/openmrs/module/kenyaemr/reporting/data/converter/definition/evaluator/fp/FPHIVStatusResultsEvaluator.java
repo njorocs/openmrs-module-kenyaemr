@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPHIVStatusResultsDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -35,12 +36,12 @@ public class FPHIVStatusResultsEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry = "SELECT fp.encounter_id, " +
                 "       hts.final_test_result " +
-                "FROM kenyaemr_etl.etl_family_planning fp " +
-                "LEFT JOIN kenyaemr_etl.etl_hts_test hts " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp " +
+                "LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test hts " +
                 "       ON hts.patient_id = fp.patient_id " +
                 "       AND hts.visit_date = ( " +
                 "           SELECT MAX(t2.visit_date) " +
-                "           FROM kenyaemr_etl.etl_hts_test t2 " +
+                "           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t2 " +
                 "           WHERE t2.patient_id = fp.patient_id " +
                 "             AND t2.visit_date <= fp.visit_date " +
                 "       ) " +

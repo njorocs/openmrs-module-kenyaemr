@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCDewormingDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,8 +38,8 @@ public class ANCDewormingDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
                 "       if(p.mebendazole is not null or p.albendazole is not null, 'Y', 'N') as dewormed\n" +
-                "from kenyaemr_etl.etl_preventive_services p\n" +
-                "         inner join kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p\n" +
+                "         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                    on p.visit_date = v.visit_date and p.patient_id = v.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 

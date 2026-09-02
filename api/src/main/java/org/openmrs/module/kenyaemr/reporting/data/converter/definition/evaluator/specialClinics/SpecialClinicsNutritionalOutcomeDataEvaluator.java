@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsNutritionalOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,7 +41,7 @@ public class SpecialClinicsNutritionalOutcomeDataEvaluator implements EncounterD
 
         String qry = "select v.encounter_id,\n" +
                 "             (case v.nutritional_details when 5544 then 'Gaining Weight' when 832 then 'Losing Weight' when 128378 then 'Static Weight' when 159791 then 'Cured' when 1692 then 'Discharged' when 163484 then 'Refused Nutrition Support' else '' end) as nutritional_details\n" +
-                "             from kenyaemr_etl.etl_special_clinics v\n" +
+                "             from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "             where date(v.visit_date) between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "';";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.shared.hiv.art;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -35,7 +36,7 @@ public class FmapCohortLibrary {
 	 * @return the indicator
 	 */
 	public CohortDefinition AdultFirstTLD() {
-		String sqlQuery = "SELECT he.patient_id FROM kenyaemr_etl.etl_drug_order he\n" +
+		String sqlQuery = "SELECT he.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order he\n" +
 			"WHERE DATE(he.visit_date) between date_sub(date(:startDate),interval 1 YEAR) and  date_sub(date(:endDate),interval 1 YEAR) and drug_name = 'TENOFOVIR DISOPROXIL FUMARATE+LAMIVUDINE+DOLUTEGRAVIR';";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("adultFirstLineTLD");
@@ -47,7 +48,7 @@ public class FmapCohortLibrary {
 	}
 
 	public CohortDefinition AdultFirstTLE() {
-		String sqlQuery = "SELECT he.patient_id FROM kenyaemr_etl.etl_drug_order he\n" +
+		String sqlQuery = "SELECT he.patient_id FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order he\n" +
 			"WHERE DATE(he.visit_date) between date_sub(date(:startDate),interval 1 YEAR) and  date_sub(date(:endDate),interval 1 YEAR) and drug_name = 'TENOFOVIR DISOPROXIL FUMARATE+LAMIVUDINE+EFAVIRENZ';";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("adultFirstLineTLE");
@@ -70,9 +71,9 @@ public class FmapCohortLibrary {
 				"                 ELSE 'False' END                                   AS pmtct,\n" +
 				"             mid(max(concat(de.date_started, de.regimen)), 11)      AS regimen,\n" +
 				"             mid(max(concat(de.date_started, de.regimen_line)), 11) AS regimen_line\n" +
-				"      FROM kenyaemr_etl.etl_drug_event de\n" +
-				"               INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
-				"               INNER JOIN kenyaemr_etl.etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
+				"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"               INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
+				"               INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
 				"      where de.date_started <= :endDate\n" +
 				"      GROUP BY de.patient_id) regimeData\n" +
 				"WHERE regimen NOT IN ('RHZE', 'RHZ', 'SRHZE', 'RfbHZE', 'RfbHZ', 'SRfbHZE', 'S (1 gm vial)', 'E', 'RHE', 'EH')\n" +
@@ -115,9 +116,9 @@ public class FmapCohortLibrary {
 				"          ELSE 'False' END AS pmtct,\n" +
 				"             mid(max(concat(de.date_started, de.regimen)), 11) AS regimen,\n" +
 				"             mid(max(concat(de.date_started, de.regimen_line)), 11) AS regimen_line\n" +
-				"   FROM kenyaemr_etl.etl_drug_event de\n" +
-				"     INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
-				"     INNER JOIN kenyaemr_etl.etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
+				"   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"     INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
+				"     INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
 				"           WHERE date_started <= :endDate\n" +
 				"   GROUP BY de.patient_id\n" +
 				"  ) regimenData\n" +
@@ -159,9 +160,9 @@ public class FmapCohortLibrary {
 				"              ELSE 'False' END AS pmtct,\n" +
 				"                 mid(max(concat(de.date_started, de.regimen)), 11) AS regimen,\n" +
 				"                 mid(max(concat(de.date_started, de.regimen_line)), 11) AS regimen_line\n" +
-				"     FROM kenyaemr_etl.etl_drug_event de\n" +
-				"              INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
-				"              INNER JOIN kenyaemr_etl.etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
+				"     FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"              INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
+				"              INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
 				"     where de.date_started <= :endDate\n" +
 				"     GROUP BY de.patient_id\n" +
 				"    ) regimenData\n" +
@@ -200,9 +201,9 @@ public class FmapCohortLibrary {
 				"          ELSE 'False' END AS pmtct,\n" +
 				"             mid(max(concat(de.date_started, de.regimen)), 11) AS regimen,\n" +
 				"             mid(max(concat(de.date_started, de.regimen_line)), 11) AS regimen_line\n" +
-				"   FROM kenyaemr_etl.etl_drug_event de\n" +
-				"     INNER JOIN kenyaemr_etl.etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
-				"     INNER JOIN kenyaemr_etl.etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
+				"   FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
+				"     INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON d.patient_id = de.patient_id\n" +
+				"     INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup ON de.patient_id = fup.patient_id\n" +
 				"               WHERE date_started <= :endDate\n" +
 				"   GROUP BY de.encounter_id\n" +
 				"  ) regimenData\n" +
@@ -247,8 +248,8 @@ public class FmapCohortLibrary {
 	public CohortDefinition peadWeight(String minWeight, String maxWeight) {
 		String sqlQuery = "SELECT tf.patient_id FROM (SELECT t.patient_id,\n" +
 			"                                  mid(max(concat(t.visit_date, t.weight)), 11) AS weight\n" +
-			"                           FROM kenyaemr_etl.etl_patient_triage t\n" +
-			"                                    INNER JOIN kenyaemr_etl.etl_patient_hiv_followup f\n" +
+			"                           FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+			"                                    INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
 			"                                               on t.patient_id = f.patient_id and t.visit_date = f.visit_date\n" +
 			"                           WHERE f.weight " + minWeight + " and f.weight " + maxWeight + "\n" +
 			"                           GROUP BY t.patient_id) tf";
@@ -261,8 +262,8 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition infantBreastfeedingPC8Regimen() {
 		String sqlQuery = "SELECT hv.patient_id\n" +
-			"      FROM kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
-			"      INNER JOIN kenyaemr_etl.etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
+			"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
+			"      INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
 			"WHERE (hv.nvp_given = 86663 OR  hv.ctx_given = 80586)\n" +
 			"  AND hv.infant_feeding IN (5526,5632)\n" +			
 			"  AND date(hv.visit_date) BETWEEN date(:startDate) and date(:endDate);";
@@ -277,8 +278,8 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition infantNotBreastfeedingPC7Regimen() {
 		String sqlQuery = "SELECT hv.patient_id\n" +
-			"      FROM kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
-			"      INNER JOIN kenyaemr_etl.etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
+			"      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
+			"      INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
 			"WHERE (hv.nvp_given = 86663 OR  hv.ctx_given = 80586)\n" +
 			"  AND hv.infant_feeding IN (164478,1595)\n" +			
 			"  AND date(hv.visit_date) BETWEEN date(:startDate) and date(:endDate);";
@@ -293,8 +294,8 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition infantAnyOtherRegimenRegimen() {
 		String sqlQuery = "SELECT hv.patient_id\n" +
-			"FROM kenyaemr_etl.etl_hei_follow_up_visit hv\n" +
-			"         INNER JOIN kenyaemr_etl.etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
+			"FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hv\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = hv.patient_id\n" +
 			"WHERE (hv.nvp_given != 86663 OR  hv.ctx_given != 80586)\n" +			
 			"  AND date(hv.visit_date) BETWEEN date(:startDate) and date(:endDate);";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -308,15 +309,15 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition prepTdfFtcRegimen() {
 		String sqlQuery = "select d.patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics d\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"         left join(select pf.patient_id,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.regimen_prescribed)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_followup pf\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup pf\n" +
 				"                   where date(pf.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pf.patient_id) pf on d.patient_id = pf.patient_id\n" +
 				"         left join(select pm.patient_id,\n" +
 				"                          mid(max(concat(pm.visit_date, pm.prescribed_regimen)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_monthly_refill pm\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill pm\n" +
 				"                   where date(pm.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pm.patient_id) pm on d.patient_id = pm.patient_id\n" +
 				"where (pf.patient_id is not null and pf.regimen_prescribed = 'TDF/FTC(Preferred)')\n" +
@@ -332,15 +333,15 @@ public class FmapCohortLibrary {
 	}
 	public CohortDefinition prepTdf3tcRegimen() {
 		String sqlQuery = "select d.patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics d\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"         left join(select pf.patient_id,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.regimen_prescribed)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_followup pf\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup pf\n" +
 				"                   where date(pf.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pf.patient_id) pf on d.patient_id = pf.patient_id\n" +
 				"         left join(select pm.patient_id,\n" +
 				"                          mid(max(concat(pm.visit_date, pm.prescribed_regimen)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_monthly_refill pm\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill pm\n" +
 				"                   where date(pm.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pm.patient_id) pm on d.patient_id = pm.patient_id\n" +
 				"where (pf.patient_id is not null and pf.regimen_prescribed = 'TDF/3TC')\n" +
@@ -357,14 +358,14 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition dapivirinePrepType() {
 		String sqlQuery = "select d.patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics d\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"         left join(select pf.patient_id,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.prep_type)), 11) as prep_type\n" +
-				"                   from kenyaemr_etl.etl_prep_followup pf\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup pf\n" +
 				"                   where date(pf.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pf.patient_id) pf on d.patient_id = pf.patient_id\n" +
 				"         left join(select pm.patient_id, mid(max(concat(pm.visit_date, pm.prep_type)), 11) as prep_type\n" +
-				"                   from kenyaemr_etl.etl_prep_monthly_refill pm\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill pm\n" +
 				"                   where date(pm.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pm.patient_id) pm on d.patient_id = pm.patient_id\n" +
 				"where (pf.patient_id is not null and pf.prep_type = 'Dapivirine ring')\n" +
@@ -381,14 +382,14 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition cabotegravirPrepType() {
 		String sqlQuery = "select d.patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics d\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"         left join(select pf.patient_id,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.prep_type)), 11) as prep_type\n" +
-				"                   from kenyaemr_etl.etl_prep_followup pf\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup pf\n" +
 				"                   where date(pf.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pf.patient_id) pf on d.patient_id = pf.patient_id\n" +
 				"         left join(select pm.patient_id, mid(max(concat(pm.visit_date, pm.prep_type)), 11) as prep_type\n" +
-				"                   from kenyaemr_etl.etl_prep_monthly_refill pm\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill pm\n" +
 				"                   where date(pm.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pm.patient_id) pm on d.patient_id = pm.patient_id\n" +
 				"where (pf.patient_id is not null and pf.prep_type = 'CAB-LA')\n" +
@@ -405,16 +406,16 @@ public class FmapCohortLibrary {
 
 	public CohortDefinition otherPrepRegimenPrepType() {
 		String sqlQuery = "select d.patient_id\n" +
-				"from kenyaemr_etl.etl_patient_demographics d\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
 				"         left join(select pf.patient_id,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.prep_type)), 11) as prep_type,\n" +
 				"                          mid(max(concat(pf.visit_date, pf.regimen_prescribed)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_followup pf\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_followup pf\n" +
 				"                   where date(pf.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pf.patient_id) pf on d.patient_id = pf.patient_id\n" +
 				"         left join(select pm.patient_id, mid(max(concat(pm.visit_date, pm.prep_type)), 11) as prep_type,\n" +
 				"                          mid(max(concat(pm.visit_date, pm.prescribed_regimen)), 11) as regimen_prescribed\n" +
-				"                   from kenyaemr_etl.etl_prep_monthly_refill pm\n" +
+				"                   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_monthly_refill pm\n" +
 				"                   where date(pm.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"                   group by pm.patient_id) pm on d.patient_id = pm.patient_id\n" +
 				"where (pf.patient_id is not null and pf.regimen_prescribed not in ('','TDF/3TC', 'TDF/FTC(Preferred)') and pf.prep_type not in ('CAB-LA', 'Dapivirine ring'))\n" +

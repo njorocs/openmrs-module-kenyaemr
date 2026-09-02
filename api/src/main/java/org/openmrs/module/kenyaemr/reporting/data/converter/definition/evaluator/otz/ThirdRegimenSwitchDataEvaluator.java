@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.ThirdRegimenSwitchDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,8 +42,8 @@ public class ThirdRegimenSwitchDataEvaluator implements PersonDataEvaluator {
                 "                                     if(@v := patient_id, 1, 1)\n" +
                 "                              )\n" +
                 "                              ) as rn\n" +
-                "                   from (select t.patient_id,t.date_started,t.regimen,t.regimen_line,max(e.visit_date) as latest_otz_enr from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                                                                                                                                left join kenyaemr_etl.etl_drug_event t on e.patient_id = t.patient_id where t.program = 'HIV'\n" +
+                "                   from (select t.patient_id,t.date_started,t.regimen,t.regimen_line,max(e.visit_date) as latest_otz_enr from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                                                                                                                                left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event t on e.patient_id = t.patient_id where t.program = 'HIV'\n" +
                 "                      group by t.date_started,e.patient_id\n" +
                 "                         having t.date_started >= latest_otz_enr) t cross join\n" +
                 "                            (select @v := -1, @rn := 0) params\n" +

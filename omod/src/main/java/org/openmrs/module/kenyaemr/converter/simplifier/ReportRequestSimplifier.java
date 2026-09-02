@@ -43,7 +43,7 @@ public class ReportRequestSimplifier extends AbstractSimplifier<ReportRequest> {
 	 */
 	@Override
 	protected SimpleObject simplify(ReportRequest request) {
-		
+
 		Mapped<ReportDefinition> mappedDefinition = request.getReportDefinition();
 		ReportDefinition definition = (mappedDefinition != null)
 				? mappedDefinition.getParameterizable()
@@ -79,7 +79,7 @@ public class ReportRequestSimplifier extends AbstractSimplifier<ReportRequest> {
 
 	/**
 	 * Calculates a time taken display value for the given request
-	 * 
+	 *
 	 * @param request the request
 	 * @return the time taken in milliseconds
 	 */

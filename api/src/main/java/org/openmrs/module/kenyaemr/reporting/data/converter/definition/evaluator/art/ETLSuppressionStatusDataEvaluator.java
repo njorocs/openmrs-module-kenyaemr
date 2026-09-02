@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLSuppressionStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,7 +40,7 @@ public class ETLSuppressionStatusDataEvaluator implements PersonDataEvaluator {
                 "  mid(max(concat(visit_date, if(lab_test = 856 and test_result >= 1000, 'Unsuppressed',\n" +
                 "  if(lab_test = 856 and test_result between 50 and 999, 'Low Level viremia',\n" +
                 "  if((lab_test= 856 and test_result <50) or (lab_test=1305 and test_result = 1302), 'Suppressed ',''))), '' )),11) as suppression_status\n" +
-                "from kenyaemr_etl.etl_laboratory_extract where coalesce(date(date_test_requested),date(visit_date)) <= date(:endDate)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract where coalesce(date(date_test_requested),date(visit_date)) <= date(:endDate)\n" +
                 "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

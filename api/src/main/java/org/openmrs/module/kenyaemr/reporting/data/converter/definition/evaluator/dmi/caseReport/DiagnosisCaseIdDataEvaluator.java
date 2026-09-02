@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.DiagnosisCaseIdDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -37,8 +38,8 @@ public class DiagnosisCaseIdDataEvaluator implements VisitDataEvaluator {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
         String qry = "select e.visit_id, GROUP_CONCAT(DISTINCT d.diagnosis_coded) as diagnosis\n" +
-                "from kenyaemr_etl.etl_clinical_encounter e\n" +
-                "         inner join openmrs.encounter_diagnosis d\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
+                "         inner join encounter_diagnosis d\n" +
                 "                    on e.encounter_id = d.encounter_id and d.dx_rank = 2 and d.voided = 0\n" +
                 "where e.visit_date between date(:startDate) and date(:endDate) GROUP BY e.visit_id;";
 

@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pama;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.BaselineCD4CountDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaBaselineVLDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,7 +40,7 @@ public class PamaBaselineVLDataDefinitionEvaluator implements PersonDataEvaluato
 				"         mid(min(concat(date(visit_date),\n" +
 				"                        if(lab_test = 856, test_result, if(lab_test = 1305 and test_result = 1302, 'LDL', '')), '')),\n" +
 				"             11) as vl_result\n" +
-				"              from kenyaemr_etl.etl_laboratory_extract\n" +
+				"              from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
 				"              where lab_test in (1305, 856)\n" +
 				"              GROUP BY patient_id;";
 		

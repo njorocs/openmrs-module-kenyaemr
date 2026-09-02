@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.EbolaRiskCategorizationDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,19 +39,22 @@ public class EbolaRiskCategorizationDataEvaluator implements PersonDataEvaluator
                         "        when t.temperature >= 38 " +
                         "             and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065) " +
                         "             and ( " +
-                        "                 (select count(distinct c.complaint) from kenyaemr_etl.etl_allergy_chronic_illness c " +
+                        "                 (select count(distinct c.complaint) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c " +
                         "                     where c.patient_id = t.patient_id " +
                         "                       and c.complaint in (139084, 116334, 2032542, 122983, 142412, 151, 162628) " +
                         "                       and c.voided = 0 " +
                         "                       and date(c.visit_date) between date(:startDate) and date(:endDate)) >= 3 " +
                         "             ) " +
                         "        then 'Suspected Ebola Case' " +
-                        "        else null " +
+                        "        when t.temperature >= 38 " +
+                        "             and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065) " +
+                        "        then 'Suspected Ebola Case' " +
+                        "        else 'Suspected Ebola Case' " +
                         "    end as risk_category " +
-                        "from kenyaemr_etl.etl_patient_triage t " +
+                        "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
                         "inner join ( " +
                         "    select patient_id, max(visit_date) as latest_visit " +
-                        "    from kenyaemr_etl.etl_patient_triage " +
+                        "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage " +
                         "    where date(visit_date) between date(:startDate) and date(:endDate) " +
                         "    and voided = 0 " +
                         "    group by patient_id " +

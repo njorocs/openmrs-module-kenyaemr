@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCIPTmalariaDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -45,7 +46,7 @@ public class ANCIPTmalariaDataEvaluator implements EncounterDataEvaluator {
                 "                                      when 2031584 then 'No SP, if last dose received <1 Month ago'\n" +
                 "                                      when 2031585 then 'IPTp - SP dose 6 (if no dose in past month)' END)),\n" +
                 "           11) as IPT_dose_given_anc\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit\n" +
                 "where date(visit_date) between date(:startDate) and date(:endDate)\n" +
                 "group by encounter_id;";
 

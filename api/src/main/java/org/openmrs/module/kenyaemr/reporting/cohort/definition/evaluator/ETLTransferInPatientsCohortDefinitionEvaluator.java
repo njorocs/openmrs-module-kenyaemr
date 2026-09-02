@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLTransferInPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -46,7 +47,7 @@ public class ETLTransferInPatientsCohortDefinitionEvaluator implements CohortDef
 
 		Cohort newCohort = new Cohort();
 		String qry=" select patient_id\n" +
-				"from kenyaemr_etl.etl_hiv_enrollment\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment\n" +
 				"where patient_type=160563\n" +
 				"      and (date(transfer_in_date) between date(:startDate) and date(:endDate) or date(visit_date) between date(:startDate) and date(:endDate));\n";
 

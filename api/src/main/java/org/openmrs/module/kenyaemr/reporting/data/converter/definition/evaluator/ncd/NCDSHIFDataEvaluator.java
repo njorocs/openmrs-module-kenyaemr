@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ncd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.NCDSHIFStatusDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,8 +37,8 @@ public class NCDSHIFDataEvaluator implements EncounterDataEvaluator {
         // shif_number
 
         String qry = "select v.encounter_id, d.sha_number " +
-                "from kenyaemr_etl.etl_ncd_enrollment v " +
-                "inner join kenyaemr_etl.etl_patient_demographics d on v.patient_id = d.patient_id " +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment v " +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on v.patient_id = d.patient_id " +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) " +
                 "and d.shif_number is not null " +
                 "group by v.encounter_id";

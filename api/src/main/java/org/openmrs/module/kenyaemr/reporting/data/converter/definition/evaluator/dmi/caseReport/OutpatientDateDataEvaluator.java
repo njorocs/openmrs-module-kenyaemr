@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.OutpatientDateDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -36,9 +37,9 @@ public class OutpatientDateDataEvaluator implements VisitDataEvaluator {
         EvaluatedVisitData c = new EvaluatedVisitData(definition, context);
 
         String qry = "select v.visit_id, DATE_FORMAT(coalesce(e.visit_date, t.visit_date), '%Y-%m-%d %H:%i:%s') as outpatient_date\n" +
-                "from openmrs.visit v\n" +
-                "         left join kenyaemr_etl.etl_clinical_encounter e on v.visit_id = e.visit_id\n" +
-                "         left join kenyaemr_etl.etl_patient_triage t on v.visit_id = t.visit_id\n" +
+                "from visit v\n" +
+                "         left join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e on v.visit_id = e.visit_id\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on v.visit_id = t.visit_id\n" +
                 "where date(v.date_started) between date(:startDate) and date(:endDate)\n" +
                 "  and v.voided = 0;";
 

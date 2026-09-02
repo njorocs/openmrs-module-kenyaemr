@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCInitiatedPrepDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,9 +38,9 @@ public class PNCInitiatedPrepDataEvaluator implements EncounterDataEvaluator {
 
         String qry = "select v.encounter_id,\n" +
 			"       if(e.patient_type = 'New Patient', 'Yes','No') as prep_initiated\n" +
-			"from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
 			"         left join (select e.encounter_id,e.patient_id, e.patient_type as patient_type from\n" +
-			"                            kenyaemr_etl.etl_prep_enrolment e where date(e.visit_date) between date(:startDate) and date(:endDate)) e\n" +
+			"                            "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_prep_enrolment e where date(e.visit_date) between date(:startDate) and date(:endDate)) e\n" +
 			"                              on e.patient_id = v.patient_id\n" +
 			"         where date(v.visit_date) between date(:startDate) and date(:endDate) ;";
 

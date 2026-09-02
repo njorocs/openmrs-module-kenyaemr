@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCTestOneResultsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class PNCTestOneResultsDataEvaluator implements EncounterDataEvaluator {
         String qry = "select v.encounter_id,\n" +
                 "                   CONCAT_WS('\\r\\n', v.test_1_kit_name, v.test_1_kit_lot_no, v.test_1_kit_expiry,\n" +
                 "                             v.test_1_result) as Test_one_results\n" +
-                "            from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "            where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

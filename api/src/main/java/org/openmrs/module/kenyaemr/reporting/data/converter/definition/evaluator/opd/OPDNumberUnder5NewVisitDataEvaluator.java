@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDNumberUnder5NewVisitDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,8 +38,8 @@ public class OPDNumberUnder5NewVisitDataEvaluator implements EncounterDataEvalua
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT ce.encounter_id, CONCAT_WS(CHAR(10), 'New',p.patient_clinic_number)\n" +
-                "from kenyaemr_etl.etl_clinical_encounter ce\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = ce.patient_id and p.voided = 0 and\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
+                "         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = ce.patient_id and p.voided = 0 and\n" +
                 "                                                               TIMESTAMPDIFF(YEAR, date(p.DOB), ce.visit_date) < 5\n" +
                 "where date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "  and ce.visit_type = 'New visit'\n" +

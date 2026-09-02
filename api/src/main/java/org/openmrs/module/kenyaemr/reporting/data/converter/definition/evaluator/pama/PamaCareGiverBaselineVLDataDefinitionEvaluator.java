@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pama;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaBaselineVLDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pama.PamaCareGiverBaselineVLDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,10 +38,10 @@ public class PamaCareGiverBaselineVLDataDefinitionEvaluator implements PersonDat
 		
 		String qry = "select distinct r.person_a,\n" +
 				"    mid(max(concat(le.visit_date, if(le.lab_test = 856, le.test_result, if(le.lab_test=1305 and le.test_result = 1302, 'LDL','')), '' )),11) as vl_result\n" +
-				"   from kenyaemr_etl.etl_patient_demographics d\n" +
-				"     inner join kenyaemr_etl.etl_laboratory_extract le on le.patient_id = d.patient_id and le.lab_test in (1305,856)\n" +
-				"     inner join openmrs.relationship r on d.patient_id = r.person_b\n" +
-				"     inner join openmrs.relationship_type t on r.relationship = t.relationship_type_id and t.uuid = '3667e52f-8653-40e1-b227-a7278d474020'\n" +
+				"   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+				"     inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le on le.patient_id = d.patient_id and le.lab_test in (1305,856)\n" +
+				"     inner JOIN relationship r on d.patient_id = r.person_b\n" +
+				"     inner JOIN relationship_type t on r.relationship = t.relationship_type_id and t.uuid = '3667e52f-8653-40e1-b227-a7278d474020'\n" +
 				"                                               and (le.visit_date <= date(r.start_date))\n" +
 				" group by r.person_a;";
 		

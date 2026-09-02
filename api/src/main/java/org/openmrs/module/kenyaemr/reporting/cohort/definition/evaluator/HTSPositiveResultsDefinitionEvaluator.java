@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.HTSPositiveResultsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -46,7 +47,7 @@ public class HTSPositiveResultsDefinitionEvaluator implements CohortDefinitionEv
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select t.patient_id from kenyaemr_etl.etl_hts_test t where t.final_test_result = 'Positive' group by t.patient_id;";
+		String qry="select t.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where t.final_test_result = 'Positive' group by t.patient_id;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

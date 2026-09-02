@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCInfantProphylaxisDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,7 +40,7 @@ public class ANCInfantProphylaxisDataEvaluator implements EncounterDataEvaluator
 			"       (IF(v.baby_azt_dispensed = 86663 AND v.baby_nvp_dispensed = 80586, 'AZT&NVP',\n" +
 			"        IF(v.baby_azt_dispensed = 86663, 'AZT',\n" +
 			"        IF(v.baby_nvp_dispensed = 80586, 'NVP', '')))) AS infant_prophylaxis\n" +
-			"    from kenyaemr_etl.etl_mch_antenatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+			"    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where date(v.visit_date) between date(:startDate) and date(:endDate);";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Date startDate = (Date)context.getParameterValue("startDate");

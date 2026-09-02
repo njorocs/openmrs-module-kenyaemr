@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPReasonsforLARCDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,8 +37,8 @@ public class FPReasonsforLARCEvaluator implements EncounterDataEvaluator {
     public EvaluatedEncounterData evaluate(EncounterDataDefinition encounterDataDefinition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry = "SELECT v.encounter_id, cn.name AS reasons_for_larc_removal " +
-                "FROM kenyaemr_etl.etl_family_planning v " +
-                "JOIN openmrs.concept_name cn " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
+                "JOIN concept_name cn " +
                 "    ON cn.concept_id = v.reasons_for_larc_removal " +
                 "    AND cn.locale = 'en' " +
                 "    AND cn.voided = 0 " +

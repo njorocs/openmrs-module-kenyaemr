@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDMalariaAssessmentDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDTracerDrugsPrescribedDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -52,8 +52,8 @@ public class OPDTracerDrugsPrescribedDataEvaluator implements EncounterDataEvalu
 			"                END\n" +
 			"            SEPARATOR '|'\n" +
 			"    ) AS tracer_drugs_prescribed\n" +
-			"FROM kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         INNER JOIN kenyaemr_etl.etl_drug_order d\n" +
+			"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order d\n" +
 			"                    ON v.patient_id = d.patient_id\n" +
 			"WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 			"GROUP BY v.encounter_id";

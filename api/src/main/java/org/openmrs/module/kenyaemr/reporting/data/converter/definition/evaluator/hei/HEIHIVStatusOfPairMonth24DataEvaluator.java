@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIHIVStatusOfPairMonth24DataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class HEIHIVStatusOfPairMonth24DataEvaluator implements PersonDataEvaluat
         String qry = "select\n" +
                 "  c.patient_id,\n" +
                 "  mid(max(concat(visit_date, (case when c.disc_patient IS NOT NULL then \"INACTIVE\" else \"ACTIVE\" end))),11) as HIV_outcome\n" +
-                "from kenyaemr_etl.etl_current_in_care c\n" +
-                "  INNER JOIN kenyaemr_etl.etl_patient_demographics d ON\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c\n" +
+                "  INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON\n" +
                 "   d.patient_id = c.patient_id\n" +
                 "WHERE round(DATEDIFF(c.visit_date,d.DOB)/7) = 96\n" +
                 "GROUP BY patient_id";

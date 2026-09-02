@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.TBScreeningAtLastVisitDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,12 +37,12 @@ public class TBScreeningAtLastVisitDataEvaluator implements PersonDataEvaluator 
 
         String qry = "SELECT s.patient_id,\n" +
                 "       (SELECT s2.resulting_tb_status\n" +
-                "        FROM kenyaemr_etl.etl_tb_screening s2\n" +
+                "        FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening s2\n" +
                 "        WHERE s2.patient_id = s.patient_id\n" +
                 "          AND s2.person_present = 978\n" +
                 "        ORDER BY s2.visit_date DESC\n" +
                 "        LIMIT 1) AS lastTBStatus\n" +
-                "FROM kenyaemr_etl.etl_tb_screening s\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening s\n" +
                 "WHERE s.person_present = 978\n" +
                 "GROUP BY s.patient_id;";
 

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCExercisesDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +38,7 @@ public class ANCExercisesDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
                 "    v.encounter_id,\n" +
                 "    (case v.anc_exercises when 1065 then \"Yes\" when 1066 then \"No\" when 1067 then \"Unknown\" else \" \" end) as anc_exercises\n" +
-                "   from kenyaemr_etl.etl_mch_antenatal_visit v;";
+                "   from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

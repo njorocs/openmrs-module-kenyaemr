@@ -22,7 +22,7 @@
 	config.pageTitle = ""
 
 	config.angularApp = "kenyaemr"
-	
+
 	ui.decorateWith("kenyaui", "standardPage", config)
 %>
 

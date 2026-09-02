@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCNVPAndAZTForBabyWithin6WeeksDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class PNCNVPAndAZTForBabyWithin6WeeksDataEvaluator implements EncounterDa
                 "            when v.infant_prophylaxis_timing = 1065 and (v.baby_nvp_dispensed = 164142 or v.baby_azt_dispensed = 164142)\n" +
                 "                then 'R'\n" +
                 "            else 'NA' end) as infant_prophylaxis_timing\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsPaymentMethodsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,12 +39,12 @@ public class SpecialClinicsPaymentMethodsDataEvaluator implements EncounterDataE
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "SELECT v.encounter_id, GROUP_CONCAT(m.name SEPARATOR ', ') AS payment_mode\n" +
-                "FROM kenyaemr_etl.etl_special_clinics v\n" +
-                "LEFT JOIN openmrs.cashier_bill t \n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
+                "LEFT JOIN cashier_bill t \n" +
                 "    ON v.patient_id = t.patient_id\n" +
-                "LEFT JOIN openmrs.cashier_bill_payment tp \n" +
+                "LEFT JOIN cashier_bill_payment tp \n" +
                 "    ON t.bill_id = tp.bill_id\n" +
-                "LEFT JOIN openmrs.cashier_payment_mode m \n" +
+                "LEFT JOIN cashier_payment_mode m \n" +
                 "    ON tp.payment_mode_id = m.payment_mode_id\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "AND v.special_clinic_form_uuid = '" + specialClinic + "'\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPImplantsRodsDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,7 +41,7 @@ public class FPImplantsRodsEvaluator implements EncounterDataEvaluator {
                 "        WHEN f.contraceptive_dispensed IN (162422, 1873) THEN 2  -- 2 Rods Implanon/Jadelle\n" +
                 "        ELSE NULL\n" +
                 "    END AS implant_type\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                 "WHERE f.contraceptive_dispensed IN (76022, 162422, 1873)\n" +
                 "  AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);\n";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

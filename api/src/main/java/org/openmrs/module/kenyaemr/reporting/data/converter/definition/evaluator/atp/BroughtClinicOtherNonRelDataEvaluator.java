@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.atp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.BroughtChildOtherNonRelativeDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -34,7 +35,7 @@ public class BroughtClinicOtherNonRelDataEvaluator implements EncounterDataEvalu
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id, other_non_relative_who_brought_child_clinic from kenyaemr_etl.etl_atp_disclosure_readiness_assessment";
+        String qry = "select encounter_id, other_non_relative_who_brought_child_clinic from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_atp_disclosure_readiness_assessment";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

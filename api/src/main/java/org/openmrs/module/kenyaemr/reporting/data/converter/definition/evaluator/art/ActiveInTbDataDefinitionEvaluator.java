@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ActiveInOvcDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ActiveInTbDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,12 +36,12 @@ public class ActiveInTbDataDefinitionEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select d.patient_id,if(v.program_client is not null or c.hiv_client is not null,'Yes','No') from kenyaemr_etl.etl_patient_demographics d\n" +
+        String qry = "select d.patient_id,if(v.program_client is not null or c.hiv_client is not null,'Yes','No') from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "  left join (select pp.patient_id as program_client from patient_program pp\n" +
                 "    inner join program p on p.program_id = pp.program_id and p.name ='TB' and date(pp.date_enrolled) <= date(:endDate)\n" +
                 "  where date(pp.date_completed) is null) v on d.patient_id=v.program_client\n" +
                 "  left join (select v.patient_id as hiv_client,max(date(v.visit_date)),mid(max(concat(date(v.visit_date),v.on_anti_tb_drugs)),11) as on_tb_drugs\n" +
-                "  from kenyaemr_etl.etl_patient_hiv_followup v\n" +
+                "  from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup v\n" +
                 "  where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  group by v.patient_id having max(date(visit_date)) <= date(:endDate) and on_tb_drugs = 1065)  c on d.patient_id = c.hiv_client;";
 

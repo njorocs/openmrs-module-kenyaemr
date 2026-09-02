@@ -78,7 +78,7 @@ public class IsPregnantCalculationTest extends BaseModuleContextSensitiveTest {
 
 		// Give patient #8 a recent YES recording
 		TestUtils.saveObs(TestUtils.getPatient(8), pregnancyStatus, yes, TestUtils.date(2012, 12, 1));
-		
+
 		List<Integer> ptIds = Arrays.asList(6, 7, 8);
 		CalculationResultMap resultMap = new IsPregnantCalculation().evaluate(ptIds, null, Context.getService(PatientCalculationService.class).createCalculationContext());
 		Assert.assertFalse((Boolean) resultMap.get(6).getValue()); // is male

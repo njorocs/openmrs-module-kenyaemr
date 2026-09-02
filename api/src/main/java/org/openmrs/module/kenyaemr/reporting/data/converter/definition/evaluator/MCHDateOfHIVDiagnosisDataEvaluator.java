@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.MCHDateOfHIVDiagnosisDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -42,21 +43,21 @@ public class MCHDateOfHIVDiagnosisDataEvaluator implements PersonDataEvaluator {
 		        + "                   ifnull(date(a.anc_visit_date), '9999-12-31'), ifnull(date(m.mat_visit_date), '9999-12-31'),\n"
 		        + "                   ifnull(date(p.pnc_visit_date), '9999-12-31'), ifnull(date(t.visit_date), '9999-12-31'),\n"
 		        + "                   ifnull(date(h.date_confirmed_hiv_positive), '9999-12-31')) as date_diagnosed_hiv_positive\n"
-		        + "      from kenyaemr_etl.etl_mch_enrollment e\n"
+		        + "      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n"
 		        + "               left join (select t.patient_id, t.visit_date\n"
-		        + "                          from kenyaemr_etl.etl_hts_test t\n"
+		        + "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t\n"
 		        + "                          where t.final_test_result = 'Positive') t\n"
 		        + "                         on e.patient_id = t.patient_id\n"
-		        + "               left join (select h.patient_id, h.date_confirmed_hiv_positive from kenyaemr_etl.etl_hiv_enrollment h) h\n"
+		        + "               left join (select h.patient_id, h.date_confirmed_hiv_positive from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment h) h\n"
 		        + "                         on h.patient_id = e.patient_id\n"
 		        + "               left join(select a.patient_id, a.visit_date as anc_visit_date\n"
-		        + "                         from kenyaemr_etl.etl_mch_antenatal_visit a\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit a\n"
 		        + "                         where a.final_test_result = 'Positive') a on e.patient_id = a.patient_id\n"
 		        + "               left join(select m.patient_id, m.visit_date as mat_visit_date\n"
-		        + "                         from kenyaemr_etl.etl_mchs_delivery m\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery m\n"
 		        + "                         where m.final_test_result = 'Positive') m on e.patient_id = m.patient_id\n"
 		        + "               left join(select p.patient_id, p.visit_date as pnc_visit_date\n"
-		        + "                         from kenyaemr_etl.etl_mch_postnatal_visit p\n"
+		        + "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p\n"
 		        + "                         where p.final_test_result = 'Positive') p on e.patient_id = p.patient_id\n"
 		        + "      where date(e.visit_date) between date(:startDate) and date(:endDate)\n"
 		        + "      group by e.patient_id) c;";

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLHTSNegReferralServicesDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class ETLHTSNegReferralServicesDataEvaluator implements PersonDataEvaluat
 
         String qry = "SELECT patient_id,\n" +
 			"       neg_referral_for\n" +
-			"    FROM kenyaemr_etl.etl_hts_test\n" +
+			"    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test\n" +
 			"    WHERE date(visit_date) >= date(:startDate) AND date(visit_date) <= date(:endDate)\n" +
 			"    GROUP BY patient_id;\n";
 

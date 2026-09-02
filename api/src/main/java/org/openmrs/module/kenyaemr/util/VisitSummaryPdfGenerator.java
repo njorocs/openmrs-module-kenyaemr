@@ -155,8 +155,8 @@ public class VisitSummaryPdfGenerator {
                                   FacilityInfo facility) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfDocument pdfDoc = new PdfDocument(
-            new PdfReader(new ByteArrayInputStream(content)),
-            new PdfWriter(out));
+                new PdfReader(new ByteArrayInputStream(content)),
+                new PdfWriter(out));
         int total = pdfDoc.getNumberOfPages();
         PdfFont footerFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
         for (int i = 1; i <= total; i++) {
@@ -173,7 +173,7 @@ public class VisitSummaryPdfGenerator {
         PdfCanvas pdfCanvas = new PdfCanvas(page.newContentStreamAfter(), page.getResources(), pdfDoc);
 
         pdfCanvas.setStrokeColor(C_RULE).setLineWidth(0.5f)
-                 .moveTo(18, 34).lineTo(ps.getWidth() - 18, 34).stroke();
+                .moveTo(18, 34).lineTo(ps.getWidth() - 18, 34).stroke();
 
         String left  = "Printed by: " + printedBy + "  •  " + printDate;
         String right = "Page " + pageNum + " of " + total;
@@ -211,27 +211,27 @@ public class VisitSummaryPdfGenerator {
     private void addPageHeader(Document doc, Visit visit, Patient patient, Date visitEnd,
                                ConceptService cs, FacilityInfo facility) {
         String visitDate = visit.getStartDatetime() != null
-            ? dateFmt.format(visit.getStartDatetime()).toUpperCase() : "";
+                ? dateFmt.format(visit.getStartDatetime()).toUpperCase() : "";
         doc.add(new Paragraph("PATIENT VISIT SUMMARY  •  " + visitDate)
-            .setFontSize(7).setFontColor(ColorConstants.BLACK).setMarginBottom(1));
+                .setFontSize(7).setFontColor(ColorConstants.BLACK).setMarginBottom(1));
 
         String name = patient.getPersonName() != null ? patient.getPersonName().getFullName() : "";
         Table nameRow = new Table(UnitValue.createPercentArray(new float[]{55, 45}))
-            .setWidth(UnitValue.createPercentValue(100))
-            .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
-            .setMarginBottom(4);
+                .setWidth(UnitValue.createPercentValue(100))
+                .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
+                .setMarginBottom(4);
 
         nameRow.addCell(new Cell()
-            .setBorder(Border.NO_BORDER)
-            .setPaddingBottom(3)
-            .add(new Paragraph(name)
-                .setFont(bold).setFontSize(11).setFontColor(ColorConstants.BLACK).setMarginBottom(2))
-            .add(new Paragraph(buildDemographicsLine(patient, visit, visitEnd, cs))
-                .setFontSize(8).setFontColor(ColorConstants.BLACK)));
+                .setBorder(Border.NO_BORDER)
+                .setPaddingBottom(3)
+                .add(new Paragraph(name)
+                        .setFont(bold).setFontSize(11).setFontColor(ColorConstants.BLACK).setMarginBottom(2))
+                .add(new Paragraph(buildDemographicsLine(patient, visit, visitEnd, cs))
+                        .setFontSize(8).setFontColor(ColorConstants.BLACK)));
 
         Paragraph facilityPara = new Paragraph()
-            .setTextAlignment(TextAlignment.RIGHT)
-            .setFontColor(ColorConstants.BLACK);
+                .setTextAlignment(TextAlignment.RIGHT)
+                .setFontColor(ColorConstants.BLACK);
         if (!facility.name.isEmpty()) {
             facilityPara.add(new Text(facility.name).setFont(bold).setFontSize(9));
         }
@@ -240,9 +240,9 @@ public class VisitSummaryPdfGenerator {
             facilityPara.add(new Text(facility.address).setFont(regular).setFontSize(7));
         }
         nameRow.addCell(new Cell()
-            .setBorder(Border.NO_BORDER)
-            .setPaddingBottom(3)
-            .add(facilityPara));
+                .setBorder(Border.NO_BORDER)
+                .setPaddingBottom(3)
+                .add(facilityPara));
 
         doc.add(nameRow);
     }
@@ -253,7 +253,7 @@ public class VisitSummaryPdfGenerator {
         if (pid != null) sb.append("MRN: ").append(pid.getIdentifier()).append("    ");
         if (patient.getBirthdate() != null) {
             sb.append("DOB: ").append(dateFmt.format(patient.getBirthdate()))
-              .append(" (").append(patient.getAge()).append("y)").append("    ");
+                    .append(" (").append(patient.getAge()).append("y)").append("    ");
         }
         sb.append("Gender: ").append("M".equals(patient.getGender()) ? "Male" : "Female").append("    ");
         String w = getLatestNumericObsValue(patient, visit.getStartDatetime(), visitEnd, cs, WEIGHT);
@@ -264,7 +264,7 @@ public class VisitSummaryPdfGenerator {
 
     private void addDiagnoses(Document doc, Visit visit) {
         List<Diagnosis> list = Context.getService(DiagnosisService.class)
-            .getDiagnosesByVisit(visit, false, false);
+                .getDiagnosesByVisit(visit, false, false);
         if (list.isEmpty()) return;
 
         List<Diagnosis> provisional = new ArrayList<>();
@@ -281,12 +281,12 @@ public class VisitSummaryPdfGenerator {
 
         if (!provisional.isEmpty()) {
             doc.add(new Paragraph("Impression").setFont(bold).setFontSize(7)
-                .setMarginTop(2).setMarginBottom(2));
+                    .setMarginTop(2).setMarginBottom(2));
             for (Diagnosis d : provisional) doc.add(bulletItem(buildDiagnosisLabel(d)));
         }
         if (!confirmed.isEmpty()) {
             doc.add(new Paragraph("Main Diagnosis").setFont(bold).setFontSize(7)
-                .setMarginTop(4).setMarginBottom(2));
+                    .setMarginTop(4).setMarginBottom(2));
             for (Diagnosis d : confirmed) doc.add(bulletItem(buildDiagnosisLabel(d)));
         }
         doc.add(tiny());
@@ -294,8 +294,8 @@ public class VisitSummaryPdfGenerator {
 
     private String buildDiagnosisLabel(Diagnosis d) {
         String name = d.getDiagnosis().getCoded() != null
-            ? d.getDiagnosis().getCoded().getName().getName()
-            : d.getDiagnosis().getNonCoded();
+                ? d.getDiagnosis().getCoded().getName().getName()
+                : d.getDiagnosis().getNonCoded();
         return name != null ? name : "";
     }
 
@@ -318,18 +318,18 @@ public class VisitSummaryPdfGenerator {
 
         if (!complaints.isEmpty()) {
             doc.add(new Paragraph("Chief Complaints").setFont(bold).setFontSize(7)
-                .setMarginTop(2).setMarginBottom(2));
+                    .setMarginTop(2).setMarginBottom(2));
             for (ComplaintItem item : complaints) {
                 doc.add(new Paragraph()
-                    .add(new Text("•  " + item.text).setFontSize(8))
-                    .add(new Text("  " + item.source).setFont(italic).setFontSize(6.5f))
-                    .setMarginLeft(6).setMarginBottom(1));
+                        .add(new Text("•  " + item.text).setFontSize(8))
+                        .add(new Text("  " + item.source).setFont(italic).setFontSize(6.5f))
+                        .setMarginLeft(6).setMarginBottom(1));
             }
         }
 
         if (!conditions.isEmpty()) {
             doc.add(new Paragraph("Conditions").setFont(bold).setFontSize(7)
-                .setMarginTop(4).setMarginBottom(2));
+                    .setMarginTop(4).setMarginBottom(2));
             Table table = buildTable(new float[]{55, 30, 15}, "Condition", "Date Noted", "Status");
             for (Condition c : conditions) {
                 table.addCell(dataCell(getConditionName(c)));
@@ -343,7 +343,7 @@ public class VisitSummaryPdfGenerator {
 
         if (!allergies.isEmpty()) {
             doc.add(new Paragraph("Allergies").setFont(bold).setFontSize(7)
-                .setMarginTop(4).setMarginBottom(2));
+                    .setMarginTop(4).setMarginBottom(2));
             Table table = buildTable(new float[]{70, 30}, "Allergen", "Severity");
             for (Allergy a : allergies) {
                 table.addCell(dataCell(getAllergenName(a)));
@@ -354,7 +354,7 @@ public class VisitSummaryPdfGenerator {
 
         if (!notes.isEmpty()) {
             doc.add(new Paragraph("Clinical Notes").setFont(bold).setFontSize(7)
-                .setMarginTop(4).setMarginBottom(2));
+                    .setMarginTop(4).setMarginBottom(2));
             for (String note : notes) doc.add(bulletItem(note));
             doc.add(tiny());
         }
@@ -367,9 +367,9 @@ public class VisitSummaryPdfGenerator {
         if (groupConcept == null || complaintCon == null) return Collections.emptyList();
 
         EncounterType triageType = Context.getEncounterService()
-            .getEncounterTypeByUuid(CommonMetadata._EncounterType.TRIAGE);
+                .getEncounterTypeByUuid(CommonMetadata._EncounterType.TRIAGE);
         EncounterType consultType = Context.getEncounterService()
-            .getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
+                .getEncounterTypeByUuid(CommonMetadata._EncounterType.CONSULTATION);
 
         List<ComplaintItem> items = new ArrayList<>();
         for (Encounter enc : visit.getEncounters()) {
@@ -397,9 +397,9 @@ public class VisitSummaryPdfGenerator {
         for (Obs m : top.getGroupMembers(false)) {
             if (m.getConcept().equals(complaintCon)) {
                 complaint = m.getValueCoded() != null
-                    ? m.getValueCoded().getName().getName() : m.getValueText();
+                        ? m.getValueCoded().getName().getName() : m.getValueText();
             } else if (durationCon != null && m.getConcept().equals(durationCon)
-                       && m.getValueNumeric() != null) {
+                    && m.getValueNumeric() != null) {
                 duration = m.getValueNumeric().intValue() + " days";
             }
         }
@@ -416,7 +416,7 @@ public class VisitSummaryPdfGenerator {
 
         // Compact 4-column grid: label + bold value side by side
         Table table = new Table(UnitValue.createPercentArray(new float[]{25, 25, 25, 25}))
-            .setWidth(UnitValue.createPercentValue(100)).setMarginBottom(4);
+                .setWidth(UnitValue.createPercentValue(100)).setMarginBottom(4);
 
         addCompactVitalCell(table, "Temp",          v.temp,   "°C");
         addCompactVitalCell(table, "Pulse",          v.pulse,  "bpm");
@@ -431,15 +431,15 @@ public class VisitSummaryPdfGenerator {
 
     private void addCompactVitalCell(Table table, String label, String value, String unit) {
         Paragraph p = new Paragraph()
-            .add(new Text(label + ": ").setFontSize(7))
-            .add(new Text(value != null ? value + " " + unit : "—").setFont(bold).setFontSize(8));
+                .add(new Text(label + ": ").setFontSize(7))
+                .add(new Text(value != null ? value + " " + unit : "—").setFont(bold).setFontSize(8));
         table.addCell(new Cell()
-            .setBorderTop(new SolidBorder(C_RULE, 0.5f))
-            .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
-            .setBorderLeft(Border.NO_BORDER)
-            .setBorderRight(Border.NO_BORDER)
-            .setPaddingTop(3).setPaddingBottom(3)
-            .add(p));
+                .setBorderTop(new SolidBorder(C_RULE, 0.5f))
+                .setBorderBottom(new SolidBorder(C_RULE, 0.5f))
+                .setBorderLeft(Border.NO_BORDER)
+                .setBorderRight(Border.NO_BORDER)
+                .setPaddingTop(3).setPaddingBottom(3)
+                .add(p));
     }
 
     private VitalValues fetchVitals(Visit visit, Date visitEnd, ConceptService cs) {
@@ -471,7 +471,7 @@ public class VisitSummaryPdfGenerator {
 
         boolean isEmpty() {
             return temp == null && pulse == null && bp == null
-                && rr == null && spo2 == null && weight == null && height == null;
+                    && rr == null && spo2 == null && weight == null && height == null;
         }
     }
 
@@ -501,8 +501,8 @@ public class VisitSummaryPdfGenerator {
 
     private String getConditionName(Condition c) {
         String name = c.getCondition().getCoded() != null
-            ? c.getCondition().getCoded().getName().getName()
-            : c.getCondition().getNonCoded();
+                ? c.getCondition().getCoded().getName().getName()
+                : c.getCondition().getNonCoded();
         return name != null ? name : "";
     }
 
@@ -530,8 +530,8 @@ public class VisitSummaryPdfGenerator {
         if (concepts.isEmpty()) return Collections.emptyList();
         Person person = Context.getPersonService().getPerson(visit.getPatient().getPersonId());
         List<Obs> raw = Context.getObsService().getObservations(
-            Collections.singletonList(person), null, concepts, null, null, null,
-            null, null, null, visit.getStartDatetime(), visitEnd, false);
+                Collections.singletonList(person), null, concepts, null, null, null,
+                null, null, null, visit.getStartDatetime(), visitEnd, false);
         List<Obs> valid = new ArrayList<>();
         for (Obs o : raw) {
             if (!Boolean.TRUE.equals(o.getVoided())) valid.add(o);
@@ -543,10 +543,10 @@ public class VisitSummaryPdfGenerator {
         if (seen.contains(panel.getObsId())) return;
         seen.add(panel.getObsId());
         table.addCell(new Cell(1, 3)
-            .setBorder(new SolidBorder(C_RULE, 0.5f))
-            .setPadding(3)
-            .add(new Paragraph(panel.getConcept().getName().getName().toUpperCase())
-                .setFont(bold).setFontSize(7)));
+                .setBorder(new SolidBorder(C_RULE, 0.5f))
+                .setPadding(3)
+                .add(new Paragraph(panel.getConcept().getName().getName().toUpperCase())
+                        .setFont(bold).setFontSize(7)));
         for (Obs child : panel.getGroupMembers(false)) {
             if (!Boolean.TRUE.equals(child.getVoided())) addLabRow(table, child, cs);
         }
@@ -589,7 +589,7 @@ public class VisitSummaryPdfGenerator {
         }
         // Interpretation — derived from whichever reference range bounds are available
         boolean hasRange = cn.getLowNormal()   != null || cn.getHiNormal()   != null
-                        || cn.getLowCritical() != null || cn.getHiCritical() != null;
+                || cn.getLowCritical() != null || cn.getHiCritical() != null;
         if (hasRange && obs.getValueNumeric() != null) {
             d.interpCode = interpretByConcept(obs.getValueNumeric(), cn);
         }
@@ -627,8 +627,8 @@ public class VisitSummaryPdfGenerator {
 
     private String getAllergenName(Allergy a) {
         String name = a.getAllergen().getCodedAllergen() != null
-            ? a.getAllergen().getCodedAllergen().getName().getName()
-            : a.getAllergen().getNonCodedAllergen();
+                ? a.getAllergen().getCodedAllergen().getName().getName()
+                : a.getAllergen().getNonCodedAllergen();
         return name != null ? name : "";
     }
 
@@ -693,7 +693,7 @@ public class VisitSummaryPdfGenerator {
 
     private boolean isMedicationActive(DrugOrder d) {
         return d.getDateStopped() == null
-            && (d.getAutoExpireDate() == null || !d.getAutoExpireDate().before(new Date()));
+                && (d.getAutoExpireDate() == null || !d.getAutoExpireDate().before(new Date()));
     }
 
 
@@ -753,13 +753,13 @@ public class VisitSummaryPdfGenerator {
 
     private void addOrderBlock(Document doc, Order order, boolean isImaging) {
         doc.add(new Paragraph(order.getConcept().getName().getName().toUpperCase())
-            .setFont(bold).setFontSize(7).setMarginBottom(1).setMarginTop(2));
+                .setFont(bold).setFontSize(7).setMarginBottom(1).setMarginTop(2));
         Procedure procedure = getLinkedProcedure(order);
         if (procedure != null) renderProcedureReport(doc, procedure, isImaging);
         String footer = buildOrderFooter(order);
         if (!footer.isEmpty()) {
             doc.add(new Paragraph(footer).setFont(italic).setFontSize(7)
-                .setMarginTop(2).setMarginBottom(2));
+                    .setMarginTop(2).setMarginBottom(2));
         }
     }
 
@@ -783,14 +783,14 @@ public class VisitSummaryPdfGenerator {
         String report = procedure.getProcedureReport();
         if (report != null && !report.isEmpty()) {
             doc.add(new Paragraph(isImaging ? "Report:" : "Procedure Report:")
-                .setFont(bold).setFontSize(7).setMarginBottom(1));
+                    .setFont(bold).setFontSize(7).setMarginBottom(1));
             doc.add(new Paragraph(stripHtml(report)).setFontSize(8).setMarginBottom(2));
         }
         if (!isImaging) return;
         String impression = procedure.getImpressions();
         if (impression != null && !impression.isEmpty()) {
             doc.add(new Paragraph("Impression:")
-                .setFont(bold).setFontSize(7).setMarginTop(2).setMarginBottom(1));
+                    .setFont(bold).setFontSize(7).setMarginTop(2).setMarginBottom(1));
             doc.add(new Paragraph(stripHtml(impression)).setFontSize(8).setMarginBottom(2));
         }
     }
@@ -803,8 +803,8 @@ public class VisitSummaryPdfGenerator {
 
     private List<String> buildClinicalNotesText(Visit visit) {
         Set<String> noteTypes = new HashSet<>(Arrays.asList(
-            CommonMetadata._EncounterType.CONSULTATION,
-            CommonMetadata._EncounterType.NURSING_CARE_PLAN));
+                CommonMetadata._EncounterType.CONSULTATION,
+                CommonMetadata._EncounterType.NURSING_CARE_PLAN));
         List<String> items = new ArrayList<>();
         for (Encounter enc : visit.getEncounters()) {
             if (!Boolean.TRUE.equals(enc.getVoided())
@@ -820,7 +820,7 @@ public class VisitSummaryPdfGenerator {
             String val = obs.getValueText();
             if (!Boolean.TRUE.equals(obs.getVoided()) && val != null && !val.isEmpty()) {
                 String conceptName = obs.getConcept() != null && obs.getConcept().getName() != null
-                    ? obs.getConcept().getName().getName() : null;
+                        ? obs.getConcept().getName().getName() : null;
                 items.add(conceptName != null ? conceptName + " - " + val : val);
             }
         }
@@ -830,9 +830,9 @@ public class VisitSummaryPdfGenerator {
     /** Bold uppercase section title with a full-width rule below — no ink fill. */
     private void addSectionHeader(Document doc, String title) {
         doc.add(new Paragraph(title)
-            .setFont(bold).setFontSize(8)
-            .setBorderBottom(new SolidBorder(ColorConstants.BLACK, 0.75f))
-            .setMarginTop(4).setMarginBottom(3).setPaddingBottom(1));
+                .setFont(bold).setFontSize(8)
+                .setBorderBottom(new SolidBorder(ColorConstants.BLACK, 0.75f))
+                .setMarginTop(4).setMarginBottom(3).setPaddingBottom(1));
     }
 
     /** Compact bullet-point item. */
@@ -843,19 +843,19 @@ public class VisitSummaryPdfGenerator {
     /** Creates a table pre-loaded with header cells. */
     private Table buildTable(float[] widths, String... headers) {
         Table table = new Table(UnitValue.createPercentArray(widths))
-            .setWidth(UnitValue.createPercentValue(100)).setMarginBottom(4);
+                .setWidth(UnitValue.createPercentValue(100)).setMarginBottom(4);
         for (String h : headers) {
             table.addCell(new Cell()
-                .setBorder(new SolidBorder(C_RULE, 0.5f))
-                .setPadding(2)
-                .add(new Paragraph(h).setFont(bold).setFontSize(7)));
+                    .setBorder(new SolidBorder(C_RULE, 0.5f))
+                    .setPadding(2)
+                    .add(new Paragraph(h).setFont(bold).setFontSize(7)));
         }
         return table;
     }
 
     private Cell dataCell(String text) {
         return new Cell().setBorder(new SolidBorder(C_RULE, 0.5f)).setPadding(2)
-            .add(new Paragraph(text != null ? text : "").setFontSize(8));
+                .add(new Paragraph(text != null ? text : "").setFontSize(8));
     }
 
     /** Small vertical gap without visible content. */
@@ -870,8 +870,8 @@ public class VisitSummaryPdfGenerator {
         if (concept == null) return null;
         Person person = Context.getPersonService().getPerson(patient.getPersonId());
         List<Obs> obs = Context.getObsService().getObservations(
-            Collections.singletonList(person), null, Collections.singletonList(concept),
-            null, null, null, Collections.singletonList("obsId"), null, null, from, to, false);
+                Collections.singletonList(person), null, Collections.singletonList(concept),
+                null, null, null, Collections.singletonList("obsId"), null, null, from, to, false);
         if (obs.isEmpty() || obs.get(0).getValueNumeric() == null) return null;
         return formatNum(obs.get(0).getValueNumeric());
     }
@@ -899,14 +899,14 @@ public class VisitSummaryPdfGenerator {
 
     private boolean isImagingOrder(Order order) {
         return order.getConcept() != null
-            && order.getConcept().getConceptClass() != null
-            && IMAGING_CLASS_UUID.equals(order.getConcept().getConceptClass().getUuid());
+                && order.getConcept().getConceptClass() != null
+                && IMAGING_CLASS_UUID.equals(order.getConcept().getConceptClass().getUuid());
     }
 
     private Procedure getLinkedProcedure(Order order) {
         try {
             List<Procedure> list = Context.getService(ProcedureService.class)
-                .getProceduresByOrderUuid(order.getUuid());
+                    .getProceduresByOrderUuid(order.getUuid());
             return list.isEmpty() ? null : list.get(0);
         } catch (Exception ignored) {
             // orderexpansion module may not be available
@@ -919,7 +919,7 @@ public class VisitSummaryPdfGenerator {
         FacilityInfo info = new FacilityInfo();
         try {
             String json = Context.getAdministrationService()
-                .getGlobalProperty("kenyaemr.cashier.receipt.facilityInformation");
+                    .getGlobalProperty("kenyaemr.cashier.receipt.facilityInformation");
             if (json == null || json.isEmpty()) return info;
             JsonNode root = new ObjectMapper().readTree(json);
             if (root.has("facilityName")) info.name = root.get("facilityName").asText("");

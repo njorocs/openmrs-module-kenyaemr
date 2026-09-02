@@ -61,7 +61,7 @@ public class MOH705AReportBuilder extends AbstractReportBuilder {
 	static final int ASTHMA = 121375;
 	static final int EAR_INFECTION = 149609;
 	static final int MALNUTRITION = 2004984;
-	
+
 
 
 
@@ -78,7 +78,7 @@ public class MOH705AReportBuilder extends AbstractReportBuilder {
 	@Override
 	protected List<Parameter> getParameters(ReportDescriptor reportDescriptor) {
 		return Arrays.asList(new Parameter("startDate", "Start Date", Date.class), new Parameter("endDate", "End Date",
-			Date.class), new Parameter("dateBasedReporting", "", String.class));
+				Date.class), new Parameter("dateBasedReporting", "", String.class));
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class MOH705AReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "DOC", "Disease Of The Skin", ReportUtils.map(moh705indicatorLibrary.diagnosis(Arrays.asList(DISEASES_OF_SKIN),AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"DS","Down’s syndrome",ReportUtils.map(moh705indicatorLibrary.diagnosis(Arrays.asList(DOWN_SYNDROME), AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"PC",	"Poisoning",ReportUtils.map(moh705indicatorLibrary.diagnosis(Arrays.asList(POISONING),AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-	    ReportingUtils.addRow(cohortDsd, "RTC", "Road TrafficI Injuries", ReportUtils.map(moh705indicatorLibrary.roadTrafficInjuries(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
+		ReportingUtils.addRow(cohortDsd, "RTC", "Road TrafficI Injuries", ReportUtils.map(moh705indicatorLibrary.roadTrafficInjuries(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"DRTC","Deaths due to Road Traffic Injuries",ReportUtils.map(moh705indicatorLibrary.deathDueToRoadTrafficInjuries(AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"VRC","Violence related  injuries", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getViolenceRelatedInjuriesList(), AGE_BELOW_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd,"OIC","Other Injuries", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getOtherInjuriesList(),AGE_BELOW_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());

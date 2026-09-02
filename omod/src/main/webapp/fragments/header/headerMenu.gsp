@@ -35,5 +35,5 @@
 				ui.navigate('/${ contextPath }/ms/logout');
 			}});
 	}
-	
+
 </script>

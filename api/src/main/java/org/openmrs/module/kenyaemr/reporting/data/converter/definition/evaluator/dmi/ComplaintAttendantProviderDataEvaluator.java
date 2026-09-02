@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.ComplaintAttendantProviderDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,15 +36,13 @@ public class ComplaintAttendantProviderDataEvaluator implements PersonDataEvalua
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        // Use complaint encounter provider when present; otherwise use triage encounter provider
-        // so Ebola/fever suspects with only a triage form still show Attended By.
         String qry = "select x.patient_id,\n" +
                 "       substring_index(group_concat(x.provider order by x.visit_date desc separator '||'), '||', 1) as provider\n" +
                 "from (\n" +
                 "    select a.patient_id,\n" +
                 "           a.visit_date,\n" +
                 "           concat_ws(' ', pn.given_name, pn.middle_name, pn.family_name) as provider\n" +
-                "    from kenyaemr_etl.etl_allergy_chronic_illness a\n" +
+                "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness a\n" +
                 "             inner join encounter e on a.encounter_id = e.encounter_id\n" +
                 "             inner join encounter_provider ep on ep.encounter_id = e.encounter_id\n" +
                 "             inner join provider p on ep.provider_id = p.provider_id\n" +
@@ -54,7 +53,7 @@ public class ComplaintAttendantProviderDataEvaluator implements PersonDataEvalua
                 "    select t.patient_id,\n" +
                 "           t.visit_date,\n" +
                 "           concat_ws(' ', pn.given_name, pn.middle_name, pn.family_name) as provider\n" +
-                "    from kenyaemr_etl.etl_patient_triage t\n" +
+                "    from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "             inner join provider p on t.encounter_provider = p.provider_id\n" +
                 "             inner join person_name pn on pn.person_id = p.person_id and pn.voided = 0\n" +
                 "    where date(t.visit_date) between date(:startDate) and date(:endDate)\n" +

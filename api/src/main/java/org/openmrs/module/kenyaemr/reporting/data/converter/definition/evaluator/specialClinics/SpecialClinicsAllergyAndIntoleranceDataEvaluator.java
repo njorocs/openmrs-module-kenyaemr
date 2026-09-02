@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsAllergyAndIntoleranceDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -66,8 +67,8 @@ public class SpecialClinicsAllergyAndIntoleranceDataEvaluator implements Encount
                 "                        when 5622 then 'Other'\n" +
                 "                        end SEPARATOR\n" +
                 "                    ',') as                          AllergyCausativeAgent\n" +
-                "from kenyaemr_etl.etl_allergy_chronic_illness ci\n" +
-                "         inner join kenyaemr_etl.etl_special_clinics sc on ci.patient_id = sc.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness ci\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc on ci.patient_id = sc.patient_id\n" +
                 "where sc.special_clinic_form_uuid = '"+specialClinic+"'\n" +
                 "and ci.allergy_causative_agent is not null\n" +
                 "and date(sc.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
@@ -115,8 +116,8 @@ public class SpecialClinicsAllergyAndIntoleranceDataEvaluator implements Encount
                 "                        when 84893 then 'Tetracycline'\n" +
                 "                        when 86663 then 'Zidovudine'\n" +
                 "                        when 5622 then 'Other' end SEPARATOR ',')   as allergy_intolerance\n" +
-                "from kenyaemr_etl.etl_adverse_events a\n" +
-                "inner join kenyaemr_etl.etl_special_clinics sc on a.patient_id = sc.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events a\n" +
+                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc on a.patient_id = sc.patient_id\n" +
                 "where sc.special_clinic_form_uuid = '"+specialClinic+"'\n" +
                 "AND date(sc.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "group by sc.patient_id, sc.encounter_id\n" +
@@ -124,9 +125,9 @@ public class SpecialClinicsAllergyAndIntoleranceDataEvaluator implements Encount
                 "SELECT sc.encounter_id,\n" +
                 "       sc.patient_id,\n" +
                 "       GROUP_CONCAT(DISTINCT n.name SEPARATOR ',') AS allergy_intolerance\n" +
-                "FROM kenyaemr_etl.etl_special_clinics sc\n" +
-                "INNER JOIN openmrs.allergy a on sc.patient_id = a.patient_id\n" +
-                "         INNER JOIN openmrs.concept_name n\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc\n" +
+                "INNER JOIN allergy a on sc.patient_id = a.patient_id\n" +
+                "         INNER JOIN concept_name n\n" +
                 "                    ON a.coded_allergen = n.concept_id\n" +
                 "                        AND n.locale = 'en'\n" +
                 "WHERE n.concept_name_type = 'FULLY_SPECIFIED'\n" +

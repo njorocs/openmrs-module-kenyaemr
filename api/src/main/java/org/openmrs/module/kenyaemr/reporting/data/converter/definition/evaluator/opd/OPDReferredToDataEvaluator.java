@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDNutritionalInterventionsDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDReferredToDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -40,7 +40,7 @@ public class OPDReferredToDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
 			"    v.encounter_id,\n" +
 			"    (case v.referral_to when 'Community Unit' then 1 when 'Other health facility' then 2 when 'This health facility' then 3  else '' end) as referred_to\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

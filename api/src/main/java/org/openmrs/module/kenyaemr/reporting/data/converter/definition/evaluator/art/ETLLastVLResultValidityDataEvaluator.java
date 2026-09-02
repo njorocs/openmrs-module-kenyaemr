@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLResultValidityDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -34,17 +35,17 @@ public class ETLLastVLResultValidityDataEvaluator implements PersonDataEvaluator
 
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
-
+        
         String qry = "SELECT t.patient_id,\n" +
                 "       CASE\n" +
                 "           WHEN DATE(:endDate) > t.vl_due_date THEN 'Invalid'\n" +
                 "           WHEN t.vl_due_date IS NULL           THEN 'Pending Results'\n" +
                 "           ELSE 'Valid'\n" +
                 "       END AS vl_status\n" +
-                "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
                 "INNER JOIN (\n" +
                 "    SELECT patient_id, MAX(visit_date) AS latest_visit\n" +
-                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
                 "    WHERE visit_date <= DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 ") lv ON lv.patient_id = t.patient_id\n" +

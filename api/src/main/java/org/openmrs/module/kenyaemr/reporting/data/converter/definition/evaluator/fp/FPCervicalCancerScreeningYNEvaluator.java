@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPCervicalCancerScreeningResultsDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPCervicalCancerScreeningYNDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,8 +43,8 @@ public class FPCervicalCancerScreeningYNEvaluator implements EncounterDataEvalua
                 "           WHEN c.pap_smear_screening_method IS NOT NULL THEN c.pap_smear_screening_method\n" +
                 "           WHEN c.via_vili_screening_method IS NOT NULL THEN c.via_vili_screening_method\n" +
                 "       END AS screening_method\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
-                "JOIN kenyaemr_etl.etl_cervical_cancer_screening c \n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
+                "JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening c \n" +
                 "  ON f.patient_id = c.patient_id\n" +
                 " AND DATE(f.visit_date) = DATE(c.visit_date)\n" +
                 "WHERE DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)";

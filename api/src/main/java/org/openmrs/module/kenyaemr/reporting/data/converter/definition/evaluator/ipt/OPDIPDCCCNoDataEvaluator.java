@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.OPDIPDCCCNoDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.VTBDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -36,7 +36,7 @@ public class OPDIPDCCCNoDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,coalesce(d.unique_patient_no,d.hei_no) as ccc_hei_no from kenyaemr_etl.etl_ipt_initiation init inner join kenyaemr_etl.etl_patient_demographics d\n" +
+        String qry = "select init.patient_id,coalesce(d.unique_patient_no,d.hei_no) as ccc_hei_no from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "     on init.patient_id = d.patient_id where init.voided = 0;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

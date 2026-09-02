@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsAdultsBMIDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsPatientCategoryDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -46,8 +46,8 @@ public class SpecialClinicsPatientCategoryDataEvaluator implements EncounterData
                 "                    DATEDIFF(sc.visit_date, d.dob) BETWEEN 15 AND 17,\n" +
                 "                    '15-17 years',\n" +
                 "                    NULL))) as patient_category\n" +
-                "FROM kenyaemr_etl.etl_patient_demographics d\n" +
-                "INNER JOIN kenyaemr_etl.etl_special_clinics sc on d.patient_id = sc.patient_id\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc on d.patient_id = sc.patient_id\n" +
                 "WHERE sc.visit_date BETWEEN date(:startDate) AND date(:endDate)\n" +
                 "AND sc.special_clinic_form_uuid = '"+specialClinic+"') a;";
 

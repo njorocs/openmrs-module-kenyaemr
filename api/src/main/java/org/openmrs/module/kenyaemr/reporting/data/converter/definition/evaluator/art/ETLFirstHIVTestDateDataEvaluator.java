@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLFirstHIVTestDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class ETLFirstHIVTestDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select t.patient_id, max(t.visit_date) as latest_hiv_test_date from kenyaemr_etl.etl_hts_test t where t.test_type = 1 and t.visit_date between date(:startDate) and date(:endDate) group by t.patient_id;";
+        String qry = "select t.patient_id, max(t.visit_date) as latest_hiv_test_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where t.test_type = 1 and t.visit_date between date(:startDate) and date(:endDate) group by t.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

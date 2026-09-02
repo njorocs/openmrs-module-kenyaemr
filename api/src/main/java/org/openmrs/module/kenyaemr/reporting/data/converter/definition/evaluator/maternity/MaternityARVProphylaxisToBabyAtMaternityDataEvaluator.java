@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityARVProphylaxisToBabyAtMaternityDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,7 +40,7 @@ public class MaternityARVProphylaxisToBabyAtMaternityDataEvaluator implements Pe
                 "                 v.patient_id,\n" +
                 "               (case when v.baby_azt_dispensed = 1 then \"Yes\" when v.baby_azt_dispensed  = 0 then \"No\"\n" +
                 "             when  v.baby_nvp_dispensed = 1 then \"Yes\" when v.baby_nvp_dispensed = 0 then \"No\"  else \" \" end) as baby_prophlyaxis_given\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

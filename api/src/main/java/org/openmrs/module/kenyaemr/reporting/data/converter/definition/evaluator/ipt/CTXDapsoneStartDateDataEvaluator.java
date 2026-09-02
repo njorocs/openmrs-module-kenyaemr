@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.CTXDapsoneStartDateDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.HIVTestDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -36,8 +36,8 @@ public class CTXDapsoneStartDateDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,coalesce(date(fup.visit_date),date(o.date_stopped)) as date_started_ctx_dapsone from kenyaemr_etl.etl_ipt_initiation init\n" +
-                "    left outer join kenyaemr_etl.etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
+        String qry = "select init.patient_id,coalesce(date(fup.visit_date),date(o.date_stopped)) as date_started_ctx_dapsone from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+                "    left outer join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup on init.patient_id = fup.patient_id\n" +
                 "                    and (fup.ctx_dispensed =105281 or fup.ctx_dispensed = 1065 or fup.dapsone_dispensed = 74250 or fup.dapsone_dispensed = 1065)\n" +
                 "                    left outer join orders o on init.patient_id = o.patient_id\n" +
                 "                    inner join drug_order do on o.order_id = do.order_id and o.concept_id in (105281,74250)\n" +

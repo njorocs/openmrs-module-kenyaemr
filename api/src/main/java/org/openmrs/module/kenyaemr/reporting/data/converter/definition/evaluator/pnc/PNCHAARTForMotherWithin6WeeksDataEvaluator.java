@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCHAARTForMotherWithin6WeeksDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class PNCHAARTForMotherWithin6WeeksDataEvaluator implements EncounterData
                 "            when v.mother_haart_given = 164142 and (v.visit_timing_mother = 1721 or v.visit_timing_mother = 1722)\n" +
                 "                then 'R'\n" +
                 "            else 'NA' end) as haart_for_mother_within_6_weeks\n" +
-                "from kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

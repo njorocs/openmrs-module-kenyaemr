@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIAgeAtTestInWeeksDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,8 +36,8 @@ public class HEIAgeAtTestInWeeksDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select x.patient_id, timestampdiff(WEEK, d.dob, x.date_test_requested) as age_at_test\n" +
-                "from kenyaemr_etl.etl_laboratory_extract x\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on d.patient_id = x.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
+                "         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on d.patient_id = x.patient_id\n" +
                 "where x.lab_test = 1030\n" +
                 "  and x.order_reason = 1040;";
 

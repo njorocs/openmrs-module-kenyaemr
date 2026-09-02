@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDRevisitsDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
 import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
@@ -38,9 +39,9 @@ public class OPDRevisitsDataEvaluator implements ObsDataEvaluator {
 
         String qry = "select le.obs_id,\n" +
                 "       v.revisit\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         LEFT JOIN (select v.patient_id,if(v.visit_type = 'Revisit', 'Yes','No') as revisit\n" +
-                "                    from kenyaemr_etl.etl_clinical_encounter v\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
                 "                    where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                    group by visit_date,patient_id) v ON le.patient_id = v.patient_id\n" +
                 "where date(le.visit_date) between date(:startDate) and date(:endDate);";

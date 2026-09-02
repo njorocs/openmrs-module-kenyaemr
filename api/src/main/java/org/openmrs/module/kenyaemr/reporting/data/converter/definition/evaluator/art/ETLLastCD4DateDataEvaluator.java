@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastCD4DateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +37,7 @@ public class ETLLastCD4DateDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select patient_id,\n" +
                 "coalesce(max(date(date_test_requested)),max(date(visit_date)))\n" +
-                "as cd4_count_date from kenyaemr_etl.etl_laboratory_extract\n" +
+                "as cd4_count_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "where date(visit_date) <= date(:endDate) and lab_test in (167718,5497,730) and result_name is not null GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

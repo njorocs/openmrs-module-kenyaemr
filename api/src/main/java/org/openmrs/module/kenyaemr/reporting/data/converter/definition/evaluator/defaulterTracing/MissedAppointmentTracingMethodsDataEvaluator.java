@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.defaulterTracing;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.defaulterTracing.MissedAppointmentTracingMethodsDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,8 +37,8 @@ public class MissedAppointmentTracingMethodsDataEvaluator implements EncounterDa
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "select fup.encounter_id, group_concat(distinct case tr.tracing_type when 1650 then 'Client Called' when 161642 then 'Treatment Supporter' else 'Physical' end) trace_methods\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "         join kenyaemr_etl.etl_ccc_defaulter_tracing tr on tr.patient_id = fup.patient_id and fup.next_appointment_date = tr.missed_appointment_date and tr.tracing_type is not null\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing tr on tr.patient_id = fup.patient_id and fup.next_appointment_date = tr.missed_appointment_date and tr.tracing_type is not null\n" +
                 "where next_appointment_date between date(:startDate) and date(:endDate)\n" +
                 "group by fup.encounter_id;";
 

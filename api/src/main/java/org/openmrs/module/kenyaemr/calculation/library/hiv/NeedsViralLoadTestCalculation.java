@@ -112,7 +112,7 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
         Set<Integer> alive = Filters.alive(cohort, context);
         Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
         //Cohorts to consider
-         // All on ART already
+        // All on ART already
         Set<Integer> allOnArt = CalculationUtils.patientsThatPass(calculate(new OnArtCalculation(), cohort, context));
         // Patients with pending vl results
         Set<Integer> pendingVlResults = CalculationUtils.patientsThatPass(calculate(new PendingViralLoadResultCalculation(), cohort, context));
@@ -255,9 +255,9 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
     }
 
     private boolean hasConfirmedPositiveAtANC(Patient patient, EncounterService encounterService,
-                                               EncounterType htsEncounterType, List<Form> htsForms,
-                                               EncounterType mchConsultationType, Form ancForm,
-                                               Concept testQuestion, Concept positiveResult) {
+                                              EncounterType htsEncounterType, List<Form> htsForms,
+                                              EncounterType mchConsultationType, Form ancForm,
+                                              Concept testQuestion, Concept positiveResult) {
         List<Encounter> allAncHtsEncounters = new ArrayList<>(encounterService.getEncounters(
                 new EncounterSearchCriteriaBuilder().setPatient(patient)
                         .setEncounterTypes(Arrays.asList(htsEncounterType)).setEnteredViaForms(htsForms)
@@ -271,10 +271,10 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
     }
 
     private boolean hasConfirmedPositiveAtDelivery(Patient patient, EncounterService encounterService,
-                                                    EncounterType htsEncounterType, List<Form> htsForms,
-                                                    EncounterType mchConsultationType, Form deliveryForm,
-                                                    Concept testQuestion, Concept positiveResult,
-                                                    Concept entryPointQuestion, Concept pmtctMatEntryPoint) {
+                                                   EncounterType htsEncounterType, List<Form> htsForms,
+                                                   EncounterType mchConsultationType, Form deliveryForm,
+                                                   Concept testQuestion, Concept positiveResult,
+                                                   Concept entryPointQuestion, Concept pmtctMatEntryPoint) {
         Encounter latestHts = latestEncounter(encounterService.getEncounters(
                 new EncounterSearchCriteriaBuilder().setPatient(patient)
                         .setEncounterTypes(Arrays.asList(htsEncounterType)).setEnteredViaForms(htsForms)
@@ -293,9 +293,9 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
     }
 
     private boolean hasConfirmedPositiveAtPNC(Patient patient, EncounterService encounterService,
-                                               EncounterType htsEncounterType, List<Form> htsForms,
-                                               EncounterType mchConsultationType, Form pncForm,
-                                               Concept testQuestion, Concept positiveResult) {
+                                              EncounterType htsEncounterType, List<Form> htsForms,
+                                              EncounterType mchConsultationType, Form pncForm,
+                                              Concept testQuestion, Concept positiveResult) {
         List<Encounter> allPncHtsEncounters = new ArrayList<>(encounterService.getEncounters(
                 new EncounterSearchCriteriaBuilder().setPatient(patient)
                         .setEncounterTypes(Arrays.asList(htsEncounterType)).setEnteredViaForms(htsForms)
@@ -332,9 +332,9 @@ public class NeedsViralLoadTestCalculation extends AbstractPatientCalculation im
         }
 
         return hasConfirmedPositiveAtANC(patient, encounterService, htsEncounterType, htsForms,
-                       mchConsultationType, ancForm, htsFinalTestQuestion, htsPositiveResult)
+                mchConsultationType, ancForm, htsFinalTestQuestion, htsPositiveResult)
                 || hasConfirmedPositiveAtPNC(patient, encounterService, htsEncounterType, htsForms,
-                       mchConsultationType, pncForm, htsFinalTestQuestion, htsPositiveResult);
+                mchConsultationType, pncForm, htsFinalTestQuestion, htsPositiveResult);
     }
 
 }

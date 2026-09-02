@@ -64,7 +64,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 	@Override
 	protected List<Parameter> getParameters(ReportDescriptor reportDescriptor) {
 		return Arrays.asList(new Parameter("startDate", "Start Date", Date.class), new Parameter("endDate", "End Date",
-			Date.class), new Parameter("dateBasedReporting", "", String.class));
+				Date.class), new Parameter("dateBasedReporting", "", String.class));
 	}
 
 	@Override
@@ -93,11 +93,11 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "CPA", "Chicken Pox", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getChickenPoxListB(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "MEA", "Measles", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMeaslesListB(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "HEA", "Hepatitis", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getHepatitisListB(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
-		ReportingUtils.addRow(cohortDsd, "MPSA", "Mumps", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMumpsListB(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());		
+		ReportingUtils.addRow(cohortDsd, "MPSA", "Mumps", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMumpsListB(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "TMC", "Tested Malaria", ReportUtils.map(moh705indicatorLibrary.labTests(DiagnosisLists.getTestedMalariaConcepts(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "SUA", "Suspected malaria", ReportUtils.map(moh705indicatorLibrary.labTestForSuspectedMalaria(DiagnosisLists.getTestedMalariaConcepts(),EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "COA",  "Confirmed Malaria positive",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getConfirmedMalariaList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
-		ReportingUtils.addRow(cohortDsd, "MPA", "Malaria In Pregnancy", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMalariaInPregnancyList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());		
+		ReportingUtils.addRow(cohortDsd, "MPA", "Malaria In Pregnancy", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMalariaInPregnancyList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "AM", "AMOEBIASIS",	ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getAmoebiasis(),EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "TYA", "Typhoid Fever", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getTyphoidList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "STIA", "STI", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getSexuallyTransmittedInfectionsList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
@@ -147,7 +147,7 @@ public class MOH705BReportBuilder extends AbstractReportBuilder {
 		ReportingUtils.addRow(cohortDsd, "CL", "Cutaneous Leishmaniasis", ReportUtils.map(moh705indicatorLibrary.diagnosis(Arrays.asList(CUTANEOUS_LEISHMANIASIS),EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "ANT", "Suspected Anthrax",	ReportUtils.map(moh705indicatorLibrary.diagnosis(Arrays.asList(SUSPECTED_ANTHRAX),EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "AM", "AMOEBIASIS",	ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getAmoebiasis(),EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
-     	ReportingUtils.addRow(cohortDsd, "MSA", "Muscular Skeletal Conditions",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMuscularSkeletalConditionsList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
+		ReportingUtils.addRow(cohortDsd, "MSA", "Muscular Skeletal Conditions",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getMuscularSkeletalConditionsList(), EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "FIA", "Fistula Birth Related", ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getFistulaBirthRelatedList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "NSA", "Neoplams",ReportUtils.map(moh705indicatorLibrary.diagnosis(DiagnosisLists.getNeoplamsList(), EQUAL_AND_OVER_FIVE), indParams),ReportAddonUtils.getAdultChildrenColumns());
 		ReportingUtils.addRow(cohortDsd, "AODA", "All other diseases for adults", ReportUtils.map(moh705indicatorLibrary.allOtherDiseasesAboveFive(EQUAL_AND_OVER_FIVE), indParams), ReportAddonUtils.getAdultChildrenColumns());

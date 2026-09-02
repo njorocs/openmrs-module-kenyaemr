@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.PtnSTITreatmentDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.TraumaDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,9 +36,9 @@ public class TraumaDataDefinitionEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT a.encounter_id, IF(tra.action_taken=165184, 'Yes', 'No') trauma_counselling\n" +
-                "    FROM kenyaemr_etl.`etl_gbv_screening` a\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".`etl_gbv_screening` a\n" +
                 "    LEFT JOIN (SELECT gsa.`visit_id`, gsa.`action_taken`, DATE(gsa.`date_created`) date_created\n" +
-                "    FROM kenyaemr_etl.`etl_gbv_screening_action` gsa \n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".`etl_gbv_screening_action` gsa \n" +
                 "    WHERE gsa.`action_taken` = 165184) tra ON a.`visit_id` = tra.visit_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

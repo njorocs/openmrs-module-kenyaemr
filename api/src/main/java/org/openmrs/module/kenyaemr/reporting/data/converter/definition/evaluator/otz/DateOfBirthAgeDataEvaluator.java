@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.DateOfBirthAgeDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.SecondRegimenSwitchDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -37,8 +37,8 @@ public class DateOfBirthAgeDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select e.patient_id,concat_ws('\\n\\r',d.DOB,timestampdiff(year,d.DOB,min(e.visit_date))) as DOB\n" +
-                "from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                join kenyaemr_etl.etl_patient_demographics d\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                                on e.patient_id = d.patient_id group by e.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIMotherPhoneDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,8 +38,8 @@ public class HEIMotherPhoneDataEvaluator implements PersonDataEvaluator {
         String qry = "select\n" +
                 "  e.patient_id,\n" +
                 "  d.phone_number as mothers_telephone\n" +
-                "from kenyaemr_etl.etl_patient_demographics d\n" +
-                "  INNER JOIN kenyaemr_etl.etl_hei_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
+                "  INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e\n" +
                 "    ON d.unique_patient_no = e.parent_ccc_number\n" +
                 "GROUP BY e.patient_id";
 

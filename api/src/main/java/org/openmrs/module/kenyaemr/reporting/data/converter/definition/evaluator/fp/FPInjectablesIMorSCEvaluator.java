@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPInjectablesIMorSCDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,7 +45,7 @@ public class FPInjectablesIMorSCEvaluator implements EncounterDataEvaluator {
                         "        WHEN 79494 THEN 'SC' -- DMPA-SC\n" +
                         "        ELSE NULL \n" +
                         "    END AS injection_type\n" +
-                        "FROM kenyaemr_etl.etl_family_planning fp\n" +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp\n" +
                         "WHERE fp.contraceptive_dispensed IN (907, 79494)\n" +
                         "  AND DATE(fp.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                         "  AND fp.voided = 0;";

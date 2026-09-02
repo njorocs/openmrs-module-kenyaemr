@@ -10,9 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.HTSTestEntryPointDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLHTSEntryPointDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLPredictionScoreDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -56,7 +55,7 @@ public class ETLHTSEntryPointDataEvaluator implements PersonDataEvaluator {
                 "                    when 163096 then 'Community Testing'\n" +
                 "                    when 5622 then 'Other'\n" +
                 "                    else ''  end ) as hts_entry_point\n" +
-                "FROM kenyaemr_etl.etl_hts_eligibility_screening\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_eligibility_screening\n" +
                 "where date(visit_date) >= date(:startDate) and date(visit_date) <= date(:endDate)\n" +
                 "GROUP BY patient_id;";
 

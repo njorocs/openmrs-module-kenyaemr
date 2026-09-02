@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.hei;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.hei.HEIMotherARVRegimenDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -41,7 +42,7 @@ public class HEIMotherARVRegimenDataEvaluator implements PersonDataEvaluator {
                 "   when 162199 then \"ABC/NVP/3TC\" when 162200 then \"3TC/ABC/LPV/r\" when 162565 then \"3TC/NVP/TDF\" when 1652 then \"3TC/NVP/AZT\"\n" +
                 "   when 162561 then \"3TC/AZT/LPV/r\" when 164511 then \"AZT-3TC-ATV/r\" when 164512 then \"TDF-3TC-ATV/r\" when 162560 then \"3TC/D4T/LPV/r\"\n" +
                 "   when 162563 then \"3TC/ABC/EFV\" when 162562 then \"ABC/LPV/R/TDF\" when 162559 then \"ABC/DDI/LPV/r\"  else \"\" end) as mother_drug_regimen\n" +
-                "from kenyaemr_etl.etl_hei_enrollment\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment\n" +
                 "GROUP BY patient_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

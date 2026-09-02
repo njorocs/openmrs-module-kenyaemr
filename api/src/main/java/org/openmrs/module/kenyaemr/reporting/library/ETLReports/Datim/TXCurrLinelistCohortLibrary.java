@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.Datim;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -36,7 +37,7 @@ public class TXCurrLinelistCohortLibrary {
      * Patients transferred in within the reporting month
      */
     public  CohortDefinition transferInReportingMonth() {
-        String sqlQuery="Select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where e.patient_type = 160563 and\n" +
+        String sqlQuery="Select e.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where e.patient_type = 160563 and\n" +
                 "                coalesce(e.transfer_in_date,e.visit_date) between DATE_SUB(date(:endDate),INTERVAL DAYOFMONTH(date(:endDate))-1 DAY) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("TX_Curr_Missing_in_previous_TI");
@@ -54,7 +55,7 @@ public class TXCurrLinelistCohortLibrary {
                 "             e.patient_type,\n" +
                 "             max(if(e.date_started_art_at_transferring_facility is not null and e.facility_transferred_from is not null,\n" +
                 "                    1, 0)) as TI\n" +
-                "      from kenyaemr_etl.etl_hiv_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
                 "      where coalesce(e.transfer_in_date, e.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by e.patient_id) a\n" +
                 "where a.patient_type = 160563\n" +
@@ -71,7 +72,7 @@ public class TXCurrLinelistCohortLibrary {
      *Patients who returned to care in the reporting month through re-enrollment
      */
     public  CohortDefinition reEnrollmentToHIVReportingMonth() {
-        String sqlQuery="Select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where\n" +
+        String sqlQuery="Select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where\n" +
                 "e.visit_date between DATE_SUB(date(:endDate),INTERVAL DAYOFMONTH(date(:endDate))-1 DAY) and date(:endDate)\n" +
                 "and e.patient_type = 159833;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -85,7 +86,7 @@ public class TXCurrLinelistCohortLibrary {
      *Patients who returned to care through re-enrollment within the quarter
      */
     public  CohortDefinition reEnrollmentToHIVReportingQuarter() {
-        String sqlQuery="Select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where\n" +
+        String sqlQuery="Select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where\n" +
                 "e.visit_date between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate)\n" +
                 "and e.patient_type = 159833;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -100,8 +101,8 @@ public class TXCurrLinelistCohortLibrary {
      */
     public  CohortDefinition noPrevHIVFUPEncQuarterly() {
         String sqlQuery="select e.patient_id from\n" +
-                "(Select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e group by e.patient_id having max(e.visit_date) < DATE_SUB(date(:endDate),INTERVAL 3 MONTH))e\n" +
-                "inner join (select f.patient_id from kenyaemr_etl.etl_patient_hiv_followup f where f.visit_date <= date(:endDate) group by patient_id\n" +
+                "(Select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e group by e.patient_id having max(e.visit_date) < DATE_SUB(date(:endDate),INTERVAL 3 MONTH))e\n" +
+                "inner join (select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f where f.visit_date <= date(:endDate) group by patient_id\n" +
                 " having min(f.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate))f\n" +
                 " on e.patient_id = f.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -116,8 +117,8 @@ public class TXCurrLinelistCohortLibrary {
      */
     public  CohortDefinition noPrevHIVFUPEncMonthly() {
         String sqlQuery="select e.patient_id from\n" +
-                "(Select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e group by e.patient_id having max(e.visit_date) < DATE_SUB(date(:endDate),INTERVAL 1 MONTH))e\n" +
-                "inner join (select f.patient_id,DATE_SUB(date(:endDate),INTERVAL 1 MONTH) ,min(f.visit_date) from kenyaemr_etl.etl_patient_hiv_followup f where f.visit_date <= date(:endDate) group by patient_id\n" +
+                "(Select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e group by e.patient_id having max(e.visit_date) < DATE_SUB(date(:endDate),INTERVAL 1 MONTH))e\n" +
+                "inner join (select f.patient_id,DATE_SUB(date(:endDate),INTERVAL 1 MONTH) ,min(f.visit_date) from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f where f.visit_date <= date(:endDate) group by patient_id\n" +
                 "having min(f.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate))f\n" +
                 "on e.patient_id = f.patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
@@ -134,11 +135,11 @@ public class TXCurrLinelistCohortLibrary {
     public  CohortDefinition newlyOnARTMonthly() {
         String sqlQuery="select e.patient_id\n" +
                 "from (select e.patient_id\n" +
-                "      from kenyaemr_etl.etl_hiv_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
                 "      group by e.patient_id\n" +
                 "      having mid(max(concat(date(e.visit_date), e.patient_type)), 11) = 164144) e\n" +
                 "         inner join (select d.patient_id, min(d.date_started) as date_started\n" +
-                "                     from kenyaemr_etl.etl_drug_event d\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d\n" +
                 "                     where d.program = 'HIV'\n" +
                 "                     group by d.patient_id) d on e.patient_id = d.patient_id\n" +
                 "where d.date_started between DATE_SUB(date(:endDate), INTERVAL 1 MONTH) and date(:endDate);";
@@ -154,7 +155,7 @@ public class TXCurrLinelistCohortLibrary {
      * @return
      */
     public  CohortDefinition discWithFutureEffectiveDate() {
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                where program_name='HIV' and date(visit_date) <= date(:endDate)\n" +
                 "                  and date(effective_discontinuation_date) > date(:endDate)\n" +
                 "                group by patient_id;";
@@ -170,8 +171,8 @@ public class TXCurrLinelistCohortLibrary {
      * @return
      */
     public  CohortDefinition discInReportMonthWithFutureReenrollment() {
-        String sqlQuery="select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
-                "left join (select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where date(e.visit_date) > date(:endDate)) e on d.patient_id = e.patient_id\n" +
+        String sqlQuery="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
+                "left join (select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where date(e.visit_date) > date(:endDate)) e on d.patient_id = e.patient_id\n" +
                 "where d.program_name='HIV' and date(d.visit_date) <= date(:endDate)\n" +
                 "  and date(effective_discontinuation_date) between date_sub(DATE(:endDate), interval 1 MONTH) and date(:endDate)\n" +
                 "and e.patient_id is not null\n" +
@@ -188,8 +189,8 @@ public class TXCurrLinelistCohortLibrary {
      * @return
      */
     public  CohortDefinition discInReportQuarterWithFutureReenrollment() {
-        String sqlQuery="select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
-                "        left join (select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where date(e.visit_date) > date(:endDate)) e on d.patient_id = e.patient_id\n" +
+        String sqlQuery="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
+                "        left join (select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where date(e.visit_date) > date(:endDate)) e on d.patient_id = e.patient_id\n" +
                 "        where d.program_name='HIV' and date(d.visit_date) <= date(:endDate)\n" +
                 "          and date(effective_discontinuation_date) between DATE_SUB(DATE_SUB(date(:endDate),INTERVAL DAYOFMONTH(date(:endDate))-1 DAY), interval 2 MONTH) and date(:endDate)\n" +
                 "        and e.patient_id is not null\n" +
@@ -206,8 +207,8 @@ public class TXCurrLinelistCohortLibrary {
      * @return
      */
     public  CohortDefinition discInPastMonthWithFutureReenrollment() {
-        String sqlQuery="select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
-                "left join (select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where date(e.visit_date) > date_sub(DATE(:endDate), interval 1 MONTH)) e on d.patient_id = e.patient_id\n" +
+        String sqlQuery="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
+                "left join (select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where date(e.visit_date) > date_sub(DATE(:endDate), interval 1 MONTH)) e on d.patient_id = e.patient_id\n" +
                 "where d.program_name='HIV' and date(d.visit_date) <= date(:endDate)\n" +
                 "  and date(effective_discontinuation_date) between date_sub(DATE(:endDate), interval 2 MONTH) and date_sub(DATE(:endDate), interval 1 MONTH)\n" +
                 "and e.patient_id is not null\n" +
@@ -224,8 +225,8 @@ public class TXCurrLinelistCohortLibrary {
      * @return
      */
     public  CohortDefinition discInPastQuarterWithFutureReenrollment() {
-        String sqlQuery="select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
-                "left join (select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e where date(e.visit_date) > date_sub(DATE(:endDate), interval 3 MONTH)) e on d.patient_id = e.patient_id\n" +
+        String sqlQuery="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
+                "left join (select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e where date(e.visit_date) > date_sub(DATE(:endDate), interval 3 MONTH)) e on d.patient_id = e.patient_id\n" +
                 "where d.program_name='HIV' and date(d.visit_date) <= date(:endDate)\n" +
                 "  and date(effective_discontinuation_date) between date_sub(DATE(:endDate), interval 6 MONTH) and date_sub(DATE(:endDate), interval 3 MONTH)\n" +
                 "and e.patient_id is not null\n" +
@@ -251,12 +252,12 @@ public class TXCurrLinelistCohortLibrary {
                 "  d.patient_id as disc_patient,\n" +
                 "  fup_reporting_period.first_visit_after_IIT as first_visit_after_IIT,\n" +
                 "  fup_reporting_period.first_tca_after_IIT as first_tca_after_IIT\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup_prev_period\n" +
-                "    join (select fup_reporting_period.patient_id,min(fup_reporting_period.visit_date) as first_visit_after_IIT,min(fup_reporting_period.next_appointment_date) as first_tca_after_IIT from kenyaemr_etl.etl_patient_hiv_followup fup_reporting_period where fup_reporting_period.visit_date >= date_sub(date(:endDate) , interval 1 MONTH) group by fup_reporting_period.patient_id)fup_reporting_period on fup_reporting_period.patient_id = fup_prev_period.patient_id\n" +
-                "    join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup_prev_period.patient_id\n" +
-                "    join kenyaemr_etl.etl_hiv_enrollment e on fup_prev_period.patient_id=e.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup_prev_period\n" +
+                "    join (select fup_reporting_period.patient_id,min(fup_reporting_period.visit_date) as first_visit_after_IIT,min(fup_reporting_period.next_appointment_date) as first_tca_after_IIT from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup_reporting_period where fup_reporting_period.visit_date >= date_sub(date(:endDate) , interval 1 MONTH) group by fup_reporting_period.patient_id)fup_reporting_period on fup_reporting_period.patient_id = fup_prev_period.patient_id\n" +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup_prev_period.patient_id\n" +
+                "    join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup_prev_period.patient_id=e.patient_id\n" +
                 "    left outer JOIN\n" +
-                "(select patient_id, visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "(select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 " where date(visit_date) <= curdate()  and program_name='HIV'\n" +
                 " group by patient_id\n" +
                 ") d on d.patient_id = fup_prev_period.patient_id\n" +
@@ -284,11 +285,11 @@ public class TXCurrLinelistCohortLibrary {
     public  CohortDefinition newlyARTReportingQuarter() {
         String sqlQuery="select e.patient_id\n" +
                 "from (select e.patient_id\n" +
-                "      from kenyaemr_etl.etl_hiv_enrollment e\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
                 "      group by e.patient_id\n" +
                 "      having mid(max(concat(date(e.visit_date), e.patient_type)), 11) = 164144) e\n" +
                 "         inner join (select d.patient_id, min(d.date_started) as date_started\n" +
-                "                     from kenyaemr_etl.etl_drug_event d\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d\n" +
                 "                     where d.program = 'HIV'\n" +
                 "                     group by d.patient_id) d on e.patient_id = d.patient_id\n" +
                 "where d.date_started between DATE_SUB(date(:endDate), interval 3 MONTH) and date(:endDate);";
@@ -354,12 +355,12 @@ public class TXCurrLinelistCohortLibrary {
                 "                         d.effective_disc_date as effective_disc_date,\n" +
                 "                         max(d.visit_date) as date_discontinued,\n" +
                 "                         de.patient_id                                                   as started_on_drugs\n" +
-                "                  from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                         join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-                "                         join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-                "                         left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate)\n" +
+                "                  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+                "                         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+                "                         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate)\n" +
                 "                         left outer JOIN\n" +
-                "                           (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                           (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                            where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "                            group by patient_id\n" +
                 "                           ) d on d.patient_id = fup.patient_id\n" +
@@ -393,12 +394,12 @@ public class TXCurrLinelistCohortLibrary {
                 "               d.effective_disc_date as effective_disc_date,\n" +
                 "               max(d.visit_date) as date_discontinued,\n" +
                 "               de.patient_id                                                   as started_on_drugs\n" +
-                "        from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                 join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-                "                 join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-                "                 left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date_sub(DATE(:endDate), interval 3 MONTH)\n" +
+                "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+                "                 left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date_sub(DATE(:endDate), interval 3 MONTH)\n" +
                 "                 left outer JOIN\n" +
-                "             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "              where date(visit_date) <= date_sub(DATE(:endDate), interval 3 MONTH) and program_name='HIV'\n" +
                 "              group by patient_id\n" +
                 "             ) d on d.patient_id = fup.patient_id\n" +
@@ -496,7 +497,7 @@ public class TXCurrLinelistCohortLibrary {
  * Patients present in previous period but missing in current period due to death
  */
 public CohortDefinition patientsDied() {
-    String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 160034 and d.visit_date <= date(:endDate);";
+    String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 160034 and d.visit_date <= date(:endDate);";
     SqlCohortDefinition cd = new SqlCohortDefinition();
     cd.setName("patientsDied");
     cd.setQuery(sqlQuery);
@@ -508,7 +509,7 @@ public CohortDefinition patientsDied() {
      * Patients present in previous period but missing in current period due to Transferring out
      */
     public CohortDefinition patientsTrfOut() {
-        String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 159492\n" +
+        String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 159492\n" +
                 "                    and coalesce(effective_discontinuation_date,d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientsTrfOut");
@@ -521,7 +522,7 @@ public CohortDefinition patientsDied() {
      * Patients present in previous period but missing in current period due to Transferring out within the quarter
      */
     public CohortDefinition patientsTrfOutQuarter() {
-        String sqlQuery = "select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 159492\n" +
+        String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d where d.program_name = 'HIV' and d.discontinuation_reason = 159492\n" +
                 "                    and coalesce(effective_discontinuation_date,d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientsTrfOutQuarter");
@@ -534,9 +535,9 @@ public CohortDefinition patientsDied() {
      * Patients present in previous period but missing in current period due to stopping treatment
      */
     public CohortDefinition patientStoppedTxWithinMonth() {
-        String sqlQuery = "select dt.patient_id from kenyaemr_etl.etl_ccc_defaulter_tracing dt where dt.is_final_trace =1267 and dt.true_status =164435 and date(dt.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate)\n" +
+        String sqlQuery = "select dt.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing dt where dt.is_final_trace =1267 and dt.true_status =164435 and date(dt.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate)\n" +
                 "union\n" +
-                "select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d where d.discontinuation_reason =164349 and date(d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate);";
+                "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d where d.discontinuation_reason =164349 and date(d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 1 MONTH) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientStoppedTxWithinMonth");
         cd.setQuery(sqlQuery);
@@ -548,9 +549,9 @@ public CohortDefinition patientsDied() {
      * Patients present in previous period but missing in current period due to stopping treatment
      */
     public CohortDefinition patientStoppedTxWithinQuarter() {
-        String sqlQuery = "select dt.patient_id from kenyaemr_etl.etl_ccc_defaulter_tracing dt where dt.is_final_trace =1267 and dt.true_status =164435 and date(dt.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate)\n" +
+        String sqlQuery = "select dt.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ccc_defaulter_tracing dt where dt.is_final_trace =1267 and dt.true_status =164435 and date(dt.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate)\n" +
                 "union\n" +
-                "select d.patient_id from kenyaemr_etl.etl_patient_program_discontinuation d where d.discontinuation_reason =164435 and date(d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate);";
+                "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d where d.discontinuation_reason =164435 and date(d.visit_date) between DATE_SUB(date(:endDate),INTERVAL 3 MONTH) and date(:endDate);";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("patientStoppedTxWithinQuarter");
         cd.setQuery(sqlQuery);
@@ -581,10 +582,10 @@ public CohortDefinition patientsDied() {
                 "            d.visit_date                                                    as date_discontinued,\n" +
                 "            d.discontinuation_reason,\n" +
                 "            de.patient_id                                                   as started_on_drugs\n" +
-                "     from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "              join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "              join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "              left outer join kenyaemr_etl.etl_drug_event de\n" +
+                "     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "              left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                              on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
                 "                                 date(date_started) <= date(curdate())\n" +
                 "              left outer JOIN\n" +
@@ -592,7 +593,7 @@ public CohortDefinition patientsDied() {
                 "                  coalesce(max(date(effective_discontinuation_date)), max(date(visit_date))) as visit_date,\n" +
                 "                  max(date(effective_discontinuation_date))                                  as effective_disc_date,\n" +
                 "                  discontinuation_reason\n" +
-                "           from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "           where date(visit_date) <= date(:endDate)\n" +
                 "             and program_name = 'HIV'\n" +
                 "           group by patient_id\n" +
@@ -637,10 +638,10 @@ public CohortDefinition patientsDied() {
                 "                           d.visit_date                                                    as date_discontinued,\n" +
                 "                           d.discontinuation_reason,\n" +
                 "                           de.patient_id                                                   as started_on_drugs\n" +
-                "                    from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                             join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "                             join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "                             left outer join kenyaemr_etl.etl_drug_event de\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                             join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                             join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "                             left outer join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                                             on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
                 "                                                date(date_started) <= date(curdate())\n" +
                 "                             left outer JOIN\n" +
@@ -648,7 +649,7 @@ public CohortDefinition patientsDied() {
                 "                                 coalesce(max(date(effective_discontinuation_date)), max(date(visit_date))) as visit_date,\n" +
                 "                                 max(date(effective_discontinuation_date))                                  as effective_disc_date,\n" +
                 "                                 discontinuation_reason\n" +
-                "                          from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                          from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                          where date(visit_date) <= date(:endDate)\n" +
                 "                            and program_name = 'HIV'\n" +
                 "                          group by patient_id\n" +
@@ -751,12 +752,12 @@ public CohortDefinition patientsDied() {
                 "               d.effective_disc_date as effective_disc_date,\n" +
                 "               max(d.visit_date) as date_discontinued,\n" +
                 "               de.patient_id                                                   as started_on_drugs\n" +
-                "        from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                 join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-                "                 join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-                "                 left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate)\n" +
+                "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+                "                 left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= date(:endDate)\n" +
                 "                 left outer JOIN\n" +
-                "             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "              where date(visit_date) <= date(:endDate) and program_name='HIV' and patient_id\n" +
                 "              group by patient_id\n" +
                 "             ) d on d.patient_id = fup.patient_id\n" +
@@ -794,17 +795,17 @@ public CohortDefinition patientsDied() {
                 "             d.effective_disc_date                                                   as effective_disc_date,\n" +
                 "             max(d.visit_date)                                                       as date_discontinued,\n" +
                 "             de.patient_id                                                           as started_on_drugs\n" +
-                "      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "               left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
                 "                                                            date(date_started) <=\n" +
                 "                                                            date_sub(DATE(:endDate), interval 1 MONTH)\n" +
                 "               left outer JOIN\n" +
                 "           (select patient_id,\n" +
                 "                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
                 "                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-                "            from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "            where date(visit_date) <= date_sub(DATE(:endDate), interval 1 MONTH)\n" +
                 "              and program_name = 'HIV'\n" +
                 "              and patient_id\n" +

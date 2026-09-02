@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.FirstRegimenSwitchReasonDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.SecondRegimenSwitchDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -60,8 +60,8 @@ public class FirstRegimenSwitchReasonDataEvaluator implements PersonDataEvaluato
                 "                               when 160566 then 'Immunological failure'\n" +
                 "                               when 5622 then 'Other'\n" +
                 "                               else '' end), t.reason_discontinued_other) as reason\n" +
-                "            from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                   left join kenyaemr_etl.etl_drug_event t on e.patient_id = t.patient_id\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                   left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event t on e.patient_id = t.patient_id\n" +
                 "            where t.program = 'HIV'\n" +
                 "            group by t.date_started, e.patient_id\n" +
                 "            having t.date_started >= latest_otz_enr) t\n" +

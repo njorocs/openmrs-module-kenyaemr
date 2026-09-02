@@ -41,7 +41,7 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                               order_id,\n" +
                 "                               concept_id,\n" +
                 "                               date_activated\n" +
-                "                        FROM openmrs.orders\n" +
+                "                        FROM orders\n" +
                 "                        WHERE order_type_id = 3\n" +
                 "                          AND voided = 0\n" +
                 "                        GROUP BY patient_id, concept_id),\n" +
@@ -50,9 +50,9 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                                 c.datatype_id     AS member_datatype,\n" +
                 "                                 c.class_id        AS member_class,\n" +
                 "                                 n.name\n" +
-                "                          FROM openmrs.concept_set cs\n" +
-                "                                   INNER JOIN openmrs.concept c ON cs.concept_id = c.concept_id\n" +
-                "                                   INNER JOIN openmrs.concept_name n ON c.concept_id = n.concept_id\n" +
+                "                          FROM concept_set cs\n" +
+                "                                   INNER JOIN concept c ON cs.concept_id = c.concept_id\n" +
+                "                                   INNER JOIN concept_name n ON c.concept_id = n.concept_id\n" +
                 "                              AND n.locale = 'en'\n" +
                 "                              AND n.concept_name_type = 'FULLY_SPECIFIED'\n" +
                 "                          WHERE cs.concept_set = 1000628)\n" +
@@ -61,8 +61,8 @@ public class LabOrderDateDataEvaluator implements VisitDataEvaluator {
                 "                        WHEN lc.member_concept_id IS NOT NULL\n" +
                 "                            THEN CONCAT(COALESCE(lc.name, '-'), '|', DATE_FORMAT(o.date_activated, '%Y-%m-%d %H:%i:%s')) END ORDER BY\n" +
                 "                    lc.member_concept_id SEPARATOR ', ') as Lab_date\n" +
-                "FROM openmrs.visit v\n" +
-                "         INNER JOIN openmrs.encounter e\n" +
+                "FROM visit v\n" +
+                "         INNER JOIN encounter e\n" +
                 "                    ON e.visit_id = v.visit_id\n" +
                 "         INNER JOIN FilteredOrders o ON o.encounter_id = e.encounter_id\n" +
                 "         INNER JOIN LabOrderConcepts lc ON o.concept_id = lc.member_concept_id\n" +

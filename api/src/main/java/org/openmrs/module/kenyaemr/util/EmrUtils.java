@@ -41,6 +41,7 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.util.PrivilegeConstants;
 import org.apache.commons.logging.Log;
@@ -74,9 +75,10 @@ public class EmrUtils {
 	public static String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
 	public static final String GP_HIE_FACILITY_REGISTRY_CODE = "kenyaemr.hie.facility.registry.code";
 
+
 	/**
 	 * Checks whether a date has any time value
-	 * 
+	 *
 	 * @param date the date
 	 * @return true if the date has time
 	 * @should return true only if date has time
@@ -90,7 +92,7 @@ public class EmrUtils {
 
 	/**
 	 * Checks if a given date is today
-	 * 
+	 *
 	 * @param date the date
 	 * @return true if date is today
 	 */
@@ -100,7 +102,7 @@ public class EmrUtils {
 
 	/**
 	 * Converts a WHO stage concept to a WHO stage number
-	 * 
+	 *
 	 * @param c the WHO stage concept
 	 * @return the WHO stage number (null if the concept isn't a WHO stage)
 	 */
@@ -128,7 +130,7 @@ public class EmrUtils {
 
 	/**
 	 * Parses a CSV list of strings, returning all trimmed non-empty values
-	 * 
+	 *
 	 * @param csv the CSV string
 	 * @return the concepts
 	 */
@@ -147,7 +149,7 @@ public class EmrUtils {
 
 	/**
 	 * Parses a CSV list of concept ids, UUIDs or mappings
-	 * 
+	 *
 	 * @param csv the CSV string
 	 * @return the concepts
 	 */
@@ -167,7 +169,7 @@ public class EmrUtils {
 
 	/**
 	 * Unlike in OpenMRS core, a user can only be one provider in KenyaEMR
-	 * 
+	 *
 	 * @param user the user
 	 * @return the provider or null
 	 */
@@ -325,7 +327,7 @@ public class EmrUtils {
 
 	/**
 	 * a helper method that checks if an encounter has obs for a concept
-	 * 
+	 *
 	 * @param enc
 	 * @param question
 	 * @return
@@ -346,7 +348,7 @@ public class EmrUtils {
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		StringBuilder q = new StringBuilder();
 		q.append("Select distinct implementation_subcounty ");
-		q.append("from kenyaemr_etl.etl_contact;");
+		q.append("from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_contact;");
 
 		List<List<Object>> subCounties = Context.getAdministrationService().executeSQL(q.toString(), true);
 		if (!subCounties.isEmpty()) {
@@ -372,7 +374,7 @@ public class EmrUtils {
 	/**
 	 * A temporary solution for whitelisting forms to show in 2.x
 	 * TODO: retire this once all forms are fully moved to o3
-	 * 
+	 *
 	 * @return
 	 */
 	public static List<String> getFormsToShowInLegacyUI() {
@@ -418,7 +420,7 @@ public class EmrUtils {
 	/**
 	 * Helper method that receives a List of Strings and returns a String
 	 * of comma-separated and single-quoted input list elements
-	 * 
+	 *
 	 * @param list
 	 * @return
 	 */
@@ -432,7 +434,7 @@ public class EmrUtils {
 
 	/**
 	 * Helper method for getting mfl code for a facility
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getMFLCode() {
@@ -461,7 +463,6 @@ public class EmrUtils {
 		// default
 		return globalPropertyMflCode != null ? globalPropertyMflCode : defaultMflCode;
 	}
-
 	/**
 	 * Gets the facility id stored in the HIE facility registry code global property
 	 * ({@value #GP_HIE_FACILITY_REGISTRY_CODE})
@@ -501,7 +502,7 @@ public class EmrUtils {
 
 	/**
 	 * Safely resolve default location ID from global property
-	 * 
+	 *
 	 * @return Integer location id or null if missing/invalid
 	 */
 	public static Integer getDefaultLocationId() {
@@ -559,14 +560,14 @@ public class EmrUtils {
 	}
 
 	public static Integer getAgeInMonths(Date birthDate, Date now) {
-        if (birthDate == null || now == null) {
-            return null;
-        }
-        DateTime d1 = new DateTime(birthDate.getTime());
-        DateTime d2 = new DateTime(now.getTime());
-        return Months.monthsBetween(d1, d2).getMonths();
-    }
-	
+		if (birthDate == null || now == null) {
+			return null;
+		}
+		DateTime d1 = new DateTime(birthDate.getTime());
+		DateTime d2 = new DateTime(now.getTime());
+		return Months.monthsBetween(d1, d2).getMonths();
+	}
+
 	/**
 	 * Extracts a value from a key:value,key:value string (e.g. GreenCardVelocityCalculation result).
 	 * Returns empty string when the key is absent or the value is the literal "null".
@@ -609,11 +610,11 @@ public class EmrUtils {
 	}
 
 	public static Integer getAgeInWeeks(Date birthDate, Date now) {
-        if (birthDate == null || now == null) {
-            return null;
-        }
-        DateTime d1 = new DateTime(birthDate.getTime());
-        DateTime d2 = new DateTime(now.getTime());
-        return Weeks.weeksBetween(d1, d2).getWeeks();
-    }
+		if (birthDate == null || now == null) {
+			return null;
+		}
+		DateTime d1 = new DateTime(birthDate.getTime());
+		DateTime d2 = new DateTime(now.getTime());
+		return Weeks.weeksBetween(d1, d2).getWeeks();
+	}
 }

@@ -389,9 +389,9 @@ public class MotherToBabyPairRiskCalculation extends AbstractPatientCalculation 
 		final Concept goodAdherenceAnswerConcept;
 
 		MotherRiskMaps(CalculationResultMap greenCardMap, CalculationResultMap lastReturnVisitMap, CalculationResultMap lastEncounterMap,
-				CalculationResultMap artStartDateMap, CalculationResultMap lastStiMap, CalculationResultMap lastKeyPopulationMap,
-				CalculationResultMap lastAdherenceMap, Concept fswConcept, Concept peopleWhoInjectDrugsConcept,
-				Concept usedAlcoholOrSubstanceUseConcept, Concept goodAdherenceAnswerConcept) {
+					   CalculationResultMap artStartDateMap, CalculationResultMap lastStiMap, CalculationResultMap lastKeyPopulationMap,
+					   CalculationResultMap lastAdherenceMap, Concept fswConcept, Concept peopleWhoInjectDrugsConcept,
+					   Concept usedAlcoholOrSubstanceUseConcept, Concept goodAdherenceAnswerConcept) {
 			this.greenCardMap = greenCardMap;
 			this.lastReturnVisitMap = lastReturnVisitMap;
 			this.lastEncounterMap = lastEncounterMap;

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.NCDStatusDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -39,10 +40,10 @@ public class NCDStatusDataEvaluator implements PersonDataEvaluator {
                 "            WHEN 1065 THEN 'Controlled'\n" +
                 "            WHEN 1066 THEN 'Not controlled'\n" +
                 "        END) AS controlled_status\n" +
-                "FROM kenyaemr_etl.etl_allergy_chronic_illness ci\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness ci\n" +
                 "JOIN (\n" +
                 "    SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
-                "    FROM kenyaemr_etl.etl_allergy_chronic_illness\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness\n" +
                 "    WHERE visit_date <= DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 ") latest ON ci.patient_id = latest.patient_id AND ci.visit_date = latest.latest_visit_date\n" +

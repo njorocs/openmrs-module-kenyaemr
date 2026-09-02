@@ -39,7 +39,7 @@ public class MedicalConditionsDataEvaluator implements PersonDataEvaluator {
         String qry = "select ci.patient_id,\n" +
 			"     group_concat(cn.name SEPARATOR '|') as ChronicIllness\n" +
 			"                from conditions ci\n" +
-			"                             inner join openmrs.concept_name cn on cn.concept_id = ci.condition_coded and cn.locale = 'en'\n" +
+			"                             inner join concept_name cn on cn.concept_id = ci.condition_coded and cn.locale = 'en'\n" +
 			"group by ci.patient_id, ci.date_created;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

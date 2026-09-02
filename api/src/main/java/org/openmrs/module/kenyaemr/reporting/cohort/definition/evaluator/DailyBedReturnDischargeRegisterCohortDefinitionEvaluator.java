@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.DailyBedReturnPatientDischargeRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -22,9 +23,6 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
-import org.openmrs.module.reporting.query.encounter.EncounterQueryResult;
-import org.openmrs.module.reporting.query.encounter.definition.EncounterQuery;
-import org.openmrs.module.reporting.query.encounter.evaluator.EncounterQueryEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -52,7 +50,7 @@ public class DailyBedReturnDischargeRegisterCohortDefinitionEvaluator implements
 		Cohort newCohort = new Cohort();
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
-		String qry = "SELECT ce.patient_id from kenyaemr_etl.etl_inpatient_discharge ce\n" +
+		String qry = "SELECT ce.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge ce\n" +
 				"where date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate) and ce.voided = 0;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

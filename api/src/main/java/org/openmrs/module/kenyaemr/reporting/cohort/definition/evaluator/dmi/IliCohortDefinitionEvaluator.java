@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.ILICohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -50,14 +51,14 @@ public class IliCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
 		
 		String qry = "select a.patient_id\n" +
 				"from (select patient_id, c.complaint as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
-				"      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+				"      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"      where c.complaint = 143264\n" +
 				"        and c.complaint_duration < 10\n" +
 				"        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"      group by patient_id) a\n" +
 				"         join visit v\n" +
 				"              on a.patient_id = v.patient_id and date(a.visit_date) = date(v.date_started) and v.visit_type_id = 1\n" +
-				"         join kenyaemr_etl.etl_patient_triage t\n" +
+				"         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 				"              on a.patient_id = t.patient_id and date(t.visit_date) = date(v.date_started) and t.temperature >= 38;";
 		
 		SqlQueryBuilder builder = new SqlQueryBuilder();

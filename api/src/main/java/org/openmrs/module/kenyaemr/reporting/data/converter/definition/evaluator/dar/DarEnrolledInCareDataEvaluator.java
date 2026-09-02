@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarEnrolledInCareDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarStartingArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -42,13 +42,13 @@ public class DarEnrolledInCareDataEvaluator implements PersonDataEvaluator {
         String qry = "";
         if (sex != null) {
             qry = "SELECT e.patient_id, 'X' enrolled\n" +
-                    "FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex' \n" +
+                    "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex' \n" +
                     "where e.entry_point <> 160563 and (e.patient_type not in (160563, 164931, 159833) or e.patient_type is null ) and e.transfer_in_date is null and date(e.visit_date) = date(:startDate) and e.voided = 0 ";
         } else {
             qry = "SELECT e.patient_id, 'X' enrolled\n" +
-                    "FROM kenyaemr_etl.etl_hiv_enrollment e\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
+                    "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
                     "where e.entry_point <> 160563  and e.transfer_in_date is null and (e.patient_type not in (160563, 164931, 159833) or e.patient_type is null ) and date(e.visit_date) = date(:startDate) and e.voided = 0 ";
         }
         String ageConditionString = "";

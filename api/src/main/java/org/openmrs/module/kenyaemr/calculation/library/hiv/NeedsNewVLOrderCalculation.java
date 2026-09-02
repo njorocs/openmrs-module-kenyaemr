@@ -28,6 +28,7 @@ import java.util.*;
  */
 public class NeedsNewVLOrderCalculation extends AbstractPatientCalculation implements PatientFlagCalculation {
     protected static final Log log = LogFactory.getLog(StablePatientsCalculation.class);
+
     /**
      * @see PatientFlagCalculation#getFlagMessage()
      */
@@ -37,40 +38,47 @@ public class NeedsNewVLOrderCalculation extends AbstractPatientCalculation imple
     }
 
     @Override
-    public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
+    public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
+            PatientCalculationContext context) {
 
         // Get those due for VL
-        Set<Integer> dueForVl = CalculationUtils.patientsThatPass(calculate(new NeedsViralLoadTestCalculation(), cohort, context));
+        Set<Integer> dueForVl = CalculationUtils
+                .patientsThatPass(calculate(new NeedsViralLoadTestCalculation(), cohort, context));
 
         CalculationResultMap ret = new CalculationResultMap();
-        for(Integer ptId:cohort) {
+        for (Integer ptId : cohort) {
             boolean needsNewVLOrder = false;
             OrderService orderService = Context.getOrderService();
-            PatientService patientService= Context.getPatientService();
+            PatientService patientService = Context.getPatientService();
             OrderType labOrderType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
             CareSetting careSetting = orderService.getCareSetting(1);
-            List<Order> labOrders = orderService.getOrders(patientService.getPatient(ptId), careSetting, labOrderType, true);
+            List<Order> labOrders = orderService.getOrders(patientService.getPatient(ptId), careSetting, labOrderType,
+                    true);
             List<Integer> vlOrders = new ArrayList<Integer>();
             for (Order order : labOrders) {
                 // only get vl orders
-                if(order.getConcept().getConceptId() == 856 || order.getConcept().getConceptId() == 1305 ) {
+                if (order.getConcept().getConceptId() == 856 || order.getConcept().getConceptId() == 1305) {
                     vlOrders.add(order.getOrderId());
                 }
             }
             if (vlOrders.size() > 0) {
                 Integer latestVlOrder = Collections.max(vlOrders);
                 if (dueForVl.contains(ptId) && orderService.getOrder(latestVlOrder).isVoided()
-                && orderService.getOrder(latestVlOrder).getVoidReason() != null && (orderService.getOrder(latestVlOrder).getVoidReason().equalsIgnoreCase("Sample not taken")
-                        || orderService.getOrder(latestVlOrder).getVoidReason().equalsIgnoreCase("Collect new sample")
-                        || orderService.getOrder(latestVlOrder).getVoidReason().equalsIgnoreCase("Sample rejected")
-                        || orderService.getOrder(latestVlOrder).getVoidReason().equalsIgnoreCase("No reagents"))) {
+                        && orderService.getOrder(latestVlOrder).getVoidReason() != null
+                        && (orderService.getOrder(latestVlOrder).getVoidReason().equalsIgnoreCase("Sample not taken")
+                                || orderService.getOrder(latestVlOrder).getVoidReason()
+                                        .equalsIgnoreCase("Collect new sample")
+                                || orderService.getOrder(latestVlOrder).getVoidReason()
+                                        .equalsIgnoreCase("Sample rejected")
+                                || orderService.getOrder(latestVlOrder).getVoidReason()
+                                        .equalsIgnoreCase("No reagents"))) {
                     needsNewVLOrder = true;
 
                 }
             }
             ret.put(ptId, new BooleanResult(needsNewVLOrder, this));
         }
-        return  ret;
+        return ret;
     }
 
 }

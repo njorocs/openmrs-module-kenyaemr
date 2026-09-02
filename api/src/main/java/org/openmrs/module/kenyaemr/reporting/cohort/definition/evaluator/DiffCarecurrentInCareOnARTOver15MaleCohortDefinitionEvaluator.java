@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.DiffCarecurrentInCareOnARTOver15MaleCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,7 +48,7 @@ public class DiffCarecurrentInCareOnARTOver15MaleCohortDefinitionEvaluator imple
 
 		Cohort newCohort = new Cohort();
 
-		String qry="select c.patient_id from kenyaemr_etl.etl_current_in_care c\n" +
+		String qry="select c.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_current_in_care c\n" +
 				"  where  timestampdiff(year ,c.dob,c.latest_vis_date)>= 15 and\n" +
 				"   c.Gender=\"M\" and c.started_on_drugs is not null;";
 

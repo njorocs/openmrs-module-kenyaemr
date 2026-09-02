@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsInfantFeedingCounselingDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,7 +44,7 @@ public class SpecialClinicsInfantFeedingCounselingDataEvaluator implements Encou
                 "            when 5632 then 'Breastfeeding'\n" +
                 "            when 164477 then 'Replacement feeding'\n" +
                 "            when 159854 then 'Complimentary feeding' end) as infant_feeding\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and special_clinic_form_uuid = '" + specialClinic + "';";
 

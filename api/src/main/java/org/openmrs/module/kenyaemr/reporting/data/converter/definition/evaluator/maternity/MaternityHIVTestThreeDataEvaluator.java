@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityHIVTestThreeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,12 +38,12 @@ public class MaternityHIVTestThreeDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select v.patient_id,\n" +
                 "  CONCAT_WS ('\\r\\n',v.test_3_kit_name,v.test_3_kit_lot_no,v.test_3_kit_expiry,v.test_3_result) as Test_three_results\n" +
-                "from kenyaemr_etl.etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "union\n" +
                 "select ht.patient_id,\n" +
                 "  CONCAT_WS ('\\r\\n',ht.test_3_kit_name,ht.test_3_kit_lot_no,ht.test_3_kit_expiry,ht.test_3_result) as Test_three_results\n" +
-                "from kenyaemr_etl.etl_hts_test ht\n" +
-                "  join kenyaemr_etl.etl_mchs_delivery mat on mat.patient_id = ht.patient_id and mat.visit_date = ht.visit_date;";
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht\n" +
+                "  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery mat on mat.patient_id = ht.patient_id and mat.visit_date = ht.visit_date;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

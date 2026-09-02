@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.ComplaintIdDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -38,7 +39,7 @@ public class ComplaintIdDataEvaluator implements VisitDataEvaluator {
 
         String qry = "select i.visit_id,\n" +
                 "       GROUP_CONCAT(DISTINCT i.complaint) as complaint\n" +
-                "from kenyaemr_etl.etl_allergy_chronic_illness i\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness i\n" +
                 "where i.visit_date between date(:startDate) and date(:endDate)\n" +
                 "group by i.visit_id;";
 

@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDComplaintDurationDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDMalariaAssessmentDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,9 +44,9 @@ public class OPDMalariaAssessmentDataEvaluator implements EncounterDataEvaluator
 			"           if(x.lab_test in (2017917) and x.test_result = 2017936, 3,\n" +
 			"            if(x.lab_test in (1643) and x.test_result = 703, 4,\n" +
 			"               if(x.lab_test in (2017917) and x.test_result = 703, 5,''))))) as malaria\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         INNER JOIN kenyaemr_etl.etl_laboratory_extract x ON v.patient_id = x.patient_id AND date(x.visit_date) between date(:startDate) and date(:endDate)\n" +
-			"         LEFT JOIN openmrs.encounter_diagnosis ed ON v.patient_id = ed.patient_id and date(ed.date_created)between date(:startDate) and date(:endDate)\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x ON v.patient_id = x.patient_id AND date(x.visit_date) between date(:startDate) and date(:endDate)\n" +
+			"         LEFT JOIN encounter_diagnosis ed ON v.patient_id = ed.patient_id and date(ed.date_created)between date(:startDate) and date(:endDate)\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

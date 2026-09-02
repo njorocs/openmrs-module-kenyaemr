@@ -10,9 +10,10 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDPriorTreatmentsPrescribedDataDefinition;
-import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
 import org.openmrs.module.reporting.data.obs.EvaluatedObsData;
+import org.openmrs.module.reporting.data.obs.definition.ObsDataDefinition;
 import org.openmrs.module.reporting.data.obs.evaluator.ObsDataEvaluator;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
@@ -38,9 +39,9 @@ public class OPDPriorTreatmentsPrescribedDataEvaluator implements ObsDataEvaluat
 
         String qry = "select le.obs_id,\n" +
                 "       d.drug_name\n" +
-                "from kenyaemr_etl.etl_laboratory_extract le\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le\n" +
                 "         LEFT JOIN (select d.enc_name, d.patient_id, GROUP_CONCAT(DISTINCT(d.drug_name) separator '|') as drug_name\n" +
-                "                    from kenyaemr_etl.etl_drug_order d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_order d\n" +
                 "                    where date(d.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                    group by visit_date,patient_id) d ON le.patient_id = d.patient_id\n" +
                 "    and d.enc_name = 'Drug Order'\n" +

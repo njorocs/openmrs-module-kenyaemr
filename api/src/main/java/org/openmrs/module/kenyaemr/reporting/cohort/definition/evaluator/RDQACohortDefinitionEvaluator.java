@@ -15,6 +15,7 @@ import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.RDQAMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.RDQACohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
@@ -23,11 +24,7 @@ import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinition
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Evaluator for patients eligible for RDQA
@@ -48,7 +45,7 @@ public class RDQACohortDefinitionEvaluator implements CohortDefinitionEvaluator 
 		Cohort newCohort = new Cohort();
 
 		String qry = " SELECT FLOOR(1 + (RAND() * 999999)) as index_no, patient_id\n" +
-				" from kenyaemr_etl.etl_patient_program\n" +
+				" from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program\n" +
 				" where voided=0 and program='HIV' \n" +
 				"  group by patient_id";
 

@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.atp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.atp.ATPTransitionReadinessRegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -40,7 +41,7 @@ public class TransitionReadinessRegisterCohortDefinitionEvaluator implements Enc
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
-		String qry = "SELECT encounter_id from kenyaemr_etl.etl_atp_transition_readiness_assessment t inner join person p on p.person_id=t.patient_id and p.voided=0 where date(t.visit_date) BETWEEN date(:startDate) AND date(:endDate) ; ";
+		String qry = "SELECT encounter_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_atp_transition_readiness_assessment t inner join person p on p.person_id=t.patient_id and p.voided=0 where date(t.visit_date) BETWEEN date(:startDate) AND date(:endDate) ; ";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

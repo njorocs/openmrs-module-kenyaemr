@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDMuacDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -44,8 +45,8 @@ public class OPDMuacDataEvaluator implements EncounterDataEvaluator {
 			"        WHEN t.muac < 11.5 THEN 'RED'\n" +
 			"        ELSE NULL\n" +
 			"        END AS muac\n" +
-			"FROM kenyaemr_etl.etl_clinical_encounter v\n" +
-			"         LEFT JOIN kenyaemr_etl.etl_patient_triage t\n" +
+			"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
+			"         LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 			"                   ON v.patient_id = t.patient_id\n" +
 			"                       AND DATE(v.visit_date) = DATE(t.visit_date)\n" +
 			"WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";

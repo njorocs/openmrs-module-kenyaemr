@@ -42,7 +42,7 @@ public class IllCasesCohortDefinitionEvaluator implements VisitQueryEvaluator {
         context = ObjectUtil.nvl(context, new EvaluationContext());
         VisitQueryResult queryResult = new VisitQueryResult(visitQuery, context);
 
-        String qry = "select v.visit_id from openmrs.visit v where date(v.date_started) between date(:startDate) and date(:endDate) and v.voided = 0;";
+        String qry = "select v.visit_id from visit v where date(v.date_started) between date(:startDate) and date(:endDate) and v.voided = 0;";
 
         SqlQueryBuilder builder = new SqlQueryBuilder();
         builder.append(qry);

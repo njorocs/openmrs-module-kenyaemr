@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.moh711;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -33,8 +34,8 @@ public class Moh711CohortLibrary {
  */
 public CohortDefinition latestMCHEnrollmentAtANC() {
     SqlCohortDefinition cd = new SqlCohortDefinition();
-    String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-            "left join (select d.patient_id,max(visit_date) as latest_disc from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+    String sqlQuery = "select e.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+            "left join (select d.patient_id,max(visit_date) as latest_disc from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
             "    where d.program_name = 'MCH Mother' group by d.patient_id)d on e.patient_id = d.patient_id\n" +
             "where e.service_type = 1622 and date(e.visit_date) <= date(:endDate) and (date(e.visit_date) > date(d.latest_disc) or d.patient_id is null);";
     cd.setName("Latest MCH enrollment at ANC");
@@ -50,8 +51,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition latestMCHEnrollment() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_mch_enrollment e\n" +
-                "left join (select d.patient_id,max(visit_date) as latest_disc from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
+                "left join (select d.patient_id,max(visit_date) as latest_disc from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "    where d.program_name = 'MCH Mother' group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "where date(e.visit_date) < date(:endDate) and (date(e.visit_date) > date(d.latest_disc) or d.patient_id is null);";
         cd.setName("Latest MCH enrollment");
@@ -69,7 +70,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition newANCVisits() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select av.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.anc_visit_number = 1\n" +
                 "  and av.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("New ANC clients");
@@ -86,7 +87,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition ancRevisitClients() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select av.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.anc_visit_number > 1\n" +
                 "  and av.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Revisiting ANC clients");
@@ -101,10 +102,10 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfANCClientsGivenIPT1stDoseSQL() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p where\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p where\n" +
                 "        date(p.malaria_prophylaxis_1) between date(:startDate) and date(:endDate)\n" +
                 "union\n" +
-                "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 1 and\n" +
+                "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 1 and\n" +
                 "      date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("No.of Clients given IPT (1st dose)");
         cd.setQuery(sqlQuery);
@@ -119,10 +120,10 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfANCClientsGivenIPT2ndDoseSQL() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p where\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p where\n" +
                 "       date(p.malaria_prophylaxis_2) between date(:startDate) and date(:endDate)\n" +
                 "union\n" +
-                "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 2 and\n" +
+                "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 2 and\n" +
                 "       date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("No.of Clients given IPT (2nd dose)");
         cd.setQuery(sqlQuery);
@@ -137,10 +138,10 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfANCClientsGivenIPT3rdDoseSQL() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p where\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p where\n" +
                 "     date(p.malaria_prophylaxis_3) between date(:startDate) and date(:endDate)\n" +
                 "union\n" +
-                "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 3 and\n" +
+                "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.IPT_dose_given_anc = 3 and\n" +
                 "        date(v.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("No.of Clients given IPT (3rd dose)");
         cd.setQuery(sqlQuery);
@@ -157,15 +158,15 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT patient_id FROM (\n" +
                 "    SELECT x.patient_id\n" +
-                "    FROM kenyaemr_etl.etl_laboratory_extract x\n" +
-                "    JOIN kenyaemr_etl.etl_mch_antenatal_visit anc on x.patient_id = anc.patient_id\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
+                "    JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc on x.patient_id = anc.patient_id\n" +
                 "    WHERE x.lab_test = 21 \n" +
                 "      AND x.test_result < 11\n" +
                 "      AND DATE(anc.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "      AND DATE(x.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    UNION\n" +
                 "    SELECT anc.patient_id\n" +
-                "    FROM kenyaemr_etl.etl_mch_antenatal_visit anc\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit anc\n" +
                 "    WHERE anc.hemoglobin < 11 \n" +
                 "      AND DATE(anc.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 ") AS low_hb_clients";
@@ -184,7 +185,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition no1stANCContactWithin12Weeks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select av.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.anc_visit_number = 1 and av.gestation_in_weeks between 0 and 12\n" +
                 "  and av.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Clients with 1st ANC Contact within 12 weeks");
@@ -199,7 +200,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition ancClientsCompleted4Visits() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select av.patient_id from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+        String sqlQuery = "select av.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.visit_date between date(:startDate) and date(:endDate) and av.anc_visit_number >= 4;";
         cd.setName("No.of Clients completed 4 Antenatal Visits");
         cd.setQuery(sqlQuery);
@@ -213,7 +214,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition ancClientsCompleted8Visits() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select av.patient_id from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+        String sqlQuery = "select av.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.visit_date between date(:startDate) and date(:endDate) and av.anc_visit_number >= 8;";
         cd.setName("No.of Clients completed 8 Antenatal Visits");
         cd.setQuery(sqlQuery);
@@ -227,7 +228,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition distributedLLINsUnder1Year() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select hf.patient_id from kenyaemr_etl.etl_hei_follow_up_visit hf where hf.LLIN = 1065\n" +
+        String sqlQuery = "select hf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit hf where hf.LLIN = 1065\n" +
                 "           and date(hf.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("No.LLINs distributed to under 1 year");
         cd.setQuery(sqlQuery);
@@ -241,8 +242,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition distributedLLINsANCClients() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p\n" +
-                "                    inner join kenyaemr_etl.etl_mch_antenatal_visit v on p.patient_id = v.patient_id\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p\n" +
+                "                    inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on p.patient_id = v.patient_id\n" +
                 "                    where p.long_lasting_insecticidal_net\n" +
                 "between date(:startDate) and date(:endDate) and v.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("No.of LLINs distributed");
@@ -259,7 +260,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition ancClientsTestedForSyphillisHTS() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_hts_test t inner join kenyaemr_etl.etl_mch_antenatal_visit v on t.patient_id = v.patient_id where t.test_1_kit_name = 'Standard Q' and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on t.patient_id = v.patient_id where t.test_1_kit_name = 'Standard Q' and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and date(v.visit_date) between date(:startDate) and date(:endDate) and t.syphillis_test_result in (1228,1229);";
         cd.setName("No.of clients Tested for Syphilis HTS");
         cd.setQuery(sqlQuery);
@@ -270,7 +271,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition testedForSyphillisANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "                and v.syphilis_test_status in (1229, 1228);";
         cd.setName("No.of clients Tested for Syphilis HTS");
         cd.setQuery(sqlQuery);
@@ -287,8 +288,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition ancTestedForSyphillisLab() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract x on v.patient_id = x.patient_id and v.visit_date = x.visit_date\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x on v.patient_id = x.patient_id and v.visit_date = x.visit_date\n" +
                 "    where v.visit_date between date(:startDate) and date(:endDate) and x.lab_test = 229;";
         cd.setName("No.of ANC clients Tested for Syphilis in the Lab");
         cd.setQuery(sqlQuery);
@@ -317,7 +318,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition ancClientsTestedPositiveForSyphillisAtHTS() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select t.patient_id from kenyaemr_etl.etl_hts_test t where t.test_1_kit_name = 'Dual Kit' and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where t.test_1_kit_name = 'Dual Kit' and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and t.syphillis_test_result = 1228;";
         cd.setName("No.of clients Tested Positive for Syphilis HTS Standard Q Kit");
         cd.setQuery(sqlQuery);
@@ -333,7 +334,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition testedPositiveForSyphillisANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "                and v.syphilis_test_status = 1228;";
         cd.setName("No.of clients Tested for Syphilis ANC");
         cd.setQuery(sqlQuery);
@@ -350,8 +351,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition ancTestedPositiveForSyphillisLab() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract x on v.patient_id = x.patient_id and v.visit_date = x.visit_date\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x on v.patient_id = x.patient_id and v.visit_date = x.visit_date\n" +
                 "    where v.visit_date between date(:startDate) and date(:endDate) and x.lab_test = 229 and x.test_result = 1228;";
         cd.setName("No.of ANC clients Tested positive for Syphilis Lab");
         cd.setQuery(sqlQuery);
@@ -380,7 +381,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition breastExaminationDone() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select av.patient_id from kenyaemr_etl.etl_mch_antenatal_visit av\n" +
+        String sqlQuery = "select av.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av\n" +
                 "where av.visit_date between date(:startDate) and date(:endDate) and av.breast_exam_done in (1115,1116);";
         cd.setName("Total women done breast examination");
         cd.setQuery(sqlQuery);
@@ -433,7 +434,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition presentingPregnancy1stANC1stTrimester() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select av.patient_id from kenyaemr_etl.etl_mch_antenatal_visit av where av.visit_date between date(:startDate)\n" +
+        String sqlQuery = "select av.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit av where av.visit_date between date(:startDate)\n" +
                 "and date(:endDate) and av.maturity <= 12;";
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -456,7 +457,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientsIssuedWithIron() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p inner join kenyaemr_etl.etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.iron_1,p.iron_2,p.iron_3,p.iron_4))\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.iron_1,p.iron_2,p.iron_3,p.iron_4))\n" +
                 "between date(:startDate) and date(:endDate);";
         cd.setName("No.of clients issued with Iron");
         cd.setQuery(sqlQuery);
@@ -471,7 +472,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientsIssuedWithFolic() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p inner join kenyaemr_etl.etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.folate_1,p.folate_2,p.folate_3,p.folate_4))\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.folate_1,p.folate_2,p.folate_3,p.folate_4))\n" +
                 "between date(:startDate) and date(:endDate);";
         cd.setName("No.of clients issued with Folic");
         cd.setQuery(sqlQuery);
@@ -486,7 +487,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientsIssuedWithFerrousFolic() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_preventive_services p inner join kenyaemr_etl.etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.folate_iron_1,p.folate_iron_2,p.folate_iron_3,p.folate_iron_4))\n" +
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v on p.patient_id = v.patient_id where date(coalesce(p.folate_iron_1,p.folate_iron_2,p.folate_iron_3,p.folate_iron_4))\n" +
                 "between date(:startDate) and date(:endDate);";
         cd.setName("No.of clients issued with Combined Ferrous Folate");
         cd.setQuery(sqlQuery);
@@ -502,7 +503,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition ancClientsWithFGMRelatedComplications() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select v.patient_id\n" +
-                "from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "where FIND_IN_SET('Scarring', v.fgm_complications) > 0\n" +
                 "   or FIND_IN_SET('Keloids', v.fgm_complications) > 0\n" +
                 "   or FIND_IN_SET('Dyspaneuria', v.fgm_complications) > 0\n" +
@@ -522,7 +523,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition cacxScreenedCommon() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select s.patient_id from kenyaemr_etl.etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select s.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and coalesce(s.via_vili_screening_method,s.hpv_screening_method,s.pap_smear_screening_method,s.colposcopy_screening_method) in ('Pap Smear','VIA','VILI','Colposcopy','HPV Test','HPV');";
         cd.setName("Screened for CACX through common form");
         cd.setQuery(sqlQuery);
@@ -537,7 +538,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition cacxScreenedAtANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery = "select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.visit_date between date(:startDate) and date(:endDate)\n" +
                 "and cacx_screening_method in (885,162816,164977);";
         cd.setName("Screened for CACX during ANC visit");
         cd.setQuery(sqlQuery);
@@ -552,7 +553,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition cacxScreenedByVIAVILIHPVMethods(String method1, String method2) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where (i.via_vili_screening_method = '"+method1+"' or i.hpv_screening_method = '"+method2+"') and i.visit_date between date(:startDate) and date(:endDate)";
         cd.setName("No.Screened for Cacx with VIA/VILI/HPV  methods");
         cd.setQuery(sqlQuery);
@@ -563,7 +564,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition cacxScreenedWithHpvMethod(String method) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where i.hpv_screening_method = '"+method+"' and i.visit_date between date(:startDate) and date(:endDate)";
         cd.setName("No.Screened for Hpv Cacx screening form");
         cd.setQuery(sqlQuery);
@@ -574,7 +575,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition cacxScreenedPAPSmearMethod(String method) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select i.patient_id from kenyaemr_etl.etl_cervical_cancer_screening i\n" +
+        String sqlQuery = "select i.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening i\n" +
                 "where i.pap_smear_screening_method = '"+method+"' and i.visit_date between date(:startDate) and date(:endDate)";
         cd.setName("No.Screened for Pap smear Cacx screening form");
         cd.setQuery(sqlQuery);
@@ -590,7 +591,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition viaViliPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select s.patient_id from kenyaemr_etl.etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select s.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and s.via_vili_screening_method in ('VIA','VILI') and s.via_vili_screening_result = 'Positive';";
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -605,7 +606,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition hpvPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select s.patient_id from kenyaemr_etl.etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select s.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and s.hpv_screening_method = 'HPV' and s.hpv_screening_result='Positive';";
         cd.setName("Positive for CACX using HPV method");
         cd.setQuery(sqlQuery);
@@ -623,7 +624,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition suspiciousCancerLessions(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select s.patient_id\n" +
-                "from kenyaemr_etl.etl_cervical_cancer_screening s\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s\n" +
                 "where date(s.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "  and (\n" +
                 "       s.via_vili_screening_result in ('Presumed','Suspicious for Cancer','Low grade lesion')\n" +
@@ -643,7 +644,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition papsmearPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select s.patient_id\n" +
-                "from kenyaemr_etl.etl_cervical_cancer_screening s\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s\n" +
                 "where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "  and s.pap_smear_screening_result in ('Low grade lesion',\n" +
                 "                                       'High grade lesion', 'Invasive Cancer', 'Atypical squamous cells(ASC-US/ASC-H)',\n" +
@@ -664,7 +665,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition treatedUsingCyrotherapy(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="SELECT s.patient_id \n" +
-                "      FROM kenyaemr_etl.etl_cervical_cancer_screening s \n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s \n" +
                 "      WHERE DATE(s.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "        AND ( \n" +
                 "             s.colposcopy_treatment_method IN ( \n" +
@@ -712,7 +713,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition treatedUsingLEEP(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="SELECT s.patient_id \n" +
-                "      FROM kenyaemr_etl.etl_cervical_cancer_screening s \n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening s \n" +
                 "      WHERE DATE(s.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) \n" +
                 "        AND ( \n" +
                 "             s.colposcopy_treatment_method IN ('LEEP performed','LEEP') \n" +
@@ -735,7 +736,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientsGivenOxytocin(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ld.patient_id from kenyaemr_etl.etl_mchs_delivery ld\n" +
+        String sqlQuery ="select ld.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where ld.uterotonic_given = 81369 and\n" +
                 "      ld.visit_date   between date(:startDate) and date(:endDate);";
         cd.setName("Mothers given uterotonics-Oxytocin within 1 minute");
@@ -753,7 +754,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientsGivenCarbatosin(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ld.patient_id from kenyaemr_etl.etl_mchs_delivery ld\n" +
+        String sqlQuery ="select ld.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where ld.uterotonic_given = 104590 and\n" +
                 "      ld.visit_date   between date(:startDate) and date(:endDate);";
         cd.setName("Mothers given uterotonics-Carbatosin within 1 minute");
@@ -770,9 +771,9 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition enrolledInHIV(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select e.patient_id from kenyaemr_etl.etl_hiv_enrollment e\n" +
+        String sqlQuery ="select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e\n" +
                 "left join (select d.patient_id,coalesce(date(max(effective_discontinuation_date)),max(visit_date))\n" +
-                "    as latest_disc from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "    as latest_disc from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "        where d.program_name = 'HIV' group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "where date(e.visit_date) < date(:endDate) and (date(e.visit_date) > date(d.latest_disc) or d.patient_id is null);";
         cd.setName("Enrolled in HIV");
@@ -789,7 +790,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition htsPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select t.patient_id from kenyaemr_etl.etl_hts_test t where t.final_test_result = 'Positive';";
+        String sqlQuery ="select t.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test t where t.final_test_result = 'Positive';";
         cd.setName("Has Positive test result in HTS");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -804,7 +805,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition mchPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="Select e.patient_id from kenyaemr_etl.etl_mch_enrollment e where e.hiv_status = 703;";
+        String sqlQuery ="Select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e where e.hiv_status = 703;";
         cd.setName("Has Positive result in MCH Enrollment");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -819,7 +820,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition ancPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="Select v.patient_id from kenyaemr_etl.etl_mch_antenatal_visit v where v.final_test_result = 'Positive' and v.visit_date <= date(:endDate);";
+        String sqlQuery ="Select v.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where v.final_test_result = 'Positive' and v.visit_date <= date(:endDate);";
         cd.setName("Has Positive result in ANC");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -834,7 +835,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition labourAndDeliveryPositive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="Select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where d.final_test_result = 'Positive' " +
+        String sqlQuery ="Select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where d.final_test_result = 'Positive' " +
                 "and coalesce(date(d.date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate);";
         cd.setName("Has Positive result in L&D");
         cd.setQuery(sqlQuery);
@@ -865,7 +866,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition screenedForBreastCancer(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select c.patient_id from kenyaemr_etl.etl_cervical_cancer_screening c where c.breast_cancer = 'Yes' and c.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select c.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening c where c.breast_cancer = 'Yes' and c.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("screenedForBreastCancer");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -876,7 +877,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition screenedForColorectalCancer(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select c.patient_id from kenyaemr_etl.etl_cervical_cancer_screening c where c.colorectal_cancer = 'Yes' and c.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select c.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening c where c.colorectal_cancer = 'Yes' and c.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("screenedForColorectalCancer");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -891,7 +892,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfFirstPNCClients(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pv.patient_id from kenyaemr_etl.etl_mch_postnatal_visit pv\n" +
+        String sqlQuery ="select pv.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pv\n" +
                 "where pv.pnc_visit_no = 1 and pv.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("First/new PNC Visit");
         cd.setQuery(sqlQuery);
@@ -907,7 +908,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfRevisitingPNCClients(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pv.patient_id from kenyaemr_etl.etl_mch_postnatal_visit pv\n" +
+        String sqlQuery ="select pv.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pv\n" +
                 "where (pv.pnc_visit_no > 1 or pv.pnc_visit_no is null) and pv.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("PNC re-visit");
         cd.setQuery(sqlQuery);
@@ -924,7 +925,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition motherPPCWithin48hrs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select p.patient_id from kenyaemr_etl.etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and p.visit_timing_mother = 1721";
         cd.setName("Mothers received PostParturm care within 48 hrs");
         cd.setQuery(sqlQuery);
@@ -940,7 +941,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition motherPPCbtw3And42Days(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select p.patient_id from kenyaemr_etl.etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and p.visit_timing_mother = 1722";
         cd.setName("Mothers received PostParturm care btw 3 days and 6 weeks");
         cd.setQuery(sqlQuery);
@@ -956,7 +957,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition motherPPCAfter6weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select p.patient_id from kenyaemr_etl.etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit p where date(p.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and p.visit_timing_mother in (1723,167015)";
         cd.setName("Mothers received PostParturm care after 6 weeks");
         cd.setQuery(sqlQuery);
@@ -972,7 +973,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition pncMothersPPCounsellingFP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select pnc.patient_id from kenyaemr_etl.etl_mch_postnatal_visit pnc\n" +
+        String sqlQuery = "select pnc.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pnc\n" +
                 "where pnc.family_planning_counseling = 1065 and\n" +
                 "      pnc.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("clientsDonePostPartumFpCounseling");
@@ -990,7 +991,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT\n" +
                 "    v.patient_id\n" +
-                "FROM kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "WHERE\n" +
                 "    FIND_IN_SET('Condoms', v.family_planning_method) > 0\n" +
                 "   OR FIND_IN_SET('Implant', v.family_planning_method) > 0\n" +
@@ -1020,8 +1021,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition babyPPCWithin48hrs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_patient_demographics d inner join kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "on d.patient_id = f.patient_id inner join kenyaemr_etl.etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "on d.patient_id = f.patient_id inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "and timestampdiff(HOUR,date(d.dob),date(f.visit_date)) <= 48;";
         cd.setName("Babies received PostParturm care within 48 hrs");
         cd.setQuery(sqlQuery);
@@ -1037,8 +1038,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition babyPPCbtw3And42Days(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_patient_demographics d inner join kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "on d.patient_id = f.patient_id inner join kenyaemr_etl.etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "on d.patient_id = f.patient_id inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "                     and timestampdiff(DAY,date(d.dob),date(f.visit_date)) between 3 and 42;";
         cd.setName("Babies received PostParturm care btw 3 days and 6 weeks");
         cd.setQuery(sqlQuery);
@@ -1054,8 +1055,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition babyPPCAfter6weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_patient_demographics d inner join kenyaemr_etl.etl_hei_follow_up_visit f\n" +
-                "on d.patient_id = f.patient_id inner join kenyaemr_etl.etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit f\n" +
+                "on d.patient_id = f.patient_id inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on d.patient_id = e.patient_id where date(f.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "     and timestampdiff(WEEK,date(d.dob),date(f.visit_date)) > 6;";
         cd.setName("Babies received PostParturm care after 6 weeks");
         cd.setQuery(sqlQuery);
@@ -1071,7 +1072,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noOfFistulaCasesPNC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pv.patient_id from kenyaemr_etl.etl_mch_postnatal_visit pv\n" +
+        String sqlQuery ="select pv.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pv\n" +
                 "where pv.fistula_screening in (127847,49, 111521) and pv.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("No.of Fistula cases during PNC");
         cd.setQuery(sqlQuery);
@@ -1087,7 +1088,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition noReferredFromCommunityForPNC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pv.patient_id from kenyaemr_etl.etl_mch_postnatal_visit pv\n" +
+        String sqlQuery ="select pv.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit pv\n" +
                 "where pv.referred_from = 1759 and pv.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("No.referred from Community for PNC services");
         cd.setQuery(sqlQuery);
@@ -1104,7 +1105,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition deliveryMethod(Integer mode){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.mode_of_delivery = "+mode+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.mode_of_delivery = "+mode+";";
         cd.setName("Delivery method");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1119,7 +1120,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition liveBirths(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849;";
         cd.setName("Live Births");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1134,7 +1135,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition lowBirthWeight(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.birth_weight < 2.5;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.birth_weight < 2.5;";
         cd.setName("No.of Low birth weight Babies (below 2500 grams)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1150,7 +1151,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition deformities(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.birth_with_deformity=155871;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.birth_with_deformity=155871;";
         cd.setName("No.of births with deformoties");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1166,7 +1167,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition givenVitaminK(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ld.patient_id from kenyaemr_etl.etl_mchs_delivery ld\n" +
+        String sqlQuery ="select ld.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where ld.vitamin_K_given =1065 and\n" +
                 "      ld.visit_date   between date(:startDate) and date(:endDate);";
         cd.setName("No.of neonates given  Vit K");
@@ -1183,7 +1184,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition chlorhexidineForCordCaregiven(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ld.patient_id from kenyaemr_etl.etl_mchs_delivery ld\n" +
+        String sqlQuery ="select ld.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where ld.chlohexidine_applied_on_code_stump =1065 and\n" +
                 "      ld.visit_date   between date(:startDate) and date(:endDate);";
         cd.setName("No.of babies applied chlorhexidine for cord care");
@@ -1200,7 +1201,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition initiatedKangarooMotherCare(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ld.patient_id from kenyaemr_etl.etl_mchs_delivery ld\n" +
+        String sqlQuery ="select ld.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "where ld.kangaroo_mother_care_given =1065 and\n" +
                 "      ld.visit_date   between date(:startDate) and date(:endDate);";
         cd.setName("No.of babies initiated on Kangaroo Mother Care");
@@ -1232,7 +1233,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition givenTetracyclineAtBirth(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.teo_given in (1,84893);";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.teo_given in (1,84893);";
         cd.setName("No.of babies given tetracycline at birth");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1247,7 +1248,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition preTermBabies(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.duration_of_pregnancy < 37;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.duration_of_pregnancy < 37;";
         cd.setName("Pre-Term babies");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1262,7 +1263,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition dischargedAlive(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ds.patient_id from kenyaemr_etl.etl_mchs_discharge ds where ds.visit_date between date(:startDate) and date(:endDate) and ds.baby_status=163016;";
+        String sqlQuery ="select ds.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_discharge ds where ds.visit_date between date(:startDate) and date(:endDate) and ds.baby_status=163016;";
         cd.setName("No.of babies discharged alive");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1277,7 +1278,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition initiatedBFWithinOneHour(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.bf_within_one_hour=1065;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=151849 and d.bf_within_one_hour=1065;";
         cd.setName("No.of babies discharged alive");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1292,7 +1293,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition deliveriesWithinPeriod(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="Select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where\n" +
+        String sqlQuery ="Select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where\n" +
                 "coalesce(date(d.date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate);";
         cd.setName("Deliveries within period");
         cd.setQuery(sqlQuery);
@@ -1323,7 +1324,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition perinatalFreshStillBirth(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=159916;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=159916;";
         cd.setName("Perinatal Deaths - Fresh still birth");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1338,7 +1339,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition perinatalMaceratedStillBirth(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=135436;";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.baby_condition=135436;";
         cd.setName("Perinatal Deaths - Macerated still birth");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1354,11 +1355,11 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition perinatalDeathWithin0To28Days(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select r.person_b as child\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
-                "         inner join openmrs.relationship r\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+                "         inner JOIN relationship r\n" +
                 "                    on ld.patient_id = r.person_a\n" +
                 "                        and r.relationship = 3\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                    on d.patient_id = r.person_b\n" +
                 "where date(ld.date_of_delivery) between date(:startDate) and date(:endDate)\n" +
                 "  and d.dead = 1\n" +
@@ -1379,11 +1380,11 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition perinatalDeathWithin0To7Days(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select r.person_b as child\n" +
-                "from kenyaemr_etl.etl_mchs_delivery ld\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
                 "         inner join relationship r\n" +
                 "                    on ld.patient_id = r.person_a\n" +
                 "                        and r.relationship = 3\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                    on d.patient_id = r.person_b\n" +
                 "where date(ld.date_of_delivery) between date(:startDate) and date(:endDate)\n" +
                 "  and d.dead = 1\n" +
@@ -1406,8 +1407,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         String sqlQuery ="SELECT d0.patient_id\n" +
                 "FROM (SELECT d.patient_id,\n" +
                 "             COALESCE(DATE(d.date_of_delivery), DATE(d.visit_date)) AS delivery_dt\n" +
-                "      FROM kenyaemr_etl.etl_mchs_delivery d) AS d0\n" +
-                "         JOIN kenyaemr_etl.etl_patient_demographics m\n" +
+                "      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d) AS d0\n" +
+                "         JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics m\n" +
                 "              ON m.patient_id = d0.patient_id\n" +
                 "WHERE m.death_date IS NOT NULL\n" +
                 "  AND d0.delivery_dt BETWEEN DATE_SUB(DATE(:endDate), INTERVAL 42 DAY) AND DATE(:endDate)\n" +
@@ -1427,7 +1428,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition maternalDeathAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ds.patient_id from kenyaemr_etl.etl_patient_program_discontinuation ds where ds.visit_date between date(:startDate) and date(:endDate) " +
+        String sqlQuery ="select ds.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ds where ds.visit_date between date(:startDate) and date(:endDate) " +
                 "and ds.program_name = 'Antenatal Care' and ds.discontinuation_reason=160034;";
         cd.setName("Maternal death at MCH");
         cd.setQuery(sqlQuery);
@@ -1456,7 +1457,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition maternalDeathAuditedWithin7Days(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate)\n" +
                 "      and d.condition_of_mother = 134612 and d.maternal_death_audited = 1065;";
         cd.setName("Maternal deaths audited within 7 days");
         cd.setQuery(sqlQuery);
@@ -1473,7 +1474,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition antePartumHaemorrhage(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=228 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=228 and condition_of_mother = "+motherCondition+";";
         cd.setName("Ante Partum Haemorrhage(APH)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1489,7 +1490,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition postPartumHaemorrhage(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=230 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=230 and condition_of_mother = "+motherCondition+";";
         cd.setName("Post Partum Haemorrhage(PPH)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1506,7 +1507,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition
     eclampsia(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=118744 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=118744 and condition_of_mother = "+motherCondition+";";
         cd.setName("Eclampsia");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1522,7 +1523,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition rupturedUterus(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=113195 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=113195 and condition_of_mother = "+motherCondition+";";
         cd.setName("Ruptured Uterus");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1538,7 +1539,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition obstructedLabour(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=115036 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=115036 and condition_of_mother = "+motherCondition+";";
         cd.setName("Obstructed Labour");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1554,7 +1555,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition sepsis(Integer motherCondition){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select d.patient_id from kenyaemr_etl.etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=130 and condition_of_mother = "+motherCondition+";";
+        String sqlQuery ="select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery d where coalesce(date(date_of_delivery),date(d.visit_date)) between date(:startDate) and date(:endDate) and d.delivery_complications=1065 and d.coded_delivery_complications=130 and condition_of_mother = "+motherCondition+";";
         cd.setName("Sepsis");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1570,7 +1571,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition normalWeightForAge(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=1115;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=1115;";
         cd.setName("Normal Weight for Age");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1585,7 +1586,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition underWeight(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category= 123814;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category= 123814;";
         cd.setName("Underweight");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1600,7 +1601,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition severeUnderWeight(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category= 126598;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category= 126598;";
         cd.setName("Severe Underweight");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1615,7 +1616,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition overweight(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=114413 ;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=114413 ;";
         cd.setName("Overweight");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1630,7 +1631,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition obese(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=115115;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.weight_category=115115;";
         cd.setName("Obese");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1645,7 +1646,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition normalMUAC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=160909;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=160909;";
         cd.setName("MUAC_Normal(Green)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1660,7 +1661,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition moderateMUAC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=160910;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=160910;";
         cd.setName("MUAC_Moderate(Yellow)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1675,7 +1676,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition severeMUAC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=127778;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.muac=127778;";
         cd.setName("MUAC_Severe(Red)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1690,7 +1691,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition stuntedGrowth(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.stunted=164085;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.stunted=164085;";
         cd.setName("Stunted");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1705,7 +1706,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition newlyEnrolledMchs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select hen.patient_id from kenyaemr_etl.etl_hei_enrollment hen where hen.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select hen.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment hen where hen.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("New_Enrollment");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1720,7 +1721,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition kwashiorkor(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.followup_type=116474;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.followup_type=116474;";
         cd.setName("Followup_type_Kwashiorkor");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1735,7 +1736,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition marasmus(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.followup_type = 132636;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.followup_type = 132636;";
         cd.setName("Followup_type_Marasmus");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1750,7 +1751,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition exclusiveBreastFeeding(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.infant_feeding=5526;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.infant_feeding=5526;";
         cd.setName("Exclusive_breast_feeding");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1765,7 +1766,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition dewormed(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.deworming_drug in(79413,70439);";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.deworming_drug in(79413,70439);";
         cd.setName("Dewormed");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1780,7 +1781,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition mnpsSupplementation(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.MNPS_Supplementation=161649;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.MNPS_Supplementation=161649;";
         cd.setName("MNPs_Supplementation");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1795,7 +1796,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition childrenDiscontinuationReasonDied(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select ds.patient_id from kenyaemr_etl.etl_patient_program_discontinuation ds where ds.visit_date between date(:startDate) and date(:endDate) and ds.program_name=\"MCH Child HEI\" and ds.discontinuation_reason=160432 ;";
+        String sqlQuery ="select ds.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation ds where ds.visit_date between date(:startDate) and date(:endDate) and ds.program_name=\"MCH Child HEI\" and ds.discontinuation_reason=160432 ;";
         cd.setName("Child Mortality");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1810,7 +1811,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition childrenWithDisability(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.disability=1065;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.disability=1065;";
         cd.setName("Children_With_Disability_Any_Form");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1825,7 +1826,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition childrenWithDelayedDevelopmentalMilestones(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select he.patient_id from kenyaemr_etl.etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.review_of_systems_developmental=6022;";
+        String sqlQuery ="select he.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_follow_up_visit he where he.visit_date between date(:startDate) and date(:endDate) and he.review_of_systems_developmental=6022;";
         cd.setName("Children_with_delayed_developmental_milestones");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1840,7 +1841,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientTbScreeningAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tb.patient_id from kenyaemr_etl.etl_mch_antenatal_visit tb where tb.tb_screening in (1660,142177,164128,1662) and tb.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select tb.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit tb where tb.tb_screening in (1660,142177,164128,1662) and tb.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Total Number of people screened at ANC");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1855,7 +1856,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientTbScreeningTBForm(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tbs.patient_id from kenyaemr_etl.etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select tbs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
                 "and tbs.resulting_tb_status  in (1660,142177,1662);";
         cd.setName("Total Number of people screened using TB form");
         cd.setQuery(sqlQuery);
@@ -1885,7 +1886,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientWithPresumptiveTbANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tb.patient_id from kenyaemr_etl.etl_mch_antenatal_visit tb where tb.tb_screening =142177 and tb.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select tb.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit tb where tb.tb_screening =142177 and tb.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Total Number of presumptive TB cases at ANC");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1900,7 +1901,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientWithPresumptiveTbTBForm(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tbs.patient_id from kenyaemr_etl.etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select tbs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
                 "       and tbs.resulting_tb_status =142177;";
         cd.setName("Total Number of presumptive TB cases (TB Form)");
         cd.setQuery(sqlQuery);
@@ -1926,7 +1927,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientStartedOnTbTreatment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select e.patient_id from kenyaemr_etl.etl_drug_event e where e.program = 'TB' and e.date_started between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e where e.program = 'TB' and e.date_started between date(:startDate) and date(:endDate);";
         cd.setName("Total Number started on TB treatment");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1941,7 +1942,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientOnTbTreatmentTBForm(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tbs.patient_id from kenyaemr_etl.etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select tbs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
                 "       and tbs.resulting_tb_status  in (1660,142177,1662) and tbs.started_anti_TB=1065;";
         cd.setName("Total Number already on TB treatment TB Form");
         cd.setQuery(sqlQuery);
@@ -1971,7 +1972,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientTbNotScreenedAtANC(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tb.patient_id from kenyaemr_etl.etl_mch_antenatal_visit tb where tb.tb_screening =160737 or tb.tb_screening is null and tb.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select tb.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit tb where tb.tb_screening =160737 or tb.tb_screening is null and tb.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Total Number of people not screened (ANC)");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1987,7 +1988,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition hivFollowupEncounterWithinPeriod(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select f.patient_id from kenyaemr_etl.etl_patient_hiv_followup f where date(f.visit_date) between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f where date(f.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("Clients with HIV followup encounter");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2002,7 +2003,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
      */
     public CohortDefinition clientTbNotScreenedTBForm(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select tbs.patient_id from kenyaemr_etl.etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
+        String sqlQuery ="select tbs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening tbs where tbs.visit_date between date(:startDate) and date(:endDate)\n" +
                 "                      and tbs.resulting_tb_status=160737 or tbs.resulting_tb_status is null group by tbs.patient_id;";
         cd.setName("Total Number of people not screened (TB Form)");
         cd.setQuery(sqlQuery);
@@ -2016,8 +2017,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition totalSgbvSurvivors(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select c.patient_id\n" +
-                "from kenyaemr_etl.etl_sgbv_post_rape_care c\n" +
-                "         inner join kenyaemr_etl.etl_patient_program p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_post_rape_care c\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program p\n" +
                 "                    on c.patient_id = p.patient_id and p.program = 'VIOLENCE SCREENING' and\n" +
                 "                       (p.date_completed is null or p.date_completed between date(:startDate) and date(:endDate))\n" +
                 "where c.visit_date between date(:startDate) and date(:endDate);";
@@ -2032,8 +2033,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition sgbvSurvivorsPresentingWithin72Hrs(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select c.patient_id\n" +
-                "from kenyaemr_etl.etl_sgbv_post_rape_care c\n" +
-                "         inner join kenyaemr_etl.etl_patient_program p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_post_rape_care c\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program p\n" +
                 "                    on c.patient_id = p.patient_id and p.program = 'VIOLENCE SCREENING' and\n" +
                 "                       (p.date_completed is null or p.date_completed between date(:startDate) and date(:endDate))\n" +
                 "where timestampdiff(HOUR, c.incident_date, c.examination_date) <= 72\n" +
@@ -2049,8 +2050,8 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition eligibleSgbvSurvivorsInitiatingPEP(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select s.patient_id\n" +
-                "from kenyaemr_etl.etl_pep_management_survivor s\n" +
-                "         inner join kenyaemr_etl.etl_patient_program p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_pep_management_survivor s\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program p\n" +
                 "                    on s.patient_id = p.patient_id and p.program = 'VIOLENCE SCREENING' and\n" +
                 "                       (p.date_completed is null or p.date_completed between date(:startDate) and date(:endDate))\n" +
                 "where s.pep_regimen_issued = 1065\n" +
@@ -2065,7 +2066,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition eligibleSgbvSurvivorsCompletedPEP(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pf.patient_id from kenyaemr_etl.etl_sgbv_pep_followup pf where pf.pep_completed = 1065 and pf.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select pf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_pep_followup pf where pf.pep_completed = 1065 and pf.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Number of eligible survivors completed PEP");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2077,7 +2078,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition sgbvSurvivorsSeroconverting3MonthsPostExposure(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pf.patient_id from kenyaemr_etl.etl_sgbv_pep_followup pf where pf.three_month_post_exposure_HIV_serology_result = 703 and pf.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select pf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_pep_followup pf where pf.three_month_post_exposure_HIV_serology_result = 703 and pf.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Number of SGBV survivors seroconverting 3 months after exposure");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2089,7 +2090,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition sgbvSurvivorsEligibleForECP(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select pr.patient_id\n" +
-                "from kenyaemr_etl.etl_sgbv_post_rape_care pr\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_post_rape_care pr\n" +
                 "where pr.known_pregnancy = 1066\n" +
                 "  and pr.on_contraception = 1066\n" +
                 "  and timestampdiff(HOUR, pr.incident_date, pr.examination_date) <= 72\n" +
@@ -2105,7 +2106,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition eligibleSgbvSurvivorsReceivedECP(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery ="select pr.patient_id\n" +
-                "from kenyaemr_etl.etl_sgbv_post_rape_care pr\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_post_rape_care pr\n" +
                 "where pr.known_pregnancy = 1066\n" +
                 "  and pr.on_contraception = 1066\n" +
                 "  and timestampdiff(HOUR, pr.incident_date, pr.examination_date) <= 72\n" +
@@ -2121,7 +2122,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition rapeOrDefilementSurvivorsPregnantAfter4Weeks(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pf.patient_id from kenyaemr_etl.etl_sgbv_pep_followup pf where pf.visit_number = 165307 and pf.pdt_test_result = 703 and pf.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select pf.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_sgbv_pep_followup pf where pf.visit_number = 165307 and pf.pdt_test_result = 703 and pf.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Number of rape/defilement Survivors Pregnant after 4 weeks");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2132,7 +2133,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition ipvAndRCClientsSeen(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select gs.patient_id from kenyaemr_etl.etl_gbv_screening gs where gs.sexual_ipv = 1065 or gs.emotional_ipv = 1065 or gs.physical_ipv = 1065 and gs.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select gs.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening gs where gs.sexual_ipv = 1065 or gs.emotional_ipv = 1065 or gs.physical_ipv = 1065 and gs.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Number of RC/ IPV clients seen");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2143,7 +2144,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition survivorsWithDisability(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery ="select pms.patient_id from kenyaemr_etl.etl_pep_management_survivor pms where pms.disabled = 1065 and pms.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery ="select pms.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_pep_management_survivor pms where pms.disabled = 1065 and pms.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("Number of SGBV survivors with disability");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2155,7 +2156,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition firstUsersOfContraceptives() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.first_user_of_contraceptive = 1065 and visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.first_user_of_contraceptive = 1065 and visit_date between date(:startDate) and date(:endDate);";
         cd.setName("firstUsersOfContraceptives");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2167,7 +2168,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition contraceptiveMethodByVisitType(int contraceptiveMethod, int visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.type_of_visit_for_method = "+visitType+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.type_of_visit_for_method = "+visitType+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("contraceptiveMethodByVisitType");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2178,7 +2179,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition contraceptiveByMethod(int contraceptiveMethod) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("contraceptiveByMethod");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2189,7 +2190,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition maleAndFemaleCondomsByVisitType(int visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed in (164813,164814) and f.type_of_visit_for_method = "+visitType+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed in (164813,164814) and f.type_of_visit_for_method = "+visitType+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("maleAndFemaleCondomsByVisitType");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2201,7 +2202,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition counselledOnNaturalFP() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.counselled_on_natural_fp = 1065 and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.counselled_on_natural_fp = 1065 and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("counselledOnNaturalFP");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2213,7 +2214,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition givenCycleBeads() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.circle_beads_given = 1065 and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.circle_beads_given = 1065 and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("givenCycleBeads");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2225,7 +2226,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition contraceptiveMethodByServiceType(int contraceptiveMethod, int serviceType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.type_of_service = "+serviceType+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.type_of_service = "+serviceType+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("contraceptiveMethodByServiceType");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2237,7 +2238,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition contraceptiveMethod(int contraceptiveMethod) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed = "+contraceptiveMethod+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("contraceptiveMethod");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2248,7 +2249,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition iucdRemoval() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.type_of_visit_for_method = 164161 and f.contraceptive_dispensed in (165464,162794) and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.type_of_visit_for_method = 164161 and f.contraceptive_dispensed in (165464,162794) and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("iucdRemoval");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2259,7 +2260,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition implantRemoval() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.type_of_visit_for_method = 164161 and f.contraceptive_dispensed in (76022, 162422, 1873) and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.type_of_visit_for_method = 164161 and f.contraceptive_dispensed in (76022, 162422, 1873) and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("implantRemoval");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2270,7 +2271,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition receivingFamilyPlanningServicesByVisitType(int visitType, int insertionType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.contraceptive_dispensed in (159783,159784,160570,907,79494,76022,162422,1873,165464,162794,164813,164814,1472,1489,164813,1489,5622,2031841) and (f.type_of_service = "+insertionType+" or f.type_of_visit_for_method = "+visitType+") and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.contraceptive_dispensed in (159783,159784,160570,907,79494,76022,162422,1873,165464,162794,164813,164814,1472,1489,164813,1489,5622,2031841) and (f.type_of_service = "+insertionType+" or f.type_of_visit_for_method = "+visitType+") and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("receivingFamilyPlanningServicesByVisitType");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2282,7 +2283,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition postPartumFP(int postPartum) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select f.patient_id from kenyaemr_etl.etl_family_planning f where f.receiving_postpartum_fp = "+postPartum+" and f.visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select f.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f where f.receiving_postpartum_fp = "+postPartum+" and f.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("postPartumFP");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2294,7 +2295,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition psychosocialCounselling() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_psychiatry p\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "WHERE FIND_IN_SET('Psychosocial therapy', REPLACE(p.counselling_prescribed, ', ', ',')) > 0\n" +
                 "  AND p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
         cd.setName("psychosocialCounselling");
@@ -2308,7 +2309,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition alcoholAndDrugAbuse() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_psychiatry p\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "WHERE p.screened_for_alcohol_abuse = 1065\n" +
                 "  AND p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
         cd.setName("alcoholAndDrugAbuse");
@@ -2323,7 +2324,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select p.patient_id\n" +
                 "              from encounter_diagnosis d\n" +
-                "                       inner join kenyaemr_etl.etl_psychiatry p on d.patient_id = p.patient_id and d.encounter_id = p.encounter_id and d.voided = 0\n" +
+                "                       inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p on d.patient_id = p.patient_id and d.encounter_id = p.encounter_id and d.voided = 0\n" +
                 "              where d.diagnosis_coded in (2019974,166673,2014092,2019974,2019975,2019976,2019977,2019979,134079)\n" +
                 "                and p.visit_date between date(:startDate) and date(:endDate) and d.dx_rank = 2;";
         cd.setName("depression");
@@ -2338,7 +2339,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition bipolarDisorder() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select p.patient_id\n" +
-                "from kenyaemr_etl.etl_psychiatry p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "         inner join encounter_diagnosis d\n" +
                 "                    on d.patient_id = p.patient_id and d.encounter_id = p.encounter_id and d.voided = 0\n" +
                 "where d.diagnosis_coded in (155302,\n" +
@@ -2433,7 +2434,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition schizopherniaAndPsychoticDisorder() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select p.patient_id\n" +
-                "from kenyaemr_etl.etl_psychiatry p\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "         inner join encounter_diagnosis d\n" +
                 "                    on d.patient_id = p.patient_id and d.encounter_id = p.encounter_id and d.voided = 0\n" +
                 "where d.diagnosis_coded in (113155,\n" +
@@ -2468,7 +2469,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition psychoSocialAssessmentsAndInvestigation() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_psychiatry p\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "WHERE FIND_IN_SET('Psycho-Social Assessments and Investigation', REPLACE(p.psycho_social_support, ', ', ',')) > 0\n" +
                 "  AND p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
         cd.setName("psychoSocialAssessmentsAndInvestigation");
@@ -2482,7 +2483,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition psychoSocialRehabilitation() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_psychiatry p\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "WHERE FIND_IN_SET('Psycho-Social rehabilitation', REPLACE(p.psycho_social_support, ', ', ',')) > 0\n" +
                 "  AND p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
         cd.setName("psychoSocialRehabilitation");
@@ -2496,7 +2497,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     public CohortDefinition outreachServicesAndHealthTalks() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT p.patient_id\n" +
-                "FROM kenyaemr_etl.etl_psychiatry p\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p\n" +
                 "WHERE FIND_IN_SET('Outreach services/Health Talks', REPLACE(p.psycho_social_support, ', ', ',')) > 0\n" +
                 "  AND p.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate);";
         cd.setName("outreachServicesAndHealthTalks");
@@ -2510,7 +2511,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition psychoReferrals() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_psychiatry p where p.patient_outcome = 1693 and visit_date between date(:startDate) and date(:endDate);";
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_psychiatry p where p.patient_outcome = 1693 and visit_date between date(:startDate) and date(:endDate);";
         cd.setName("psychoReferrals");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2521,7 +2522,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition physioDisorders(int disorder, int visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category = "+disorder+" and p.visit_type = "+visitType+";";
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category = "+disorder+" and p.visit_type = "+visitType+";";
         cd.setName("physioDisorders");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2532,7 +2533,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition preAndPostnatal(int visitType) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category in (2002192,168812) and p.visit_type = "+visitType+";";
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category in (2002192,168812) and p.visit_type = "+visitType+";";
         cd.setName("preAndPostnatal");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2543,7 +2544,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
     }
     public CohortDefinition physioDisordersTx(int disorder) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category = "+disorder+" and p.planned_interventions is not null and p.planned_interventions !='';";
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category = "+disorder+" and p.planned_interventions is not null and p.planned_interventions !='';";
         cd.setName("physioDisordersTx");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -2555,7 +2556,7 @@ public CohortDefinition latestMCHEnrollmentAtANC() {
 
     public CohortDefinition preAndPostnatalTx() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select p.patient_id from kenyaemr_etl.etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category in (2002192,168812) and p.planned_interventions is not null and p.planned_interventions !='';";
+        String sqlQuery = "select p.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_physiotherapy p where p.visit_date between date(:startDate) and date(:endDate) and p.disorder_category in (2002192,168812) and p.planned_interventions is not null and p.planned_interventions !='';";
         cd.setName("preAndPostnatalTx");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));

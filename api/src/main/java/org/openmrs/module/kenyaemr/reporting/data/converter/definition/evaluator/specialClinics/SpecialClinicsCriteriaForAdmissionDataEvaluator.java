@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsCriteriaForAdmissionDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -41,7 +42,7 @@ public class SpecialClinicsCriteriaForAdmissionDataEvaluator implements Encounte
 
         String qry = "select v.encounter_id,\n" +
                 "(case v.criteria_for_admission  when 1362 then 'Edema +' when 1363 then 'Edema ++' when 1364 then 'Edema +++' when 1343 then 'MUAC' when 162584 then 'WHZ' when 1342 then 'BMI for Age' else '' end) as criteria_for_admission\n" +
-                "from kenyaemr_etl.etl_special_clinics v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics v\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate) and special_clinic_form_uuid = '" + specialClinic + "';";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

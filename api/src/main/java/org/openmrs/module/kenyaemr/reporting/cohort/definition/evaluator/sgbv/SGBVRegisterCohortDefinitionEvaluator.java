@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.sgbv;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.sgbv.SGBVRegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -40,7 +41,7 @@ public class SGBVRegisterCohortDefinitionEvaluator implements EncounterQueryEval
         context = ObjectUtil.nvl(context, new EvaluationContext());
         EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
-        String qry="SELECT encounter_id FROM kenyaemr_etl.etl_gbv_screening\n" +
+        String qry="SELECT encounter_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening\n" +
                 "where visit_date between date(:startDate) and date(:endDate)\n" +
                 " GROUP BY patient_id;";
 

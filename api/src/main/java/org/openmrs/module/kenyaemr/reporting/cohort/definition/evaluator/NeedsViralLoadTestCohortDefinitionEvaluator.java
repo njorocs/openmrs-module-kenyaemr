@@ -9,11 +9,9 @@
  */
 package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.ActivePatientsSnapshotCohortDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.NeedsViralLoadTestCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -59,24 +57,24 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"             d.effective_disc_date                                                  as effective_disc_date,\n" +
 				"             max(d.visit_date)                                                      as date_discontinued,\n" +
 				"             de.patient_id                                                          as started_on_drugs\n" +
-				"      from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"               join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-				"               join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-				"               left join kenyaemr_etl.etl_drug_event de\n" +
+				"      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+				"               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+				"               left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
 				"                         on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
 				"                            date(de.date_started) <= date(:endDate)\n" +
 				"               left outer JOIN\n" +
 				"           (select patient_id,\n" +
 				"                   coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
 				"                   max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-				"            from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"            where date(visit_date) <= date(:endDate)\n" +
 				"              and program_name = 'HIV'\n" +
 				"            group by patient_id) d on d.patient_id = fup.patient_id\n" +
 				"                      inner join (SELECT t.patient_id\n" +
-				"                  FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+				"                  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
 				"                      INNER JOIN (SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
-				"                      FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+				"                      FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
 				"                      WHERE visit_date <= DATE(:endDate)\n" +
 				"                      GROUP BY patient_id) latest\n" +
 				"                  ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date\n" +
@@ -97,6 +95,7 @@ public class NeedsViralLoadTestCohortDefinitionEvaluator implements CohortDefini
 				"               disc_patient is null)\n" +
 				"              )\n" +
 				"          )) t;";
+
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

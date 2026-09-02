@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.VitalsOxygenSaturationModeDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -40,7 +41,7 @@ public class VitalsOxygenSaturationModeDataEvaluator implements VisitDataEvaluat
                 "       case t.oxygen_saturation_collection_mode\n" +
                 "           when 162735 then 'Room air'\n" +
                 "           when 162738 then 'On supplemental oxygen' end as oxygen_saturation_mode\n" +
-                "from kenyaemr_etl.etl_patient_triage t\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "GROUP BY t.visit_id;";
 

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.PatientPresentingComplaintsDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -23,10 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * Lists presenting complaints for a patient in the report period (same source as DMI payload:
- * concept 5219 answers stored in {@code kenyaemr_etl.etl_allergy_chronic_illness}).
- */
 @Handler(supports = PatientPresentingComplaintsDataDefinition.class, order = 50)
 public class PatientPresentingComplaintsDataEvaluator implements PersonDataEvaluator {
 
@@ -36,11 +33,10 @@ public class PatientPresentingComplaintsDataEvaluator implements PersonDataEvalu
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        // complaint_today on etl_patient_triage is only Yes/No — actual coded complaints live here.
         String qry = "select i.patient_id, " +
                 "group_concat(distinct cn.name order by cn.name separator ', ') as presenting_complaints " +
-                "from kenyaemr_etl.etl_allergy_chronic_illness i " +
-                "inner join openmrs.concept_name cn on cn.concept_id = i.complaint " +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness i " +
+                "inner join concept_name cn on cn.concept_id = i.complaint " +
                 "  and cn.locale = 'en' " +
                 "  and cn.concept_name_type = 'FULLY_SPECIFIED' " +
                 "  and cn.voided = 0 " +

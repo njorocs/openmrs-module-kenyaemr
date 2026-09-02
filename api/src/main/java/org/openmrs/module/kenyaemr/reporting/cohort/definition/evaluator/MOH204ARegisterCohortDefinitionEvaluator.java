@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MOH204ARegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -42,8 +43,8 @@ public class MOH204ARegisterCohortDefinitionEvaluator implements EncounterQueryE
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
 		String qry = "SELECT ce.encounter_id\n" +
-                "FROM kenyaemr_etl.etl_clinical_encounter ce\n" +
-                "         INNER JOIN kenyaemr_etl.etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0 AND\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
+                "         INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0 AND\n" +
                 "                                                               TIMESTAMPDIFF(YEAR, date(p.DOB), ce.visit_date) < 5\n" +
                 "         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
                 "WHERE ed.dx_rank = 2 AND date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.VaccinatedAgainstCovid19DataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.VaccinatedAgainstInfluenzaDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
@@ -35,7 +36,7 @@ public class VaccinatedAgainstInfluenzaDataEvaluator implements PersonDataEvalua
 
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
-        String qry = "select i.patient_id, if(timestampdiff(YEAR, DATE(i.influenza), DATE(:endDate)) <= 12, 'Y','N') as is_vaccinated from kenyaemr_etl.etl_immunization i;";
+        String qry = "select i.patient_id, if(timestampdiff(YEAR, DATE(i.influenza), DATE(:endDate)) <= 12, 'Y','N') as is_vaccinated from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization i;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Date startDate = (Date)context.getParameterValue("startDate");

@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLSecondLineARTCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -56,12 +57,12 @@ public class ETLSecondLineARTCohortDefinitionEvaluator implements CohortDefiniti
 				"                d.effective_disc_date as effective_disc_date,\n" +
 				"                max(d.visit_date) as date_discontinued,\n" +
 				"                de.patient_id as started_on_drugs\n" +
-				"           from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-				"                  join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
-				"                  join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
-				"                  left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and de.regimen_line='Second line' and date(date_started) <= date(curdate())\n" +
+				"           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+				"                  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=fup.patient_id\n" +
+				"                  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" +
+				"                  left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and de.regimen_line='Second line' and date(date_started) <= date(curdate())\n" +
 				"                  left outer JOIN\n" +
-				"                  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+				"                  (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
 				"                     where date(visit_date) <= date(curdate()) and program_name='HIV'\n" +
 				"                     group by patient_id\n" +
 				"                  ) d on d.patient_id = fup.patient_id\n" +

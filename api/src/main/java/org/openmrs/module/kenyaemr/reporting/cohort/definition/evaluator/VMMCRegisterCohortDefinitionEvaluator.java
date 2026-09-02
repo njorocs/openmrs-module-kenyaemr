@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.VMMCRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -52,7 +53,7 @@ public class VMMCRegisterCohortDefinitionEvaluator implements CohortDefinitionEv
 		Date startDate = (Date) context.getParameterValue("startDate");
 		Date endDate = (Date) context.getParameterValue("endDate");
 
-		String qry = "SELECT t.patient_id from kenyaemr_etl.etl_vmmc_circumcision_procedure t inner join kenyaemr_etl.etl_patient_demographics d on t.patient_id = d.patient_id and date(t.visit_date) BETWEEN date(:startDate) AND date(:endDate) GROUP BY t.patient_id;";
+		String qry = "SELECT t.patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure t inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on t.patient_id = d.patient_id and date(t.visit_date) BETWEEN date(:startDate) AND date(:endDate) GROUP BY t.patient_id;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

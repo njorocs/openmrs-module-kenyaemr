@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsHFAZScoreDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsLastCD4DataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -47,8 +47,8 @@ public class SpecialClinicsLastCD4DataEvaluator implements EncounterDataEvaluato
                 "                                                                                     if(x.lab_test = 730, concat(x.test_result, '%'), '')))),\n" +
                 "                                          '')),\n" +
                 "                               11) as cd4\n" +
-                "                    from kenyaemr_etl.etl_special_clinics s\n" +
-                "                             inner join kenyaemr_etl.etl_laboratory_extract x on s.patient_id = x.patient_id\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics s\n" +
+                "                             inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x on s.patient_id = x.patient_id\n" +
                 "                    where s.visit_date between date(:startDate) and date(:endDate)\n" +
                 "                      and date(x.visit_date) <= date(:endDate)\n" +
                 "                      and lab_test in (167718, 5497, 730)\n" +

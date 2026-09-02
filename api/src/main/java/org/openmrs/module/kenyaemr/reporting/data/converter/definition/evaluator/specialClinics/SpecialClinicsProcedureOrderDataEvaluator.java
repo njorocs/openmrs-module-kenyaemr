@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsProcedureOrderDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,10 +38,10 @@ public class SpecialClinicsProcedureOrderDataEvaluator implements EncounterDataE
         SpecialClinicsProcedureOrderDataDefinition cohortDefinition = (SpecialClinicsProcedureOrderDataDefinition) definition;
         String specialClinic = cohortDefinition.getSpecialClinic();
 
-        String qry = "select c.encounter_id,d.procedures from kenyaemr_etl.etl_special_clinics c inner join\n" +
+        String qry = "select c.encounter_id,d.procedures from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics c inner join\n" +
                 "(SELECT d.patient_id, GROUP_CONCAT(DISTINCT n.name SEPARATOR '\\\\r\\\\n') AS procedures,DATE(d.date_created) as visit_date\n" +
                 "FROM orders d INNER JOIN concept_name n ON d.concept_id = n.concept_id AND n.locale = 'en'\n" +
-                "inner join kenyaemr_etl.etl_special_clinics c on d.patient_id = c.patient_id and date(c.visit_date) = date(d.date_created)\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics c on d.patient_id = c.patient_id and date(c.visit_date) = date(d.date_created)\n" +
                 "WHERE n.concept_name_type = 'FULLY_SPECIFIED' AND d.voided = 0\n" +
                 "GROUP BY d.patient_id, d.encounter_id, DATE(d.date_created))d on c.patient_id = d.patient_id and c.visit_date = d.visit_date\n" +
                 "where c.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate) and c.special_clinic_form_uuid = '" + specialClinic + "';" ;

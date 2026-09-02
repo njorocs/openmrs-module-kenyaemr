@@ -10,11 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.PopulationTypeDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.PopulationTypeArtDataDefinition;
-import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
-import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
-import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -51,7 +48,7 @@ public class PopulationTypeArtDataEvaluator implements PersonDataEvaluator {
                 "                                    when 165100 then \"Transgender\"\n" +
                 "                                    when 160578 then \"Men who have sex with men\"\n" +
                 "                                    when 160579 then \"Female sex Worker\" else \"\" end), \"\" )),11) as key_population_type\n" +
-                "        FROM kenyaemr_etl.etl_patient_hiv_followup GROUP BY patient_id) fup\n" +
+                "        FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup GROUP BY patient_id) fup\n" +
                 "GROUP BY fup.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

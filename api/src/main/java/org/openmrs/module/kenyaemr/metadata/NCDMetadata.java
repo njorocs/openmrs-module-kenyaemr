@@ -67,7 +67,7 @@ public class NCDMetadata extends AbstractMetadataBundle {
 		install(encounterType("NCD Discontinuation", "NCD program discontinuation encounter", _EncounterType.NCD_DISCONTINUATION));
 
 		boolean installForms = shouldInstallForms();
-		
+
 		if (installForms) {
 			logger.info("=== NCDMetadata: Installing forms because shouldInstallForms() returned true ===");
 			install(form("NCD Enrollment Form", null, _EncounterType.NCD_ENROLLMENT, "1", _Form.NCD_ENROLLMENT_FORM));

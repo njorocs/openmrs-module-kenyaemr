@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.otz;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.OnARTDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.otz.OTZRemarksDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +36,7 @@ public class OTZRemarksDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select e.patient_id,a.remarks from kenyaemr_etl.etl_otz_enrollment e left join (select a.patient_id, mid(max(concat(a.remarks,a.visit_date)),11) as remarks from kenyaemr_etl.etl_otz_activity a group by a.patient_id)a on e.patient_id = e.patient_id group by e.patient_id;";
+        String qry = "select e.patient_id,a.remarks from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e left join (select a.patient_id, mid(max(concat(a.remarks,a.visit_date)),11) as remarks from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_activity a group by a.patient_id)a on e.patient_id = e.patient_id group by e.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         Date startDate = (Date)context.getParameterValue("startDate");

@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.HivTestDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.P3DataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -38,10 +38,10 @@ public class HivTestDefinitionEvaluator implements EncounterDataEvaluator {
         String qry = "SELECT a.encounter_id, IF(hiv.program = 'HIV', 'Known Positive',\n" +
                 "  IF(hts.final_test_result='Positive', 'Positive',\n" +
                 "   IF(hts.final_test_result='Negative', 'Negative', 'Not Done'))) AS hiv_test\n" +
-                "   FROM kenyaemr_etl.etl_gbv_screening a\n" +
+                "   FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening a\n" +
                 "   LEFT JOIN (SELECT patient_id, pg.program\n" +
-                "  FROM kenyaemr_etl.etl_patient_program pg WHERE pg.program='HIV' AND pg.date_completed IS NULL) hiv ON a.patient_id = hiv.patient_id\n" +
-                "   LEFT JOIN (SELECT ht.patient_id, ht.final_test_result FROM kenyaemr_etl.etl_hts_test ht WHERE ht.test_type=1) hts ON a.patient_id=hts.patient_id;";
+                "  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program pg WHERE pg.program='HIV' AND pg.date_completed IS NULL) hiv ON a.patient_id = hiv.patient_id\n" +
+                "   LEFT JOIN (SELECT ht.patient_id, ht.final_test_result FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hts_test ht WHERE ht.test_type=1) hts ON a.patient_id=hts.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

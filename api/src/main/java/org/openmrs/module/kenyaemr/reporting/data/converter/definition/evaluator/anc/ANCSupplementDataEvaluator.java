@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCSupplementDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,8 +43,8 @@ public class ANCSupplementDataEvaluator implements EncounterDataEvaluator {
                 "                if(p.calcium, 'Calcium', if(coalesce(p.folate_1, p.folate_2, p.folate_3, p.folate_4) and\n" +
                 "                                            coalesce(p.iron_1, p.iron_2, p.iron_3, p.iron_4), 'Iron+Folate Separately',\n" +
                 "                                            null))))) as supplementation\n" +
-                "from kenyaemr_etl.etl_preventive_services p\n" +
-                "         inner join kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_preventive_services p\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "                    on p.visit_date = v.visit_date and p.patient_id = v.patient_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 

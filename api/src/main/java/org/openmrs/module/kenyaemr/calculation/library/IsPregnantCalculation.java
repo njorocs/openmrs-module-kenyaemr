@@ -43,14 +43,14 @@ public class IsPregnantCalculation extends AbstractPatientCalculation implements
 		return "Pregnant";
 	}
 
-    /**
+	/**
 	 * Evaluates the calculation
-     * @should calculate false for deceased patients
+	 * @should calculate false for deceased patients
 	 * @should calculate false for patients with no recorded status
 	 * @should calculate last recorded pregnancy status for all patients
-     */
-    @Override
-    public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
+	 */
+	@Override
+	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 
 		Set<Integer> aliveAndFemale = Filters.female(Filters.alive(cohort, context), context);
 		EncounterType mchEnrollment = MetadataUtils.existing(EncounterType.class, MchMetadata._EncounterType.MCHMS_ENROLLMENT);
@@ -114,7 +114,7 @@ public class IsPregnantCalculation extends AbstractPatientCalculation implements
 			ret.put(ptId, new BooleanResult(result, this));
 		}
 		return ret;
-    }
+	}
 
 	private static boolean isActiveEnrollment(Encounter enrollment, Encounter discontinuation) {
 		return enrollment != null && (discontinuation == null || discontinuation.getEncounterDatetime().before(enrollment.getEncounterDatetime()));

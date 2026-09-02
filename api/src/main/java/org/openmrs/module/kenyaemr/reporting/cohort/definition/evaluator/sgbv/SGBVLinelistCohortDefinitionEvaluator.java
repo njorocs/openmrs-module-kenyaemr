@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.sgbv.SGBVLineListCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -49,7 +50,7 @@ public class SGBVLinelistCohortDefinitionEvaluator implements CohortDefinitionEv
 
         Cohort newCohort = new Cohort();
 
-        String qry="SELECT patient_id FROM kenyaemr_etl.etl_gbv_screening\n" +
+        String qry="SELECT patient_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening\n" +
                 " where visit_date between date(:startDate) and date(:endDate)\n" +
                 "GROUP BY patient_id;";
 

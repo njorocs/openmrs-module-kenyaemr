@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.MpoxCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -54,12 +55,12 @@ public class MpoxCohortDefinitionEvaluator implements CohortDefinitionEvaluator 
 				"            WHEN group_concat(concat_ws('|', c.complaint, c.complaint_duration)) LIKE '%140238%' THEN\n" +
 				"                SUBSTRING_INDEX(SUBSTRING_INDEX(group_concat(concat_ws('|', c.complaint, c.complaint_duration)), '|', -1), ',', 1)\n" +
 				"        END AS fever_duration_from_days\n" +
-				"        from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+				"        from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"        where c.complaint in (140238, 512, 139084, 135488, 121, 148035)\n" +
 				"        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"        group by patient_id) a\n" +
-				"        join kenyaemr_etl.etl_patient_demographics d on a.patient_id = d.patient_id\n" +
-				"        join kenyaemr_etl.etl_patient_triage t on a.patient_id = t.patient_id\n" +
+				"        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on a.patient_id = d.patient_id\n" +
+				"        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on a.patient_id = t.patient_id\n" +
 				"        and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"        and t.temperature > 38.5\n" +
 				"        and date(a.visit_date) between date(:startDate) and date(:endDate)\n" +

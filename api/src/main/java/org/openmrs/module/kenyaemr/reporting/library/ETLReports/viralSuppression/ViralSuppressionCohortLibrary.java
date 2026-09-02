@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.viralSuppression;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.RevisedDatim.DatimCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -46,7 +47,7 @@ public class ViralSuppressionCohortLibrary {
                 "                   x.lab_test    as lab_test,\n" +
                 "                   x.test_result as test_result,\n" +
                 "                   urgency       as urgency\n" +
-                "            from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "            from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "            where x.lab_test in (1305, 856)\n" +
                 "            group by x.patient_id, x.visit_date\n" +
                 "            order by visit_date desc) b\n" +
@@ -80,7 +81,7 @@ public class ViralSuppressionCohortLibrary {
                 "                   x.lab_test    as lab_test,\n" +
                 "                   x.test_result as test_result,\n" +
                 "                   urgency       as urgency\n" +
-                "            from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "            where x.lab_test in (1305, 856)\n" +
                 "            group by x.patient_id, x.visit_date\n" +
                 "            order by visit_date desc) b\n" +
@@ -102,7 +103,7 @@ public class ViralSuppressionCohortLibrary {
                 "from (select patient_id,\n" +
                 "             coalesce(mid(max(concat(date(visit_date), date(date_test_requested))), 11),\n" +
                 "                      max(visit_date)) as lab_test_date\n" +
-                "      from kenyaemr_etl.etl_laboratory_extract\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "      where lab_test in (1305, 856)\n" +
                 "      group by patient_id\n" +
                 "      having lab_test_date < date_sub(:endDate, interval 12 MONTH)) a;";
@@ -123,7 +124,7 @@ public class ViralSuppressionCohortLibrary {
         return cd;
     }
     public  CohortDefinition hasVL() {
-        String sqlQuery="select patient_id from kenyaemr_etl.etl_laboratory_extract where lab_test in (1305,856)\n" +
+        String sqlQuery="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract where lab_test in (1305,856)\n" +
                 "                group by patient_id;";
         SqlCohortDefinition cd = new SqlCohortDefinition();
         cd.setName("VLResults");

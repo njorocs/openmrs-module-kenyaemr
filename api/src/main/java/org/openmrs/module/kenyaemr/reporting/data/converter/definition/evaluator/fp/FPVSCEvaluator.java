@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPVSCDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,8 +44,8 @@ public class FPVSCEvaluator implements EncounterDataEvaluator {
                 "        WHEN f.contraceptive_dispensed = 1489 THEN 'Vasectomy'\n" +
                 "        ELSE NULL\n" +
                 "    END AS contraceptive_dispensed\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
-                "INNER JOIN openmrs.person p ON f.patient_id = p.person_id\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
+                "INNER JOIN person p ON f.patient_id = p.person_id\n" +
                 "WHERE f.contraceptive_dispensed IN (1472, 1489)\n" +
                 "    AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    AND f.voided = 0;\n";

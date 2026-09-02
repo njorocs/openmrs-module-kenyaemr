@@ -9,11 +9,12 @@
  */
 package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.pmtct;
 
-import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.PatientsOnMCHCohortDefinition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.cohort.definition.pmtct.PatientsOnMCHCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.evaluator.CohortDefinitionEvaluator;
@@ -52,10 +53,10 @@ public class PatientsOnMCHCohortDefinitionEvaluator implements CohortDefinitionE
 		String qry="SELECT t.patient_id FROM (" +
 				"SELECT e.patient_id, d.patient_id AS disc_patient," +
 				" d.disc_date, max( e.visit_date ) AS latest_enrollment_date" +
-				" FROM kenyaemr_etl.etl_mch_enrollment e JOIN" +
-				" kenyaemr_etl.etl_patient_demographics p ON" +
+				" FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e JOIN" +
+				" "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON" +
 				" p.patient_id = e.patient_id AND p.voided = 0 LEFT JOIN (SELECT" +
-				" patient_id, max( visit_date ) AS disc_date FROM kenyaemr_etl.etl_patient_program_discontinuation" +
+				" patient_id, max( visit_date ) AS disc_date FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation" +
 				" WHERE program_name = 'MCH Mother' AND date( visit_date ) <= date(:endDate )" +
 				" GROUP BY patient_id ) d ON e.patient_id = d.patient_id " +
 				" WHERE e.visit_date BETWEEN date(:startDate) and date(:endDate )" +

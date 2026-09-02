@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator.dmi.ca
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.casereport.CaseVitalsCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -43,7 +44,7 @@ public class CaseVitalsCohortDefinitionEvaluator implements VisitQueryEvaluator 
         VisitQueryResult queryResult = new VisitQueryResult(visitQuery, context);
 
         String qry = "select t.visit_id\n" +
-                "from kenyaemr_etl.etl_patient_triage t\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "where t.visit_date between date(:startDate) and date(:endDate)\n" +
                 "GROUP BY t.visit_id;";
 

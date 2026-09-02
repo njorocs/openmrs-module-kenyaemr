@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.enhancedAdherence;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.enhancedAdherence.PatientChallengesReachingClinicDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.enhancedAdherence.PatientIncomeSourcesDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -35,7 +35,7 @@ public class PatientChallengesReachingClinicDataEvaluator implements PersonDataE
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select patient_id,patient_challenges_reaching_clinic from kenyaemr_etl.etl_enhanced_adherence group by patient_id;";
+        String qry = "select patient_id,patient_challenges_reaching_clinic from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_enhanced_adherence group by patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

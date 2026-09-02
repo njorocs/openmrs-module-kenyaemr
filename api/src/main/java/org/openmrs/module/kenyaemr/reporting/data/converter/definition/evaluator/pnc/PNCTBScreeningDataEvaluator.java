@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.pnc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.pnc.PNCTBScreeningDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -43,8 +44,8 @@ public class PNCTBScreeningDataEvaluator implements EncounterDataEvaluator {
                 "                          when 1662 then 'TB Confirmed'\n" +
                 "                          when 160737 then 'TB Screening Not Done'\n" +
                 "                          else '' end) as resulting_tb_status\n" +
-                "              from kenyaemr_etl.etl_tb_screening s\n" +
-                "                       inner join kenyaemr_etl.etl_mch_postnatal_visit v\n" +
+                "              from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_screening s\n" +
+                "                       inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_postnatal_visit v\n" +
                 "                                  on s.patient_id = v.patient_id and s.encounter_id = v.encounter_id\n" +
                 "where date(v.visit_date) between date(:startDate) and date(:endDate);";
 

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.moh301;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.moh301.DischargeReferralDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,11 +41,11 @@ public class DischargeReferralDataEvaluator implements PersonDataEvaluator {
                 "           when 1693 then 'Transferring to another ward'\n" +
                 "           when 164165 then 'To another facility'\n" +
                 "           when 1692 then 'Discharged home' end as referral\n" +
-                "from kenyaemr_etl.etl_doctor_progress_note n\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_doctor_progress_note n\n" +
                 "where n.visit_date between date(:startDate) and date(:endDate)\n" +
                 "union\n" +
                 "select d.patient_id, case d.discharge_status when 164165 then 'To another facility' end as referral\n" +
-                "from kenyaemr_etl.etl_inpatient_discharge d\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_inpatient_discharge d\n" +
                 "where d.visit_date between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.IPTDiscontinuationReasonDataDefinition;
-import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -36,8 +36,8 @@ public class IPTDiscontinuationReasonDataEvaluator implements PersonDataEvaluato
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id,(case d.discontinuation_reason when 102 then \"ADR\" when 112141 then \"ATB\" when 159598 then \"PA\" else \"OTR\" end) as discontinuation_reason from  kenyaemr_etl.etl_ipt_initiation init\n" +
-                "                                                                      INNER join kenyaemr_etl.etl_patient_program_discontinuation d on init.patient_id = d.patient_id and d.program_name = \"TPT\"\n" +
+        String qry = "select init.patient_id,(case d.discontinuation_reason when 102 then \"ADR\" when 112141 then \"ATB\" when 159598 then \"PA\" else \"OTR\" end) as discontinuation_reason from  "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init\n" +
+                "                                                                      INNER join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on init.patient_id = d.patient_id and d.program_name = \"TPT\"\n" +
                 "where init.voided = 0  group by init.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

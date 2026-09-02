@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarCurrentOnArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -42,18 +43,18 @@ public class DarCurrentOnArtDataEvaluator implements PersonDataEvaluator {
         if (sex != null) {
             qry = "SELECT f.patient_id, if(f2.patient_id is not null,\n" +
                     "    TIMESTAMPDIFF(MONTH , date(f.visit_date), date(f.next_appointment_date)), 'R' ) as res\n" +
-                    "FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 and p.Gender = ':sex'\n" +
-                    "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = f.patient_id  and  date(d.date_started) <= date(:startDate)  and ifnull(d.voided,0)= 0\n" +
-                    "         left join kenyaemr_etl.etl_patient_hiv_followup f2 on f.patient_id = f2.patient_id  and  date(f.visit_date) = date(f2.next_appointment_date) and f2.voided = 0\n" +
+                    "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 and p.Gender = ':sex'\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = f.patient_id  and  date(d.date_started) <= date(:startDate)  and ifnull(d.voided,0)= 0\n" +
+                    "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f2 on f.patient_id = f2.patient_id  and  date(f.visit_date) = date(f2.next_appointment_date) and f2.voided = 0\n" +
                     "where date(f.visit_date) = date(:startDate) and f.voided = 0 ";
         } else {
             qry = "SELECT f.patient_id, if(f2.patient_id is not null,\n" +
                     "    TIMESTAMPDIFF(MONTH , date(f.visit_date), date(f.next_appointment_date)), 'R' ) as res\n" +
-                    "FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                    "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 \n" +
-                    "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = f.patient_id  and  date(d.date_started) <= date(:startDate)  and ifnull(d.voided,0)= 0\n" +
-                    "         left join kenyaemr_etl.etl_patient_hiv_followup f2 on f.patient_id = f2.patient_id  and  date(f.visit_date) = date(f2.next_appointment_date) and f2.voided = 0\n" +
+                    "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 \n" +
+                    "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = f.patient_id  and  date(d.date_started) <= date(:startDate)  and ifnull(d.voided,0)= 0\n" +
+                    "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f2 on f.patient_id = f2.patient_id  and  date(f.visit_date) = date(f2.next_appointment_date) and f2.voided = 0\n" +
                     "where date(f.visit_date) = date(:startDate) and f.voided = 0 ";
         }
         String ageConditionString = "";

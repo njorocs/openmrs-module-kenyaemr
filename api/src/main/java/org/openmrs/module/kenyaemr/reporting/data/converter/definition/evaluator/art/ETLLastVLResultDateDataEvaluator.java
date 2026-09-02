@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVLResultDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,10 +37,10 @@ public class ETLLastVLResultDateDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "SELECT t.patient_id, t.date_test_result_received\n" +
-                "FROM kenyaemr_etl.etl_viral_load_validity_tracker t\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker t\n" +
                 "         INNER JOIN (\n" +
                 "    SELECT patient_id, MAX(visit_date) AS latest_visit_date\n" +
-                "    FROM kenyaemr_etl.etl_viral_load_validity_tracker\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker\n" +
                 "    WHERE visit_date <= DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 ") latest ON latest.patient_id = t.patient_id AND latest.latest_visit_date = t.visit_date;";

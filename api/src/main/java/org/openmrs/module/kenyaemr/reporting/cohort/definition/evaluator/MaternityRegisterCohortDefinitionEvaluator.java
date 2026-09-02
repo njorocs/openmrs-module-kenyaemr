@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.MaternityRegisterCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -51,8 +52,8 @@ public class MaternityRegisterCohortDefinitionEvaluator implements CohortDefinit
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 
         String qry = "SELECT ld.patient_id\n" +
-				"from kenyaemr_etl.etl_mchs_delivery ld\n" +
-				"         inner join kenyaemr_etl.etl_mch_enrollment e\n" +
+				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
+				"         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
 				"                    on e.patient_id = ld.patient_id\n" +
 				"where e.visit_date <= ld.visit_date\n" +
 				"  and coalesce(date(ld.date_of_delivery), date(ld.visit_date))\n" +

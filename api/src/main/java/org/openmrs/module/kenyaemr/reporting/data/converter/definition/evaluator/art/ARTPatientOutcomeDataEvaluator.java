@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTFirstSubstitutionDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTPatientOutcomeDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,7 +38,7 @@ public class ARTPatientOutcomeDataEvaluator implements PersonDataEvaluator {
                 "  fdr.patient_id,\n" +
                 "  if(disc.outcome is null,\"Alive on ART\",disc.outcome) as outcome\n" +
                 "from  (SELECT patient_id\n" +
-                "       FROM kenyaemr_etl.etl_drug_event WHERE program=\"HIV\" ) fdr\n" +
+                "       FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event WHERE program=\"HIV\" ) fdr\n" +
                 "  left join (SELECT patient_id,\n" +
                 "               mid(max(concat(visit_date,(case discontinuation_reason\n" +
                 "                                          when 159492 then \"Transferred Out\"\n" +
@@ -48,7 +48,7 @@ public class ARTPatientOutcomeDataEvaluator implements PersonDataEvaluator {
                 "                                          when 5622 then \"Other\"\n" +
                 "                                          when 1067 then \"Unknown\"\n" +
                 "                                          else \"\" end), \"\" )),20) as outcome,\n" +
-                "               COUNT(patient_id) as p_id FROM kenyaemr_etl.etl_patient_program_discontinuation WHERE program_name='HIV' GROUP BY patient_id  HAVING p_id > 0) disc\n" +
+                "               COUNT(patient_id) as p_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation WHERE program_name='HIV' GROUP BY patient_id  HAVING p_id > 0) disc\n" +
                 "    on disc.patient_id = fdr.patient_id\n" +
                 "GROUP BY fdr.patient_id;";
 

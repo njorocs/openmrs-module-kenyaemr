@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCurrentRegimenDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLFirstRegimenDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -36,7 +36,7 @@ public class ETLFirstRegimenDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "select patient_id,\n" +
-                "            mid(min(concat(visit_date,regimen, \"\" )),11) as regimen from kenyaemr_etl.etl_drug_event where program ='HIV'\n" +
+                "            mid(min(concat(visit_date,regimen, \"\" )),11) as regimen from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event where program ='HIV'\n" +
                 "\tGROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

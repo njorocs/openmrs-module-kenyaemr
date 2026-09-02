@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPQtyDispDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -35,7 +36,7 @@ public class FPCombinedOralContraceptiveQtyDispEvaluator implements EncounterDat
     public EvaluatedEncounterData evaluate(EncounterDataDefinition encounterDataDefinition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(encounterDataDefinition, context);
         String qry = " SELECT f.encounter_id, CAST(f.quantity_dispensed AS UNSIGNED)\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                 "WHERE f.contraceptive_dispensed = 159783\n" +
                 "AND DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 

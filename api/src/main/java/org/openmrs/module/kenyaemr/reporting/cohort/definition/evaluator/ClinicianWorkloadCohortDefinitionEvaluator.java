@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ClinicianWorkloadCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -45,10 +46,10 @@ public class ClinicianWorkloadCohortDefinitionEvaluator implements VisitQueryEva
 		VisitQueryResult queryResult = new VisitQueryResult(visitQuery, context);
 
 		String qry="WITH filtered_patients AS (SELECT openmrs_id, patient_id\n" +
-				"                           FROM kenyaemr_etl.etl_patient_demographics\n" +
+				"                           FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics\n" +
 				"                           WHERE voided = 0),\n" +
 				"     checked_in AS (SELECT v.visit_id, v.patient_id, v.creator, date(v.date_started) as checkin_date\n" +
-				"                    FROM openmrs.visit v\n" +
+				"                    from visit v\n" +
 				"                             JOIN filtered_patients p ON p.patient_id = v.patient_id\n" +
 				"                    WHERE v.voided = 0\n" +
 				"                      AND date(v.date_started) between date(:startDate) and date(:endDate))\n" +

@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.reporting.builder.common;
 
-import liquibase.pro.packaged.S;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;

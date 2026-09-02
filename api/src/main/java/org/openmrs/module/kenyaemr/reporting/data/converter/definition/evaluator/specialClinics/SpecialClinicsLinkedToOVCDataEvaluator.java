@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsLinkedToOVCDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -39,7 +40,7 @@ public class SpecialClinicsLinkedToOVCDataEvaluator implements EncounterDataEval
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "select sc.encounter_id, if(ovc.patient_id is not null, 'Yes', 'No') as linked_to_ovc\n" +
-                "from kenyaemr_etl.etl_special_clinics sc\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc\n" +
                 "         left join\n" +
                 "     (select a.patient_id\n" +
                 "      from ( -- OVC Clients\n" +
@@ -47,12 +48,12 @@ public class SpecialClinicsLinkedToOVCDataEvaluator implements EncounterDataEval
                 "                      d.patient_id        as disc_patient,\n" +
                 "                      d.date_discontinued as date_discontinued,\n" +
                 "                      max(e.visit_date)   as enrollment_date\n" +
-                "               from kenyaemr_etl.etl_ovc_enrolment e\n" +
-                "                        join kenyaemr_etl.etl_patient_demographics p\n" +
+                "               from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ovc_enrolment e\n" +
+                "                        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p\n" +
                 "                             on p.patient_id = e.patient_id and p.voided = 0 and p.dead = 0\n" +
                 "                        left outer JOIN\n" +
                 "                    (select patient_id, max(visit_date) as date_discontinued\n" +
-                "                     from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                     from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                     where program_name = 'OVC'\n" +
                 "                     group by patient_id) d on d.patient_id = e.patient_id\n" +
                 "               group by e.patient_id\n" +
@@ -69,17 +70,17 @@ public class SpecialClinicsLinkedToOVCDataEvaluator implements EncounterDataEval
                 "                       d.effective_disc_date                                                  as effective_disc_date,\n" +
                 "                       max(d.visit_date)                                                      as date_discontinued,\n" +
                 "                       de.patient_id                                                          as started_on_drugs\n" +
-                "                from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "                         join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "                         join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
-                "                         left join kenyaemr_etl.etl_drug_event de\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "                         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "                         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "                         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event de\n" +
                 "                                   on e.patient_id = de.patient_id and de.program = 'HIV' and\n" +
                 "                                      date(date_started) <= date(:endDate)\n" +
                 "                         left outer JOIN\n" +
                 "                     (select patient_id,\n" +
                 "                             coalesce(date(effective_discontinuation_date), visit_date) visit_date,\n" +
                 "                             max(date(effective_discontinuation_date)) as               effective_disc_date\n" +
-                "                      from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "                      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "                      where date(visit_date) <= date(:endDate)\n" +
                 "                        and program_name = 'HIV'\n" +
                 "                      group by patient_id) d on d.patient_id = fup.patient_id\n" +

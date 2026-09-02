@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+
 public class FPQueryImplantsIUCDsLibrary {
 
     public static final String TYPE_OF_VISIT_QUERY =
@@ -20,6 +22,6 @@ public class FPQueryImplantsIUCDsLibrary {
                     "        WHEN 1000049 THEN 'Re-insertion'\n" +
                     "        WHEN 2002014 THEN 'Check-up'\n" +
                     "    END AS type_of_visit_label\n" +
-                    "FROM kenyaemr_etl.etl_family_planning f\n" +
+                    "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                     "WHERE DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);\n;";
 }

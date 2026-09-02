@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCDaysSinceSurgeryDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -34,8 +35,8 @@ public class VMMCDaysSinceSurgeryDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "SELECT t.patient_id,TIMESTAMPDIFF(DAY, date(t.visit_date), date(v.visit_date)) FROM kenyaemr_etl.etl_vmmc_circumcision_procedure t" +
-                " INNER JOIN kenyaemr_etl.etl_vmmc_client_followup v on t.patient_id = v.patient_id GROUP BY v.patient_id;";
+        String qry = "SELECT t.patient_id,TIMESTAMPDIFF(DAY, date(t.visit_date), date(v.visit_date)) FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_circumcision_procedure t" +
+                " INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_vmmc_client_followup v on t.patient_id = v.patient_id GROUP BY v.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

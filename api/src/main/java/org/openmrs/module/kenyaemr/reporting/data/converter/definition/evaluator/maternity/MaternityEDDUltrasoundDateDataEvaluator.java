@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.maternity;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.maternity.MaternityEDDUltrasoundDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -37,7 +38,7 @@ public class MaternityEDDUltrasoundDateDataEvaluator implements PersonDataEvalua
 
         String qry = "select v.patient_id,\n" +
                 "       date(mid(max(concat(date(v.visit_date), date(v.edd_ultrasound))), 11)) as edd\n" +
-                "from kenyaemr_etl.etl_mch_enrollment v\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment v\n" +
                 "where date(v.visit_date) <= date(:endDate)\n" +
                 "group by v.patient_id;";
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

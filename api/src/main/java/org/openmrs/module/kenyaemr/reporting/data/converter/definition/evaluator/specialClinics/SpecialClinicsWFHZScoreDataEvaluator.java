@@ -10,9 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsDiagnosisDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsWFHZScoreDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsWeightDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -41,8 +40,8 @@ public class SpecialClinicsWFHZScoreDataEvaluator implements EncounterDataEvalua
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "select c.encounter_id, t.z_score_absolute\n" +
-                "from kenyaemr_etl.etl_patient_triage t\n" +
-                "         inner join kenyaemr_etl.etl_special_clinics c on t.patient_id = c.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics c on t.patient_id = c.patient_id\n" +
                 "and t.visit_date = c.visit_date\n" +
                 "  where t.visit_date between date(:startDate) and date(:endDate) and c.special_clinic_form_uuid = '" + specialClinic + "';";
 

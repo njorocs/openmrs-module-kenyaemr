@@ -90,7 +90,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(neurologicalSyndromeDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(wateryDiarrhoeaDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(ebolaDataSetDefinitionColumns(), "startDate=${startDate},endDate=${endDate}")
-                );
+        );
     }
 
     protected DataSetDefinition caseIdentificationClassificationIndicators() {
@@ -133,7 +133,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
                 "", ReportUtils.map(idsrIndicatorLibrary.acuteMeningitisCases(), indParams), "");
         cohortDsd.addColumn(
                 "Suspected Ebola Cases",
-                "", ReportUtils.map(idsrIndicatorLibrary.suspectedEbolaCases(), indParams), "");                
+                "", ReportUtils.map(idsrIndicatorLibrary.suspectedEbolaCases(), indParams), "");
 
         return cohortDsd;
 
@@ -308,7 +308,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         dsd.addColumn("County",new CalculationDataDefinition("County", new CountyAddressCalculation()), "",new CalculationResultConverter());
         dsd.addColumn("Village_Estate_Landmark", new CalculationDataDefinition("Village/Estate/Landmark", new PersonAddressCalculation()), "", new RDQACalculationResultConverter());
         dsd.addColumn("Visit Date", visitDateWithComplaintsDataDefinition, paramMapping);
-       // dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping, new DateConverter(DATE_FORMAT));
+        // dsd.addColumn("Next Visit", lastAppointmentDateDataDefinition, paramMapping, new DateConverter(DATE_FORMAT));
         dsd.addColumn("Presenting Complaints", presentingComplaintsDataDefinition, paramMapping);
         dsd.addColumn("Duration of Presenting Complaints", durationOfComplaintsDataDefinition, paramMapping);
         dsd.addColumn("Date of onset of the current Illness", complaintsOnsetDateDataDefinition, paramMapping);
@@ -899,7 +899,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
         lastAppointmentDateDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
         VisitTypeWithComplaintsDataDefinition visitTypeDataDefinition = new VisitTypeWithComplaintsDataDefinition();
         visitTypeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class)); 
+        visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
         ComplaintAttendantProviderDataDefinition attendedByDataDefinition = new ComplaintAttendantProviderDataDefinition();
         attendedByDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -1034,7 +1034,7 @@ public class IDSRSuspectedCaseListReportBuilder extends AbstractReportBuilder {
 
         VisitTypeWithComplaintsDataDefinition visitTypeDataDefinition = new VisitTypeWithComplaintsDataDefinition();
         visitTypeDataDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class)); 
+        visitTypeDataDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 
         dsd.addColumn("Hospital Unit", new MFLCodeDataDefinition(), "", new org.openmrs.module.kenyaemr.reporting.data.converter.LocationNameConverter());
         dsd.addColumn("id", new PersonIdDataDefinition(), "");

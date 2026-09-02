@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentDaysMissedDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -38,9 +39,9 @@ public class AppointmentDaysMissedDataEvaluator implements PersonDataEvaluator {
         String qry = "select a.patient_id,a.days_missed from(\n" +
                 "select fup.patient_id, max(fup.visit_date) as fup_visit_date,\n" +
                 "      timestampdiff(DAY, date(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11)), date(:endDate)) as days_missed,date(mid(max(concat(fup.visit_date, fup.next_appointment_date)), 11)) as latest_fup_tca\n" +
-                "from kenyaemr_etl.etl_patient_hiv_followup fup\n" +
-                "        join kenyaemr_etl.etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
-                "        join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup fup\n" +
+                "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = fup.patient_id\n" +
+                "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment e on fup.patient_id = e.patient_id\n" +
                 "where fup.visit_date < date(:endDate)\n" +
                 "group by patient_id\n" +
                 "having fup_visit_date <= date(:endDate) and latest_fup_tca < date(:endDate))a;";

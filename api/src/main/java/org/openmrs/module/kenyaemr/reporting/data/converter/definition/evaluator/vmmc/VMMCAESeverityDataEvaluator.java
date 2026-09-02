@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.vmmc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.vmmc.VMMCAESeverityDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class VMMCAESeverityDataEvaluator implements PersonDataEvaluator {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
         String qry = "SELECT patient_id, GROUP_CONCAT(DISTINCT CASE severity WHEN 1500 then 'Severe'WHEN 1499 then 'Moderate' " +
-                "WHEN 1498 then 'Mild' ELSE '' END SEPARATOR ', ') FROM kenyaemr_etl.etl_adverse_events WHERE form = 'vmmc-procedure'" +
+                "WHEN 1498 then 'Mild' ELSE '' END SEPARATOR ', ') FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_adverse_events WHERE form = 'vmmc-procedure'" +
                 " GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

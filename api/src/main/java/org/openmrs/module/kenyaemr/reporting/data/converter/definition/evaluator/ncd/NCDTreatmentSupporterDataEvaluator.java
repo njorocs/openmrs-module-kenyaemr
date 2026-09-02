@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ncd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.NCDTreatmentSupporterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -34,8 +35,8 @@ public class NCDTreatmentSupporterDataEvaluator implements EncounterDataEvaluato
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT e.encounter_id, tb.next_of_kin_phone " +
-                "FROM kenyaemr_etl.etl_ncd_enrollment e " +
-                "INNER JOIN kenyaemr_etl.etl_patient_demographics tb ON e.patient_id = tb.patient_id " +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment e " +
+                "INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics tb ON e.patient_id = tb.patient_id " +
                 "WHERE DATE(e.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate) " +
                 "AND tb.next_of_kin_phone IS NOT NULL";
 

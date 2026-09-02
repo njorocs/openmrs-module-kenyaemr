@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ncd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ncd.NCDDiagnosisDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,10 +43,10 @@ public class NCDDiagnosisDataEvaluator implements EncounterDataEvaluator {
         String qry = "SELECT\n" +
                 "  v.encounter_id,\n" +
                 "  cn.name AS diagnosis_name\n" +
-                "FROM kenyaemr_etl.etl_ncd_enrollment v\n" +
-                "INNER JOIN openmrs.encounter_diagnosis ed ON ed.encounter_id = v.encounter_id\n" +
-                "LEFT JOIN openmrs.concept c ON c.concept_id = ed.diagnosis_coded\n" +
-                "LEFT JOIN openmrs.concept_name cn ON cn.concept_id = c.concept_id AND cn.locale = 'en'\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ncd_enrollment v\n" +
+                "INNER JOIN encounter_diagnosis ed ON ed.encounter_id = v.encounter_id\n" +
+                "LEFT JOIN concept c ON c.concept_id = ed.diagnosis_coded\n" +
+                "LEFT JOIN concept_name cn ON cn.concept_id = c.concept_id AND cn.locale = 'en'\n" +
                 "WHERE DATE(v.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
 

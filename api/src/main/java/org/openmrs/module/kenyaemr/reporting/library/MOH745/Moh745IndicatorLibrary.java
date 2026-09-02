@@ -9,13 +9,13 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.MOH745;
 
-import static org.openmrs.module.kenyacore.report.ReportUtils.map;
-import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
-
+import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.openmrs.module.kenyacore.report.ReportUtils;
+
+import static org.openmrs.module.kenyacore.report.ReportUtils.map;
+import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
 @Component
 public class Moh745IndicatorLibrary {

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarStartingArtDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -48,13 +49,13 @@ public class DarStartingArtDataEvaluator implements PersonDataEvaluator {
                     " max(if(enr.date_started_art_at_transferring_facility is not null and enr.facility_transferred_from is not null, 1, 0)) as TI_on_art\n" +
                     " from\n" +
                     "      (select e.patient_id, min(e.date_started) as date_started\n" +
-                    "        from kenyaemr_etl.etl_drug_event e\n" +
-                    "        join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                    "        from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                    "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                     "        where e.program = 'HIV'\n" +
                     "        group by e.patient_id) e\n" +
-                    " inner join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-                    " inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex'\n" +
-                    " inner join kenyaemr_etl.etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 and p.Gender = ':sex'\n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
                     " where date(e.date_started) = date(:startDate) \n" +
                     " group by e.patient_id\n" +
                     " having TI_on_art=0) a ";
@@ -67,13 +68,13 @@ public class DarStartingArtDataEvaluator implements PersonDataEvaluator {
                     " max(if(enr.date_started_art_at_transferring_facility is not null and enr.facility_transferred_from is not null, 1, 0)) as TI_on_art\n" +
                     " from\n" +
                     "      (select e.patient_id, min(e.date_started) as date_started\n" +
-                    "        from kenyaemr_etl.etl_drug_event e\n" +
-                    "        join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+                    "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
+                    "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                     "        where e.program = 'HIV'\n" +
                     "        group by e.patient_id) e\n" +
-                    " inner join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
-                    " inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
-                    " inner join kenyaemr_etl.etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=e.patient_id\n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = e.patient_id and  p.voided = 0 \n" +
+                    " inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f on f.patient_id = e.patient_id and  date(f.visit_date) = date(:startDate) and f.voided = 0\n" +
                     " where date(e.date_started) = date(:startDate) \n" +
                     " group by e.patient_id\n" +
                     " having TI_on_art=0) a ";

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.DiagnosisCaseDataDefinition;
 import org.openmrs.module.reporting.data.visit.EvaluatedVisitData;
 import org.openmrs.module.reporting.data.visit.definition.VisitDataDefinition;
@@ -41,9 +42,9 @@ public class DiagnosisCaseDataEvaluator implements VisitDataEvaluator {
                 "                        WHEN d.diagnosis_coded IS NOT NULL\n" +
                 "                            THEN CONCAT(d.diagnosis_coded, '|', COALESCE(n.name, '-')) END ORDER BY\n" +
                 "                    d.diagnosis_coded SEPARATOR ', ') as diagnosis\n" +
-                "FROM kenyaemr_etl.etl_clinical_encounter e\n" +
-                "         inner join openmrs.encounter_diagnosis d on e.encounter_id = d.encounter_id and d.voided = 0  and d.dx_rank = 2\n" +
-                "         inner join openmrs.concept_name n\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter e\n" +
+                "         inner join encounter_diagnosis d on e.encounter_id = d.encounter_id and d.voided = 0  and d.dx_rank = 2\n" +
+                "         inner join concept_name n\n" +
                 "                    on d.diagnosis_coded = n.concept_id and n.locale = 'en'\n" +
                 "where n.concept_name_type = 'FULLY_SPECIFIED'\n" +
                 "  and visit_date between date(:startDate) and date(:endDate)\n" +

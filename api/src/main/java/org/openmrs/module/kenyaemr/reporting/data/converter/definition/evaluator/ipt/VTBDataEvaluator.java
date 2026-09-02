@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.ipt;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.ipt.VTBDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,7 +36,7 @@ public class VTBDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
-        String qry = "select init.patient_id, do.dose from kenyaemr_etl.etl_ipt_initiation init left outer join orders o on init.patient_id = o.patient_id\n" +
+        String qry = "select init.patient_id, do.dose from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_ipt_initiation init left outer join orders o on init.patient_id = o.patient_id\n" +
                 "                                                                          inner join drug_order do on o.order_id = do.order_id\n" +
                 "where o.concept_id = 82913 and init.voided = 0 group by init.patient_id having max(o.date_stopped);";
 

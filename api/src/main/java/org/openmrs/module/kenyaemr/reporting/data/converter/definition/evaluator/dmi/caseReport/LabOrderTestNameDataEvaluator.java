@@ -40,7 +40,7 @@ public class LabOrderTestNameDataEvaluator implements VisitDataEvaluator {
                 "       encounter_id,\n" +
                 "       order_id,\n" +
                 "       concept_id\n" +
-                "FROM openmrs.orders\n" +
+                "FROM orders\n" +
                 "WHERE order_type_id = 3\n" +
                 "  AND voided = 0\n" +
                 "GROUP BY patient_id,concept_id),\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.fp;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPEmergencyContraceptiveQtyDispDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -41,7 +42,7 @@ public class FPEmergencyContraceptiveQtyDispEvaluator implements EncounterDataEv
                 "        THEN CAST(f.quantity_dispensed AS UNSIGNED)\n" +
                 "        ELSE 0\n" +
                 "    END AS emergency_contraceptives_qty\n" +
-                "FROM kenyaemr_etl.etl_family_planning f\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning f\n" +
                 "WHERE DATE(f.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate);";
 
 

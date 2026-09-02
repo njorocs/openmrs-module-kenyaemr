@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCSyphilisTestDoneDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -42,14 +43,14 @@ public class ANCVDRLDoneDataEvaluator implements EncounterDataEvaluator {
                 "        WHEN v.syphilis_test_status IS NOT NULL THEN 'Duo Test'\n" +
                 "        WHEN COALESCE(l.has_vdrl, 0) = 1 THEN 'VDRL'\n" +
                 "        END AS syphilis\n" +
-                "FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "         LEFT JOIN (\n" +
                 "    SELECT\n" +
                 "        x.encounter_id,\n" +
                 "        x.patient_id,\n" +
                 "        DATE(x.date_test_requested) AS test_date,\n" +
                 "        1 AS has_vdrl\n" +
-                "    FROM kenyaemr_etl.etl_laboratory_extract x\n" +
+                "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "    WHERE x.lab_test = 299\n" +
                 "      AND DATE(x.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY x.encounter_id, x.patient_id, DATE(x.date_test_requested)\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dar;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dar.DarOnModernFPDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -35,8 +36,8 @@ public class DarOnModernFPDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
         String qry = "SELECT f.patient_id, 'X' as modernFp\n" +
-                "FROM kenyaemr_etl.etl_patient_hiv_followup f\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 and TIMESTAMPDIFF(YEAR, date(p.DOB), date(:startDate)) >= 15 and p.Gender = 'F'\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = f.patient_id and  p.voided = 0 and TIMESTAMPDIFF(YEAR, date(p.DOB), date(:startDate)) >= 15 and p.Gender = 'F'\n" +
                 "where date(f.visit_date) = date(:startDate) and f.voided = 0 and f.family_planning_method != 190 ";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

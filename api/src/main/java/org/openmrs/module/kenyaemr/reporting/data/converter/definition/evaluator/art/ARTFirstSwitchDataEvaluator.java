@@ -10,11 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTFirstSubstitutionDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ARTFirstSwitchDataDefinition;
-import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
-import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
-import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -52,7 +49,7 @@ public class ARTFirstSwitchDataEvaluator implements PersonDataEvaluator {
                 "                                    when 1754 then \"Drugs out of stock\"\n" +
                 "                                    else \"\" end), \"\" )),11) as reasonDiscontinued,\n" +
                 "         mid(max(concat(visit_date,regimen_line)),11) as regimenLine,\n" +
-                "         COUNT(patient_id) as p_id FROM kenyaemr_etl.etl_drug_event WHERE regimen_line=\"Second line\" GROUP BY patient_id  HAVING p_id > 0) fdr\n" +
+                "         COUNT(patient_id) as p_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event WHERE regimen_line=\"Second line\" GROUP BY patient_id  HAVING p_id > 0) fdr\n" +
                 "GROUP BY fdr.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

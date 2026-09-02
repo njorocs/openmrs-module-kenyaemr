@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.dmi;
 
-import org.openmrs.module.kenyacore.report.ReportUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
-import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.springframework.stereotype.Component;
@@ -36,14 +35,14 @@ public class IDSRCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id\n" +
                 "from (select patient_id, c.complaint as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
-                "      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where c.complaint = 143264\n" +
                 "        and c.complaint_duration < 10\n" +
                 "        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
-                "         join openmrs.visit v\n" +
+                "         JOIN visit v\n" +
                 "              on a.patient_id = v.patient_id and date(a.visit_date) = date(v.date_started) and v.visit_type_id = 1\n" +
-                "         join kenyaemr_etl.etl_patient_triage t\n" +
+                "         join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "              on a.patient_id = t.patient_id and date(t.visit_date) = date(v.date_started) and t.temperature >= 38;";
         cd.setName("iliCases");
         cd.setQuery(sqlQuery);
@@ -62,14 +61,14 @@ public class IDSRCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id\n" +
                 "from (select patient_id, c.complaint as complaint, DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) as complaint_date, c.visit_date\n" +
-                "      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where c.complaint = 143264\n" +
                 "        and c.complaint_duration < 10\n" +
                 "        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
-                "         join openmrs.visit v\n" +
+                "         JOIN visit v\n" +
                 "              on a.patient_id = v.patient_id and date(a.visit_date) = date(v.date_started) and v.visit_type_id = 3\n" +
-                "         join kenyaemr_etl.etl_patient_triage t\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "              on a.patient_id = t.patient_id and date(t.visit_date) = date(v.date_started) and t.temperature >= 38;";
         cd.setName("sariCases");
         cd.setQuery(sqlQuery);
@@ -87,13 +86,13 @@ public class IDSRCohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id\n" +
                 "from (select patient_id, c.visit_date,group_concat(c.complaint) as complaint\n" +
-                "      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where c.complaint = 157498\n" +
                 "        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
-                "         join kenyaemr_etl.etl_patient_demographics d on a.patient_id = d.patient_id and\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on a.patient_id = d.patient_id and\n" +
                 "                                                         timestampdiff(YEAR,d.DOB,a.visit_date) < 15\n" +
-                "         join kenyaemr_etl.etl_patient_triage t\n" +
+                "         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "              on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "where FIND_IN_SET(157498, a.complaint) > 0;";
         cd.setName("poliomyelitisCases");
@@ -116,7 +115,7 @@ public class IDSRCohortLibrary {
                 "                 WHEN group_concat(concat_ws('|',c.complaint,c.complaint_duration))  LIKE '%140238%' THEN\n" +
                 "                     SUBSTRING_INDEX(SUBSTRING_INDEX(group_concat(concat_ws('|',c.complaint,c.complaint_duration)) , '|', -1), ',', 1)\n" +
                 "                 END AS fever_duration_from_days\n" +
-                "      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "      where c.complaint in (140238,162628)\n" +
                 "        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "      group by patient_id) a\n" +
@@ -142,12 +141,12 @@ public class IDSRCohortLibrary {
                 "            WHEN group_concat(concat_ws('|', c.complaint, c.complaint_duration)) LIKE '%140238%' THEN\n" +
                 "                SUBSTRING_INDEX(SUBSTRING_INDEX(group_concat(concat_ws('|', c.complaint, c.complaint_duration)), '|', -1), ',', 1)\n" +
                 "        END AS fever_duration_from_days\n" +
-                "        from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "        where c.complaint in (140238, 512, 139084, 135488, 121, 148035)\n" +
                 "        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "        group by patient_id) a\n" +
-                "        join kenyaemr_etl.etl_patient_demographics d on a.patient_id = d.patient_id\n" +
-                "        join kenyaemr_etl.etl_patient_triage t on a.patient_id = t.patient_id\n" +
+                "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on a.patient_id = d.patient_id\n" +
+                "        join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t on a.patient_id = t.patient_id\n" +
                 "        and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "        and t.temperature > 38.5\n" +
                 "        and date(a.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -171,27 +170,25 @@ public class IDSRCohortLibrary {
      */
     public CohortDefinition jaundiceCases() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "SELECT a.patient_id\n" +
-                "FROM (\n" +
-                "    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
-                "    FROM kenyaemr_etl.etl_clinical_encounter c\n" +
-                "    WHERE c.general_examination LIKE '%Jaundice%'\n" +
-                "      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
-                "    GROUP BY patient_id\n" +
-                "    UNION ALL\n" +
-                "    SELECT patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
-                "    FROM kenyaemr_etl.etl_patient_hiv_followup h\n" +
-                "    WHERE h.general_examination LIKE '%Jaundice%'\n" +
-                "      AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
-                "    GROUP BY patient_id\n" +
-                ") a\n" +
-                "WHERE a.general_examination IS NOT NULL\n" +
-                "  AND FIND_IN_SET('Jaundice', a.general_examination) > 0;";
+        String sqlQuery = "SELECT p.patient_id FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_demographics p " +
+                " WHERE EXISTS (" +
+                "    SELECT 1 FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_clinical_encounter c " +
+                "    WHERE c.patient_id = p.patient_id " +
+                "    AND c.general_examination LIKE '%Jaundice%' " +
+                "    AND c.visit_date BETWEEN :startDate AND :endDate" +
+                " ) " +
+                " OR EXISTS (" +
+                "    SELECT 1 FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_hiv_followup h " +
+                "    WHERE h.patient_id = p.patient_id " +
+                "    AND h.general_examination LIKE '%Jaundice%' " +
+                "    AND h.visit_date BETWEEN :startDate AND :endDate" +
+                " )";
+
         cd.setName("jaundice");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Acute Jaundice");
+        cd.setDescription("Acute Jaundice Cases");
 
         return cd;
     }
@@ -205,13 +202,13 @@ public class IDSRCohortLibrary {
         String sqlQuery = "SELECT a.patient_id\n" +
                 "FROM (\n" +
                 "    SELECT patient_id, c.visit_date, GROUP_CONCAT(c.complaint) AS complaint\n" +
-                "    FROM kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "    WHERE c.complaint IN (6017, 113054)\n" +
                 "      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 ") a\n" +
-                "JOIN kenyaemr_etl.etl_patient_demographics d ON a.patient_id = d.patient_id\n" +
-                "JOIN kenyaemr_etl.etl_patient_triage t ON a.patient_id = t.patient_id\n" +
+                "JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d ON a.patient_id = d.patient_id\n" +
+                "JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t ON a.patient_id = t.patient_id\n" +
                 "    AND DATE(t.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "WHERE FIND_IN_SET(6017, a.complaint) > 0\n" +
                 "  AND FIND_IN_SET(113054, a.complaint) > 0\n" +
@@ -240,7 +237,7 @@ public class IDSRCohortLibrary {
                 "        DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) AS complaint_date,\n" +
                 "        c.complaint_duration\n" +
                 "    FROM \n" +
-                "        kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "        "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "    WHERE \n" +
                 "        c.complaint = 161887\n" +
                 "        AND c.complaint_duration < 14\n" +
@@ -271,7 +268,7 @@ public class IDSRCohortLibrary {
                 "        DATE_SUB(c.visit_date, INTERVAL c.complaint_duration DAY) AS complaint_date,\n" +
                 "        c.complaint_duration\n" +
                 "    FROM\n" +
-                "        kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "        "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "    WHERE\n" +
                 "        c.complaint IN (140238, 512)\n" +
                 "        AND c.complaint_duration < 14\n" +
@@ -300,13 +297,13 @@ public class IDSRCohortLibrary {
                 "                         WHEN group_concat(concat_ws('|',c.complaint,c.complaint_duration))  LIKE '%140238%' THEN\n" +
                 "                             SUBSTRING_INDEX(SUBSTRING_INDEX(group_concat(concat_ws('|',c.complaint,c.complaint_duration)) , '|', -1), ',', 1)\n" +
                 "                         END AS fever_duration_from_days\n" +
-                "              from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "              where c.complaint = 140238\n" +
                 "              AND c.complaint_duration < 14\n" +
                 "                and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "              group by patient_id) a\n" +
-                "                 join kenyaemr_etl.etl_patient_demographics d on a.patient_id = d.patient_id\n" +
-                "                 join kenyaemr_etl.etl_patient_triage t\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on a.patient_id = d.patient_id\n" +
+                "                 join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
                 "                      on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate) and\n" +
                 "                         t.temperature > 38.5 and date(a.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "        where FIND_IN_SET(140238, a.complaint) > 0;";
@@ -326,7 +323,7 @@ public class IDSRCohortLibrary {
         String sqlQuery = "SELECT a.patient_id\n" +
                 "FROM (\n" +
                 "    SELECT patient_id, GROUP_CONCAT(c.complaint) AS complaint\n" +
-                "    FROM kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
                 "    WHERE c.complaint IN (112721)\n" +
                 "      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
@@ -340,25 +337,14 @@ public class IDSRCohortLibrary {
 
         return cd;
     }
-
     /**
      * Suspected Ebola Cases
      */
     public CohortDefinition suspectedEbolaCases() {
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String qry="select patient_id from kenyaemr_etl.etl_patient_triage t \n" +
-                "where t.temperature >= 38\n" +
-                "  and (t.history_of_travel in (165748, 162884, 2032318, 5622) or t.contact_with_evd_suspected_case = 1065)\n" +
-                "  and (\n" +
-                "    select count(distinct c.complaint)\n" +
-                "    from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
-                "    where c.patient_id = t.patient_id\n" +
-                "      and c.complaint in (139084, 116334, 2032542, 151, 122983, 142412, 162628)\n" +
-                "      and c.voided = 0\n" +
-                "      and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
-                "  ) >= 3\n" +
-                "  and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
-                "  and t.voided = 0\n" +
+        String qry="select patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t \n" +
+                "where t.temperature >= 38 and (t.contact_with_evd_suspected_case = 1065 or t.history_of_travel != 1066 or t.occupation != 1107 ) and date(t.visit_date) between date(:startDate) and date(:endDate) \n" +
+                "and t.voided = 0\n" +
                 "group by t.patient_id";
         cd.setName("suspectedEbolaCases");
         cd.setQuery(qry);

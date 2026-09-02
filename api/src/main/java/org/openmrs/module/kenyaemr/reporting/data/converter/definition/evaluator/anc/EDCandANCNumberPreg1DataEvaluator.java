@@ -10,10 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.EDCandANCNumberPreg1DataDefinition;
-import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
-import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
-import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -43,7 +41,7 @@ public class EDCandANCNumberPreg1DataEvaluator implements PersonDataEvaluator {
                 "from  (SELECT patient_id,\n" +
                 "              mid(max(concat(visit_date,lmp)),11) as lmp,\n" +
                 "              mid(max(concat(visit_date,anc_number)),11) as anc_number,\n" +
-                "              COUNT(patient_id) as c FROM kenyaemr_etl.etl_mch_enrollment GROUP BY patient_id  HAVING c = 1) e\n" +
+                "              COUNT(patient_id) as c FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment GROUP BY patient_id  HAVING c = 1) e\n" +
                 "GROUP BY e.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

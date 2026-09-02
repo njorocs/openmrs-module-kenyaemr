@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.specialClinics;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.specialClinics.SpecialClinicsDiagnosisDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class SpecialClinicsDiagnosisDataEvaluator implements EncounterDataEvalua
         String specialClinic = cohortDefinition.getSpecialClinic();
 
         String qry = "SELECT c.encounter_id, d.diagnosis\n" +
-                "FROM kenyaemr_etl.etl_special_clinics c\n" +
+                "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics c\n" +
                 "INNER JOIN (\n" +
                 "    SELECT d.patient_id,\n" +
                 "           GROUP_CONCAT(DISTINCT n.name SEPARATOR '\r\n') AS diagnosis,\n" +

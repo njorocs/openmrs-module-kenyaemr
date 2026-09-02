@@ -251,12 +251,12 @@ public class NeedsViralLoadTestCalculationTest extends BaseModuleContextSensitiv
         Concept entryPointQuestion = Context.getConceptService().getConcept(NeedsViralLoadTestCalculation.HTSENTRYPOINT_QUESTION_CONCEPT_ID);
         Obs[] obss = entryPoint != null
                 ? new Obs[] {
-                        TestUtils.saveObs(patient, htsFinalTestQuestion, positiveResult, encounterDate),
-                        TestUtils.saveObs(patient, entryPointQuestion, entryPoint, encounterDate)
-                }
+                TestUtils.saveObs(patient, htsFinalTestQuestion, positiveResult, encounterDate),
+                TestUtils.saveObs(patient, entryPointQuestion, entryPoint, encounterDate)
+        }
                 : new Obs[] {
-                        TestUtils.saveObs(patient, htsFinalTestQuestion, positiveResult, encounterDate)
-                };
+                TestUtils.saveObs(patient, htsFinalTestQuestion, positiveResult, encounterDate)
+        };
         TestUtils.saveEncounter(patient, encounterType, form, encounterDate, obss);
     }
 

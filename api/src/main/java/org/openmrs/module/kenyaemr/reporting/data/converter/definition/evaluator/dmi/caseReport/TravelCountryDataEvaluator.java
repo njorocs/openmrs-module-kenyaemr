@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.dmi.caseReport;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.dmi.casereport.TravelCountryDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -40,10 +41,10 @@ public class TravelCountryDataEvaluator implements PersonDataEvaluator {
                 "        when 1066    then 'No travel history' " +
                 "        else null " +
                 "    end as travel_country " +
-                "from kenyaemr_etl.etl_patient_triage t " +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t " +
                 "inner join ( " +
                 "    select patient_id, max(visit_date) as latest_visit " +
-                "    from kenyaemr_etl.etl_patient_triage " +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage " +
                 "    where date(visit_date) between date(:startDate) and date(:endDate) " +
                 "    and voided = 0 " +
                 "    group by patient_id " +

@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.art;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLFirstSubstitutionDateDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLRefillDateDataDefinition;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.evaluator.PersonDataEvaluator;
@@ -44,7 +44,7 @@ public class ETLFirstSubstitutionDateDataEvaluator implements PersonDataEvaluato
                 "         mid(max(concat(visit_date,date_started)),11) as firstSubstitution_date,\n" +
                 "         mid(min(concat(visit_date,date_started)),11) as dateStarted,\n" +
                 "         mid(max(concat(visit_date,regimen_line)),11) as regimenLine,\n" +
-                "         COUNT(patient_id) as p_id FROM kenyaemr_etl.etl_drug_event  GROUP BY patient_id  HAVING p_id = 2) fdr\n" +
+                "         COUNT(patient_id) as p_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event  GROUP BY patient_id  HAVING p_id = 2) fdr\n" +
                 "GROUP BY fdr.patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

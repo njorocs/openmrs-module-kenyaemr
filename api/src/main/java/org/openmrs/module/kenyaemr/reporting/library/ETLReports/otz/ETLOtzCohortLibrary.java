@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.reporting.library.ETLReports.otz;
 
-import org.openmrs.module.kenyacore.report.cohort.definition.CalculationCohortDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
@@ -32,8 +32,8 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition otzEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select distinct e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select distinct e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "where (e.transfer_in =\"Yes\" or e.transfer_in =\"No\")\n" +
                 "and date(e.visit_date) between date(:startDate) and date(:endDate);";
         cd.setName("newOtzEnrollment");
@@ -48,8 +48,8 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition attendedSupportGroup(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct a.patient_id\n" +
-                "  from kenyaemr_etl.etl_otz_activity a\n" +
-                "  join kenyaemr_etl.etl_patient_demographics p on p.patient_id=a.patient_id and p.voided=0\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_activity a\n" +
+                "  join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=a.patient_id and p.voided=0\n" +
                 "  where a.attended_support_group =\"Yes\" and a.visit_date between date(:startDate) and date(:endDate);";
         cd.setName("AttendedSupportGroup");
         cd.setQuery(sqlQuery);
@@ -63,9 +63,9 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition transferredOut(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select dis.patient_id\n" +
-                "                      from kenyaemr_etl.etl_patient_program_discontinuation dis\n" +
-                "       join kenyaemr_etl.etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
-                "       join kenyaemr_etl.etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
+                "                      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
                 "where dis.discontinuation_reason = 159492\n" +
                 "  and dis.visit_date between :startDate and :endDate\n" +
                 "  and en.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
@@ -82,9 +82,9 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition otzLostToFollowup(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select dis.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation dis\n" +
-                "       join kenyaemr_etl.etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
-                "       join kenyaemr_etl.etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
                 "where dis.discontinuation_reason = 5240\n" +
                 "  and en.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "  and dis.visit_date between :startDate and :endDate\n" +
@@ -109,10 +109,10 @@ public class ETLOtzCohortLibrary {
                 "             p.dob             as dob,\n" +
                 "             timestampdiff(YEAR, p.DOB, date(:endDate)),\n" +
                 "             date_sub(:endDate, interval "+month+" MONTH)\n" +
-                "      from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "             inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id\n" +
+                "      from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "             inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id\n" +
                 "             inner join (select d.patient_id, date(max(d.visit_date)) as latest_disc\n" +
-                "                         from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "                         from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "                         where d.program_name = 'OTZ'\n" +
                 "                         group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "      group by e.patient_id\n" +
@@ -131,10 +131,10 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition numberOfAdolescentsInotzProgram(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id from (select e.patient_id, max(e.visit_date) as latest_enr,min(e.visit_date) as first_enr, d.patient_id as disc_patient,d.latest_disc,p.dob as dob,timestampdiff(YEAR,p.DOB,date(:endDate)),date_sub(:endDate , interval "+month+" MONTH)\n" +
-                "from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "       inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "       inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id\n" +
                 "       left join (select d.patient_id, date(max(d.visit_date)) as latest_disc\n" +
-                "                  from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "                  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "                  where d.program_name = 'OTZ'\n" +
                 "                  group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "group by e.patient_id\n" +
@@ -152,9 +152,9 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition reportedDead(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select dis.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation dis\n" +
-                "       join kenyaemr_etl.etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
-                "       join kenyaemr_etl.etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
                 "where (dis.discontinuation_reason = 160034 or p.dead = 1)\n" +
                 "  and en.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "  and dis.visit_date between :startDate and :endDate\n" +
@@ -172,9 +172,9 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition transitionedToAdultCare(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select dis.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation dis\n" +
-                "       join kenyaemr_etl.etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
-                "       join kenyaemr_etl.etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
+                "       join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
                 "where dis.discontinuation_reason = 165363\n" +
                 "  and en.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "  and dis.visit_date between :startDate and :endDate\n" +
@@ -191,9 +191,9 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition optedOutOfOtz(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select dis.patient_id\n" +
-                "from kenyaemr_etl.etl_patient_program_discontinuation dis\n" +
-                "      join kenyaemr_etl.etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
-                "      join kenyaemr_etl.etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation dis\n" +
+                "      join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment en on en.patient_id = dis.patient_id\n" +
+                "      join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id = dis.patient_id and p.voided = 0\n" +
                 "where dis.discontinuation_reason = 159836\n" +
                 " and en.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "and dis.visit_date between :startDate and :endDate\n" +
@@ -213,11 +213,11 @@ public class ETLOtzCohortLibrary {
         String sqlQuery = "select distinct patient_id\n" +
                 "            from (\n" +
                 "            select f1.patient_id,max(f1.visit_date) as visit_date, max(f2.next_appointment_date) as next_appointment_date\n" +
-                "            from kenyaemr_etl.etl_patient_hiv_followup f1\n" +
-                "            join kenyaemr_etl.etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f1\n" +
+                "            join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f2 on f1.visit_date>f2.visit_date\n" +
                 "            and f1.patient_id=f2.patient_id\n" +
-                "            join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
-                "            join kenyaemr_etl.etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
+                "            join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "            join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
                 "            where date(f1.visit_date) between date(:startDate) and date(:endDate)\n" +
                 "              and f1.visit_date<=f2.next_appointment_date and f1.visit_date>=ot.visit_date\n" +
                 "            group by f1.patient_id, f1.visit_date)vis;";
@@ -235,10 +235,10 @@ public class ETLOtzCohortLibrary {
         String sqlQuery = "select  patient_id\n" +
                 "       from (\n" +
                 "       select f1.patient_id,f1.arv_adherence\n" +
-                "       from kenyaemr_etl.etl_patient_hiv_followup f1\n" +
-                "              join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
-                "              join kenyaemr_etl.etl_otz_enrollment otz on otz.patient_id=f1.patient_id\n" +
-                "              join kenyaemr_etl.etl_patient_demographics p on p.patient_id=f1.patient_id and p.voided=0\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f1\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment otz on otz.patient_id=f1.patient_id\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=f1.patient_id and p.voided=0\n" +
                 "         where date(f1.visit_date) <= date(:endDate) and f1.arv_adherence=159405\n" +
                 "         group by f1.patient_id)vis ;";
         cd.setName("AdherenceGood");
@@ -255,10 +255,10 @@ public class ETLOtzCohortLibrary {
         String sqlQuery = "select  patient_id\n" +
                 "           from (\n" +
                 "           select f1.patient_id,max(f1.visit_date) as visit_date, max(f1.next_appointment_date) as next_appointment_date\n" +
-                "           from kenyaemr_etl.etl_patient_hiv_followup f1\n" +
-                "           join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
-                "           join kenyaemr_etl.etl_otz_enrollment otz on otz.patient_id=f1.patient_id\n" +
-                "           join kenyaemr_etl.etl_patient_demographics p on p.patient_id=f1.patient_id and p.voided=0\n" +
+                "           from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup f1\n" +
+                "           join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "           join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment otz on otz.patient_id=f1.patient_id\n" +
+                "           join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=f1.patient_id and p.voided=0\n" +
                 "             where date(f1.next_appointment_date) between date(:startDate) and date(:endDate) and f1.next_appointment_date>otz.visit_date\n" +
                 "           group by f1.patient_id, f1.visit_date)vis where visit_date<next_appointment_date;\n";
         cd.setName("BookedAppointments");
@@ -271,12 +271,12 @@ public class ETLOtzCohortLibrary {
     }
     public CohortDefinition patientWithVLResultWithinLast6MonthsAtEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "  inner join( select patient_id,visit_date,\n" +
                 "                if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "                urgency\n" +
-                "              from kenyaemr_etl.etl_laboratory_extract\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "              where lab_test in (1305, 856)\n" +
                 "              and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -292,12 +292,12 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition patientWithVLlessThan1000AtEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "  inner join( select patient_id,visit_date,\n" +
                 "     if(lab_test = 856, test_result, \"\") as vl_result,\n" +
                 "     urgency\n" +
-                "    from kenyaemr_etl.etl_laboratory_extract\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "    where lab_test = 856\n" +
                 "    and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -314,12 +314,12 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition patientWithVLlessThan400AtEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "  inner join( select patient_id,visit_date,\n" +
                 "                if(lab_test = 856, test_result, \"\") as vl_result,\n" +
                 "                urgency\n" +
-                "              from kenyaemr_etl.etl_laboratory_extract\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "              where lab_test = 856\n" +
                 "                    and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -336,12 +336,12 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition patientWithLDLAtEnrollment(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "  inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "  inner join( select patient_id,visit_date,\n" +
                 "                if(lab_test=1305 and test_result = 1302, \"LDL\",\"\") as vl_result,\n" +
                 "                urgency\n" +
-                "              from kenyaemr_etl.etl_laboratory_extract\n" +
+                "              from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "              where lab_test = 1305\n" +
                 "                    and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -359,10 +359,10 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithValidVL(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id from (select c.patient_id,vl.vl_date from (select e.patient_id, max(e.visit_date) as latest_enr,min(e.visit_date) as first_enr, d.patient_id as disc_patient,d.latest_disc,p.dob as dob,timestampdiff(YEAR,p.DOB,date(:endDate)),date_sub(:endDate , interval "+month+" MONTH)\n" +
-                "  from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id\n" +
                 "         left join (select d.patient_id, date(max(d.visit_date)) as latest_disc\n" +
-                "                    from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "                    where d.program_name = 'OTZ'\n" +
                 "                    group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "  group by e.patient_id\n" +
@@ -383,7 +383,7 @@ public class ETLOtzCohortLibrary {
                 "                                                                                           x.lab_test    as lab_test,\n" +
                 "                                                                                           x.test_result as test_result,\n" +
                 "                                                                                           urgency       as urgency\n" +
-                "                                                                                    from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                                                                                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                                                                                    where x.lab_test in (1305, 856)\n" +
                 "                                                                                    group by x.patient_id, x.visit_date\n" +
                 "                                                                                    order by visit_date desc)b\n" +
@@ -403,10 +403,10 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithValidVLLess400(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id from (select c.patient_id,vl.vl_date from (select e.patient_id, max(e.visit_date) as latest_enr,min(e.visit_date) as first_enr, d.patient_id as disc_patient,d.latest_disc,p.dob as dob,timestampdiff(YEAR,p.DOB,date(:endDate)),date_sub(:endDate , interval "+month+" MONTH)\n" +
-                "  from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id\n" +
                 "         left join (select d.patient_id, date(max(d.visit_date)) as latest_disc\n" +
-                "                    from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "                    where d.program_name = 'OTZ'\n" +
                 "                    group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "  group by e.patient_id\n" +
@@ -427,7 +427,7 @@ public class ETLOtzCohortLibrary {
                 "                                                                                           x.lab_test    as lab_test,\n" +
                 "                                                                                           x.test_result as test_result,\n" +
                 "                                                                                           urgency       as urgency\n" +
-                "                                                                                    from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                                                                                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                                                                                    where x.lab_test in (1305, 856)\n" +
                 "                                                                                    group by x.patient_id, x.visit_date\n" +
                 "                                                                                    order by visit_date desc)b\n" +
@@ -447,10 +447,10 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithValidVLLess1000(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select a.patient_id from (select c.patient_id,vl.vl_date from (select e.patient_id, max(e.visit_date) as latest_enr,min(e.visit_date) as first_enr, d.patient_id as disc_patient,d.latest_disc,p.dob as dob,timestampdiff(YEAR,p.DOB,date(:endDate)),date_sub(:endDate , interval "+month+" MONTH)\n" +
-                "  from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id\n" +
                 "         left join (select d.patient_id, date(max(d.visit_date)) as latest_disc\n" +
-                "                    from kenyaemr_etl.etl_patient_program_discontinuation d\n" +
+                "                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d\n" +
                 "                    where d.program_name = 'OTZ'\n" +
                 "                    group by d.patient_id)d on e.patient_id = d.patient_id\n" +
                 "  group by e.patient_id\n" +
@@ -471,7 +471,7 @@ public class ETLOtzCohortLibrary {
                 "                                                                                           x.lab_test    as lab_test,\n" +
                 "                                                                                           x.test_result as test_result,\n" +
                 "                                                                                           urgency       as urgency\n" +
-                "                                                                                    from kenyaemr_etl.etl_laboratory_extract x\n" +
+                "                                                                                    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
                 "                                                                                    where x.lab_test in (1305, 856)\n" +
                 "                                                                                    group by x.patient_id, x.visit_date\n" +
                 "                                                                                    order by visit_date desc)b\n" +
@@ -490,12 +490,12 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition patientWithValidVLGreaterThan1000(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "                inner join( select patient_id,visit_date,\n" +
                 "                   if(lab_test = 856, test_result, \"\") as vl_result,\n" +
                 "   urgency\n" +
-                "  from kenyaemr_etl.etl_laboratory_extract\n" +
+                "  from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "  where lab_test = 856\n" +
                 "  and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -512,12 +512,12 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition patientWithValidVLasLDL(){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select  e.patient_id from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics p on p.patient_id=e.patient_id\n" +
+        String sqlQuery = "select  e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on p.patient_id=e.patient_id\n" +
                 "                inner join( select patient_id,visit_date,\n" +
                 "                              if(lab_test=1305 and test_result = 1302, \"LDL\",\"\") as vl_result,\n" +
                 "              urgency\n" +
-                "            from kenyaemr_etl.etl_laboratory_extract\n" +
+                "            from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "            where lab_test = 1305\n" +
                 "                  and visit_date between  date_sub(:endDate , interval 6 MONTH) and date(:endDate)) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "where  date(e.visit_date) between date(:startDate) and date(:endDate)\n" +
@@ -549,19 +549,19 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -595,21 +595,21 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -645,21 +645,21 @@ public class ETLOtzCohortLibrary {
                 "          if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "          a.dob                                                        as dob,\n" +
                 "          encounter\n" +
-                "        from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "                inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "                inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "                inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "                inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "        from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "                inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "                inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "                inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "        where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "              and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "              and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "              group by e.patient_id) a\n" +
-                "            left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "            left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "            left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "            left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "          group by mch.patient_id\n" +
                 "          having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "          inner join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
-                "          left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "          inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
+                "          left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "        group by a.patient_id) o\n" +
                 "   ) e\n" +
                 " where\n" +
@@ -696,21 +696,21 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -747,21 +747,21 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -798,21 +798,21 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (856, 1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -849,21 +849,21 @@ public class ETLOtzCohortLibrary {
                 "         if(l.lab_test = 856, mid(max(concat(l.visit_date, l.test_result)), 11), if(l.lab_test=1305 and mid(max(concat(l.visit_date, l.test_result)), 11) = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "         a.dob                                                        as dob,\n" +
                 "         encounter\n" +
-                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from kenyaemr_etl.etl_otz_enrollment e\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
-                "         inner join kenyaemr_etl.etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
-                "         inner join openmrs.encounter enc on e.patient_id=enc.patient_id\n" +
-                "         inner join openmrs.orders o on o.encounter_id =  enc.encounter_id\n" +
+                "       from (select e.patient_id, min(date_started) as date_started_art, p.DOB as dob,o.encounter_id as encounter from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p on e.patient_id = p.patient_id and p.voided = 0\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event d on d.patient_id = e.patient_id and ifnull(d.voided, 0) = 0\n" +
+                "         inner JOIN encounter enc on e.patient_id=enc.patient_id\n" +
+                "         inner JOIN orders o on o.encounter_id =  enc.encounter_id\n" +
                 "       where o.order_type_id = 3 and o.order_reason=161236\n" +
                 "             and o.date_activated  between date(:startDate) and date(:endDate)\n" +
                 "             and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       group by e.patient_id) a\n" +
-                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from kenyaemr_etl.etl_mch_enrollment mch\n" +
-                "           left join kenyaemr_etl.etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
+                "         left join (select mch.patient_id,di.patient_id as disc_patient,max(date(mch.visit_date)) as latest_mch_date,max(date(di.visit_date)) as disc_date,di.program_name from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment mch\n" +
+                "           left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation di on mch.patient_id = di.patient_id\n" +
                 "         group by mch.patient_id\n" +
                 "         having ((latest_mch_date > disc_date and di.program_name = 'MCH Mother') or di.patient_id is null)) mch on mch.patient_id = a.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (1305)\n" +
-                "         left join kenyaemr_etl.etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l on l.patient_id = a.patient_id and l.lab_test in (1305)\n" +
+                "         left join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract l_ever on l_ever.patient_id = a.patient_id and l_ever.lab_test in (856, 1305)\n" +
                 "       group by a.patient_id) o\n" +
                 "  ) e\n" +
                 "where\n" +
@@ -887,7 +887,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithRepeatVLLessThan1000(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct e.patient_id\n" +
-                "                from kenyaemr_etl.etl_otz_enrollment e\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "                   inner join\n" +
                 "                 (\n" +
                 "                   select\n" +
@@ -895,10 +895,10 @@ public class ETLOtzCohortLibrary {
                 "                     visit_date,\n" +
                 "                     if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "     urgency,order_id\n" +
-                "   from kenyaemr_etl.etl_laboratory_extract\n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test in (1305, 856)  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -916,7 +916,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithRepeatVLMoreThan1000(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct e.patient_id\n" +
-                "                from kenyaemr_etl.etl_otz_enrollment e\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "                   inner join\n" +
                 "                 (\n" +
                 "                   select\n" +
@@ -924,10 +924,10 @@ public class ETLOtzCohortLibrary {
                 "                     visit_date,\n" +
                 "                     if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "     urgency,order_id\n" +
-                "   from kenyaemr_etl.etl_laboratory_extract\n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test = 856  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -945,7 +945,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithRepeatVLLessThan400(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct e.patient_id\n" +
-                "                from kenyaemr_etl.etl_otz_enrollment e\n" +
+                "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "                   inner join\n" +
                 "                 (\n" +
                 "                   select\n" +
@@ -953,10 +953,10 @@ public class ETLOtzCohortLibrary {
                 "                     visit_date,\n" +
                 "                     if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "     urgency,order_id\n" +
-                "   from kenyaemr_etl.etl_laboratory_extract\n" +
+                "   from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "   where lab_test in (1305, 856)  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 " ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                " inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                " inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 " where vl_result.order_id is not null\n" +
                 "       and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "       and o.order_reason in(843,163523)\n" +
@@ -974,7 +974,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithRepeatVLResults(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct e.patient_id,vl_result\n" +
-                "from kenyaemr_etl.etl_otz_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "  inner join\n" +
                 "  (\n" +
                 "    select\n" +
@@ -982,10 +982,10 @@ public class ETLOtzCohortLibrary {
                 "      visit_date,\n" +
                 "      if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "      urgency,order_id\n" +
-                "    from kenyaemr_etl.etl_laboratory_extract\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "    where lab_test in (1305, 856)  and visit_date between  date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "  ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                "  inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 "where vl_result.order_id is not null\n" +
                 "      and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "      and o.order_reason in(843,163523)\n" +
@@ -1002,7 +1002,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithRepeatVLasLDL(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select distinct e.patient_id\n" +
-                "from kenyaemr_etl.etl_otz_enrollment e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e\n" +
                 "  inner join\n" +
                 "  (\n" +
                 "    select\n" +
@@ -1010,10 +1010,10 @@ public class ETLOtzCohortLibrary {
                 "      visit_date,\n" +
                 "      if(lab_test = 856, test_result, if(lab_test=1305 and test_result = 1302, \"LDL\",\"\")) as vl_result,\n" +
                 "      urgency,order_id\n" +
-                "    from kenyaemr_etl.etl_laboratory_extract\n" +
+                "    from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "    where lab_test = 1305  and visit_date between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "  ) vl_result on vl_result.patient_id = e.patient_id\n" +
-                "  inner join openmrs.orders o on o.order_id =vl_result.order_id\n" +
+                "  inner JOIN orders o on o.order_id =vl_result.order_id\n" +
                 "where vl_result.order_id is not null\n" +
                 "      and e.visit_date between date_sub(:startDate, interval "+month+" MONTH) and date_sub(:endDate, interval "+month+" MONTH)\n" +
                 "      and o.order_reason in(843,163523)\n" +
@@ -1032,11 +1032,11 @@ public class ETLOtzCohortLibrary {
         String sqlQuery = "select distinct patient_id\n" +
                 "from (\n" +
                 "       select f1.patient_id,max(f1.visit_date) as visit_date\n" +
-                "       from kenyaemr_etl.etl_drug_event f1\n" +
-                "              join kenyaemr_etl.etl_drug_event f2 on f1.visit_date>f2.visit_date\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event f1\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event f2 on f1.visit_date>f2.visit_date\n" +
                 "         and f1.patient_id=f2.patient_id\n" +
-                "               join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
-                "               join kenyaemr_etl.etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "               join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
                 "       where date(f1.visit_date) between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "         and f1.regimen_line=\"Second line\" and f2.regimen_line=\"First line\" and f1.discontinued is null\n" +
                 "\n" +
@@ -1055,11 +1055,11 @@ public class ETLOtzCohortLibrary {
         String sqlQuery = "select distinct patient_id\n" +
                 "from (\n" +
                 "       select f1.patient_id,max(f1.visit_date) as visit_date\n" +
-                "       from kenyaemr_etl.etl_drug_event f1\n" +
-                "              join kenyaemr_etl.etl_drug_event f2 on f1.visit_date>f2.visit_date\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event f1\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event f2 on f1.visit_date>f2.visit_date\n" +
                 "         and f1.patient_id=f2.patient_id\n" +
-                "              join kenyaemr_etl.etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
-                "              join kenyaemr_etl.etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hiv_enrollment enr on enr.patient_id=f1.patient_id\n" +
+                "              join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment ot on ot.patient_id=f1.patient_id\n" +
                 "       where date(f1.visit_date) between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "         and f1.regimen_line=\"Third line\" and f2.regimen_line=\"Second line\" and f1.discontinued is null\n" +
                 "\n" +
@@ -1076,7 +1076,7 @@ public class ETLOtzCohortLibrary {
     public CohortDefinition patientWithVLMoreThan1000AtEnrollment(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select e.patient_id\n" +
-                "from kenyaemr_etl.etl_drug_event e\n" +
+                "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_drug_event e\n" +
                 "       inner join\n" +
                 "     (\n" +
                 "       select\n" +
@@ -1084,15 +1084,15 @@ public class ETLOtzCohortLibrary {
                 "         visit_date,\n" +
                 "         if(lab_test = 856, test_result, \"\") as vl_result,\n" +
                 "         urgency\n" +
-                "       from kenyaemr_etl.etl_laboratory_extract\n" +
+                "       from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract\n" +
                 "       where lab_test = 856 and visit_date between  date_sub(:endDate , interval "+month+" MONTH) and date(:endDate)\n" +
                 "     ) vl_result on vl_result.patient_id = e.patient_id\n" +
                 "       left JOIN\n" +
-                "     (select patient_id, visit_date from kenyaemr_etl.etl_patient_program_discontinuation\n" +
+                "     (select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation\n" +
                 "      where date(visit_date) <= date(:endDate) and program_name='HIV'\n" +
                 "      group by patient_id\n" +
                 "     ) d on d.patient_id = e.patient_id\n" +
-                "       inner JOIN(select patient_id, visit_date from kenyaemr_etl.etl_otz_enrollment\n" +
+                "       inner JOIN(select patient_id, visit_date from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment\n" +
                 "                  where date(visit_date) <= date(:endDate)\n" +
                 "                  group by patient_id) ot on ot.patient_id = e.patient_id\n" +
                 "where e.program = 'HIV' and vl_result.visit_date <= ot.visit_date\n" +
@@ -1110,13 +1110,13 @@ public class ETLOtzCohortLibrary {
 
     public CohortDefinition otzMembersWhoCompletedAllModules(Integer month){
         SqlCohortDefinition cd = new SqlCohortDefinition();
-        String sqlQuery = "select e.patient_id from kenyaemr_etl.etl_otz_enrollment e join  (select patient_id, min(a.visit_date) as firstVisitDate,\n" +
+        String sqlQuery = "select e.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_enrollment e join  (select patient_id, min(a.visit_date) as firstVisitDate,\n" +
                 "   group_concat(\n" +
                 "       concat_ws(',',if(a.orientation = 'Yes',1,null),if(a.leadership = 'Yes',2,null),if(a.participation = 'Yes',3,null),\n" +
                 "                 if(a.treatment_literacy = 'Yes',4,null),if(a.transition_to_adult_care = 'Yes',5,null),\n" +
                 "                 if(a.making_decision_future = 'Yes',6,null),if(a.srh = 'Yes',7,null),if(a.beyond_third_ninety = 'Yes',8,null)\n" +
                 "         )) as modules_completed\n" +
-                "        from kenyaemr_etl.etl_otz_activity a group by patient_id)a on e.patient_id = a.patient_id\n" +
+                "        from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_otz_activity a group by patient_id)a on e.patient_id = a.patient_id\n" +
                 "where length(a.modules_completed)>=15\n" +
                 "  and firstVisitDate between date_sub(:endDate , interval "+month+" MONTH) and date(:endDate);";
         cd.setName("OtzMembersWhoCompletedAllModules");

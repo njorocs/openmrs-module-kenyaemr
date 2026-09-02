@@ -11,8 +11,8 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPCycleBeadsGivenDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPEmergencyContraceptiveQtyDispDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -39,10 +39,10 @@ public class FPCycleBeadsGivenEvaluator implements EncounterDataEvaluator {
         String qry =
                 "SELECT v.encounter_id, " +
                         "       cn.name AS circle_beads_given " +
-                        "FROM kenyaemr_etl.etl_family_planning v " +
-                        "LEFT JOIN openmrs.concept c " +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning v " +
+                        "LEFT JOIN concept c " +
                         "       ON c.concept_id = v.circle_beads_given " +
-                        "LEFT JOIN openmrs.concept_name cn " +
+                        "LEFT JOIN concept_name cn " +
                         "       ON cn.concept_id = c.concept_id " +
                         "      AND cn.locale = 'en' " +
                         "      AND cn.concept_name_type = 'FULLY_SPECIFIED' " +

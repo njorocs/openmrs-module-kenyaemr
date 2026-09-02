@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.cwc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.cwc.DateOfVaccineDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -37,7 +38,7 @@ public class DateOfVaccineDataEvaluator implements EncounterDataEvaluator {
 
         String tableColumn = def.getVaccineTableColumn();
 
-        String qry = "select encounter_id, (CASE WHEN :vaccineColumn != '' THEN STR_TO_DATE(:vaccineColumn, '%Y-%m-%d') ELSE NULL END) from kenyaemr_etl.etl_immunization ";
+        String qry = "select encounter_id, (CASE WHEN :vaccineColumn != '' THEN STR_TO_DATE(:vaccineColumn, '%Y-%m-%d') ELSE NULL END) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
 
         qry = qry.replaceAll(":vaccineColumn", tableColumn);
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

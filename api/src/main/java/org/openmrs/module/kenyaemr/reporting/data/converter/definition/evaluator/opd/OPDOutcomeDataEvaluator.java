@@ -10,8 +10,8 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.opd;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDOutcomeDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.opd.OPDReferredToDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
 import org.openmrs.module.reporting.data.encounter.evaluator.EncounterDataEvaluator;
@@ -40,13 +40,13 @@ public class OPDOutcomeDataEvaluator implements EncounterDataEvaluator {
         String qry = "select\n" +
 			"   v.encounter_id,\n" +
 			"    (case v.patient_outcome when 159 then 'Died'  else 'Alive' end) as patient_outcome\n" +
-			"from kenyaemr_etl.etl_clinical_encounter v\n" +
+			"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter v\n" +
 			"where date(v.visit_date) between date(:startDate) and date(:endDate)\n" +
 			"UNION\n" +
 			"select\n" +
 			"    sc.encounter_id,\n" +
 			"    (case sc.patient_outcome when 159 then 'Died'  else 'Alive' end) as patient_outcome\n" +
-			"from kenyaemr_etl.etl_special_clinics sc\n" +
+			"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_special_clinics sc\n" +
 			"where date(sc.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();

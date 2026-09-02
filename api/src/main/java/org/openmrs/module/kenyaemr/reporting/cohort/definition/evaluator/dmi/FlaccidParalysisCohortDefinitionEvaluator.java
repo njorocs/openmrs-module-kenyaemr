@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.dmi.FlaccidParalysisCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -50,13 +51,13 @@ public class FlaccidParalysisCohortDefinitionEvaluator implements CohortDefiniti
 		
 		String qry = "select a.patient_id\n" +
 				"from (select patient_id, c.visit_date,group_concat(c.complaint) as complaint\n" +
-				"      from kenyaemr_etl.etl_allergy_chronic_illness c\n" +
+				"      from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_allergy_chronic_illness c\n" +
 				"      where c.complaint = 157498\n" +
 				"        and date(c.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"      group by patient_id) a\n" +
-				"         join kenyaemr_etl.etl_patient_demographics d on a.patient_id = d.patient_id and\n" +
+				"         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on a.patient_id = d.patient_id and\n" +
 				"                                                         timestampdiff(YEAR,d.DOB,a.visit_date) < 15\n" +
-				"         join kenyaemr_etl.etl_patient_triage t\n" +
+				"         join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_triage t\n" +
 				"              on a.patient_id = t.patient_id and date(t.visit_date) between date(:startDate) and date(:endDate)\n" +
 				"where FIND_IN_SET(157498, a.complaint) > 0;";
 		

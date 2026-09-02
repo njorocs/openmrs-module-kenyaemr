@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluato
 
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.fp.FPInjectablesQtyDispDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class FPInjectablesQtyDispEvaluator implements EncounterDataEvaluator {
                 "SELECT \n" +
                         "    fp.encounter_id,\n" +
                         "    fp.quantity_dispensed\n" +
-                        "FROM kenyaemr_etl.etl_family_planning fp\n" +
+                        "FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_family_planning fp\n" +
                         "WHERE fp.contraceptive_dispensed IN (907, 79494)\n" +
                         "  AND fp.quantity_dispensed IS NOT NULL\n" +
                         "  AND DATE(fp.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +

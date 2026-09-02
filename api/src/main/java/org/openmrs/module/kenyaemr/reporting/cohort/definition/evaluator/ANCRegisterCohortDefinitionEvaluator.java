@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.cohort.definition.evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ANCRegisterCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -41,7 +42,7 @@ public class ANCRegisterCohortDefinitionEvaluator implements EncounterQueryEvalu
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
 		String qry = "SELECT v.encounter_id\n" +
-				"from kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+				"from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
 				"where v.anc_visit_number >= 1 and date(v.visit_date) BETWEEN date(:startDate) AND date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

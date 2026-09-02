@@ -10,7 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.sgbv;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.HivTestDataDefinition;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.sgbv.TcaDateDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,9 +36,9 @@ public class TcaDateDateDefinitionEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT a.encounter_id, fup.next_appointment_date\n" +
-                "  FROM kenyaemr_etl.etl_gbv_screening a\n" +
+                "  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_gbv_screening a\n" +
                 "  LEFT JOIN (SELECT gsa.visit_id, gsa.next_appointment_date\n" +
-                "  FROM kenyaemr_etl.etl_patient_hiv_followup gsa) fup ON a.visit_id = fup.visit_id";
+                "  FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup gsa) fup ON a.visit_id = fup.visit_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

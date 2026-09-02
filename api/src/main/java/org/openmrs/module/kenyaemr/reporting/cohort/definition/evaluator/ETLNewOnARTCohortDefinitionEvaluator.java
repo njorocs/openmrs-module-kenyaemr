@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ETLNewOnARTCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,7 +48,7 @@ public class ETLNewOnARTCohortDefinitionEvaluator implements CohortDefinitionEva
 
 		Cohort newCohort = new Cohort();
 
-		String qry="SELECT patient_id FROM kenyaemr_etl.etl_last_month_newly_on_art;";
+		String qry="SELECT patient_id FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_last_month_newly_on_art;";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCNumberRevisitDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class ANCNumberRevisitDataEvaluator implements EncounterDataEvaluator {
         String qry = "SELECT v.encounter_id, i.anc_number\n" +
                 "FROM (\n" +
                 "         SELECT v.encounter_id, v.patient_id\n" +
-                "         FROM kenyaemr_etl.etl_mch_antenatal_visit v\n" +
+                "         FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v\n" +
                 "         WHERE v.form = 'MCH ANC Followup'\n" +
                 "           AND v.visit_date BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "     ) v\n" +
@@ -48,8 +49,8 @@ public class ANCNumberRevisitDataEvaluator implements EncounterDataEvaluator {
                 "                   MID(MAX(CONCAT(i.visit_date, i.anc_number)), 11),\n" +
                 "                   d.national_unique_patient_identifier\n" +
                 "           ) AS anc_number\n" +
-                "    FROM kenyaemr_etl.etl_mch_antenatal_visit i\n" +
-                "             JOIN kenyaemr_etl.etl_patient_demographics d\n" +
+                "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit i\n" +
+                "             JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d\n" +
                 "                  ON i.patient_id = d.patient_id\n" +
                 "    WHERE i.form = 'MCH Antenatal Initial Visit'\n" +
                 "    GROUP BY i.patient_id\n" +

@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.anc;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.ANCPartnerHIVStatusDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -38,7 +39,7 @@ public class ANCPartnerHivStatusDataEvaluator implements EncounterDataEvaluator 
         String qry = "select\n" +
                 "    v.encounter_id,\n" +
                 "  (case v.partner_hiv_status when 664 then 'HIV Negative' when 703 then 'HIV Positive' when 1067 then 'Unknown' else '' end) as partner_hiv_status\n" +
-                " from kenyaemr_etl.etl_mch_antenatal_visit v where date(visit_date) between date(:startDate) and date(:endDate);\n";
+                " from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_antenatal_visit v where date(visit_date) between date(:startDate) and date(:endDate);\n";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

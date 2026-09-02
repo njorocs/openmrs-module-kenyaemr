@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.reporting.data.converter.definition.evaluator.cacx;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.cacx.CountyOfResidenceDataDefinition;
 import org.openmrs.module.reporting.data.encounter.EvaluatedEncounterData;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,9 +37,9 @@ public class CountyOfResidenceDataEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
         String qry = "SELECT encounter_id, a.county\n" +
-                "from kenyaemr_etl.etl_cervical_cancer_screening t\n" +
-                "         inner join kenyaemr_etl.etl_patient_demographics d on t.patient_id = d.patient_id\n" +
-                "         inner join kenyaemr_etl.etl_person_address a on t.patient_id = a.patient_id\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_cervical_cancer_screening t\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d on t.patient_id = d.patient_id\n" +
+                "         inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_person_address a on t.patient_id = a.patient_id\n" +
                 "where date(t.visit_date) BETWEEN date(:startDate) AND date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
