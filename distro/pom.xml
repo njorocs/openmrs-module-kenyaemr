@@ -73,12 +73,6 @@
 
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
-			<artifactId>kenyadq-omod</artifactId>
-			<version>${kenyadqVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
 			<artifactId>kenyaemr-omod</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>

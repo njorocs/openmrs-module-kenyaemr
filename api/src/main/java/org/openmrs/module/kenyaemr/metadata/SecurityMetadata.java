@@ -11,7 +11,6 @@ package org.openmrs.module.kenyaemr.metadata;
 
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
-import org.openmrs.module.kenyadq.DqConstants;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.openmrs.util.PrivilegeConstants;
@@ -78,8 +77,6 @@ public class SecurityMetadata extends AbstractMetadataBundle {
 				EmrConstants.APP_DIRECTORY,
 				EmrConstants.APP_FACILITIES,
 				EmrConstants.APP_ADMIN,
-				DqConstants.APP_DATAQUALITY,
-				DqConstants.APP_DATAMANAGER,
 				EmrConstants.APP_FACILITY_DASHBOARD,
 				EmrConstants.APP_DRUG_ORDER,
 				EmrConstants.APP_LAB_ORDER,
@@ -167,8 +164,6 @@ public class SecurityMetadata extends AbstractMetadataBundle {
 						app(EmrConstants.APP_REPORTS),
 						app(EmrConstants.APP_DIRECTORY),
 						app(EmrConstants.APP_FACILITIES),
-						app(DqConstants.APP_DATAQUALITY),
-						app(DqConstants.APP_DATAMANAGER),
 						app(EmrConstants.APP_FACILITY_DASHBOARD),
 						app(EmrConstants.APP_DRUG_ORDER),
 						app(EmrConstants.APP_LAB_ORDER),
@@ -219,7 +214,6 @@ public class SecurityMetadata extends AbstractMetadataBundle {
 						app(EmrConstants.APP_REPORTS),
 						app(EmrConstants.APP_DIRECTORY),
 						app(EmrConstants.APP_FACILITIES),
-						app(DqConstants.APP_DATAQUALITY),
 						app(EmrConstants.APP_FACILITY_DASHBOARD),
 						app(EmrConstants.APP_DRUG_ORDER),
 						app(EmrConstants.APP_LAB_ORDER),
