@@ -62,6 +62,7 @@ public class FacilityStatusHandler extends DataHandler {
      * Auth: mediator client_credentials via kenyaemr.sha.jwt.auth.mode = mediator
      */
     public static ResponseEntity<String> getFacilityStatus() throws IOException {
+
         String bearerToken = DataHandler.getBearerToken();
         if (bearerToken == null || bearerToken.isEmpty()) {
             log.error("Bearer token is missing");
@@ -82,23 +83,24 @@ public class FacilityStatusHandler extends DataHandler {
 
         log.info("Fetching facility status from: {}", url);
 
-        try {
-            CloseableHttpClient httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(createSslConnectionFactory())
-                    .build();
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLSocketFactory(createSslConnectionFactory())
+                .build()) {
+
             HttpGet getRequest = new HttpGet(url);
             getRequest.setHeader("Authorization", "Bearer " + bearerToken);
 
-            HttpResponse response = httpClient.execute(getRequest);
-            int responseCode = response.getStatusLine().getStatusCode();
+            try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
+                int responseCode = response.getStatusLine().getStatusCode();
 
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
-                        .body(createSuccessResponse(response));
-            } else {
-                log.error("HIE facility registry returned HTTP {}", responseCode);
-                return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"status\": \"Error\", \"code\": " + responseCode + "}");
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
+                            .body(createSuccessResponse(response));
+                } else {
+                    log.error("HIE facility registry returned HTTP {}", responseCode);
+                    return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"status\": \"Error\", \"code\": " + responseCode + "}");
+                }
             }
         } catch (Exception ex) {
             log.error("Error fetching facility status from HIE middleware", ex);
@@ -106,7 +108,6 @@ public class FacilityStatusHandler extends DataHandler {
                     .body("{\"status\": \"Error\", \"message\": \"" + ex.getMessage() + "\"}");
         }
     }
-
     /**
      * Fetches facility status and routes to the correct adapter based on response shape:
      *   "[" → IlmHieAdapter          (new DHA HIE middleware — JSON array)

@@ -119,7 +119,6 @@ import org.openmrs.module.kenyaemr.metadata.OTZMetadata;
 import org.openmrs.module.kenyaemr.metadata.OVCMetadata;
 import org.openmrs.module.kenyaemr.metadata.TbMetadata;
 import org.openmrs.module.kenyaemr.metadata.VMMCMetadata;
-import org.openmrs.module.kenyaemr.model.AdverseDrugReactionEmailLog;
 import org.openmrs.module.kenyaemr.model.ConsentOTPRequest;
 import org.openmrs.module.kenyaemr.nmlis.NlmisHttpClientService;
 import org.openmrs.module.kenyaemr.nupi.UpiUtilsDataExchange;
@@ -156,7 +155,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
@@ -273,8 +271,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/forms") // gets all visit forms for a patient
 	@ResponseBody
 	public Object getAllAvailableFormsForVisit(HttpServletRequest request,
-											   @RequestParam("patientUuid") String patientUuid,
-											   @RequestParam(value = "visitUuid", required = false) String visitUuid) {
+			@RequestParam("patientUuid") String patientUuid,
+			@RequestParam(value = "visitUuid", required = false) String visitUuid) {
 		if (StringUtils.isBlank(patientUuid)) {
 			return new ResponseEntity<Object>("You must specify patientUuid in the request!",
 					new HttpHeaders(), HttpStatus.BAD_REQUEST);
@@ -334,8 +332,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				}
 			}
 
-			//We want to show patient forms that can be filled multiple times per visit eg IPD forms
-			if(!commonFormDescriptors.isEmpty()) {
+			// We want to show patient forms that can be filled multiple times per visit eg
+			// IPD forms
+			if (!commonFormDescriptors.isEmpty()) {
 
 				for (FormDescriptor descriptor : commonFormDescriptors) {
 					if (!descriptor.getTarget().getRetired().booleanValue()) {
@@ -383,110 +382,128 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	 * @param patientUuid
 	 * @return
 	 */
-//	@RequestMapping(method = RequestMethod.GET, value = "/flags") // gets all flags for a patient
-//	@ResponseBody
-//	@Cacheable(value = "patientFlagCache", key = "#patientUuid")
-//	public Object getAllPatientFlags(HttpServletRequest request, @RequestParam("patientUuid") String patientUuid,
-//			@SpringBean CalculationManager calculationManager) {
-//		if (StringUtils.isBlank(patientUuid)) {
-//			return new ResponseEntity<Object>("You must specify patientUuid in the request!",
-//					new HttpHeaders(), HttpStatus.BAD_REQUEST);
-//		}
-//
-//		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
-//		// ProgramWorkflowService service = Context.getProgramWorkflowService();
-//		// List<PatientProgram> programEnrolmentHistory =
-//		// service.getPatientPrograms(patient, null, null, null, null, null, false);
-//
-//		if (patient == null) {
-//			return new ResponseEntity<Object>("The provided patient was not found in the system!",
-//					new HttpHeaders(), HttpStatus.NOT_FOUND);
-//		}
-//
-//		Map<String, String> patientFlagsMap = new HashMap<>();
-//		ObjectNode flagsObj = JsonNodeFactory.instance.objectNode();
-//
-//		// TODO: Consider flags categorization for a patient who is not in any program
-//		// TODO: Commenting this to allow patients not enrolled in any programs to see
-//		// flags focussing on facility wide implementation
-//		// if (programEnrolmentHistory.size() < 1) {
-//		// flagsObj.put("results", JsonNodeFactory.instance.arrayNode()); // return an
-//		// empty list
-//		// return flagsObj.toString();
-//		// }
-//
-//		CacheManager cacheManager = Context.getRegisteredComponent("apiCacheManager", CacheManager.class);
-//		Cache patientFlagCache = cacheManager.getCache("patientFlagCache");
-//		List<String> patientFlagsToRefreshOnEveryRequest = Arrays.asList(
-//				"EligibleForIDSRSymptomsFlagsCalculation");
-//		calculationManager.refresh();
-//
-//		/**
-//		 * The patientFlagCache is implemented using a map of property and value pair.
-//		 * For flags, the property (the key), is the simple name of the flags
-//		 * calculation
-//		 * We append a special property of lastUpdated to keep track of the last updated
-//		 * time.
-//		 * We can use the property to check if certain flags need refresh or not
-//		 * We only want to refresh flags which can change in the course of a visit
-//		 */
-//		if (patientFlagCache != null && patientFlagCache.get(patientUuid) != null) {
-//			patientFlagsMap = (HashMap<String, String>) cacheManager.getCache("patientFlagCache").get(patientUuid)
-//					.get();
-//			for (PatientFlagCalculation calc : calculationManager.getFlagCalculations()) {
-//
-//				if (!(calc instanceof PatientFlagCalculation)
-//						|| !patientFlagsToRefreshOnEveryRequest.contains(calc.getClass().getSimpleName())) {
-//					continue;
-//				}
-//
-//				try {
-//					CalculationResult result = Context.getService(PatientCalculationService.class)
-//							.evaluate(patient.getId(), calc);
-//					if (result != null && (Boolean) result.getValue()) {
-//						patientFlagsMap.put(calc.getClass().getSimpleName(), calc.getFlagMessage());
-//					}
-//				} catch (Exception ex) {
-//					System.out.println("Error evaluating " + ex.getMessage());
-//					log.error("Error evaluating " + calc.getClass(), ex);
-//				}
-//			}
-//			patientFlagsMap.put("lastUpdated", Instant.now().toString());
-//			patientFlagCache.put(patient.getUuid(), patientFlagsMap);
-//
-//			flagsObj.put("results", composePatientFlagsFromMap(patientFlagsMap));
-//			return flagsObj.toString();
-//		}
-//
-//		// define a hashmap of flag name and value for ease of update in other parts of
-//		// the code
-//		for (PatientFlagCalculation calc : calculationManager.getFlagCalculations()) {
-//
-//			if (!(calc instanceof PatientFlagCalculation)) { // we are only interested in flags calculation
-//				continue;
-//			}
-//
-//			try {
-//				CalculationResult result = Context.getService(PatientCalculationService.class).evaluate(patient.getId(),
-//						calc);
-//				if (result != null && (Boolean) result.getValue()) {
-//					patientFlagsMap.put(calc.getClass().getSimpleName(), calc.getFlagMessage());
-//				}
-//			} catch (Exception ex) {
-//				System.out.println("Error evaluating " + ex.getMessage());
-//				log.error("Error evaluating " + calc.getClass(), ex);
-//			}
-//		}
-//
-//		// add last update timestamp
-//		if (patientFlagCache != null) {
-//			patientFlagsMap.put("lastUpdated", Instant.now().toString());
-//			patientFlagCache.put(patient.getUuid(), patientFlagsMap);
-//		}
-//		flagsObj.put("results", composePatientFlagsFromMap(patientFlagsMap));
-//		return flagsObj.toString();
-//
-//	}
+	// @RequestMapping(method = RequestMethod.GET, value = "/flags") // gets all
+	// flags for a patient
+	// @ResponseBody
+	// @Cacheable(value = "patientFlagCache", key = "#patientUuid")
+	// public Object getAllPatientFlags(HttpServletRequest request,
+	// @RequestParam("patientUuid") String patientUuid,
+	// @SpringBean CalculationManager calculationManager) {
+	// if (StringUtils.isBlank(patientUuid)) {
+	// return new ResponseEntity<Object>("You must specify patientUuid in the
+	// request!",
+	// new HttpHeaders(), HttpStatus.BAD_REQUEST);
+	// }
+	//
+	// Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+	// // ProgramWorkflowService service = Context.getProgramWorkflowService();
+	// // List<PatientProgram> programEnrolmentHistory =
+	// // service.getPatientPrograms(patient, null, null, null, null, null, false);
+	//
+	// if (patient == null) {
+	// return new ResponseEntity<Object>("The provided patient was not found in the
+	// system!",
+	// new HttpHeaders(), HttpStatus.NOT_FOUND);
+	// }
+	//
+	// Map<String, String> patientFlagsMap = new HashMap<>();
+	// ObjectNode flagsObj = JsonNodeFactory.instance.objectNode();
+	//
+	// // TODO: Consider flags categorization for a patient who is not in any
+	// program
+	// // TODO: Commenting this to allow patients not enrolled in any programs to
+	// see
+	// // flags focussing on facility wide implementation
+	// // if (programEnrolmentHistory.size() < 1) {
+	// // flagsObj.put("results", JsonNodeFactory.instance.arrayNode()); // return
+	// an
+	// // empty list
+	// // return flagsObj.toString();
+	// // }
+	//
+	// CacheManager cacheManager = Context.getRegisteredComponent("apiCacheManager",
+	// CacheManager.class);
+	// Cache patientFlagCache = cacheManager.getCache("patientFlagCache");
+	// List<String> patientFlagsToRefreshOnEveryRequest = Arrays.asList(
+	// "EligibleForIDSRSymptomsFlagsCalculation");
+	// calculationManager.refresh();
+	//
+	// /**
+	// * The patientFlagCache is implemented using a map of property and value pair.
+	// * For flags, the property (the key), is the simple name of the flags
+	// * calculation
+	// * We append a special property of lastUpdated to keep track of the last
+	// updated
+	// * time.
+	// * We can use the property to check if certain flags need refresh or not
+	// * We only want to refresh flags which can change in the course of a visit
+	// */
+	// if (patientFlagCache != null && patientFlagCache.get(patientUuid) != null) {
+	// patientFlagsMap = (HashMap<String, String>)
+	// cacheManager.getCache("patientFlagCache").get(patientUuid)
+	// .get();
+	// for (PatientFlagCalculation calc : calculationManager.getFlagCalculations())
+	// {
+	//
+	// if (!(calc instanceof PatientFlagCalculation)
+	// ||
+	// !patientFlagsToRefreshOnEveryRequest.contains(calc.getClass().getSimpleName()))
+	// {
+	// continue;
+	// }
+	//
+	// try {
+	// CalculationResult result =
+	// Context.getService(PatientCalculationService.class)
+	// .evaluate(patient.getId(), calc);
+	// if (result != null && (Boolean) result.getValue()) {
+	// patientFlagsMap.put(calc.getClass().getSimpleName(), calc.getFlagMessage());
+	// }
+	// } catch (Exception ex) {
+	// System.out.println("Error evaluating " + ex.getMessage());
+	// log.error("Error evaluating " + calc.getClass(), ex);
+	// }
+	// }
+	// patientFlagsMap.put("lastUpdated", Instant.now().toString());
+	// patientFlagCache.put(patient.getUuid(), patientFlagsMap);
+	//
+	// flagsObj.put("results", composePatientFlagsFromMap(patientFlagsMap));
+	// return flagsObj.toString();
+	// }
+	//
+	// // define a hashmap of flag name and value for ease of update in other parts
+	// of
+	// // the code
+	// for (PatientFlagCalculation calc : calculationManager.getFlagCalculations())
+	// {
+	//
+	// if (!(calc instanceof PatientFlagCalculation)) { // we are only interested in
+	// flags calculation
+	// continue;
+	// }
+	//
+	// try {
+	// CalculationResult result =
+	// Context.getService(PatientCalculationService.class).evaluate(patient.getId(),
+	// calc);
+	// if (result != null && (Boolean) result.getValue()) {
+	// patientFlagsMap.put(calc.getClass().getSimpleName(), calc.getFlagMessage());
+	// }
+	// } catch (Exception ex) {
+	// System.out.println("Error evaluating " + ex.getMessage());
+	// log.error("Error evaluating " + calc.getClass(), ex);
+	// }
+	// }
+	//
+	// // add last update timestamp
+	// if (patientFlagCache != null) {
+	// patientFlagsMap.put("lastUpdated", Instant.now().toString());
+	// patientFlagCache.put(patient.getUuid(), patientFlagsMap);
+	// }
+	// flagsObj.put("results", composePatientFlagsFromMap(patientFlagsMap));
+	// return flagsObj.toString();
+	//
+	// }
 
 	/**
 	 * Prepares an array of flags from Patient flags map
@@ -508,10 +525,11 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		return flags;
 	}
 
-	//Removing cache
+	// Removing cache
 	@RequestMapping(method = RequestMethod.GET, value = "/flags") // gets all flags for a patient
 	@ResponseBody
-	public Object getAllPatientFlags(HttpServletRequest request, @RequestParam("patientUuid") String patientUuid, @SpringBean CalculationManager calculationManager) {
+	public Object getAllPatientFlags(HttpServletRequest request, @RequestParam("patientUuid") String patientUuid,
+			@SpringBean CalculationManager calculationManager) {
 		if (StringUtils.isBlank(patientUuid)) {
 			return new ResponseEntity<Object>("You must specify patientUuid in the request!",
 					new HttpHeaders(), HttpStatus.BAD_REQUEST);
@@ -529,14 +547,14 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		for (PatientFlagCalculation calc : calculationManager.getFlagCalculations()) {
 
 			try {
-				CalculationResult result = Context.getService(PatientCalculationService.class).evaluate(patient.getId(), calc);
+				CalculationResult result = Context.getService(PatientCalculationService.class).evaluate(patient.getId(),
+						calc);
 				if (result != null && (Boolean) result.getValue()) {
 					flags.add(calc.getFlagMessage());
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				log.error("Error evaluating " + calc.getClass(), ex);
-				return new ResponseEntity<Object>("ERROR EVALUATING!"+ calc.getFlagMessage(),
+				return new ResponseEntity<Object>("ERROR EVALUATING!" + calc.getFlagMessage(),
 						new HttpHeaders(), HttpStatus.NOT_FOUND);
 			}
 		}
@@ -545,6 +563,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		return flagsObj.toString();
 
 	}
+
 	/**
 	 * Returns custom patient object
 	 *
@@ -587,7 +606,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/regimenHistory")
 	@ResponseBody
 	public Object getRegimenHistory(@RequestParam("patientUuid") String patientUuid,
-									@RequestParam("category") String category) {
+			@RequestParam("category") String category) {
 		ObjectNode regimenObj = JsonNodeFactory.instance.objectNode();
 		if (StringUtils.isBlank(patientUuid)) {
 			return new ResponseEntity<Object>("You must specify patientUuid in the request!",
@@ -646,6 +665,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 		return locationNode.toString();
 	}
+
 	/**
 	 * Fetches hie facility registry code.
 	 *
@@ -871,7 +891,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/lastRegimenEncounter")
 	@ResponseBody
 	public Object getLastRegimenEncounterUuid(@RequestParam("category") String category,
-											  @RequestParam("patientUuid") String patientUuid) {
+			@RequestParam("patientUuid") String patientUuid) {
 		ObjectNode encObj = JsonNodeFactory.instance.objectNode();
 		ObjectNode node = JsonNodeFactory.instance.objectNode();
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
@@ -1100,7 +1120,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/zscore")
 	@ResponseBody
 	public Object calculateZScore(@RequestParam("sex") String sex, @RequestParam("weight") Double weight,
-								  @RequestParam("height") Double height) {
+			@RequestParam("height") Double height) {
 		ObjectNode resultNode = JsonNodeFactory.instance.objectNode();
 		Integer result = ZScoreUtil.calculateZScore(height, weight, sex);
 
@@ -1226,8 +1246,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					Concept valueCoded = obs.getValueCoded();
 					String classification = valueCoded
 							.equals(Dictionary.getConcept(Dictionary.SMEAR_POSITIVE_NEW_TUBERCULOSIS_PATIENT))
-							? "New tuberculosis patient"
-							: valueCoded.getName().getName();
+									? "New tuberculosis patient"
+									: valueCoded.getName().getName();
 					tbResponseObj.put("tbPatientClassification", classification);
 				}
 			}
@@ -1605,110 +1625,110 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					programDetails.put("enrollmentFormUuid", HivMetadata._Form.HIV_ENROLLMENT);
 					programDetails.put("enrollmentFormName", "HIV Enrollment");
 				} else
-					// tpt program
-					if (patientProgramEnrollment.getProgram().getUuid().equals(TPT_PROGRAM_UUID)) {
-						Enrollment tptEnrollment = new Enrollment(patientProgramEnrollment);
-						Encounter tptEnrollmentEncounter = tptEnrollment
-								.lastEncounter(defaultEnrollmentForm.getEncounterType());
-						Encounter tptDiscontinuationEncounter = tptEnrollment
-								.lastEncounter(defaultCompletionForm.getEncounterType());
+				// tpt program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(TPT_PROGRAM_UUID)) {
+					Enrollment tptEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter tptEnrollmentEncounter = tptEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter tptDiscontinuationEncounter = tptEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-						if (tptEnrollmentEncounter != null) {
-							for (Obs obs : tptEnrollmentEncounter.getAllObs(true)) {
-								if (obs.getConcept()
-										.equals(Dictionary.getConcept(Dictionary.INDICATION_FOR_TB_PROPHYLAXIS))) {
-									programDetails.put("tptIndication", obs.getValueCoded().getName().getName());
-									break;
+					if (tptEnrollmentEncounter != null) {
+						for (Obs obs : tptEnrollmentEncounter.getAllObs(true)) {
+							if (obs.getConcept()
+									.equals(Dictionary.getConcept(Dictionary.INDICATION_FOR_TB_PROPHYLAXIS))) {
+								programDetails.put("tptIndication", obs.getValueCoded().getName().getName());
+								break;
+							}
+						}
+						programDetails.put("enrollmentEncounterUuid", tptEnrollmentEncounter.getUuid());
+					}
+					if (tptDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", tptDiscontinuationEncounter.getUuid());
+					}
+					try {
+						// get medication patient is on
+						CareSetting outpatient = Context.getOrderService().getCareSettingByName("OUTPATIENT"); // TODO:
+						// include
+						// all
+						// relevant
+						// care
+						// settings
+						OrderType drugOrderType = Context.getOrderService()
+								.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
+						List<Order> allDrugOrders = Context.getOrderService().getOrders(patient, outpatient,
+								drugOrderType, false);
+						List<DrugOrder> tptDrugOrders = new ArrayList<DrugOrder>();
+						for (Order order : allDrugOrders) {
+							if (order != null && order.getConcept() != null) {
+								ConceptName cn = order.getConcept().getName(CoreConstants.LOCALE);
+								if (cn != null && (cn.getUuid().equals(ISONIAZID_DRUG_UUID)
+										|| cn.getUuid().equals(RIFAMPIN_ISONIAZID_DRUG_UUID))) {
+									tptDrugOrders.add((DrugOrder) order);
 								}
 							}
-							programDetails.put("enrollmentEncounterUuid", tptEnrollmentEncounter.getUuid());
 						}
-						if (tptDiscontinuationEncounter != null) {
-							programDetails.put("discontinuationEncounterUuid", tptDiscontinuationEncounter.getUuid());
-						}
-						try {
-							// get medication patient is on
-							CareSetting outpatient = Context.getOrderService().getCareSettingByName("OUTPATIENT"); // TODO:
-							// include
-							// all
-							// relevant
-							// care
-							// settings
-							OrderType drugOrderType = Context.getOrderService()
-									.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
-							List<Order> allDrugOrders = Context.getOrderService().getOrders(patient, outpatient,
-									drugOrderType, false);
-							List<DrugOrder> tptDrugOrders = new ArrayList<DrugOrder>();
-							for (Order order : allDrugOrders) {
-								if (order != null && order.getConcept() != null) {
-									ConceptName cn = order.getConcept().getName(CoreConstants.LOCALE);
-									if (cn != null && (cn.getUuid().equals(ISONIAZID_DRUG_UUID)
-											|| cn.getUuid().equals(RIFAMPIN_ISONIAZID_DRUG_UUID))) {
-										tptDrugOrders.add((DrugOrder) order);
-									}
+						if (!tptDrugOrders.isEmpty()) {
+
+							Collections.sort(tptDrugOrders, new Comparator<DrugOrder>() {
+								@Override
+								public int compare(DrugOrder order1, DrugOrder order2) {
+									return order2.getDateCreated().compareTo(order1.getDateCreated());
 								}
-							}
-							if (!tptDrugOrders.isEmpty()) {
+							});
+							DrugOrder drugOrder = (DrugOrder) tptDrugOrders.get(0).cloneForRevision();
+							// Now you can use the latestDrugOrder as needed
+							programDetails.put("tptDrugName",
+									drugOrder.getDrug() != null ? drugOrder.getDrug().getFullName(LOCALE) : "");
+							programDetails.put("tptDrugStartDate", formatDate(drugOrder.getEffectiveStartDate()));
+						}
+					} catch (NullPointerException e) {
+						// Handle null pointer exception
+						e.printStackTrace();
 
-								Collections.sort(tptDrugOrders, new Comparator<DrugOrder>() {
-									@Override
-									public int compare(DrugOrder order1, DrugOrder order2) {
-										return order2.getDateCreated().compareTo(order1.getDateCreated());
-									}
-								});
-								DrugOrder drugOrder = (DrugOrder) tptDrugOrders.get(0).cloneForRevision();
-								// Now you can use the latestDrugOrder as needed
-								programDetails.put("tptDrugName",
-										drugOrder.getDrug() != null ? drugOrder.getDrug().getFullName(LOCALE) : "");
-								programDetails.put("tptDrugStartDate", formatDate(drugOrder.getEffectiveStartDate()));
-							}
-						} catch (NullPointerException e) {
-							// Handle null pointer exception
-							e.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
-						} catch (Exception e) {
-							e.printStackTrace();
+					programDetails.put("enrollmentFormUuid", IPTMetadata._Form.IPT_INITIATION);
+					programDetails.put("enrollmentFormName", "IPT Initiation");
+					programDetails.put("discontinuationFormUuid", IPTMetadata._Form.IPT_OUTCOME);
+					programDetails.put("discontinuationFormName", "IPT Outcome");
+				} else
+				// tb program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(TB_PROGRAM_UUID)) {
+					Enrollment tbEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter tbEnrollmentEncounter = tbEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter tbDiscontinuationEncounter = tbEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
+
+					if (tbEnrollmentEncounter != null) {
+						for (Obs obs : tbEnrollmentEncounter.getAllObs(true)) {
+							if (obs.getConcept()
+									.equals(Dictionary.getConcept(Dictionary.REFERRING_CLINIC_OR_HOSPITAL))) {
+								programDetails.put("referredFrom", obs.getValueCoded().getName().getName());
+								break;
+							}
 						}
 
-						programDetails.put("enrollmentFormUuid", IPTMetadata._Form.IPT_INITIATION);
-						programDetails.put("enrollmentFormName", "IPT Initiation");
-						programDetails.put("discontinuationFormUuid", IPTMetadata._Form.IPT_OUTCOME);
-						programDetails.put("discontinuationFormName", "IPT Outcome");
-					} else
-						// tb program
-						if (patientProgramEnrollment.getProgram().getUuid().equals(TB_PROGRAM_UUID)) {
-							Enrollment tbEnrollment = new Enrollment(patientProgramEnrollment);
-							Encounter tbEnrollmentEncounter = tbEnrollment
-									.lastEncounter(defaultEnrollmentForm.getEncounterType());
-							Encounter tbDiscontinuationEncounter = tbEnrollment
-									.lastEncounter(defaultCompletionForm.getEncounterType());
-
-							if (tbEnrollmentEncounter != null) {
-								for (Obs obs : tbEnrollmentEncounter.getAllObs(true)) {
-									if (obs.getConcept()
-											.equals(Dictionary.getConcept(Dictionary.REFERRING_CLINIC_OR_HOSPITAL))) {
-										programDetails.put("referredFrom", obs.getValueCoded().getName().getName());
-										break;
-									}
-								}
-
-								programDetails.put("enrollmentEncounterUuid", tbEnrollmentEncounter.getUuid());
-								Encounter firstEnc = EncounterBasedRegimenUtils.getFirstEncounterForCategory(patient, "TB");
-								SimpleObject firstEncDetails = null;
-								if (firstEnc != null) {
-									firstEncDetails = EncounterBasedRegimenUtils.buildRegimenChangeObject(firstEnc.getObs(),
-											firstEnc);
-								}
-								programDetails.put("firstEncounter", firstEncDetails);
-							}
-							if (tbDiscontinuationEncounter != null) {
-								programDetails.put("discontinuationEncounterUuid", tbDiscontinuationEncounter.getUuid());
-							}
-							programDetails.put("enrollmentFormUuid", TbMetadata._Form.TB_ENROLLMENT);
-							programDetails.put("enrollmentFormName", "TB Enrollment");
-							programDetails.put("discontinuationFormUuid", TbMetadata._Form.TB_COMPLETION);
-							programDetails.put("discontinuationFormName", "TB Discontinuation");
+						programDetails.put("enrollmentEncounterUuid", tbEnrollmentEncounter.getUuid());
+						Encounter firstEnc = EncounterBasedRegimenUtils.getFirstEncounterForCategory(patient, "TB");
+						SimpleObject firstEncDetails = null;
+						if (firstEnc != null) {
+							firstEncDetails = EncounterBasedRegimenUtils.buildRegimenChangeObject(firstEnc.getObs(),
+									firstEnc);
 						}
+						programDetails.put("firstEncounter", firstEncDetails);
+					}
+					if (tbDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", tbDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", TbMetadata._Form.TB_ENROLLMENT);
+					programDetails.put("enrollmentFormName", "TB Enrollment");
+					programDetails.put("discontinuationFormUuid", TbMetadata._Form.TB_COMPLETION);
+					programDetails.put("discontinuationFormName", "TB Discontinuation");
+				}
 
 				// mch mother program
 				if (patientProgramEnrollment.getProgram().getUuid().equals(MCH_MOTHER_PROGRAM_UUID)) {
@@ -1769,126 +1789,126 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					programDetails.put("discontinuationFormName", "MCH-MS Discontinuation");
 				} else
 
-					// mch child program
-					if (patientProgramEnrollment.getProgram().getUuid().equals(MCH_CHILD_PROGRAM_UUID)) {
-						Enrollment mchcEnrollment = new Enrollment(patientProgramEnrollment);
-						Encounter mchcEnrollmentEncounter = mchcEnrollment
-								.lastEncounter(defaultEnrollmentForm.getEncounterType());
-						Encounter mchcDiscontinuationEncounter = mchcEnrollment
-								.lastEncounter(defaultCompletionForm.getEncounterType());
+				// mch child program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(MCH_CHILD_PROGRAM_UUID)) {
+					Enrollment mchcEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter mchcEnrollmentEncounter = mchcEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter mchcDiscontinuationEncounter = mchcEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-						if (mchcEnrollmentEncounter != null) {
-							for (Obs obs : mchcEnrollmentEncounter.getAllObs(true)) {
-								if (obs.getConcept().equals(Dictionary.getConcept(Dictionary.METHOD_OF_ENROLLMENT))) {
-									programDetails.put("entryPoint", entryPointAbbriviations(obs.getValueCoded()));
-									break;
-								}
+					if (mchcEnrollmentEncounter != null) {
+						for (Obs obs : mchcEnrollmentEncounter.getAllObs(true)) {
+							if (obs.getConcept().equals(Dictionary.getConcept(Dictionary.METHOD_OF_ENROLLMENT))) {
+								programDetails.put("entryPoint", entryPointAbbriviations(obs.getValueCoded()));
+								break;
 							}
-							programDetails.put("enrollmentEncounterUuid", mchcEnrollmentEncounter.getUuid());
 						}
-						if (mchcDiscontinuationEncounter != null) {
-							programDetails.put("discontinuationEncounterUuid", mchcDiscontinuationEncounter.getUuid());
-						}
-						programDetails.put("enrollmentFormUuid", MchMetadata._Form.MCHCS_ENROLLMENT);
-						programDetails.put("enrollmentFormName", "Mch Child Enrolment Form");
-						programDetails.put("discontinuationFormUuid", MchMetadata._Form.MCHCS_DISCONTINUATION);
-						programDetails.put("discontinuationFormName", "Child Welfare Services Discontinuation");
-					} else
-						// otz program
-						if (patientProgramEnrollment.getProgram().getUuid().equals(OTZ_PROGRAM_UUID)) {
-							Enrollment otzEnrollment = new Enrollment(patientProgramEnrollment);
-							Encounter otzEnrollmentEncounter = otzEnrollment
-									.lastEncounter(defaultEnrollmentForm.getEncounterType());
-							Encounter otzDiscontinuationEncounter = otzEnrollment
-									.lastEncounter(defaultCompletionForm.getEncounterType());
+						programDetails.put("enrollmentEncounterUuid", mchcEnrollmentEncounter.getUuid());
+					}
+					if (mchcDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", mchcDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", MchMetadata._Form.MCHCS_ENROLLMENT);
+					programDetails.put("enrollmentFormName", "Mch Child Enrolment Form");
+					programDetails.put("discontinuationFormUuid", MchMetadata._Form.MCHCS_DISCONTINUATION);
+					programDetails.put("discontinuationFormName", "Child Welfare Services Discontinuation");
+				} else
+				// otz program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(OTZ_PROGRAM_UUID)) {
+					Enrollment otzEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter otzEnrollmentEncounter = otzEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter otzDiscontinuationEncounter = otzEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-							if (otzEnrollmentEncounter != null) {
-								programDetails.put("enrollmentEncounterUuid", otzEnrollmentEncounter.getUuid());
-							}
-							if (otzDiscontinuationEncounter != null) {
-								programDetails.put("discontinuationEncounterUuid", otzDiscontinuationEncounter.getUuid());
-							}
-							programDetails.put("enrollmentFormUuid", OTZMetadata._Form.OTZ_ENROLLMENT_FORM);
-							programDetails.put("enrollmentFormName", "OTZ Enrollment Form");
-							programDetails.put("discontinuationFormUuid", OTZMetadata._Form.OTZ_DISCONTINUATION_FORM);
-							programDetails.put("discontinuationFormName", "OTZ Discontinuation Form");
-						} else
-							// ovc program
-							if (patientProgramEnrollment.getProgram().getUuid().equals(OVC_PROGRAM_UUID)) {
-								Enrollment ovcEnrollment = new Enrollment(patientProgramEnrollment);
-								Encounter ovcEnrollmentEncounter = ovcEnrollment
-										.lastEncounter(defaultEnrollmentForm.getEncounterType());
-								Encounter ovcDiscontinuationEncounter = ovcEnrollment
-										.lastEncounter(defaultCompletionForm.getEncounterType());
+					if (otzEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", otzEnrollmentEncounter.getUuid());
+					}
+					if (otzDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", otzDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", OTZMetadata._Form.OTZ_ENROLLMENT_FORM);
+					programDetails.put("enrollmentFormName", "OTZ Enrollment Form");
+					programDetails.put("discontinuationFormUuid", OTZMetadata._Form.OTZ_DISCONTINUATION_FORM);
+					programDetails.put("discontinuationFormName", "OTZ Discontinuation Form");
+				} else
+				// ovc program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(OVC_PROGRAM_UUID)) {
+					Enrollment ovcEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter ovcEnrollmentEncounter = ovcEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter ovcDiscontinuationEncounter = ovcEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-								if (ovcEnrollmentEncounter != null) {
-									programDetails.put("enrollmentEncounterUuid", ovcEnrollmentEncounter.getUuid());
-								}
-								if (ovcDiscontinuationEncounter != null) {
-									programDetails.put("discontinuationEncounterUuid", ovcDiscontinuationEncounter.getUuid());
-								}
-								programDetails.put("enrollmentFormUuid", OVCMetadata._Form.OVC_ENROLLMENT_FORM);
-								programDetails.put("enrollmentFormName", "OVC Enrollment Form");
-								programDetails.put("discontinuationFormUuid", OVCMetadata._Form.OVC_DISCONTINUATION_FORM);
-								programDetails.put("discontinuationFormName", "OVC Discontinuation Form");
-							} else
-								// vmmc program
-								if (patientProgramEnrollment.getProgram().getUuid().equals(VMMC_PROGRAM_UUID)) {
-									Enrollment vmmcEnrollment = new Enrollment(patientProgramEnrollment);
-									Encounter vmmcEnrollmentEncounter = vmmcEnrollment
-											.lastEncounter(defaultEnrollmentForm.getEncounterType());
-									Encounter vmmcDiscontinuationEncounter = vmmcEnrollment
-											.lastEncounter(defaultCompletionForm.getEncounterType());
+					if (ovcEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", ovcEnrollmentEncounter.getUuid());
+					}
+					if (ovcDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", ovcDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", OVCMetadata._Form.OVC_ENROLLMENT_FORM);
+					programDetails.put("enrollmentFormName", "OVC Enrollment Form");
+					programDetails.put("discontinuationFormUuid", OVCMetadata._Form.OVC_DISCONTINUATION_FORM);
+					programDetails.put("discontinuationFormName", "OVC Discontinuation Form");
+				} else
+				// vmmc program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(VMMC_PROGRAM_UUID)) {
+					Enrollment vmmcEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter vmmcEnrollmentEncounter = vmmcEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter vmmcDiscontinuationEncounter = vmmcEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-									if (vmmcEnrollmentEncounter != null) {
-										programDetails.put("enrollmentEncounterUuid", vmmcEnrollmentEncounter.getUuid());
-									}
-									if (vmmcDiscontinuationEncounter != null) {
-										programDetails.put("discontinuationEncounterUuid", vmmcDiscontinuationEncounter.getUuid());
-									}
-									programDetails.put("enrollmentFormUuid", VMMCMetadata._Form.VMMC_ENROLLMENT_FORM);
-									programDetails.put("enrollmentFormName", "VMMC Enrollment Form");
-									programDetails.put("discontinuationFormUuid", VMMCMetadata._Form.VMMC_DISCONTINUATION_FORM);
-									programDetails.put("discontinuationFormName", "VMMC Discontinuation Form");
-								} else
-									// prep program
-									if (patientProgramEnrollment.getProgram().getUuid().equals(PREP_PROGRAM_UUID)) {
-										Enrollment prepEnrollment = new Enrollment(patientProgramEnrollment);
-										Encounter prepEnrollmentEncounter = prepEnrollment
-												.lastEncounter(defaultEnrollmentForm.getEncounterType());
-										Encounter prepDiscontinuationEncounter = prepEnrollment
-												.lastEncounter(defaultCompletionForm.getEncounterType());
+					if (vmmcEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", vmmcEnrollmentEncounter.getUuid());
+					}
+					if (vmmcDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", vmmcDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", VMMCMetadata._Form.VMMC_ENROLLMENT_FORM);
+					programDetails.put("enrollmentFormName", "VMMC Enrollment Form");
+					programDetails.put("discontinuationFormUuid", VMMCMetadata._Form.VMMC_DISCONTINUATION_FORM);
+					programDetails.put("discontinuationFormName", "VMMC Discontinuation Form");
+				} else
+				// prep program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(PREP_PROGRAM_UUID)) {
+					Enrollment prepEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter prepEnrollmentEncounter = prepEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter prepDiscontinuationEncounter = prepEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-										if (prepEnrollmentEncounter != null) {
-											programDetails.put("enrollmentEncounterUuid", prepEnrollmentEncounter.getUuid());
-										}
-										if (prepDiscontinuationEncounter != null) {
-											programDetails.put("discontinuationEncounterUuid", prepDiscontinuationEncounter.getUuid());
-										}
-										programDetails.put("enrollmentFormUuid", PREP_ENROLLMENT_FORM);
-										programDetails.put("enrollmentFormName", "PrEP Enrollment");
-										programDetails.put("discontinuationFormUuid", PREP_DISCONTINUATION_FORM);
-										programDetails.put("discontinuationFormName", "PrEP Client Discontinuation");
-									} else
-										// kp program
-										if (patientProgramEnrollment.getProgram().getUuid().equals(KP_PROGRAM_UUID)) {
-											Enrollment kpEnrollment = new Enrollment(patientProgramEnrollment);
-											Encounter kpEnrollmentEncounter = kpEnrollment
-													.lastEncounter(defaultEnrollmentForm.getEncounterType());
-											Encounter kpDiscontinuationEncounter = kpEnrollment
-													.lastEncounter(defaultCompletionForm.getEncounterType());
+					if (prepEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", prepEnrollmentEncounter.getUuid());
+					}
+					if (prepDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", prepDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", PREP_ENROLLMENT_FORM);
+					programDetails.put("enrollmentFormName", "PrEP Enrollment");
+					programDetails.put("discontinuationFormUuid", PREP_DISCONTINUATION_FORM);
+					programDetails.put("discontinuationFormName", "PrEP Client Discontinuation");
+				} else
+				// kp program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(KP_PROGRAM_UUID)) {
+					Enrollment kpEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter kpEnrollmentEncounter = kpEnrollment
+							.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter kpDiscontinuationEncounter = kpEnrollment
+							.lastEncounter(defaultCompletionForm.getEncounterType());
 
-											if (kpEnrollmentEncounter != null) {
-												programDetails.put("enrollmentEncounterUuid", kpEnrollmentEncounter.getUuid());
-											}
-											if (kpDiscontinuationEncounter != null) {
-												programDetails.put("discontinuationEncounterUuid", kpDiscontinuationEncounter.getUuid());
-											}
-											programDetails.put("enrollmentFormUuid", KP_CLIENT_ENROLMENT);
-											programDetails.put("enrollmentFormName", "KP Enrollment");
-											programDetails.put("discontinuationFormUuid", KP_CLIENT_DISCONTINUATION);
-											programDetails.put("discontinuationFormName", "KP Discontinuation");
-										}
+					if (kpEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", kpEnrollmentEncounter.getUuid());
+					}
+					if (kpDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", kpDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", KP_CLIENT_ENROLMENT);
+					programDetails.put("enrollmentFormName", "KP Enrollment");
+					programDetails.put("discontinuationFormUuid", KP_CLIENT_DISCONTINUATION);
+					programDetails.put("discontinuationFormName", "KP Discontinuation");
+				}
 				// mental health program
 				if (patientProgramEnrollment.getProgram().getUuid().equals(MENTAL_HEALTH_PROGRAM_UUID)) {
 					Enrollment mentalHealthEnrollment = new Enrollment(patientProgramEnrollment);
@@ -1902,7 +1922,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 						Encounter mentalHealthDiscontinuationEncounter = mentalHealthEnrollment
 								.lastEncounter(defaultCompletionForm.getEncounterType());
 						if (mentalHealthDiscontinuationEncounter != null) {
-							programDetails.put("discontinuationEncounterUuid", mentalHealthDiscontinuationEncounter.getUuid());
+							programDetails.put("discontinuationEncounterUuid",
+									mentalHealthDiscontinuationEncounter.getUuid());
 						}
 					}
 					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
@@ -1921,7 +1942,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 						Encounter mentalHealthDiscontinuationEncounter = mentalHealthEnrollment
 								.lastEncounter(defaultCompletionForm.getEncounterType());
 						if (mentalHealthDiscontinuationEncounter != null) {
-							programDetails.put("discontinuationEncounterUuid", mentalHealthDiscontinuationEncounter.getUuid());
+							programDetails.put("discontinuationEncounterUuid",
+									mentalHealthDiscontinuationEncounter.getUuid());
 						}
 					}
 					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
@@ -1940,15 +1962,20 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	}
 
 	/**
-	 * @param patientUuid the unique identifier of the patient whose encounters need to be fetched
-	 * @param formUuid the unique identifier of the form used to filter encounters
-	 * @return an object containing the encounters matching the given patient and form;
-	 *         returns a ResponseEntity with an appropriate error message and status if the patient or form is not found
+	 * @param patientUuid the unique identifier of the patient whose encounters need
+	 *                    to be fetched
+	 * @param formUuid    the unique identifier of the form used to filter
+	 *                    encounters
+	 * @return an object containing the encounters matching the given patient and
+	 *         form;
+	 *         returns a ResponseEntity with an appropriate error message and status
+	 *         if the patient or form is not found
 	 */
 
 	@RequestMapping(method = RequestMethod.GET, value = "/encountersByPatientAndForm")
 	@ResponseBody
-	public Object getEncountersByPatientAndForm(@RequestParam("patientUuid") String patientUuid, @RequestParam("formUuid") String formUuid) {
+	public Object getEncountersByPatientAndForm(@RequestParam("patientUuid") String patientUuid,
+			@RequestParam("formUuid") String formUuid) {
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
 		if (patient == null) {
 			return new ResponseEntity<>("Patient not found", new HttpHeaders(), HttpStatus.NOT_FOUND);
@@ -1971,9 +1998,12 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			public int compare(Encounter e1, Encounter e2) {
 				Date d1 = e1.getEncounterDatetime();
 				Date d2 = e2.getEncounterDatetime();
-				if (d1 == null && d2 == null) return 0;
-				if (d1 == null) return 1;
-				if (d2 == null) return -1;
+				if (d1 == null && d2 == null)
+					return 0;
+				if (d1 == null)
+					return 1;
+				if (d2 == null)
+					return -1;
 				return d2.compareTo(d1);
 			}
 		});
@@ -1986,15 +2016,12 @@ public class KenyaemrCoreRestController extends BaseRestController {
 							"uuid", enc.getUuid(),
 							"id", enc.getEncounterId(),
 							"encounterType", enc.getEncounterType().getName(),
-							"dateCreated", formatDate(enc.getDateCreated())
-					) : null,
+							"dateCreated", formatDate(enc.getDateCreated())) : null,
 					"form", enc.getForm() != null ? SimpleObject.create(
 							"uuid", enc.getForm().getUuid(),
-							"name", enc.getForm().getName()
-					) : null,
+							"name", enc.getForm().getName()) : null,
 					"location", enc.getLocation() != null ? enc.getLocation().getName() : null,
-					"creator", enc.getCreator() != null ? enc.getCreator().getId() : null
-			);
+					"creator", enc.getCreator() != null ? enc.getCreator().getId() : null);
 			results.add(obj);
 		}
 		return SimpleObject.create("results", results);
@@ -2226,8 +2253,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				: null;
 		String whoStagingAtEnrollment = (firstWhoStageObs != null && firstWhoStageObs.getValueCoded() != null
 				&& firstWhoStageObs.getValueCoded().getName() != null)
-				? firstWhoStageObs.getValueCoded().getName().getName()
-				: "";
+						? firstWhoStageObs.getValueCoded().getName().getName()
+						: "";
 		patientSummary.put("whoStagingAtEnrollment", whoStagingAtEnrollment);
 
 		if (patient.getGender().equals("F")) {
@@ -2238,7 +2265,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					: null;
 			String caxcScreeningOutcome = (cacxObs != null && cacxObs.getValueCoded() != null
 					&& cacxObs.getValueCoded().getName() != null) ? cacxObs.getValueCoded().getName().getName()
-					: "None";
+							: "None";
 			patientSummary.put("caxcScreeningOutcome", caxcScreeningOutcome);
 		}
 
@@ -2314,7 +2341,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				context);
 		Obs treatmentSupporterNameObs = (treatmentSupporterName != null)
 				? EmrCalculationUtils.obsResultForPatient(treatmentSupporterName,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		String treatSupportName = (treatmentSupporterNameObs != null
 				&& treatmentSupporterNameObs.getValueText() != null) ? treatmentSupporterNameObs.getValueText() : "N/A";
@@ -2324,13 +2351,13 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				context);
 		Obs treatmentSupporterRelationObs = (treatmentSupporterRelation != null)
 				? EmrCalculationUtils.obsResultForPatient(treatmentSupporterRelation,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		String treatSupportRel = (treatmentSupporterRelationObs != null
 				&& treatmentSupporterRelationObs.getValueCoded() != null
 				&& treatmentSupporterRelationObs.getValueCoded().getName() != null)
-				? treatmentSupporterRelationObs.getValueCoded().getName().getName()
-				: "N/A";
+						? treatmentSupporterRelationObs.getValueCoded().getName().getName()
+						: "N/A";
 		patientSummary.put("relationshipToTreatmentSupporter", treatSupportRel);
 
 		CalculationResultMap treatmentSupporterContacts = Calculations.lastObs(
@@ -2338,11 +2365,11 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				context);
 		Obs treatmentSupporterContactsObs = (treatmentSupporterContacts != null)
 				? EmrCalculationUtils.obsResultForPatient(treatmentSupporterContacts,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		String treatSupportContact = (treatmentSupporterContactsObs != null
 				&& treatmentSupporterContactsObs.getValueText() != null) ? treatmentSupporterContactsObs.getValueText()
-				: "N/A";
+						: "N/A";
 		patientSummary.put("contactOfTreatmentSupporter", treatSupportContact);
 
 		// TB Start date
@@ -2450,15 +2477,15 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				context);
 		Obs previousArtPurposePmtctObs = (previousArtPurposePmtct != null)
 				? EmrCalculationUtils.obsResultForPatient(previousArtPurposePmtct,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		Obs previousArtPurposePepObs = (previousArtPurposePep != null)
 				? EmrCalculationUtils.obsResultForPatient(previousArtPurposePep,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		Obs previousArtPurposeHaartObs = (previousArtPurposeHaart != null)
 				? EmrCalculationUtils.obsResultForPatient(previousArtPurposeHaart,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		String purposeString = "";
 		if (patientSummary.get("previousArtStatus").equals("None")
@@ -2639,9 +2666,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			patientSummary.put("dapsone", "Yes");
 		} else if (medOrdersMapObsDapsone != null && medOrdersMapObsDapsone.getValueCoded() != null
 				&& medOrdersMapObsDapsone.getValueCoded()
-				.equals(Dictionary.getConcept(Dictionary.SULFAMETHOXAZOLE_TRIMETHOPRIM))
+						.equals(Dictionary.getConcept(Dictionary.SULFAMETHOXAZOLE_TRIMETHOPRIM))
 				|| (medicationDispensedCtxObs != null && medicationDispensedCtxObs.getValueCoded() != null
-				&& medicationDispensedCtxObs.getValueCoded().equals(Dictionary.getConcept(Dictionary.YES)))) {
+						&& medicationDispensedCtxObs.getValueCoded().equals(Dictionary.getConcept(Dictionary.YES)))) {
 			patientSummary.put("dapsone", "No");
 		} else {
 			patientSummary.put("dapsone", "No");
@@ -2655,7 +2682,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				Dictionary.getConcept(Dictionary.ISONIAZID_DISPENSED), Arrays.asList(patient.getPatientId()), context);
 		Obs medicationDispensedIptObs = (medicationDispensedIpt != null)
 				? EmrCalculationUtils.obsResultForPatient(medicationDispensedIpt,
-				patient.getPatientId())
+						patient.getPatientId())
 				: null;
 		if (medOrdersMapObsInh != null && medOrdersMapObsInh.getValueCoded() != null
 				&& medOrdersMapObsInh.getValueCoded().equals(Dictionary.getConcept(Dictionary.ISONIAZID))) {
@@ -2809,7 +2836,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/relationship")
 	@ResponseBody
 	public String getRelationship(@RequestParam("patientUuid") String patientUuid,
-								  @RequestParam("relationshipType") String relationshipType) {
+			@RequestParam("relationshipType") String relationshipType) {
 		String personRelationshipName = "";
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
 		List<Person> people = new ArrayList<Person>();
@@ -2837,8 +2864,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/kpIdentifier")
 	@ResponseBody
 	public Object getGeneratedKPIdentifier(@RequestParam("patientUuid") String patientUuid,
-										   @RequestParam("kpType") String kpTypeVal, @RequestParam("subCounty") String subCounty,
-										   @RequestParam("ward") String ward, @RequestParam("hotspotCode") String hotSpotCodeVal) {
+			@RequestParam("kpType") String kpTypeVal, @RequestParam("subCounty") String subCounty,
+			@RequestParam("ward") String ward, @RequestParam("hotspotCode") String hotSpotCodeVal) {
 		PersonService personService = Context.getPersonService();
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
@@ -3305,7 +3332,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/sql")
 	@ResponseBody
 	public List<org.openmrs.module.webservices.rest.SimpleObject> search(@RequestParam("q") String query,
-																		 HttpServletRequest request) throws Exception {
+			HttpServletRequest request) throws Exception {
 		return Context.getService(KenyaEmrService.class).search(query, request.getParameterMap());
 
 	}
@@ -3335,8 +3362,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/verifynupi/{country}/{identifierType}/{identifier}")
 	@ResponseBody
 	public Object verifyNUPI(@PathVariable String country, @PathVariable String identifierType,
-							 @PathVariable String identifier) {
+			@PathVariable String identifier) {
 		String ret = "{\"status\": \"Error\"}";
+		HttpsURLConnection con = null;
 		try {
 			GlobalProperty globalGetUrl = Context.getAdministrationService()
 					.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_GET_END_POINT);
@@ -3351,7 +3379,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			UpiUtilsDataExchange upiUtilsDataExchange = new UpiUtilsDataExchange();
 			String authToken = upiUtilsDataExchange.getToken();
 
-			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+			con = (HttpsURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 
 			con.setRequestProperty("Authorization", "Bearer " + authToken);
@@ -3363,17 +3391,16 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 			if (responseCode == HttpURLConnection.HTTP_OK) { // success
 				// Read the response
-				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String returnResponse;
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+					String input;
+					StringBuffer response = new StringBuffer();
 
-				String input;
-				StringBuffer response = new StringBuffer();
-
-				while ((input = in.readLine()) != null) {
-					response.append(input);
+					while ((input = in.readLine()) != null) {
+						response.append(input);
+					}
+					returnResponse = response.toString();
 				}
-				in.close();
-
-				String returnResponse = response.toString();
 				System.out.println("NUPI verification: Got the Response as: " + returnResponse);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3383,21 +3410,19 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			} else {
 				System.out.println("NUPI verification: Error verifying NUPI for client: " + responseCode);
 
-				InputStream errorStream = con.getErrorStream();
 				// Read the error response body
-				BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-				StringBuilder errorResponse = new StringBuilder();
-				String line;
-				while ((line = errorReader.readLine()) != null) {
-					errorResponse.append(line);
+				String errorBody;
+				try (InputStream errorStream = con.getErrorStream();
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream))) {
+					StringBuilder errorResponse = new StringBuilder();
+					String line;
+					while ((line = errorReader.readLine()) != null) {
+						errorResponse.append(line);
+					}
+					errorBody = errorResponse.toString();
 				}
 
-				// Close the reader and the error stream
-				errorReader.close();
-				errorStream.close();
-
 				// Handle or log the error response
-				String errorBody = errorResponse.toString();
 				System.err.println("New NUPI: Error response body: " + errorBody);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3413,6 +3438,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		} catch (Exception ex) {
 			System.err.println("NUPI verification: ERROR: " + ex.getMessage());
 			ex.printStackTrace();
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 
 		return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(ret);
@@ -3428,6 +3457,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@ResponseBody
 	public Object searchNUPI(@PathVariable String searchkey, @PathVariable String searchvalue) {
 		String ret = "{\"status\": \"Error\"}";
+		HttpsURLConnection con = null;
 		try {
 			System.out.println("NUPI search: SearchKey: " + searchkey + " SearchValue: " + searchvalue);
 
@@ -3447,7 +3477,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			UpiUtilsDataExchange upiUtilsDataExchange = new UpiUtilsDataExchange();
 			String authToken = upiUtilsDataExchange.getToken();
 
-			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+			con = (HttpsURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 
 			con.setRequestProperty("Authorization", "Bearer " + authToken);
@@ -3459,17 +3489,16 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 			if (responseCode == HttpURLConnection.HTTP_OK) { // success
 				// Read the response
-				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String returnResponse;
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+					String input;
+					StringBuffer response = new StringBuffer();
 
-				String input;
-				StringBuffer response = new StringBuffer();
-
-				while ((input = in.readLine()) != null) {
-					response.append(input);
+					while ((input = in.readLine()) != null) {
+						response.append(input);
+					}
+					returnResponse = response.toString();
 				}
-				in.close();
-
-				String returnResponse = response.toString();
 				System.out.println("NUPI search: Got the Response as: " + returnResponse);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3478,21 +3507,19 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			} else {
 				System.out.println("NUPI search: Error searching NUPI for client: " + responseCode);
 
-				InputStream errorStream = con.getErrorStream();
 				// Read the error response body
-				BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-				StringBuilder errorResponse = new StringBuilder();
-				String line;
-				while ((line = errorReader.readLine()) != null) {
-					errorResponse.append(line);
+				String errorBody;
+				try (InputStream errorStream = con.getErrorStream();
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream))) {
+					StringBuilder errorResponse = new StringBuilder();
+					String line;
+					while ((line = errorReader.readLine()) != null) {
+						errorResponse.append(line);
+					}
+					errorBody = errorResponse.toString();
 				}
 
-				// Close the reader and the error stream
-				errorReader.close();
-				errorStream.close();
-
 				// Handle or log the error response
-				String errorBody = errorResponse.toString();
 				System.err.println("New NUPI: Error response body: " + errorBody);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3508,6 +3535,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		} catch (Exception ex) {
 			System.err.println("NUPI search: ERROR: " + ex.getMessage());
 			ex.printStackTrace();
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 
 		return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(ret);
@@ -3525,7 +3556,6 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	public Object newNUPI(HttpServletRequest request) {
 		String ret = "{\"status\": \"Error\"}";
 
-		// InputStream errorStream = null;
 		HttpsURLConnection con = null;
 		try {
 			System.out.println("New NUPI: Received NUPI details: " + request.getQueryString());
@@ -3561,27 +3591,25 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			for (String output = ""; (output = requestReader.readLine()) != null; requestBody = requestBody + output) {
 			}
 			System.out.println("New NUPI: Sending to remote: " + requestBody);
-			PrintStream os = new PrintStream(con.getOutputStream());
-			os.print(requestBody);
-			os.close();
+			try (PrintStream os = new PrintStream(con.getOutputStream())) {
+				os.print(requestBody);
+			}
 
 			int responseCode = con.getResponseCode();
 
 			if (responseCode == HttpURLConnection.HTTP_OK) { // success
 
 				// Read the response
-				BufferedReader in = null;
-				in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String returnResponse;
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+					String input;
+					StringBuffer response = new StringBuffer();
 
-				String input;
-				StringBuffer response = new StringBuffer();
-
-				while ((input = in.readLine()) != null) {
-					response.append(input);
+					while ((input = in.readLine()) != null) {
+						response.append(input);
+					}
+					returnResponse = response.toString();
 				}
-				in.close();
-
-				String returnResponse = response.toString();
 				System.out.println("New NUPI: Got the Response as: " + returnResponse);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3590,21 +3618,19 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			} else {
 				System.out.println("New NUPI: Error posting new NUPI for client: " + responseCode);
 
-				InputStream errorStream = con.getErrorStream();
 				// Read the error response body
-				BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-				StringBuilder errorResponse = new StringBuilder();
-				String line;
-				while ((line = errorReader.readLine()) != null) {
-					errorResponse.append(line);
+				String errorBody;
+				try (InputStream errorStream = con.getErrorStream();
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream))) {
+					StringBuilder errorResponse = new StringBuilder();
+					String line;
+					while ((line = errorReader.readLine()) != null) {
+						errorResponse.append(line);
+					}
+					errorBody = errorResponse.toString();
 				}
 
-				// Close the reader and the error stream
-				errorReader.close();
-				errorStream.close();
-
 				// Handle or log the error response
-				String errorBody = errorResponse.toString();
 				System.err.println("New NUPI: Error response body: " + errorBody);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3620,6 +3646,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		} catch (Exception ex) {
 			System.err.println("New NUPI: ERROR: " + ex.getMessage());
 			ex.printStackTrace();
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 
 		return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(ret);
@@ -3635,10 +3665,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/modifynupi/{nupinumber}/{searchtype}")
 	@ResponseBody
 	public Object modifyNUPI(HttpServletRequest request, @PathVariable String nupinumber,
-							 @PathVariable String searchtype) {
+			@PathVariable String searchtype) {
 		String ret = "{\"status\": \"Error\"}";
 
-		// InputStream errorStream = null;
 		HttpsURLConnection con = null;
 		try {
 			System.out.println("Modify NUPI: Received NUPI details: " + request.getQueryString());
@@ -3675,27 +3704,25 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			for (String output = ""; (output = requestReader.readLine()) != null; requestBody = requestBody + output) {
 			}
 			System.out.println("Modify NUPI: Sending to remote: " + requestBody);
-			PrintStream os = new PrintStream(con.getOutputStream());
-			os.print(requestBody);
-			os.close();
+			try (PrintStream os = new PrintStream(con.getOutputStream())) {
+				os.print(requestBody);
+			}
 
 			int responseCode = con.getResponseCode();
 
 			if (responseCode == HttpURLConnection.HTTP_OK) { // success
 
 				// Read the response
-				BufferedReader in = null;
-				in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String returnResponse;
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+					String input;
+					StringBuffer response = new StringBuffer();
 
-				String input;
-				StringBuffer response = new StringBuffer();
-
-				while ((input = in.readLine()) != null) {
-					response.append(input);
+					while ((input = in.readLine()) != null) {
+						response.append(input);
+					}
+					returnResponse = response.toString();
 				}
-				in.close();
-
-				String returnResponse = response.toString();
 				System.out.println("Modify NUPI: Got the Response as: " + returnResponse);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3704,21 +3731,19 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			} else {
 				System.out.println("Modify NUPI: Error posting new NUPI for client: " + responseCode);
 
-				InputStream errorStream = con.getErrorStream();
 				// Read the error response body
-				BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-				StringBuilder errorResponse = new StringBuilder();
-				String line;
-				while ((line = errorReader.readLine()) != null) {
-					errorResponse.append(line);
+				String errorBody;
+				try (InputStream errorStream = con.getErrorStream();
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream))) {
+					StringBuilder errorResponse = new StringBuilder();
+					String line;
+					while ((line = errorReader.readLine()) != null) {
+						errorResponse.append(line);
+					}
+					errorBody = errorResponse.toString();
 				}
 
-				// Close the reader and the error stream
-				errorReader.close();
-				errorStream.close();
-
 				// Handle or log the error response
-				String errorBody = errorResponse.toString();
 				System.err.println("Modify NUPI: Error response body: " + errorBody);
 
 				HttpHeaders headers = new HttpHeaders();
@@ -3734,6 +3759,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		} catch (Exception ex) {
 			System.err.println("Modify NUPI: ERROR: " + ex.getMessage());
 			ex.printStackTrace();
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 
 		return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(ret);
@@ -3750,7 +3779,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/latestobs")
 	@ResponseBody
 	public Object getLatestObs(@RequestParam("patientUuid") String patientUuid,
-							   @RequestParam("concept") String conceptIdentifier) {
+			@RequestParam("concept") String conceptIdentifier) {
 		SimpleObject ret = SimpleObject.create("conceptId", 0, "conceptUuid", "");
 		if (StringUtils.isBlank(patientUuid)) {
 			return new ResponseEntity<Object>("You must specify a patientUuid in the request!",
@@ -3778,7 +3807,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/send-kenyaemr-sms")
-	public Object sendKenyaEmrSms(@RequestParam("message") String message, @RequestParam("phone") String phone, @RequestParam(required = false) String nationalId) {
+	public Object sendKenyaEmrSms(@RequestParam("message") String message, @RequestParam("phone") String phone,
+			@RequestParam(required = false) String nationalId) {
 		return Context.getService(KenyaEmrService.class).sendKenyaEmrSms(phone, message, nationalId);
 	}
 
@@ -3813,21 +3843,23 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		GlobalProperty globalGetHWRResponseFormat = Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_HEI_RESPONSE_FORMAT);
 		String gpResponseFhirFormat = globalGetHWRResponseFormat.getPropertyValue();
-		//TODO: Parameters may be 2 or 3 depending on FHIR or custom responses from FHIR
-		//		if (allParams.size() != 3) {
-		//			return ResponseEntity.badRequest()
-		//				.contentType(MediaType.APPLICATION_JSON)
-		//				.body("{\"status\": \"Error\", \"message\": \"More than two identifier must be provided for the search at a time\"}");
-		//		}
+		// TODO: Parameters may be 2 or 3 depending on FHIR or custom responses from
+		// FHIR
+		// if (allParams.size() != 3) {
+		// return ResponseEntity.badRequest()
+		// .contentType(MediaType.APPLICATION_JSON)
+		// .body("{\"status\": \"Error\", \"message\": \"More than two identifier must
+		// be provided for the search at a time\"}");
+		// }
 		String identifierType = allParams.get("identifierType");
 		String identifier = allParams.get("identifierNumber");
 		String regulator = allParams.get("regulator");
 		String toReturn = getHwStatus(identifier, identifierType, regulator);
-		//TODO: Checks whether the response from HIE is custom or FHIR based
-		//TODO: To remove once we have assurance from HIE of the perpetual format
+		// TODO: Checks whether the response from HIE is custom or FHIR based
+		// TODO: To remove once we have assurance from HIE of the perpetual format
 		if (gpResponseFhirFormat.equalsIgnoreCase("false")) {
 
-			//Concatenate the response with a fhirFormat object
+			// Concatenate the response with a fhirFormat object
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode toReturnCustomResponse = (ObjectNode) mapper.readTree(toReturn);
 			toReturnCustomResponse.put("fhirFormat", false);
@@ -3887,11 +3919,12 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					.build();
 
 			// Execute the request
-			Response response = client.newCall(request).execute();
-			if (response.isSuccessful()) {
-				ret = response.body().string();
-			} else {
-				System.out.println("HIE Auth Get Request failed: " + response.code() + " - " + response.message());
+			try (Response response = client.newCall(request).execute()) {
+				if (response.isSuccessful()) {
+					ret = response.body().string();
+				} else {
+					System.out.println("HIE Auth Get Request failed: " + response.code() + " - " + response.message());
+				}
 			}
 		} else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("post")) {
 			// Build the POST request
@@ -3905,15 +3938,16 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					.header("Cookie",
 							"incap_ses_6550_2912339=Gt0ldtSEr3gzhyyAnUbmWsc39mcAAAAAeRlLAEJa78AYqRNx3TRw5A==; visid_incap_2912339=cOIlO1QSR62/Wo6Ega29z/TjjWcAAAAAQUIPAAAAAAB6TxV9uQ87Ev365z8yUqhP")
 					.build();
-			Response postResponse = client.newCall(postRequest).execute();
-			if (!postResponse.isSuccessful()) {
-				System.err.println("Get HIE Post Auth: ERROR: Request failed: " + postResponse.code() + " - "
-						+ postResponse.message());
-			} else {
-				String payload = postResponse.body().string();
-				com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-				com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(payload);
-				ret = rootNode.path("access_token").asText();
+			try (Response postResponse = client.newCall(postRequest).execute()) {
+				if (!postResponse.isSuccessful()) {
+					System.err.println("Get HIE Post Auth: ERROR: Request failed: " + postResponse.code() + " - "
+							+ postResponse.message());
+				} else {
+					String payload = postResponse.body().string();
+					com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+					com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(payload);
+					ret = rootNode.path("access_token").asText();
+				}
 			}
 		} else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("mediator")) {
 			// Build the Mediator request
@@ -3938,10 +3972,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				.addHeader("Authorization", "Bearer " + token)
 				.build();
 
-		Response response = client.newCall(request).execute();
-		String respo = response.body().string();
-		// convert response to json
-		return respo;
+		try (Response response = client.newCall(request).execute()) {
+			return response.body().string();
+		}
 	}
 
 	public static String getHwStatus(String identifier, String identifierType, String regulator) throws IOException {
@@ -3954,7 +3987,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_HEI_RESPONSE_FORMAT);
 		String gpResponseFhirFormat = globalGetHWRResponseFormat.getPropertyValue();
 
-		System.out.println("HWR endpoint ==>"+baseURL);
+		System.out.println("HWR endpoint ==>" + baseURL);
 		if (baseURL == null || baseURL.trim().isEmpty()) {
 			System.out.println("HWR GET endpoint configs not updated: ");
 		}
@@ -3963,14 +3996,15 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			OkHttpClient client = new OkHttpClient().newBuilder()
 					.build();
 			Request request = new Request.Builder()
-					.url(baseURL + "?identifierType" + "=" + identifierType + "&identifierNumber" + "=" + identifier + "&regulator" + "=" + regulator)
+					.url(baseURL + "?identifierType" + "=" + identifierType + "&identifierNumber" + "=" + identifier
+							+ "&regulator" + "=" + regulator)
 					.addHeader("Referer", "")
 					.addHeader("Authorization", "Bearer " + token)
 					.build();
-			Response response = client.newCall(request).execute();
-			String respo = response.body().string();
-			return respo;
-		}else {
+			try (Response response = client.newCall(request).execute()) {
+				return response.body().string();
+			}
+		} else {
 			OkHttpClient client = new OkHttpClient().newBuilder()
 					.build();
 			Request request = new Request.Builder()
@@ -3978,9 +4012,9 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					.addHeader("Referer", "")
 					.addHeader("Authorization", "Bearer " + token)
 					.build();
-			Response response = client.newCall(request).execute();
-			String respo = response.body().string();
-			return respo;
+			try (Response response = client.newCall(request).execute()) {
+				return response.body().string();
+			}
 		}
 	}
 
@@ -4041,7 +4075,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					}
 					ConceptReferenceTerm referenceTerm = conceptService.getConceptReferenceTermByCode(icd11Code,
 							icd11Who) != null ? conceptService.getConceptReferenceTermByCode(icd11Code, icd11Who)
-							: new ConceptReferenceTerm(icd11Who, icd11Code, icd11Name);
+									: new ConceptReferenceTerm(icd11Who, icd11Code, icd11Name);
 					ConceptMap conceptMap = new ConceptMap();
 					conceptMap.setConceptMapType(sameAs);
 					conceptMap.setConceptReferenceTerm(referenceTerm);
@@ -4082,8 +4116,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/facility-dashboard")
 	@ResponseBody
 	public Object getFacilityDashboard(HttpServletRequest request,
-									   @RequestParam(value = "startDate", required = true) String startDate,
-									   @RequestParam(value = "endDate", required = true) String endDate) {
+			@RequestParam(value = "startDate", required = true) String startDate,
+			@RequestParam(value = "endDate", required = true) String endDate) {
 		double PERCENT_DIVISOR = 100.0;
 		final String clinicalActionPercentageThreshold = getGlobalPropertyValue(
 				CommonMetadata.GP_CLINICAL_ACTION_PERCENTAGE_THRESHOLD);
@@ -4149,13 +4183,18 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	}
 
 	/**
-	 * Retrieves the main facility dashboard data, including statistics related to general outpatients,
+	 * Retrieves the main facility dashboard data, including statistics related to
+	 * general outpatients,
 	 * top ten diseases, emergency cases, and referrals, for a specified date range.
 	 *
-	 * @param startDate optional parameter defining the start date for the data range in yyyy-MM-dd format.
-	 * @param endDate optional parameter defining the end date for the data range in yyyy-MM-dd format.
-	 * @return an object containing dashboard data such as general outpatients by age group, top ten diseases,
-	 *         emergency cases, and referral statistics for the specified date range.
+	 * @param startDate optional parameter defining the start date for the data
+	 *                  range in yyyy-MM-dd format.
+	 * @param endDate   optional parameter defining the end date for the data range
+	 *                  in yyyy-MM-dd format.
+	 * @return an object containing dashboard data such as general outpatients by
+	 *         age group, top ten diseases,
+	 *         emergency cases, and referral statistics for the specified date
+	 *         range.
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/main-facility-dashboard")
 	@ResponseBody
@@ -4166,28 +4205,29 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		// Ensure default dates (today) if not provided
 		if (StringUtils.isBlank(startDate) || StringUtils.isBlank(endDate)) {
 			LocalDate today = LocalDate.now();
-			if (StringUtils.isBlank(startDate)) startDate = today.toString();
-			if (StringUtils.isBlank(endDate)) endDate = today.toString();
+			if (StringUtils.isBlank(startDate))
+				startDate = today.toString();
+			if (StringUtils.isBlank(endDate))
+				endDate = today.toString();
 		}
 
 		return SimpleObject.create(
 				"indicators", SimpleObject.create(
 						"generalOutpatientVisits", SimpleObject.create(
-								"childrenUnder5", FacilityDashboardUtil.getGeneralOutPatientsUnderFiveYears(startDate, endDate),
-								"over5YearsOld", FacilityDashboardUtil.getGeneralOutPatientsFiveYearsAndAbove(startDate, endDate)
-						),
+								"childrenUnder5",
+								FacilityDashboardUtil.getGeneralOutPatientsUnderFiveYears(startDate, endDate),
+								"over5YearsOld",
+								FacilityDashboardUtil.getGeneralOutPatientsFiveYearsAndAbove(startDate, endDate)),
 						"topTenDiseases", SimpleObject.create(
-								"childrenUnder5", FacilityDashboardUtil.getTopTenDiseasesUnderFiveYearsOld(startDate, endDate),
-								"over5YearsOld", FacilityDashboardUtil.getTopTenDiseasesFiveYearsOldAndAbove(startDate, endDate)
-						),
+								"childrenUnder5",
+								FacilityDashboardUtil.getTopTenDiseasesUnderFiveYearsOld(startDate, endDate),
+								"over5YearsOld",
+								FacilityDashboardUtil.getTopTenDiseasesFiveYearsOldAndAbove(startDate, endDate)),
 						"emergencyCases", FacilityDashboardUtil.getEmergencyCases(startDate, endDate),
 						"referrals", SimpleObject.create(
 								"in", FacilityDashboardUtil.getReferredInPatients(startDate, endDate),
-								"out", FacilityDashboardUtil.getReferredOutPatients(startDate, endDate)
-						),
-						"admissionCases", FacilityDashboardUtil.getAdmissionCases(startDate, endDate)
-				)
-		);
+								"out", FacilityDashboardUtil.getReferredOutPatients(startDate, endDate)),
+						"admissionCases", FacilityDashboardUtil.getAdmissionCases(startDate, endDate)));
 	}
 
 	/**
@@ -4271,8 +4311,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/adrencounter")
 	@ResponseBody
 	public ArrayList<SimpleObject> adrEncounters(HttpServletRequest request,
-												 @RequestParam(value = "fromdate", required = false) String fromDate,
-												 @RequestParam(value = "todate", required = false) String toDate) {
+			@RequestParam(value = "fromdate", required = false) String fromDate,
+			@RequestParam(value = "todate", required = false) String toDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		EncounterService encounterService = Context.getEncounterService();
 
@@ -4288,7 +4328,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			ArrayList<SimpleObject> adrEncounters = new ArrayList<SimpleObject>();
 
 			List<Encounter> encounters = encounterService.getEncounters(searchCriteria.createEncounterSearchCriteria());
-			if(encounters.size() > 0) {
+			if (encounters.size() > 0) {
 				for (Encounter encounter : encounters) {
 					SimpleObject adrEncounter = new SimpleObject();
 					SimpleObject form = new SimpleObject();
@@ -4296,7 +4336,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					form.put("uuid", encounter.getForm().getUuid());
 					form.put("version", encounter.getForm().getVersion());
 					form.put("published", encounter.getForm().getPublished());
-					form.put("retired", encounter.getForm().getRetired());;
+					form.put("retired", encounter.getForm().getRetired());
+					;
 					form.put("formCategory", "");
 					adrEncounter.put("form", form);
 					adrEncounter.put("encounterUuid", encounter.getUuid());
@@ -4317,15 +4358,16 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			}
 
 			return adrEncounters;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Invalid date format. Please use 'yyyy-MM-dd'.");
 		}
 	}
 
 	/**
-	 * Check whether the global param kenyaemr.sha.registration.number has been filled
+	 * Check whether the global param kenyaemr.sha.registration.number has been
+	 * filled
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -4335,25 +4377,27 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		SimpleObject ret = SimpleObject.create("registrationNumber", "");
 
 		try {
-			GlobalProperty gpSHARegNum = Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_REGISTRATION_NUMBER);
-			if(gpSHARegNum != null) {
+			GlobalProperty gpSHARegNum = Context.getAdministrationService()
+					.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_REGISTRATION_NUMBER);
+			if (gpSHARegNum != null) {
 				String stSHARegNum = gpSHARegNum.getPropertyValue();
-				if(stSHARegNum != null) {
+				if (stSHARegNum != null) {
 					ret.put("registrationNumber", stSHARegNum);
 				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("KenyaEMR module: An error occured getting sha registration number");
 		}
 
-		return(ret);
+		return (ret);
 	}
 
 	/**
-	 * Check the global param kenyaemr.hie.registry.otp.source to assist toggle between hie and kehmis otp source
+	 * Check the global param kenyaemr.hie.registry.otp.source to assist toggle
+	 * between hie and kehmis otp source
 	 * Options hie or kehmis
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -4363,27 +4407,26 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		SimpleObject ret = SimpleObject.create("otpSource", "");
 
 		try {
-			GlobalProperty gpOtpSource = Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_HEI_OPT_SOURCE);
-			if(gpOtpSource != null) {
+			GlobalProperty gpOtpSource = Context.getAdministrationService()
+					.getGlobalPropertyObject(CommonMetadata.GP_HEI_OPT_SOURCE);
+			if (gpOtpSource != null) {
 				String stOtpSource = gpOtpSource.getPropertyValue();
-				if(stOtpSource != null) {
+				if (stOtpSource != null) {
 					ret.put("otpSource", stOtpSource);
 				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("KenyaEMR module: An error occurred getting otp source");
 		}
 
-		return(ret);
+		return (ret);
 	}
-
 
 	@RequestMapping(method = RequestMethod.GET, value = "/adpdf/view")
 	public ResponseEntity<byte[]> viewAdrPdf(HttpServletRequest request,
-											 @RequestParam(value = "patientUuid", required = false) String patientUuid,
-											 @RequestParam(value = "type", required = false, defaultValue = "filled") String type) {
+			@RequestParam(value = "patientUuid", required = false) String patientUuid,
+			@RequestParam(value = "type", required = false, defaultValue = "filled") String type) {
 
 		try {
 			ADRReportingFormGenerator generator = new ADRReportingFormGenerator();
@@ -4436,9 +4479,12 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					.body(errorMessage.getBytes());
 		}
 	}
+
 	/**
-	 * Check the global param kenyaemr.hie.login.otp to toggle between requiring OTP at login
+	 * Check the global param kenyaemr.hie.login.otp to toggle between requiring OTP
+	 * at login
 	 * Options true or false
+	 * 
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/requireLoginOtp")
@@ -4447,23 +4493,25 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		SimpleObject ret = SimpleObject.create("loginOtp", "");
 
 		try {
-			GlobalProperty gpLoginOtp = Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_LOGIN_OTP_REQUIREMENT);
-			if(gpLoginOtp != null) {
+			GlobalProperty gpLoginOtp = Context.getAdministrationService()
+					.getGlobalPropertyObject(CommonMetadata.GP_LOGIN_OTP_REQUIREMENT);
+			if (gpLoginOtp != null) {
 				String stLoginOtp = gpLoginOtp.getPropertyValue();
-				if(stLoginOtp != null) {
+				if (stLoginOtp != null) {
 					ret.put("loginOtp", stLoginOtp);
 				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("KenyaEMR module: An error occurred getting login Otp requirement");
 		}
 
-		return(ret);
+		return (ret);
 	}
+
 	/**
 	 * Endpoint for palladium kehmis sms service
+	 * 
 	 * @param message and phone
 	 * @return
 	 */
@@ -4476,19 +4524,16 @@ public class KenyaemrCoreRestController extends BaseRestController {
 	@ResponseBody
 	public ResponseEntity<?> sendMail(@RequestBody EmailRequestDto request) {
 
-		AdverseDrugReactionEmailService service =
-				Context.getService(AdverseDrugReactionEmailService.class);
+		AdverseDrugReactionEmailService service = Context.getService(AdverseDrugReactionEmailService.class);
 
 		try {
 			service.sendReport(
 					request.getPatientUuid(),
 					request.getEncounterUuid(),
-					request.getRecipientEmail()
-			);
+					request.getRecipientEmail());
 
 			return ResponseEntity.ok(
-					new SimpleResponse("success", "Email sent successfully")
-			);
+					new SimpleResponse("success", "Email sent successfully"));
 
 		} catch (Exception exe) {
 
@@ -4499,6 +4544,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		}
 
 	}
+
 	public static class SimpleResponse {
 		public String status;
 		public String message;
@@ -4543,8 +4589,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body("{\"status\":\"Error\"}");
 	}
+
 	/**
 	 * Get NLMIS processing periods
+	 * 
 	 * @return
 	 */
 
@@ -4562,6 +4610,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 	/**
 	 * Get NLMIS programs
+	 * 
 	 * @return
 	 */
 
@@ -4614,6 +4663,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 	/**
 	 * Get Requisition Status from NLMIS
+	 * 
 	 * @return
 	 */
 
@@ -4664,6 +4714,7 @@ public class KenyaemrCoreRestController extends BaseRestController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body("{\"status\":\"Error\"}");
 	}
+
 	/**
 	 * Returns VL order validation details for a patient:
 	 * whether they are pregnant, breastfeeding, and initiated on ART.
@@ -4702,7 +4753,8 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		CalculationResult pregnantResult = calculationService.evaluate(patientId, new IsPregnantCalculation());
 		boolean pregnant = pregnantResult != null && Boolean.TRUE.equals(pregnantResult.getValue());
 
-		CalculationResult breastfeedingResult = calculationService.evaluate(patientId, new IsBreastFeedingCalculation());
+		CalculationResult breastfeedingResult = calculationService.evaluate(patientId,
+				new IsBreastFeedingCalculation());
 		boolean breastfeeding = breastfeedingResult != null && Boolean.TRUE.equals(breastfeedingResult.getValue());
 
 		CalculationResult onArtResult = calculationService.evaluate(patientId, new OnArtCalculation());

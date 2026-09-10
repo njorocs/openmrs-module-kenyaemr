@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.kenyaemr.dataExchange;
 
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -45,7 +44,6 @@ import java.util.Base64;
 import static org.openmrs.module.kenyaemr.api.impl.KenyaEmrServiceImpl.getHIEILMediatorAuthToken;
 import static org.openmrs.module.kenyaemr.util.EmrUtils.getGlobalPropertyValue;
 
-
 public abstract class DataHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DataHandler.class);
@@ -76,8 +74,7 @@ public abstract class DataHandler {
             try {
                 Files.setPosixFilePermissions(
                         Paths.get(directoryPath),
-                        PosixFilePermissions.fromString("rwxr-xr-x")
-                );
+                        PosixFilePermissions.fromString("rwxr-xr-x"));
             } catch (IOException e) {
                 System.err.println("Failed to set directory permissions: " + e.getMessage());
             }
@@ -127,84 +124,89 @@ public abstract class DataHandler {
     public static SSLConnectionSocketFactory createSslConnectionFactory() throws Exception {
         return new SSLConnectionSocketFactory(
                 SSLContexts.createDefault(),
-                new String[]{"TLSv1.2"},
+                new String[] { "TLSv1.2" },
                 null,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier()
-        );
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
     }
 
     public static String getBearerToken() throws IOException {
-		// Utility function to get auth token
-		String ret = null;
-		OkHttpClient client = new OkHttpClient();
-		GlobalProperty globalGetJwtTokenUrl = Context.getAdministrationService()
-			.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_GET_END_POINT);
-		String shaJwtTokenUrl = globalGetJwtTokenUrl.getPropertyValue();
-		if (shaJwtTokenUrl == null || shaJwtTokenUrl.trim().isEmpty()) {
-			System.out.println("Jwt token url configs not updated: ");
-		}
-		GlobalProperty globalGetJwtUsername = Context.getAdministrationService()
-			.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME);
-		String shaJwtUsername = globalGetJwtUsername.getPropertyValue();
-		if (shaJwtUsername == null || shaJwtUsername.trim().isEmpty()) {
-			System.out.println("Jwt token username not updated: ");
-		}
-		GlobalProperty globalGetJwtPassword = Context.getAdministrationService()
-			.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD);
-		String shaJwtPassword = globalGetJwtPassword.getPropertyValue();
-		if (shaJwtPassword == null || shaJwtPassword.trim().isEmpty()) {
-			System.out.println("Jwt token password not updated: ");
-		}
+        // Utility function to get auth token
+        String ret = null;
+        OkHttpClient client = new OkHttpClient();
+        GlobalProperty globalGetJwtTokenUrl = Context.getAdministrationService()
+                .getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_GET_END_POINT);
+        String shaJwtTokenUrl = globalGetJwtTokenUrl.getPropertyValue();
+        if (shaJwtTokenUrl == null || shaJwtTokenUrl.trim().isEmpty()) {
+            System.out.println("Jwt token url configs not updated: ");
+        }
+        GlobalProperty globalGetJwtUsername = Context.getAdministrationService()
+                .getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME);
+        String shaJwtUsername = globalGetJwtUsername.getPropertyValue();
+        if (shaJwtUsername == null || shaJwtUsername.trim().isEmpty()) {
+            System.out.println("Jwt token username not updated: ");
+        }
+        GlobalProperty globalGetJwtPassword = Context.getAdministrationService()
+                .getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD);
+        String shaJwtPassword = globalGetJwtPassword.getPropertyValue();
+        if (shaJwtPassword == null || shaJwtPassword.trim().isEmpty()) {
+            System.out.println("Jwt token password not updated: ");
+        }
 
-		// Encode username and password for Basic Auth
-		String auth = Base64.getEncoder().encodeToString((shaJwtUsername + ":" + shaJwtPassword).getBytes());
-	
-		//Config to toggle GET and POST requests
-		GlobalProperty gpHIEAuthMode = Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_AUTH_MODE);
-		if (gpHIEAuthMode == null) {
-			System.out.println("Jwt Auth mode not configured: ");
-		} else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("get")) {
-			// Build the GET request
-			Request request = new Request.Builder()
-				.url(shaJwtTokenUrl)
-				.header("Authorization", "Basic " + auth)
-				.build();
+        // Encode username and password for Basic Auth
+        String auth = Base64.getEncoder().encodeToString((shaJwtUsername + ":" + shaJwtPassword).getBytes());
 
-			// Execute the request
-			Response response = client.newCall(request).execute();
-			if (response.isSuccessful()) {
-					ret = response.body().string();
-			} else {
-				System.out.println("HIE Auth Get Request failed: " + response.code() + " - " + response.message());
-			}
-		} else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("post")) {
-			// Build the POST request
-			System.out.println("Auth mode is post: ");
-			okhttp3.MediaType mediaType = okhttp3.MediaType.parse("text/plain");
-			okhttp3.RequestBody body = okhttp3.RequestBody.create(mediaType, "");
-			Request postRequest = new Request.Builder()
-				.url(shaJwtTokenUrl)
-				.method("POST", body)
-				.header("Authorization", "Basic " + auth)
-				.header("Cookie", "incap_ses_6550_2912339=Gt0ldtSEr3gzhyyAnUbmWsc39mcAAAAAeRlLAEJa78AYqRNx3TRw5A==; visid_incap_2912339=cOIlO1QSR62/Wo6Ega29z/TjjWcAAAAAQUIPAAAAAAB6TxV9uQ87Ev365z8yUqhP")
-				.build();
-			Response postResponse = client.newCall(postRequest).execute();
-			if (!postResponse.isSuccessful()) {
-				System.err.println("Get HIE Post Auth: ERROR: Request failed: " + postResponse.code() + " - " + postResponse.message());
-			} else {
-				String payload = postResponse.body().string();
-				//System.out.println("Got HIE Post Auth token payload: " + payload);
-				com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-				com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(payload);
-				ret = rootNode.path("access_token").asText();
-			}
-		}else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("mediator")) {
-			// Build the Mediator request
-			System.out.println("Auth mode is mediator here");
-			ret = getHIEILMediatorAuthToken();
-		}
-		//System.out.println("HIE Auth Token retrieved ==>" + ret);
-		return ret;
+        // Config to toggle GET and POST requests
+        GlobalProperty gpHIEAuthMode = Context.getAdministrationService()
+                .getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_AUTH_MODE);
+        if (gpHIEAuthMode == null) {
+            System.out.println("Jwt Auth mode not configured: ");
+        } else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("get")) {
+            // Build the GET request
+            Request request = new Request.Builder()
+                    .url(shaJwtTokenUrl)
+                    .header("Authorization", "Basic " + auth)
+                    .build();
+
+            // Execute the request, ensuring the response (and its underlying
+            // connection) is always closed, even on early return / exception
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ret = response.body().string();
+                } else {
+                    System.out.println("HIE Auth Get Request failed: " + response.code() + " - " + response.message());
+                }
+            }
+        } else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("post")) {
+            // Build the POST request
+            System.out.println("Auth mode is post: ");
+            okhttp3.MediaType mediaType = okhttp3.MediaType.parse("text/plain");
+            okhttp3.RequestBody body = okhttp3.RequestBody.create(mediaType, "");
+            Request postRequest = new Request.Builder()
+                    .url(shaJwtTokenUrl)
+                    .method("POST", body)
+                    .header("Authorization", "Basic " + auth)
+                    .header("Cookie",
+                            "incap_ses_6550_2912339=Gt0ldtSEr3gzhyyAnUbmWsc39mcAAAAAeRlLAEJa78AYqRNx3TRw5A==; visid_incap_2912339=cOIlO1QSR62/Wo6Ega29z/TjjWcAAAAAQUIPAAAAAAB6TxV9uQ87Ev365z8yUqhP")
+                    .build();
+            try (Response postResponse = client.newCall(postRequest).execute()) {
+                if (!postResponse.isSuccessful() || postResponse.body() == null) {
+                    System.err.println("Get HIE Post Auth: ERROR: Request failed: " + postResponse.code() + " - "
+                            + postResponse.message());
+                } else {
+                    String payload = postResponse.body().string();
+                    // System.out.println("Got HIE Post Auth token payload: " + payload);
+                    com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(payload);
+                    ret = rootNode.path("access_token").asText();
+                }
+            }
+        } else if (gpHIEAuthMode.getPropertyValue().trim().equalsIgnoreCase("mediator")) {
+            // Build the Mediator request
+            System.out.println("Auth mode is mediator here");
+            ret = getHIEILMediatorAuthToken();
+        }
+        // System.out.println("HIE Auth Token retrieved ==>" + ret);
+        return ret;
     }
 
     private static String createBasicAuthHeader(String username, String password) {
@@ -219,6 +221,7 @@ public abstract class DataHandler {
             throw new RuntimeException("Error parsing response", e);
         }
     }
+
     public static void logDiagnostics(ResponseEntity<String> response) {
         try {
             JSONObject jsonObject = new JSONObject(response);
