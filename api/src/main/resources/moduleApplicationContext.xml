@@ -229,6 +229,8 @@
 						</property>
 					</bean>
 				</property>
+				<property name="locationService" ref="locationService" />
+				<property name="identifierManager" ref="identifierManager" />
 			</bean>
 		</property>
 		<property name="preInterceptors">
