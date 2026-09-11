@@ -59,8 +59,6 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.util.DatabaseUpdater;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.aop.scope.ScopedProxyUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -78,10 +76,10 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 	protected static final String OPENMRS_MEDICAL_RECORD_NUMBER_NAME = "Kenya EMR - OpenMRS Medical Record Number";
 	protected static final String HIV_UNIQUE_PATIENT_NUMBER_NAME = "Kenya EMR - OpenMRS HIV Unique Patient Number";
 
-	@Autowired
+	
 	private IdentifierManager identifierManager;
 
-	@Autowired
+	
 	private LocationService locationService;
 
 	private boolean setupRequired = true;
@@ -157,6 +155,14 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 		finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES);
 		}
+	}
+	
+	public void setIdentifierManager(IdentifierManager identifierManager) {
+		this.identifierManager = identifierManager;
+	}
+
+	public void setLocationService(LocationService locationService) {
+		this.locationService = locationService;
 	}
 
 	/**
