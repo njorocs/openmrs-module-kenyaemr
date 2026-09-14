@@ -140,13 +140,6 @@
 		<constructor-arg value="800" />
 	</bean>
 
-	<bean id="kenyaemr.app.nupiVerification" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
-		<constructor-arg value="kenyaemr.nupiVerification" />
-		<constructor-arg value="NUPI Verification" />
-		<constructor-arg value="" />
-		<constructor-arg value="kenyaemr:apps/upi.png" />
-		<constructor-arg value="840" />
-	</bean>
 
 	<bean id="kenyaemr.app.developer" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
 		<constructor-arg value="kenyaemr.developer" />
