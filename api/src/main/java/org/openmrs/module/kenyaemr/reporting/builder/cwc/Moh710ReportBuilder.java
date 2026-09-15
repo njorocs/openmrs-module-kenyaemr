@@ -94,6 +94,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addDailyVaccineRows(dsd, "ROTA-3", "Rota 3", "ROTA_3");
 		addDailyVaccineRows(dsd, "YF", "Yellow Fever", "Yellow_fever");
 		addDailyVaccineRows(dsd, "MR-1", "Measles-Rubella 1", "Measles_rubella_1");
+		addDailyVaccineRows(dsd, "TCV", "Typhoid Conjugate Vaccine", "typhoid_conjugate_vaccine");
 		addDailyVaccineRows(dsd, "FIC", "Fully immunized children", "fully_immunized");
 
 		// === Vitamin A: specific age bands, single row each, no age split ===
@@ -103,9 +104,16 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addSingleDailyVaccineRow(dsd, "VA-2Y", "Vitamin A 2yr", "VitaminA_2_yr");
 		addSingleDailyVaccineRow(dsd, "VA-2Y-5Y", "Vitamin A 2-5yr", "VitaminA_2_to_5_yr");
 		addSingleDailyVaccineRow(dsd, "VA-3Y", "Vitamin A 3yr", "VitaminA_3_yr");
-		addSingleDailyVaccineRow(dsd, "VA-3.5Y", "Vitamin A 3.5yr", "VitaminA_3_and_half_yr");
-		addSingleDailyVaccineRow(dsd, "VA-4Y", "Vitamin A 4yr", "VitaminA_4_yr");
-		addSingleDailyVaccineRow(dsd, "VA-4.5Y", "Vitamin A 4.5yr", "VitaminA_4_and_half_yr");
+
+		//TODO	- Activate and etl these immunizations once they are available in the system
+/*		addSingleDailyVaccineRow(dsd, "VA-6-11M", "Vitamin A 6-11 Months", "VitaminA_6_11_month");
+		addSingleDailyVaccineRow(dsd, "VA-12-59M", "Vitamin 12-59 Months", "VitaminA_12_59_month");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine-Pregnant Women_1", "1st Dose", "tetanus_taxoid_vaccine_pregnant_women_1");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine-Pregnant Women_2", "2nd Dose", "tetanus_taxoid_vaccine_pregnant_women_2");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine-Pregnant Women_3", "3rd Dose", "tetanus_taxoid_vaccine_pregnant_women_3");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine-Pregnant Women_4", "4th Dose", "tetanus_taxoid_vaccine_pregnant_women_4");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine-Pregnant Women_5", "5th Dose", "tetanus_taxoid_vaccine_pregnant_women_5");
+		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine for Trauma", "TTV for Trauma", "tetanus_taxoid_vaccine_for_trauma");*/
 
 		// === MR-2: 2 rows with 31 daily columns: 18-24mo and >2yr ===
 		addDailyVaccineColumnsForAge(dsd, "MR-2_18_24", "MR-2", "Measles_rubella_2", 1, 2, "18-24mo");
@@ -114,7 +122,6 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		// === HPV: single rows per dose ===
 		addSingleDailyVaccineRow(dsd, "HPV-1", "HPV 1", "HPV_1");
 		addSingleDailyVaccineRow(dsd, "HPV-2", "HPV 2", "HPV_2");
-		addSingleDailyVaccineRow(dsd, "HPV-3", "HPV 3", "HPV_3");
 
 		return dsd;
 	}
