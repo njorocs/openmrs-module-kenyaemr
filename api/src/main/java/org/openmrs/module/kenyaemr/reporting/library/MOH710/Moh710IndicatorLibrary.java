@@ -27,6 +27,10 @@ public class Moh710IndicatorLibrary {
 		ind.addParameter(new org.openmrs.module.reporting.evaluation.parameter.Parameter("dayOfMonth", "Day of Month", Integer.class));
 		return ind;
 	}
+
+	public CohortIndicator vaccinatedTotal(String vaccineColumn, Integer minAge, Integer maxAge) {
+		return cohortIndicator(null, map(moh710CohortLibrary.vaccinatedTotal(vaccineColumn, minAge, maxAge), "startDate=${startDate},endDate=${endDate}"));
+	}
 }
 
 

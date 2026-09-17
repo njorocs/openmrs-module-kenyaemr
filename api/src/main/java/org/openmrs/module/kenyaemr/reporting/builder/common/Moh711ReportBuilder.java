@@ -22,6 +22,7 @@ import org.openmrs.module.kenyaemr.reporting.library.moh711.Moh711IndicatorLibra
 import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonDimensionLibrary;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
+import org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
@@ -103,7 +104,8 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
                 ReportUtils.map(createTBScreeningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(familyPlanningDataSet(), "startDate=${startDate},endDate=${endDate}"),
                 ReportUtils.map(PsychiatryDataSet(), "startDate=${startDate},endDate=${endDate}"),
-                ReportUtils.map(PhysiotherapyDataSet(), "startDate=${startDate},endDate=${endDate}")
+                ReportUtils.map(PhysiotherapyDataSet(), "startDate=${startDate},endDate=${endDate}"),
+                ReportUtils.map(createFIFDataSet(), "startDate=${startDate},endDate=${endDate}")
         );
     }
 
@@ -511,6 +513,75 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd, "Total number of treatments", "", ReportUtils.map(moh711Indicators.totalPhysiotherapyTreatments(), indParams), physiotherapyAgeDisaggregation, Arrays.asList("01", "02", "03"));
 
         return dsd;
+    }
+
+    private DataSetDefinition createFIFDataSet() {
+        SqlDataSetDefinition dsd = new SqlDataSetDefinition();
+        dsd.setName("FIF");
+        dsd.setDescription("Facility Improvement Fund");
+        dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        dsd.setSqlQuery(getFIFQuery());
+        return dsd;
+    }
+
+    private String getFIFQuery() {
+        return "SELECT\n" +
+                "    COALESCE(c.cashier_amount, 0) + COALESCE(v.claim_amount, 0) AS Amount_of_FIF_Collected,\n" +
+                "    COALESCE(e.exempted_amount, 0) AS Amount_of_FIF_Exempted,\n" +
+                "    COALESCE(w.waived_amount, 0) AS Amount_of_FIF_Waived\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT SUM(bp.amount) AS cashier_amount\n" +
+                "        FROM cashier_bill_payment bp\n" +
+                "                 JOIN cashier_bill b ON b.bill_id = bp.bill_id AND b.voided = 0\n" +
+                "                 JOIN cashier_payment_mode pm ON pm.payment_mode_id = bp.payment_mode_id\n" +
+                "        WHERE bp.voided = 0\n" +
+                "          AND pm.name NOT LIKE '%waiv%'\n" +
+                "          AND pm.name NOT LIKE '%exempt%'\n" +
+                "          AND bp.date_created >= :startDate\n" +
+                "          AND bp.date_created <= :endDate\n" +
+                "    ) c\n" +
+                "        CROSS JOIN\n" +
+                "    (\n" +
+                "        SELECT SUM(vc.total_claim_net_amount) AS claim_amount\n" +
+                "        FROM iclm_virtual_claim vc\n" +
+                "        WHERE vc.voided = 0\n" +
+                "          AND (\n" +
+                "            vc.payer_workflow_state IS NOT NULL\n" +
+                "                OR vc.payer_workflow_state NOT IN ('REJECTED', 'SENT_BACK')\n" +
+                "            )\n" +
+                "          AND vc.date_created >= :startDate\n" +
+                "          AND vc.date_created <= :endDate\n" +
+                "    ) v\n" +
+                "        CROSS JOIN\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            SUM(bp.amount) AS exempted_amount\n" +
+                "        FROM\n" +
+                "            cashier_bill_payment bp\n" +
+                "                JOIN cashier_bill b ON b.bill_id = bp.bill_id AND b.voided = 0\n" +
+                "                JOIN cashier_payment_mode pm ON pm.payment_mode_id = bp.payment_mode_id\n" +
+                "        WHERE\n" +
+                "            bp.voided = 0\n" +
+                "          AND pm.name LIKE '%exempt%'\n" +
+                "          AND bp.date_created >= :startDate\n" +
+                "          AND bp.date_created <= :endDate\n" +
+                "    ) e\n" +
+                "        CROSS JOIN\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            SUM(bp.amount) AS waived_amount\n" +
+                "        FROM\n" +
+                "            cashier_bill_payment bp\n" +
+                "                JOIN cashier_bill b ON b.bill_id = bp.bill_id AND b.voided = 0\n" +
+                "                JOIN cashier_payment_mode pm ON pm.payment_mode_id = bp.payment_mode_id\n" +
+                "        WHERE\n" +
+                "            bp.voided = 0\n" +
+                "          AND pm.name LIKE '%waiv%'\n" +
+                "          AND bp.date_created >= :startDate\n" +
+                "          AND bp.date_created <= :endDate\n" +
+                "    ) w;";
     }
 
 }

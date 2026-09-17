@@ -56,4 +56,34 @@ public class Moh710CohortLibrary {
 
 		return cd;
 	}
+
+	/**
+	 * Unique children vaccinated during the reporting period with age filter as-of vaccination date
+	 * @param vaccineColumn the column in etl_immunization
+	 * @param minAge the minimum age in years
+	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @return the cohort definition
+	 */
+	public CohortDefinition vaccinatedTotal(String vaccineColumn, Integer minAge, Integer maxAge) {
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+
+		String sql = "SELECT i.patient_id\n" +
+				"FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_immunization i\n" +
+				"INNER JOIN " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_demographics p ON p.patient_id = i.patient_id\n" +
+				"WHERE DATE(i." + vaccineColumn + ") BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+				(minAge != null
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, DATE(i." + vaccineColumn + ")) >= " + minAge + "\n"
+						: "") +
+				(maxAge != null
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, DATE(i." + vaccineColumn + ")) < " + maxAge + "\n"
+						: "") +
+				"GROUP BY i.patient_id";
+
+		cd.setQuery(sql);
+
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+
+		return cd;
+	}
 }

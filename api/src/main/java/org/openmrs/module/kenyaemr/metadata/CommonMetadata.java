@@ -630,10 +630,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				"The facility for which this installation is configured",
 				LocationDatatype.class, null, null));
 
-		// ADX dataset mappings are no longer stored as global properties: the DHIS2 mapping
-		// outgrew the global_property.property_value column. They now live as JSON files under
-		// the application data directory and are read via AdxMappingConfigStore, which seeds the
-		// files from any legacy global property value or a bundled default on first use.
+		// ADX dataset mappings are no longer stored as global properties: the DHIS2 (KHIS) mapping
+		// outgrew the global_property.property_value column. It is read via AdxMappingConfigStore
+		// straight from the khis/khis_dataset_mapping.default.json resource bundled in the module.
+		// Only the much smaller 3PM mapping still lives as a JSON file under the application data
+		// directory, seeded from any legacy global property value or a bundled default on first use.
 		AdministrationService administrationService = Context.getAdministrationService();
 
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {

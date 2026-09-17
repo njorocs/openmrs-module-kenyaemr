@@ -94,7 +94,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addDailyVaccineRows(dsd, "ROTA-3", "Rota 3", "ROTA_3");
 		addDailyVaccineRows(dsd, "YF", "Yellow Fever", "Yellow_fever");
 		addDailyVaccineRows(dsd, "MR-1", "Measles-Rubella 1", "Measles_rubella_1");
-		addDailyVaccineRows(dsd, "TCV", "Typhoid Conjugate Vaccine", "typhoid_conjugate_vaccine");
+		addDailyVaccineRows(dsd, "TCV", "Typhoid Conjugate Vaccine", "TCV");
 		addDailyVaccineRows(dsd, "FIC", "Fully immunized children", "fully_immunized");
 
 		// === Vitamin A: specific age bands, single row each, no age split ===
@@ -103,7 +103,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addSingleDailyVaccineRow(dsd, "VA-1.5Y", "Vitamin A 1.5yr", "VitaminA_1_and_half_yr");
 		addSingleDailyVaccineRow(dsd, "VA-2Y", "Vitamin A 2yr", "VitaminA_2_yr");
 		addSingleDailyVaccineRow(dsd, "VA-2Y-5Y", "Vitamin A 2-5yr", "VitaminA_2_to_5_yr");
-		addSingleDailyVaccineRow(dsd, "VA-3Y", "Vitamin A 3yr", "VitaminA_3_yr");
+		// addSingleDailyVaccineRow(dsd, "VA-3Y", "Vitamin A 3yr", "VitaminA_3_yr");
 
 		//TODO	- Activate and etl these immunizations once they are available in the system
 /*		addSingleDailyVaccineRow(dsd, "VA-6-11M", "Vitamin A 6-11 Months", "VitaminA_6_11_month");
@@ -116,8 +116,8 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine for Trauma", "TTV for Trauma", "tetanus_taxoid_vaccine_for_trauma");*/
 
 		// === MR-2: 2 rows with 31 daily columns: 18-24mo and >2yr ===
-		addDailyVaccineColumnsForAge(dsd, "MR-2_18_24", "MR-2", "Measles_rubella_2", 1, 2, "18-24mo");
-		addDailyVaccineColumnsForAge(dsd, "MR-2_GT2", "MR-2", "Measles_rubella_2", 2, null, ">2yr");
+		addDailyVaccineColumnsForAge(dsd, "MR-2_18_24", "MR-2 18-24 months", "Measles_rubella_2", 1, 2, "18-24mo");
+		addDailyVaccineColumnsForAge(dsd, "MR-2_GT2", "MR-2 24 months+", "Measles_rubella_2", 2, null, ">2yr");
 
 		// === HPV: single rows per dose ===
 		addSingleDailyVaccineRow(dsd, "HPV-1", "HPV 1", "HPV_1");
@@ -138,6 +138,10 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 					ReportUtils.map(moh710Indicators.vaccinatedOnDay(etlCol, minAge, maxAge), indMap),
 					(String) null);
 		}
+		// Adding monthly total column
+		dsd.addColumn(baseName + "-total", label + " Total",
+				ReportUtils.map(moh710Indicators.vaccinatedTotal(etlCol, minAge, maxAge), "startDate=${startDate},endDate=${endDate}"),
+				(String) null);
 	}
 
 	/**
@@ -152,7 +156,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 	 */
 	private void addDailyVaccineRows(CohortIndicatorDataSetDefinition dsd, String baseName, String label, String etlCol) {
 		addDailyVaccineColumnsForAge(dsd, baseName, label, etlCol, 0, 1, "<1yr");
-		addDailyVaccineColumnsForAge(dsd, baseName + "_O1", label, etlCol, 1, null, ">=1yr");
+		addDailyVaccineColumnsForAge(dsd, baseName + "_01", label, etlCol, 1, null, ">=1yr");
 	}
 
 }

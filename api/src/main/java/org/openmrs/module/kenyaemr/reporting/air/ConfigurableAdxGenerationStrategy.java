@@ -609,15 +609,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
                 String categoryOptionCombo = null;
 
                 if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
-                    String mappedValue = datasetMapping.getFieldMappings().get(mappingKey);
-                    // Check if mapping contains categoryOptionCombo (format: dataElement|categoryOptionCombo)
-                    if (mappedValue.contains("|")) {
-                        String[] parts = mappedValue.split("\\|");
-                        dataElementName = parts[0];
-                        categoryOptionCombo = parts[1];
-                    } else {
-                        dataElementName = mappedValue;
+                    MappedDataElement mapped = resolveMappedDataElement(datasetMapping.getFieldMappings().get(mappingKey));
+                    if (mapped == null) {
+                        log.debug("Skipping column " + mappingKey + " of report " + reportName
+                                + " because its mapping carries no data element");
+                        continue;
                     }
+                    dataElementName = mapped.getDataElement();
+                    categoryOptionCombo = mapped.getCategoryOptionCombo();
                 }
 
                 // Exclude unmapped data elements for non-MOH 731 reports
@@ -675,13 +674,67 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
     private String getDatasetName(AdxConfiguration.AdxDatasetMapping datasetMapping, String dsKey, String reportName) {
         if (datasetMapping != null) {
           if (MONTHLY_REPORT_NAME.equals(reportName)) {
-                return datasetMapping.get3pmName();
+                return StringUtils.trimToNull(datasetMapping.get3pmName());
             } else {
                 // For other reports, use dhisName as default
-                return datasetMapping.getDhisName();
+                return StringUtils.trimToNull(datasetMapping.getDhisName());
             }
         }
         return dsKey; // Fallback to original key
+    }
+
+    /**
+     * Resolves a configured field mapping into its data element and, where present, its category
+     * option combo. Mappings take the form {@code dataElement} or
+     * {@code dataElement|categoryOptionCombo}. Placeholders that carry no data element - such as
+     * {@code "|"}, used for indicators that have no KHIS code yet - resolve to null so that the
+     * column is skipped instead of breaking the whole payload.
+     *
+     * @return the resolved mapping, or null when the mapping has no usable data element
+     */
+    private MappedDataElement resolveMappedDataElement(String mappedValue) {
+        if (StringUtils.isBlank(mappedValue)) {
+            return null;
+        }
+
+        String dataElement = mappedValue;
+        String categoryOptionCombo = null;
+
+        int separator = mappedValue.indexOf('|');
+        if (separator >= 0) {
+            dataElement = mappedValue.substring(0, separator);
+            categoryOptionCombo = mappedValue.substring(separator + 1);
+        }
+
+        dataElement = StringUtils.trimToNull(dataElement);
+        if (dataElement == null) {
+            return null;
+        }
+
+        return new MappedDataElement(dataElement, StringUtils.trimToNull(categoryOptionCombo));
+    }
+
+    /**
+     * A resolved field mapping: the DHIS2 data element with its optional category option combo
+     */
+    private static final class MappedDataElement {
+
+        private final String dataElement;
+
+        private final String categoryOptionCombo;
+
+        private MappedDataElement(String dataElement, String categoryOptionCombo) {
+            this.dataElement = dataElement;
+            this.categoryOptionCombo = categoryOptionCombo;
+        }
+
+        private String getDataElement() {
+            return dataElement;
+        }
+
+        private String getCategoryOptionCombo() {
+            return categoryOptionCombo;
+        }
     }
 
     /**
@@ -1095,14 +1148,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
                 String categoryOptionCombo = null;
 
                 if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
-                    String mappedValue = datasetMapping.getFieldMappings().get(mappingKey);
-                    if (mappedValue.contains("|")) {
-                        String[] parts = mappedValue.split("\\|");
-                        dataElementName = parts[0];
-                        categoryOptionCombo = parts[1];
-                    } else {
-                        dataElementName = mappedValue;
+                    MappedDataElement mapped = resolveMappedDataElement(datasetMapping.getFieldMappings().get(mappingKey));
+                    if (mapped == null) {
+                        log.debug("Skipping column " + mappingKey + " of report " + reportName
+                                + " because its mapping carries no data element");
+                        continue;
                     }
+                    dataElementName = mapped.getDataElement();
+                    categoryOptionCombo = mapped.getCategoryOptionCombo();
                 }
 
                 if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {

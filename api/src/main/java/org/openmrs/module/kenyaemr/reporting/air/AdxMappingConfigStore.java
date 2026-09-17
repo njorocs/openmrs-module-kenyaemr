@@ -32,19 +32,21 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Source of truth for the ADX dataset/field mapping configuration.
  *
- * <p>The mappings used to be stored in the {@code kenyaemr.adxDatasetMapping} and
- * {@code kenyakeypop.adx3pmDatasetMapping} global properties, but the DHIS2 mapping grew large
- * enough to exceed the {@code global_property.property_value} column size. The configuration is
- * therefore kept as JSON files on disk, under the OpenMRS application data directory, where it is
- * not bound by any DB column limit and can be edited by an administrator.</p>
+ * <p>The KHIS (DHIS2) mapping used to be stored in the {@code kenyaemr.adxDatasetMapping} global
+ * property, but it grew large enough to exceed the {@code global_property.property_value} column
+ * size, which silently truncated the mapping and, with it, the {@code outputFormat} of each report.
+ * That mapping is therefore read exclusively from the {@code khis/khis_dataset_mapping.default.json}
+ * resource bundled in the module: it ships with the reports it belongs to and is not bound by any
+ * DB column limit.</p>
  *
- * <p>Reads are served from a static in-memory cache keyed by file path. The parsed configuration is
- * only re-read and re-parsed when the file's last-modified timestamp changes, so repeated lookups
- * are cheap and edits to the file are picked up without restarting OpenMRS.</p>
+ * <p>The much smaller 3PM mapping is still kept as a JSON file on disk, under the OpenMRS
+ * application data directory, so that it can be edited by an administrator. On first use, a missing
+ * file is seeded from (1) the legacy global property if it still holds a non-empty value (migration
+ * for existing deployments), otherwise (2) a default JSON resource bundled in the module.</p>
  *
- * <p>On first use, a missing file is seeded from (1) the legacy global property if it still holds a
- * non-empty value (migration for existing deployments), otherwise (2) a default JSON resource
- * bundled in the module.</p>
+ * <p>Reads are served from static in-memory caches. The bundled resource is parsed once, while the
+ * on-disk file is only re-read and re-parsed when its last-modified timestamp changes, so repeated
+ * lookups are cheap and edits to the file are picked up without restarting OpenMRS.</p>
  */
 public final class AdxMappingConfigStore {
 
@@ -53,23 +55,27 @@ public final class AdxMappingConfigStore {
     private static final String ADX_DIR = OpenmrsUtil.getApplicationDataDirectory()
             + File.separator + "kenyaemr" + File.separator + "khis";
 
-    private static final String DHIS2_FILE = ADX_DIR + File.separator + "dhis2_dataset_mapping.json";
     private static final String THREE_PM_FILE = ADX_DIR + File.separator + "3pm_dataset_mapping.json";
 
-    private static final String DHIS2_DEFAULT_RESOURCE = "khis/khis_dataset_mapping.default.json";
+    private static final String DHIS2_RESOURCE = "khis/khis_dataset_mapping.default.json";
     private static final String THREE_PM_DEFAULT_RESOURCE = "khis/3pm_dataset_mapping.default.json";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, Cached> CACHE = new ConcurrentHashMap<String, Cached>();
+    private static final Map<String, List<AdxConfiguration>> RESOURCE_CACHE = new ConcurrentHashMap<String, List<AdxConfiguration>>();
 
     private AdxMappingConfigStore() {
     }
 
     /**
+     * Reads the KHIS (DHIS2) mapping for every report other than the 3PM monthly report. The
+     * mapping is always taken from the JSON resource bundled in the module, never from the legacy
+     * global property, which cannot hold a value of this size.
+     *
      * @return the DHIS2 ADX configurations (never null; empty list when nothing is configured)
      */
     public static List<AdxConfiguration> getDhis2Configurations() {
-        return getConfigurations(DHIS2_FILE, DHIS2_DEFAULT_RESOURCE, EmrConstants.GP_DHIS2_DATASET_MAPPING);
+        return getResourceConfigurations(DHIS2_RESOURCE);
     }
 
     /**
@@ -77,6 +83,20 @@ public final class AdxMappingConfigStore {
      */
     public static List<AdxConfiguration> getThreePmConfigurations() {
         return getConfigurations(THREE_PM_FILE, THREE_PM_DEFAULT_RESOURCE, EmrConstants.GP_3PM_DATASET_MAPPING);
+    }
+
+    private static List<AdxConfiguration> getResourceConfigurations(String resource) {
+        List<AdxConfiguration> cached = RESOURCE_CACHE.get(resource);
+        if (cached != null) {
+            return cached;
+        }
+
+        List<AdxConfiguration> configurations = parse(readResourceNode(resource));
+        if (configurations.isEmpty()) {
+            log.error("No ADX configuration could be read from bundled resource: " + resource);
+        }
+        RESOURCE_CACHE.put(resource, configurations);
+        return configurations;
     }
 
     private static List<AdxConfiguration> getConfigurations(String filePath, String defaultResource, String legacyGpKey) {
@@ -151,15 +171,19 @@ public final class AdxMappingConfigStore {
         }
 
         // 2. Fall back to the default resource bundled in the module.
-        InputStream in = AdxMappingConfigStore.class.getClassLoader().getResourceAsStream(defaultResource);
+        return readResourceNode(defaultResource);
+    }
+
+    private static JsonNode readResourceNode(String resource) {
+        InputStream in = AdxMappingConfigStore.class.getClassLoader().getResourceAsStream(resource);
         if (in == null) {
-            log.error("Bundled ADX default resource not found: " + defaultResource);
+            log.error("Bundled ADX resource not found: " + resource);
             return null;
         }
         try {
             return objectMapper.readTree(in);
         } catch (IOException e) {
-            log.error("Failed to read bundled ADX default resource: " + defaultResource, e);
+            log.error("Failed to read bundled ADX resource: " + resource, e);
             return null;
         } finally {
             try {
