@@ -58,7 +58,7 @@ textarea {
 	<p></p>
 
 	<div id="adxMsg">
-		<textarea ${ outputFormat == 'json' ? 'style="background: white; color: black;"' : '' }>${ adx }</textarea>
+		<textarea ${ outputFormat == 'json' ? 'style="background: white; color: black;"' : '' }>${ khis }</textarea>
 	</div>
 	<br/>
 

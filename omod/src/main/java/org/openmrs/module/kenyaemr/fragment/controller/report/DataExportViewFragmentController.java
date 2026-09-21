@@ -362,13 +362,28 @@ public class DataExportViewFragmentController {
                         AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
                         if (datasetMapping != null && datasetMapping.getFieldMappings() != null
                                 && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
+
                             String mappedValue = datasetMapping.getFieldMappings().get(mappingKey);
-                            if (mappedValue.contains("|")) {
-                                String[] parts = mappedValue.split("\\|");
-                                dataElementValue = parts[0];
+
+                            if (StringUtils.isBlank(mappedValue) || "|".equals(mappedValue.trim())) {
+                                log.debug("Skipping unmapped field: report={}, dataset={}, mappingKey={}, mappedValue=[{}]"
+                                );
+                                continue;
+                            }
+
+                            String[] parts = mappedValue.split("\\|", 2);
+
+                            if (StringUtils.isBlank(parts[0])) {
+                                log.warn("Invalid field mapping: report={}, dataset={}, mappingKey={}, mappedValue=[{}]. "
+                                                + "Data element is missing."
+                                );
+                                continue;
+                            }
+
+                            dataElementValue = parts[0];
+
+                            if (parts.length > 1 && StringUtils.isNotBlank(parts[1])) {
                                 categoryOptionCombo = parts[1];
-                            } else {
-                                dataElementValue = mappedValue;
                             }
                         } else if (datasetMapping != null && datasetMapping.getFieldMappings() != null
                                 && !datasetMapping.getFieldMappings().containsKey(mappingKey)
