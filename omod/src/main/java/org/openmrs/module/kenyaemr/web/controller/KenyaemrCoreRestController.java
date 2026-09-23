@@ -3849,12 +3849,18 @@ public class KenyaemrCoreRestController extends BaseRestController {
 			if (request.getFacility() == null || request.getFacility().isEmpty()) {
 				return ResponseEntity.badRequest().body("Missing or invalid facility");
 			}
+			boolean overrideMemberConsent = request.getOverrideMemberConsent() != null && request.getOverrideMemberConsent();
+			if (overrideMemberConsent && (request.getParentCRNumber() == null || request.getParentCRNumber().isEmpty())) {
+				return ResponseEntity.badRequest().body("parentCRNumber is required when overrideMemberConsent is true.");
+			}
 			String token = getAuthToken();
 			return ConsentSendOTP(request.getIdentifierType(),
 					request.getIdentifierNumber(),
 					request.getPhoneNumber(),
 					request.getScope(),
-					request.getFacility(), token);
+					request.getFacility(),
+					request.getParentCRNumber(),
+					overrideMemberConsent, token);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("--> Failed to send consent OTP request " + e.getMessage());
