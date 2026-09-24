@@ -255,6 +255,24 @@ public class CommonDimensionLibrary {
     }
 
     /**
+     * Dimension of age using the age groups required by the MOH 763 report: 0-9, 10-18, 19-24, 25-34, 35-64, 65+
+     * @return the dimension
+     */
+    public CohortDefinitionDimension moh763AgeGroups() {
+        CohortDefinitionDimension dim = new CohortDefinitionDimension();
+        dim.setName("age groups (0-9, 10-18, 19-24, 25-34, 35-64, 65+)");
+        dim.addParameter(new Parameter("onDate", "Date", Date.class));
+        dim.addCohortDefinition("0-9", map(commonCohortLibrary.agedAtLeastAgedAtMost(0, 9), "effectiveDate=${onDate}"));
+        dim.addCohortDefinition("10-18", map(commonCohortLibrary.agedAtLeastAgedAtMost(10, 18), "effectiveDate=${onDate}"));
+        dim.addCohortDefinition("19-24", map(commonCohortLibrary.agedAtLeastAgedAtMost(19, 24), "effectiveDate=${onDate}"));
+        dim.addCohortDefinition("25-34", map(commonCohortLibrary.agedAtLeastAgedAtMost(25, 34), "effectiveDate=${onDate}"));
+        dim.addCohortDefinition("35-64", map(commonCohortLibrary.agedAtLeastAgedAtMost(35, 64), "effectiveDate=${onDate}"));
+        dim.addCohortDefinition("65+", map(commonCohortLibrary.agedAtLeast(65), "effectiveDate=${onDate}"));
+
+        return dim;
+    }
+
+    /**
      * Dimension of age using the 2 standard age groups. <15 and 15+ years
      * @return the dimension
      */

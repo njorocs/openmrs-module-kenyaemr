@@ -160,6 +160,7 @@
 				<ref bean="kenyaemr.ehrReports.report.moh711"/>
 				<ref bean="kenyaemr.ehrReports.report.fmap"/>
 				<ref bean="kenyaemr.ehrReports.report.moh745"/>
+				<ref bean="kenyaemr.ehrReports.report.moh763"/>
 				<ref bean="kenyaemr.ehrReports.report.moh416" />
 				<ref bean="kenyaemr.ehrReports.report.moh417" />
 				<ref bean="kenyaemr.ehrReports.report.moh270" />
@@ -900,6 +901,14 @@
 		<property name="description" value="Comprehensive Cervical Cancer Facility Reporting Form - MOH" />
 		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
 		<property name="template" value="kenyaemr:moh745.xls" />
+	</bean>
+
+	<bean id="kenyaemr.ehrReports.report.moh763" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
+		<property name="targetUuid" value="3befc7d9-be85-4d9f-91cd-db7791fd3f48" />
+		<property name="name" value="MOH 763" />
+		<property name="description" value="Mental Health Monthly Summary Reporting Form - MOH" />
+		<property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+		<property name="template" value="kenyaemr:moh763.xls" />
 	</bean>
 
 	<bean id="kenyaemr.etl.common.report.Moh731KDoD" class="org.openmrs.module.kenyacore.report.IndicatorReportDescriptor">
