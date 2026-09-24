@@ -19,6 +19,8 @@ public class ConsentOTPRequest {
     private String phoneNumber;
     private List<String> scope;
     private String facility;
+    private String parentCRNumber;
+    private Boolean overrideMemberConsent;
 
     public String getId() {
         return id;
@@ -74,5 +76,21 @@ public class ConsentOTPRequest {
 
     public void setFacility(String facility) {
         this.facility = facility;
+    }
+
+    public String getParentCRNumber() {
+        return parentCRNumber;
+    }
+
+    public void setParentCRNumber(String parentCRNumber) {
+        this.parentCRNumber = parentCRNumber;
+    }
+
+    public Boolean getOverrideMemberConsent() {
+        return overrideMemberConsent;
+    }
+
+    public void setOverrideMemberConsent(Boolean overrideMemberConsent) {
+        this.overrideMemberConsent = overrideMemberConsent;
     }
 }

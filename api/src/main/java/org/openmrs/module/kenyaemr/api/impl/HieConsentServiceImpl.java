@@ -38,7 +38,7 @@ public class HieConsentServiceImpl {
      * @throws Exception if an error occurs during the HTTP request or while constructing the response object
      */
 
-    public static SimpleObject ConsentSendOTP(String identifierType, String identifierNumber, String phoneNumber, List<String> scope, String facility, String token) throws Exception{
+    public static SimpleObject ConsentSendOTP(String identifierType, String identifierNumber, String phoneNumber, List<String> scope, String facility, String parentCRNumber, Boolean overrideMemberConsent, String token) throws Exception{
         CloseableHttpClient httpClient = HttpClients.createDefault();
         String responseMsg = null;
         try {
@@ -51,6 +51,10 @@ public class HieConsentServiceImpl {
             json.put("phoneNumber", phoneNumber);
             json.put("facility", facility);
             json.put("scope", scope);
+            json.put("overrideMemberConsent", overrideMemberConsent != null && overrideMemberConsent);
+            if (parentCRNumber != null && !parentCRNumber.isEmpty()) {
+                json.put("parentCRNumber", parentCRNumber);
+            }
             StringEntity entity = new StringEntity(json.toString());
             postRequest.setEntity(entity);
             postRequest.setHeader("Content-Type", "application/json");
