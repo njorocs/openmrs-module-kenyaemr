@@ -851,7 +851,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 				"Allows for alphanumeric format",
 				null, LocationBehavior.NOT_USED, false, _PatientIdentifierType.PASSPORT_NUMBER));
 		install(patientIdentifierType("Birth Certificate Number", "Birth certificate number for client",
-				"^[a-zA-Z0-9]+$", "Allows for alphanumeric format",
+				"^[a-zA-Z0-9_/-]+$", "Alphanumeric, underscore, slash or hyphen",
 				null, LocationBehavior.NOT_USED, false, _PatientIdentifierType.BIRTH_CERTIFICATE_NUMBER));
 		install(patientIdentifierType("Alien ID Number", "Alien ID number for client", "^[a-zA-Z0-9]+$",
 				"Allows for alphanumeric format",
