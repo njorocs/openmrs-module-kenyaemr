@@ -35,7 +35,12 @@ public class DateOfFullImmunizationDataEvaluator implements EncounterDataEvaluat
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id, NULLIF(date(fully_immunized),'0000-00-00') as immunization_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
+        // first visit at which the child was recorded as fully immunized, keyed by any of the child's immunization encounters
+        String qry = "select x.encounter_id, min(i.visit_date) as immunization_date\n" +
+                "from (select distinct encounter_id, patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization) x\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization i on i.patient_id = x.patient_id\n" +
+                "  and i.voided = 0 and i.fully_immunized = 1065\n" +
+                "group by x.encounter_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);

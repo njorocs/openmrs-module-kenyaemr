@@ -4408,9 +4408,9 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery =  "select distinct he.patient_id\n" +
                 "from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
                 "  inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization hi on hi.patient_id=he.patient_id\n" +
-                "where date(hi.visit_date) between (:startDate) and (:endDate)\n" +
-                "      and he.child_exposed != 1067 AND\n" +
-                "      hi.PCV_10_1 = \"Yes\" ;";
+                "where hi.voided = 0 and hi.vaccine = 781 and hi.sequence = 1\n" +
+                "      and date(hi.date_given) between (:startDate) and (:endDate)\n" +
+                "      and he.child_exposed != 1067;";
 
         cd.setName("knownExposureAtPenta1");
         cd.setQuery(sqlQuery);
@@ -4428,8 +4428,8 @@ public class ETLMoh731GreenCardCohortLibrary extends BaseQuery<Encounter> implem
         String sqlQuery =  "select distinct he.patient_id\n" +
                 "                from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment he\n" +
                 "                 inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization hi on hi.patient_id=he.patient_id\n" +
-                "                where date(hi.visit_date) between (:startDate) and (:endDate)\n" +
-                "                  and hi.PCV_10_1 = \"Yes\" ;";
+                "                where hi.voided = 0 and hi.vaccine = 781 and hi.sequence = 1\n" +
+                "                  and date(hi.date_given) between (:startDate) and (:endDate);";
 
         cd.setName("totalGivenPenta1");
         cd.setQuery(sqlQuery);

@@ -25,8 +25,13 @@ public class DateOfVaccineDataDefinition extends BaseDataDefinition implements E
 
     public static final long serialVersionUID = 1L;
 
+    /** vaccine concept id as stored in etl_immunization.vaccine */
     @ConfigurationProperty
-    private String vaccineTableColumn;
+    private Integer vaccine;
+
+    /** dose number as stored in etl_immunization.sequence, null for any dose */
+    @ConfigurationProperty
+    private Integer sequence;
 
     /**
      * Default Constructor
@@ -46,17 +51,26 @@ public class DateOfVaccineDataDefinition extends BaseDataDefinition implements E
     //***** INSTANCE METHODS *****
 
 
-    public String getVaccineTableColumn() {
-        return vaccineTableColumn;
+    public Integer getVaccine() {
+        return vaccine;
     }
 
-    public void setVaccineTableColumn(String vaccineTableColumn) {
-        this.vaccineTableColumn = vaccineTableColumn;
+    public void setVaccine(Integer vaccine) {
+        this.vaccine = vaccine;
     }
 
-    public DateOfVaccineDataDefinition(String name, String vaccineTableColumn) {
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
+
+    public DateOfVaccineDataDefinition(String name, Integer vaccine, Integer sequence) {
         super(name);
-        this.vaccineTableColumn = vaccineTableColumn;
+        this.vaccine = vaccine;
+        this.sequence = sequence;
     }
 
     /**

@@ -21,13 +21,56 @@ import java.util.Date;
 public class Moh710CohortLibrary {
 
 	/**
-	 * Unique children vaccinated on a specific calendar day of the month with age filter as-of that day
-	 * @param vaccineColumn the column in etl_immunization
+	 * Unique children given a vaccine dose on a specific calendar day of the month with age filter as-of that day
 	 * @param minAge the minimum age in years
 	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @param sequence the dose number in etl_immunization.sequence (null for any dose)
+	 * @param vaccines the vaccine concept ids in etl_immunization.vaccine
 	 * @return the cohort definition
 	 */
-	public CohortDefinition vaccinatedOnDay(String vaccineColumn, Integer minAge, Integer maxAge) {
+	public CohortDefinition vaccinatedOnDay(Integer minAge, Integer maxAge, Integer sequence, Integer... vaccines) {
+		return onDay(vaccineGiven(sequence, vaccines), "i.date_given", minAge, maxAge);
+	}
+
+	/**
+	 * Unique children given a vaccine dose during the reporting period with age filter as-of vaccination date
+	 * @param minAge the minimum age in years
+	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @param sequence the dose number in etl_immunization.sequence (null for any dose)
+	 * @param vaccines the vaccine concept ids in etl_immunization.vaccine
+	 * @return the cohort definition
+	 */
+	public CohortDefinition vaccinatedTotal(Integer minAge, Integer maxAge, Integer sequence, Integer... vaccines) {
+		return total(vaccineGiven(sequence, vaccines), "i.date_given", minAge, maxAge);
+	}
+
+	/**
+	 * Unique children recorded as fully immunized at a visit on a specific calendar day of the month
+	 */
+	public CohortDefinition fullyImmunizedOnDay(Integer minAge, Integer maxAge) {
+		return onDay("i.voided = 0 AND i.fully_immunized = 1065", "i.visit_date", minAge, maxAge);
+	}
+
+	/**
+	 * Unique children recorded as fully immunized at a visit during the reporting period
+	 */
+	public CohortDefinition fullyImmunizedTotal(Integer minAge, Integer maxAge) {
+		return total("i.voided = 0 AND i.fully_immunized = 1065", "i.visit_date", minAge, maxAge);
+	}
+
+	private String vaccineGiven(Integer sequence, Integer... vaccines) {
+		StringBuilder sb = new StringBuilder("i.voided = 0 AND i.vaccine IN (");
+		for (int k = 0; k < vaccines.length; k++) {
+			sb.append(k > 0 ? "," : "").append(vaccines[k]);
+		}
+		sb.append(")");
+		if (sequence != null) {
+			sb.append(" AND i.sequence = ").append(sequence);
+		}
+		return sb.toString();
+	}
+
+	private CohortDefinition onDay(String condition, String dateColumn, Integer minAge, Integer maxAge) {
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 
 		String sql = "SELECT i.patient_id\n" +
@@ -39,7 +82,8 @@ public class Moh710CohortLibrary {
 				"        INTERVAL :dayOfMonth-1 DAY\n" +
 				"    ) AS target_date\n" +
 				") d_ref\n" +
-				"WHERE DATE(i." + vaccineColumn + ") = d_ref.target_date\n" +
+				"WHERE " + condition + "\n" +
+				"  AND DATE(" + dateColumn + ") = d_ref.target_date\n" +
 				(minAge != null
 						? "  AND TIMESTAMPDIFF(YEAR, p.dob, d_ref.target_date) >= " + minAge + "\n"
 						: "") +
@@ -57,25 +101,20 @@ public class Moh710CohortLibrary {
 		return cd;
 	}
 
-	/**
-	 * Unique children vaccinated during the reporting period with age filter as-of vaccination date
-	 * @param vaccineColumn the column in etl_immunization
-	 * @param minAge the minimum age in years
-	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
-	 * @return the cohort definition
-	 */
-	public CohortDefinition vaccinatedTotal(String vaccineColumn, Integer minAge, Integer maxAge) {
+	private CohortDefinition total(String condition, String dateColumn, Integer minAge, Integer maxAge) {
 		SqlCohortDefinition cd = new SqlCohortDefinition();
+		String date = "DATE(" + dateColumn + ")";
 
 		String sql = "SELECT i.patient_id\n" +
 				"FROM " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_immunization i\n" +
 				"INNER JOIN " + CommonMetadata.EmrDatabaseEtl.ETL_DATABASE + ".etl_patient_demographics p ON p.patient_id = i.patient_id\n" +
-				"WHERE DATE(i." + vaccineColumn + ") BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+				"WHERE " + condition + "\n" +
+				"  AND " + date + " BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				(minAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, DATE(i." + vaccineColumn + ")) >= " + minAge + "\n"
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, " + date + ") >= " + minAge + "\n"
 						: "") +
 				(maxAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, DATE(i." + vaccineColumn + ")) < " + maxAge + "\n"
+						? "  AND TIMESTAMPDIFF(YEAR, p.dob, " + date + ") < " + maxAge + "\n"
 						: "") +
 				"GROUP BY i.patient_id";
 
