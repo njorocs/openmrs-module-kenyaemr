@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.reporting.library.MOH710;
 import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,14 +23,30 @@ public class Moh710IndicatorLibrary {
 	@Autowired
 	private Moh710CohortLibrary moh710CohortLibrary;
 
-	public CohortIndicator vaccinatedOnDay(String vaccineColumn, Integer minAge, Integer maxAge) {
-		CohortIndicator ind = cohortIndicator(null, map(moh710CohortLibrary.vaccinatedOnDay(vaccineColumn, minAge, maxAge), "startDate=${startDate},endDate=${endDate},dayOfMonth=${dayOfMonth}"));
+	public CohortIndicator vaccinatedOnDay(Integer minAge, Integer maxAge, Integer sequence, Integer... vaccines) {
+		return onDay(moh710CohortLibrary.vaccinatedOnDay(minAge, maxAge, sequence, vaccines));
+	}
+
+	public CohortIndicator vaccinatedTotal(Integer minAge, Integer maxAge, Integer sequence, Integer... vaccines) {
+		return total(moh710CohortLibrary.vaccinatedTotal(minAge, maxAge, sequence, vaccines));
+	}
+
+	public CohortIndicator fullyImmunizedOnDay(Integer minAge, Integer maxAge) {
+		return onDay(moh710CohortLibrary.fullyImmunizedOnDay(minAge, maxAge));
+	}
+
+	public CohortIndicator fullyImmunizedTotal(Integer minAge, Integer maxAge) {
+		return total(moh710CohortLibrary.fullyImmunizedTotal(minAge, maxAge));
+	}
+
+	private CohortIndicator onDay(CohortDefinition cd) {
+		CohortIndicator ind = cohortIndicator(null, map(cd, "startDate=${startDate},endDate=${endDate},dayOfMonth=${dayOfMonth}"));
 		ind.addParameter(new org.openmrs.module.reporting.evaluation.parameter.Parameter("dayOfMonth", "Day of Month", Integer.class));
 		return ind;
 	}
 
-	public CohortIndicator vaccinatedTotal(String vaccineColumn, Integer minAge, Integer maxAge) {
-		return cohortIndicator(null, map(moh710CohortLibrary.vaccinatedTotal(vaccineColumn, minAge, maxAge), "startDate=${startDate},endDate=${endDate}"));
+	private CohortIndicator total(CohortDefinition cd) {
+		return cohortIndicator(null, map(cd, "startDate=${startDate},endDate=${endDate}"));
 	}
 }
 

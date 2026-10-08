@@ -1157,10 +1157,11 @@ public class Moh731MatCohortLibrary {
 
 	public CohortDefinition matAllNumberHBVvaccinated() {
 		String sqlQuery = "select imm.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization imm \n" +
-				"where imm.DPT_Hep_B_Hib_1 != '' and imm.DPT_Hep_B_Hib_2 != '' and imm.DPT_Hep_B_Hib_3 != ''  \n" +
-				"and imm.fully_immunized=1 \n" +
-				"and DATE(imm.visit_date) between DATE(:startDate) AND DATE(:endDate) \n" +
-				"group by imm.patient_id;";
+				"where imm.voided = 0 \n" +
+				"group by imm.patient_id \n" +
+				"having count(distinct if(imm.vaccine = 781 and imm.sequence in (1, 2, 3), imm.sequence, null)) = 3 \n" +
+				"and sum(imm.fully_immunized = 1065) > 0 \n" +
+				"and sum(DATE(imm.visit_date) between DATE(:startDate) AND DATE(:endDate)) > 0;";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("matNumberNegativeHBVvaccinated");
 		cd.setQuery(sqlQuery);

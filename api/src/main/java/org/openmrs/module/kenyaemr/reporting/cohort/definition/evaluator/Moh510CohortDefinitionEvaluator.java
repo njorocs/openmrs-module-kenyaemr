@@ -41,9 +41,11 @@ public class Moh510CohortDefinitionEvaluator implements EncounterQueryEvaluator 
 		context = ObjectUtil.nvl(context, new EvaluationContext());
 		EncounterQueryResult queryResult = new EncounterQueryResult(definition, context);
 
-		String qry = "select i.encounter_id \n" +
+		// one register row per child: etl_immunization has a row per vaccine given, so pick one of the child's encounters
+		String qry = "select max(i.encounter_id) \n" +
 				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization i inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_hei_enrollment e on e.patient_id=i.patient_id\n" +
-				"where e.visit_date between date(:startDate) and (:endDate) ; ";
+				"where i.voided = 0 and e.visit_date between date(:startDate) and (:endDate)\n" +
+				"group by i.patient_id; ";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();
 		builder.append(qry);

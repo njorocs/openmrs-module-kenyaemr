@@ -36,11 +36,15 @@ public class DateOfVaccineDataEvaluator implements EncounterDataEvaluator {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
         DateOfVaccineDataDefinition def = (DateOfVaccineDataDefinition) definition;
 
-        String tableColumn = def.getVaccineTableColumn();
+        String dose = def.getSequence() != null ? " and i.sequence = " + def.getSequence() : "";
 
-        String qry = "select encounter_id, (CASE WHEN :vaccineColumn != '' THEN STR_TO_DATE(:vaccineColumn, '%Y-%m-%d') ELSE NULL END) from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
+        // the child's date for this dose, keyed by any of the child's immunization encounters
+        String qry = "select x.encounter_id, min(i.date_given)\n" +
+                "from (select distinct encounter_id, patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization) x\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization i on i.patient_id = x.patient_id\n" +
+                "  and i.voided = 0 and i.vaccine = " + def.getVaccine() + dose + "\n" +
+                "group by x.encounter_id";
 
-        qry = qry.replaceAll(":vaccineColumn", tableColumn);
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
         Map<Integer, Object> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Object.class, context);

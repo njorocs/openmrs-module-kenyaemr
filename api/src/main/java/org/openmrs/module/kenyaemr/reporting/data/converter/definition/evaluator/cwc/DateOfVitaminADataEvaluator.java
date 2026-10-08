@@ -35,15 +35,12 @@ public class DateOfVitaminADataEvaluator implements EncounterDataEvaluator {
     public EvaluatedEncounterData evaluate(EncounterDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedEncounterData c = new EvaluatedEncounterData(definition, context);
 
-        String qry = "select encounter_id,\n" +
-                "concat_ws(\", \", \n" +
-                "\tif(VitaminA_6_months != '', STR_TO_DATE(VitaminA_6_months, '%Y/%m/%d'),\"\"), \n" +
-                "\tif(VitaminA_1_yr != '', STR_TO_DATE(VitaminA_1_yr, '%Y/%m/%d'),\"\"),\n" +
-                "\tif(VitaminA_1_and_half_yr != '', STR_TO_DATE(VitaminA_1_and_half_yr, '%Y/%m/%d'),\"\"),\n" +
-                "\tif(VitaminA_2_yr != '', STR_TO_DATE(VitaminA_2_yr, '%Y/%m/%d'),\"\"),\n" +
-                "\tif(VitaminA_2_to_5_yr != '', STR_TO_DATE(VitaminA_2_to_5_yr, '%Y/%m/%d'),\"\")\n" +
-                "\t) as dates\n" +
-                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization ";
+        // all of the child's Vitamin A dates, keyed by any of the child's immunization encounters
+        String qry = "select x.encounter_id, group_concat(distinct date_format(i.date_given, '%Y-%m-%d') order by i.date_given separator ', ') as dates\n" +
+                "from (select distinct encounter_id, patient_id from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization) x\n" +
+                "inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_immunization i on i.patient_id = x.patient_id\n" +
+                "  and i.voided = 0 and i.vaccine in (86339, 1685)\n" +
+                "group by x.encounter_id";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
