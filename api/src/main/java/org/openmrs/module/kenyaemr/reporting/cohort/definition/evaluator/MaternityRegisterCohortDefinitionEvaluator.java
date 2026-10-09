@@ -53,10 +53,7 @@ public class MaternityRegisterCohortDefinitionEvaluator implements CohortDefinit
 
         String qry = "SELECT ld.patient_id\n" +
 				"from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery ld\n" +
-				"         inner join "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment e\n" +
-				"                    on e.patient_id = ld.patient_id\n" +
-				"where e.visit_date <= ld.visit_date\n" +
-				"  and coalesce(date(ld.date_of_delivery), date(ld.visit_date))\n" +
+				"  where coalesce(date(ld.date_of_delivery), date(ld.visit_date))\n" +
 				"    BETWEEN date(:startDate) AND date(:endDate);";
 
 		SqlQueryBuilder builder = new SqlQueryBuilder();

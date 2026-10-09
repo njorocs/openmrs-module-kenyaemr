@@ -38,8 +38,8 @@ public class MaternityLMPDateDataEvaluator implements PersonDataEvaluator {
 
         String qry = "select\n" +
                 "  v.patient_id,\n" +
-                " mid(max(concat(date(v.visit_date),date(v.lmp))),11)\n" +
-                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mch_enrollment v where date(v.visit_date) between date(:startDate) and date(:endDate);";
+                " mid(max(concat(date(v.visit_date),date(v.date_of_last_menstrual_period))),11)\n" +
+                "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_mchs_delivery v where date(v.visit_date) between date(:startDate) and date(:endDate);";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
