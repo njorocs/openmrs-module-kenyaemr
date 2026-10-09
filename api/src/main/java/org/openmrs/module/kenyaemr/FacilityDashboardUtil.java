@@ -444,11 +444,11 @@ public class FacilityDashboardUtil {
 				"                  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
 				"                  WHERE x.lab_test = 856\n" +
 				"                    AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"                    AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"                    AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received),\n" +
 				"                                 INTERVAL 14 DAY) BETWEEN DATE('" +startDate + "') AND DATE('" +endDate + "')\n" +
 				"              ) x\n" +
 				"         WHERE x.rn = 1\n" +
+				"         AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (SELECT t.patient_id\n" +
 				"                     FROM (SELECT fup.visit_date,\n" +
@@ -532,11 +532,11 @@ public class FacilityDashboardUtil {
 				"                  FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
 				"                  WHERE x.lab_test = 856\n" +
 				"                    AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"                    AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"                    AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received),\n" +
 				"                                 INTERVAL 14 DAY) BETWEEN DATE('" +startDate+ "') AND DATE('" +endDate + "')\n" +
 				"              ) x\n" +
 				"         WHERE x.rn = 1\n" +
+				"         AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (SELECT t.patient_id\n" +
 				"                     FROM (SELECT fup.visit_date,\n" +
@@ -1122,13 +1122,15 @@ public class FacilityDashboardUtil {
 				"                x.previous_test_result,\n" +
 				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
 				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
+				"         FROM (SELECT x.*, ROW_NUMBER() OVER (PARTITION BY x.patient_id ORDER BY x.date_created DESC) AS rn\n" +
 				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
-				"         WHERE x.lab_test = 856\n" +
-				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
-				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"             WHERE x.lab_test = 856\n" +
+				"             AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"             AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
 				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
-				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
+				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)) x \n" +
+				"             WHERE x.rn = 1\n" +
+				"             AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
@@ -1405,13 +1407,16 @@ public class FacilityDashboardUtil {
 				"                x.previous_test_result,\n" +
 				"                COALESCE(x.date_test_result_received, x.previous_date_test_result_received) AS vl_effective_result_date,\n" +
 				"                COALESCE(x.vl_result, x.previous_test_result)                               AS vl_effective_result\n" +
-				"         FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
-				"         WHERE x.lab_test = 856\n" +
-				"           AND x.order_reason NOT IN (2001236, 162080)\n" +
-				"           AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
-				"           AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
-				"             BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
-				"             AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
+				"         FROM (SELECT x.*, ROW_NUMBER() OVER (PARTITION BY x.patient_id ORDER BY x.date_created DESC) AS rn\n" +
+				"               FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_viral_load_validity_tracker x\n" +
+				"               WHERE x.lab_test = 856\n" +
+				"               AND x.order_reason NOT IN (2001236, 162080)\n" +
+				"               AND DATE_ADD(COALESCE(x.date_test_result_received, x.previous_date_test_result_received), INTERVAL 14 DAY)\n" +
+				"               BETWEEN DATE_SUB('" + endDate +"', INTERVAL 30 DAY)\n" +
+				"               AND DATE_SUB('" + endDate +"', INTERVAL 14 DAY)\n" +
+				"     ) x\n" +
+				"     WHERE x.rn = 1\n" +
+				"     AND COALESCE(x.vl_result, x.previous_test_result) >= 200\n" +
 				"     ) vl\n" +
 				"         INNER JOIN (\n" +
 				"    SELECT t.patient_id\n" +
