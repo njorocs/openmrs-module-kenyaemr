@@ -269,6 +269,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String MENTAL_HEALTH_FOLLOWUP_FORM = "825d118c-8991-478f-840e-d622959238ca";
 		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 		public static final String MENTAL_HEALTH_ENROLLMENT_FORM = "e2633aa9-4a45-4b8b-8263-37a71817b7bf";
+		public static final String DIAGNOSIS_MGXT_FORM = "2c889d09-094f-478c-b800-8212f8aaf17f";
 	}
 
 	public static final class _OrderType {
@@ -620,6 +621,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					_Form.MENTAL_HEALTH_FOLLOWUP_FORM));
 			install(form("Mental Health Enrollment Form", "Form for Mental Health Enrollment", _EncounterType.MENTAL_HEALTH_ENROLLMENT, "1",
 					_Form.MENTAL_HEALTH_ENROLLMENT_FORM));
+			install(form("Diagnosis and Management Form", "Form for Diagnosis and Clinical Management", _EncounterType.CONSULTATION, "1",
+					_Form.DIAGNOSIS_MGXT_FORM));
 			
 
 		} else {
