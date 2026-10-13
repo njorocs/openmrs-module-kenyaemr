@@ -233,6 +233,10 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 	public static final String MENTAL_HEALTH_INITIAL_FORM_UUID = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 
+	public static String ONCOLOGY_PROGRAM_UUID = "9902616a-3922-4a77-ab19-813258d0dc1d";
+	public static String ONCOLOGY_ENROLMENT_UUID = "52d63759-3ee6-4a12-9eb3-80ad380049c7";
+	public static String ONCOLOGY_DISCONTINUATION_UUID = "caf94ef9-e34f-4b37-98f8-ac08c4584b72";
+
 	public static final Locale LOCALE = Locale.ENGLISH;
 
 	public String name = null;
@@ -1948,7 +1952,26 @@ public class KenyaemrCoreRestController extends BaseRestController {
 					programDetails.put("enrollmentFormUuid", MENTAL_HEALTH_INITIAL_FORM_UUID);
 					programDetails.put("enrollmentFormName", "Mental Health Initial Form");
 				}
+				// Oncology program
+				if (patientProgramEnrollment.getProgram().getUuid().equals(ONCOLOGY_PROGRAM_UUID)) {
+					Enrollment oncologyEnrollment = new Enrollment(patientProgramEnrollment);
+					Encounter oncologyEnrollmentEncounter = oncologyEnrollment
+						.lastEncounter(defaultEnrollmentForm.getEncounterType());
+					Encounter oncologuDiscontinuationEncounter = oncologyEnrollment
+						.lastEncounter(defaultCompletionForm.getEncounterType());
 
+					if (oncologyEnrollmentEncounter != null) {
+						programDetails.put("enrollmentEncounterUuid", oncologyEnrollmentEncounter.getUuid());
+					}
+					if (oncologuDiscontinuationEncounter != null) {
+						programDetails.put("discontinuationEncounterUuid", oncologuDiscontinuationEncounter.getUuid());
+					}
+					programDetails.put("enrollmentFormUuid", ONCOLOGY_ENROLMENT_UUID);
+					programDetails.put("enrollmentFormName", "Oncology Enrolment form");
+					programDetails.put("discontinuationFormUuid", ONCOLOGY_DISCONTINUATION_UUID);
+					programDetails.put("discontinuationFormName", "Oncology Discontinuation form");
+				}
+				
 				programDetails.put("programName", patientProgramEnrollment.getProgram().getName());
 				programDetails.put("active", patientProgramEnrollment.getActive());
 				programDetails.put("dateEnrolled", formatDate(patientProgramEnrollment.getDateEnrolled()));
