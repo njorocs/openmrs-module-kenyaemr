@@ -27,4 +27,5 @@
 	<ref key="POSTNATAL_CARE" uuid="286598d5-1886-4f0d-9e5f-fa5473399cee" />
 	<ref key="PRE_CONCEPTION" uuid="fd549de0-2e6d-4e76-a2c1-64df26351bdd" />
 	<ref key="MENTAL_HEALTH" uuid="4b6c5ea4-49c6-454e-9fa1-44838e3a4f40" />
+	<ref key="ONCOLOGY" uuid="9902616a-3922-4a77-ab19-813258d0dc1d" />
 </refs>

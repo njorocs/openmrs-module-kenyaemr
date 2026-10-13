@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- ===================== Program ===================== -->
+
+	<bean id="kenyaemr.oncology.program" class="org.openmrs.module.kenyacore.program.ProgramDescriptor">
+		<property name="targetUuid" value="9902616a-3922-4a77-ab19-813258d0dc1d" />		
+		<property name="defaultEnrollmentForm" ref="kenyaemr.oncology.form.enrolment" />
+		<property name="defaultCompletionForm" ref="kenyaemr.oncology.form.discontinuation" />
+		<property name="visitForms">
+			<set>
+				<ref bean="kenyaemr.oncology.form.treatment" />
+			</set>
+		</property>
+		<property name="reports">
+			<set>
+			</set>
+		</property>
+		<property name="fragments">
+			<map>
+				<entry key="enrollment-summary" value="" />
+				<entry key="care-panel" value="" />
+				<entry key="completion-summary" value="" />
+			</map>
+		</property>
+		<property name="order" value="900" />
+	</bean>
+
+	<!-- ===================== Forms ===================== -->
+
+	<!-- Oncology Enrolment form -->
+	<bean id="kenyaemr.oncology.form.enrolment" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+		<property name="targetUuid" value="52d63759-3ee6-4a12-9eb3-80ad380049c7" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.registration" />
+				<ref bean="kenyaemr.app.intake" />
+				<ref bean="kenyaemr.app.clinician" />
+				<ref bean="kenyaemr.app.chart" />
+			</set>
+		</property>
+		<property name="icon" value="kenyaui:forms/generic.png" />
+		<property name="htmlform" value="kenyaemr:oncology/formDoesNotExistOn2x.html" />
+	</bean>
+
+	<!-- Oncology Discontinuation form -->
+	<bean id="kenyaemr.oncology.form.discontinuation" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+		<property name="targetUuid" value="caf94ef9-e34f-4b37-98f8-ac08c4584b72" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.clinician" />
+				<ref bean="kenyaemr.app.chart" />
+			</set>
+		</property>
+		<property name="icon" value="kenyaui:forms/generic.png" />
+		<property name="htmlform" value="kenyaemr:oncology/formDoesNotExistOn2x.html" />
+	</bean>
+
+	<!-- Oncology Treatment form -->
+	<bean id="kenyaemr.oncology.form.treatment" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+		<property name="targetUuid" value="42046b40-048b-44b4-be7c-8b85e488f089" />
+		<property name="apps">
+			<set>
+				<ref bean="kenyaemr.app.registration" />
+				<ref bean="kenyaemr.app.intake" />
+				<ref bean="kenyaemr.app.clinician" />
+				<ref bean="kenyaemr.app.chart" />
+			</set>
+		</property>
+		<property name="icon" value="kenyaui:forms/generic.png" />
+		<property name="htmlform" value="kenyaemr:oncology/formDoesNotExistOn2x.html" />
+	</bean>
+
+</beans>
