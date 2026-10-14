@@ -29,20 +29,20 @@ public class Moh505CohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT a.patient_id\n" +
                 "FROM (\n" +
-                "    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
+                "    SELECT patient_id, CONVERT(GROUP_CONCAT(c.general_examination) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS general_examination\n" +
                 "    FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c\n" +
                 "    WHERE c.general_examination LIKE '%Jaundice%'\n" +
                 "      AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 "    UNION ALL\n" +
-                "    SELECT patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
+                "    SELECT patient_id, CONVERT(GROUP_CONCAT(h.general_examination) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS general_examination\n" +
                 "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup h\n" +
                 "    WHERE h.general_examination LIKE '%Jaundice%'\n" +
                 "      AND DATE(h.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 ") a\n" +
                 "WHERE a.general_examination IS NOT NULL\n" +
-                "  AND FIND_IN_SET('Jaundice', a.general_examination) > 0;";
+                "  AND FIND_IN_SET(_utf8mb4'Jaundice' COLLATE utf8mb4_unicode_ci, a.general_examination) > 0;";
         cd.setName("jaundice");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -56,13 +56,13 @@ public class Moh505CohortLibrary {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "SELECT a.patient_id\n" +
                 "FROM (\n" +
-                "    SELECT patient_id, GROUP_CONCAT(c.general_examination) AS general_examination\n" +
+                "    SELECT patient_id, CONVERT(GROUP_CONCAT(c.general_examination) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS general_examination\n" +
                 "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter c\n" +
                 "    WHERE c.general_examination LIKE '%Jaundice%'\n" +
                 "     AND c.patient_outcome = " + patientOutcome + " AND DATE(c.visit_date) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "    GROUP BY patient_id\n" +
                 "    UNION ALL\n" +
-                "    SELECT h.patient_id, GROUP_CONCAT(h.general_examination) AS general_examination\n" +
+                "    SELECT h.patient_id, CONVERT(GROUP_CONCAT(h.general_examination) USING utf8mb4) COLLATE utf8mb4_unicode_ci AS general_examination\n" +
                 "    FROM "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_hiv_followup h " +
                 "    LEFT JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_program_discontinuation d on h.patient_id = d.patient_id\n" +
                 "    WHERE h.general_examination LIKE '%Jaundice%' AND d.discontinuation_reason = '160034'\n" +
@@ -70,7 +70,7 @@ public class Moh505CohortLibrary {
                 "    GROUP BY h.patient_id\n" +
                 ") a\n" +
                 "WHERE a.general_examination IS NOT NULL\n" +
-                "  AND FIND_IN_SET('Jaundice', a.general_examination) > 0;";
+                "  AND FIND_IN_SET(_utf8mb4'Jaundice' COLLATE utf8mb4_unicode_ci, a.general_examination) > 0;";
         cd.setName("jaundice");
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
