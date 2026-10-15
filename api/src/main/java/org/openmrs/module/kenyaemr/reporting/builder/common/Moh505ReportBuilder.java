@@ -50,6 +50,7 @@ public class Moh505ReportBuilder extends AbstractReportBuilder {
     static final int GUINEA_WORM_DISEASE = 137458;
     static final int MEASLES = 134561;
     static final int SUSPECTED_MALARIA = 166623;
+    static final int MALARIA = 123;
     static final int MENINGOCOCCAL_MENINGITIS = 134369;
     static final int NEONATAL_TETANUS = 124954;
     static final int NEONATAL_DEATH = 154223;
@@ -132,7 +133,7 @@ public class Moh505ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd,"Measles Deaths", "No of Measles Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(MEASLES, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Suspected Malaria", "No of Suspected Malaria Cases", ReportUtils.map(Moh505Indicator.diagnosis(SUSPECTED_MALARIA), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Suspected Malaria Deaths", "No of Suspected Malaria Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(SUSPECTED_MALARIA, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd,"Deaths due to Malaria", "No of Deaths due to Malaria Cases", ReportUtils.map(Moh505Indicator.acuteJaundiceCase(), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd,"Deaths due to Malaria", "No of Deaths due to Malaria Cases", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(MALARIA, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Maternal deaths", "No of Maternal deaths", ReportUtils.map(Moh505Indicator.maternalDeathCase(), indParams), over5_epidemic, Arrays.asList("01","02"));
         EmrReportingUtils.addRow(dsd,"Meningococcal Meningitis", "No of Meningococcal Meningitis cases", ReportUtils.map(Moh505Indicator.diagnosis(MENINGOCOCCAL_MENINGITIS), indParams), all_epidemic, Arrays.asList("01","02", "03"));
         EmrReportingUtils.addRow(dsd,"Meningococcal Meningitis Deaths", "No of Meningococcal Meningitis Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(MENINGOCOCCAL_MENINGITIS, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
