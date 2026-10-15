@@ -547,10 +547,8 @@ public class Moh711ReportBuilder extends AbstractReportBuilder {
                 "        SELECT SUM(vc.total_claim_net_amount) AS claim_amount\n" +
                 "        FROM iclm_virtual_claim vc\n" +
                 "        WHERE vc.voided = 0\n" +
-                "          AND (\n" +
-                "            vc.payer_workflow_state IS NOT NULL\n" +
-                "                OR vc.payer_workflow_state NOT IN ('REJECTED', 'SENT_BACK')\n" +
-                "            )\n" +
+                "          AND vc.payer_workflow_state IS NOT NULL\n" +
+                "          AND vc.payer_workflow_state NOT IN ('REJECTED', 'SENT_BACK')\n" +
                 "          AND vc.date_created >= :startDate\n" +
                 "          AND vc.date_created <= :endDate\n" +
                 "    ) v\n" +
