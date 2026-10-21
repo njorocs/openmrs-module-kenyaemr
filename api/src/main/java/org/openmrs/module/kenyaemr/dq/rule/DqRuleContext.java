@@ -58,4 +58,10 @@ public interface DqRuleContext {
 	String getEtlDatabase();
 
 	List<Object[]> query(String sql, Map<String, Object> parameters);
+
+	/**
+	 * @return a context for the month, with no run, sharing this context's stored values; the trend
+	 * charts use it to check month after month without reading the same values again
+	 */
+	DqRuleContext forMonth(Date monthStart);
 }

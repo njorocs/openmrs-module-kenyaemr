@@ -15,6 +15,7 @@ import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,17 +37,50 @@ public class ServiceDqRuleContext implements DqRuleContext {
 
 	private final Date periodEnd;
 
-	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators = new HashMap<String, DqIndicatorCalculator.IndicatorValue>();
+	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators;
 
 	/**
 	 * @param run the run being checked, or null for a weekly check
 	 */
 	public ServiceDqRuleContext(DqService service, DqConfig config, DqReportRun run, Date periodStart, Date periodEnd) {
+		this(service, config, run, periodStart, periodEnd, new HashMap<String, DqIndicatorCalculator.IndicatorValue>());
+	}
+
+	private ServiceDqRuleContext(DqService service, DqConfig config, DqReportRun run, Date periodStart, Date periodEnd,
+	                             Map<String, DqIndicatorCalculator.IndicatorValue> indicators) {
 		this.service = service;
 		this.config = config;
 		this.run = run;
 		this.periodStart = periodStart;
 		this.periodEnd = periodEnd;
+		this.indicators = indicators;
+	}
+
+	/**
+	 * Reads an indicator's values for a range of months in one query, so that a trend does not
+	 * query month by month
+	 */
+	public void preload(String code, Date fromMonth, Date toMonth) {
+		DqConfig.Indicator indicator = config.getIndicator(code);
+		if (indicator == null) {
+			return;
+		}
+		Map<Long, List<DqValue>> byMonth = new HashMap<Long, List<DqValue>>();
+		for (DqValue value : service.getLatestValues(indicator.getReports(), fromMonth, toMonth)) {
+			Long month = DqPeriods.monthStart(value.getReportRun().getPeriodStart()).getTime();
+			if (!byMonth.containsKey(month)) {
+				byMonth.put(month, new ArrayList<DqValue>());
+			}
+			byMonth.get(month).add(value);
+		}
+		for (Date month = DqPeriods.monthStart(fromMonth); !month.after(toMonth); month = DqPeriods.addMonths(month, 1)) {
+			String key = code + "@" + month.getTime();
+			if (!indicators.containsKey(key)) {
+				List<DqValue> values = byMonth.get(month.getTime());
+				indicators.put(key, DqIndicatorCalculator.calculate(indicator,
+						values != null ? values : Collections.<DqValue>emptyList()));
+			}
+		}
 	}
 
 	@Override
@@ -94,6 +128,12 @@ public class ServiceDqRuleContext implements DqRuleContext {
 	@Override
 	public String getEtlDatabase() {
 		return CommonMetadata.EmrDatabaseEtl.ETL_DATABASE;
+	}
+
+	@Override
+	public DqRuleContext forMonth(Date monthStart) {
+		Date start = DqPeriods.monthStart(monthStart);
+		return new ServiceDqRuleContext(service, config, null, start, DqPeriods.lastDayOfMonth(start), indicators);
 	}
 
 	@Override

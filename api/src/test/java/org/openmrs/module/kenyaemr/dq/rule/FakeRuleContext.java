@@ -31,7 +31,7 @@ import java.util.Set;
  */
 class FakeRuleContext implements DqRuleContext {
 
-	private final DqConfig config = DqConfigStore.getDefaultConfig();
+	private final DqConfig config;
 
 	private final DqReportRun run;
 
@@ -39,11 +39,11 @@ class FakeRuleContext implements DqRuleContext {
 
 	private final Date periodEnd;
 
-	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators = new HashMap<String, DqIndicatorCalculator.IndicatorValue>();
+	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators;
 
-	private final Set<String> generated = new HashSet<String>();
+	private final Set<String> generated;
 
-	private final LinkedList<List<Object[]>> queryResults = new LinkedList<List<Object[]>>();
+	private final LinkedList<List<Object[]>> queryResults;
 
 	final List<Map<String, Object>> queryParameters = new ArrayList<Map<String, Object>>();
 
@@ -66,9 +66,23 @@ class FakeRuleContext implements DqRuleContext {
 	}
 
 	private FakeRuleContext(DqReportRun run, Date periodStart, Date periodEnd) {
+		this.config = DqConfigStore.getDefaultConfig();
 		this.run = run;
 		this.periodStart = periodStart;
 		this.periodEnd = periodEnd;
+		this.indicators = new HashMap<String, DqIndicatorCalculator.IndicatorValue>();
+		this.generated = new HashSet<String>();
+		this.queryResults = new LinkedList<List<Object[]>>();
+	}
+
+	private FakeRuleContext(FakeRuleContext parent, Date monthStart) {
+		this.config = parent.config;
+		this.run = null;
+		this.periodStart = monthStart;
+		this.periodEnd = DqPeriods.lastDayOfMonth(monthStart);
+		this.indicators = parent.indicators;
+		this.generated = parent.generated;
+		this.queryResults = parent.queryResults;
 	}
 
 	FakeRuleContext indicator(String code, Date month, Double value) {
@@ -138,6 +152,11 @@ class FakeRuleContext implements DqRuleContext {
 	@Override
 	public String getEtlDatabase() {
 		return "kenyaemr_etl";
+	}
+
+	@Override
+	public DqRuleContext forMonth(Date monthStart) {
+		return new FakeRuleContext(this, monthStart);
 	}
 
 	@Override

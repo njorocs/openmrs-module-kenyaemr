@@ -17,6 +17,8 @@ import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,19 +54,30 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 	public List<DqResult> evaluate(DqRuleContext context) {
 		List<DqResult> results = new ArrayList<DqResult>();
 		for (DqConfig.Indicator indicator : trackedIndicators(context)) {
-			DqRuleSettings settings = settings(context, indicator);
-			DqOutcome severity = settings.getOutcome("severity", DqOutcome.WARN);
-			DqIndicatorCalculator.IndicatorValue current = context.getIndicator(indicator.getCode(), context.getPeriodStart());
-			if (!current.isComplete()) {
-				results.add(result(context, indicator.getCode(), DqOutcome.NOT_APPLICABLE, indicator.getName()
-						+ " could not be calculated: " + current.getMissingColumns().size() + " of its report columns are "
-						+ "missing. Generate all of its reports for the period, or check the indicator definition."));
-				continue;
-			}
-			results.add(rolling(context, indicator, settings, severity, current.getValue()));
-			results.add(lastYear(context, indicator, settings, severity, current.getValue()));
+			results.addAll(evaluateIndicator(context, indicator));
 		}
 		return results;
+	}
+
+	/**
+	 * Checks one indicator for the context's month, whether or not it is tracked. The trend charts
+	 * use this to draw the same expected range the rule checks against.
+	 *
+	 * @return a result for each baseline, with the expected range in the detail as expectedMin and
+	 * expectedMax; or a single NOT_APPLICABLE result when the indicator cannot be calculated
+	 */
+	public List<DqResult> evaluateIndicator(DqRuleContext context, DqConfig.Indicator indicator) {
+		DqRuleSettings settings = settings(context, indicator);
+		DqOutcome severity = settings.getOutcome("severity", DqOutcome.WARN);
+		DqIndicatorCalculator.IndicatorValue current = context.getIndicator(indicator.getCode(), context.getPeriodStart());
+		if (!current.isComplete()) {
+			return Collections.singletonList(result(context, indicator.getCode(), DqOutcome.NOT_APPLICABLE,
+					indicator.getName() + " could not be calculated: " + current.getMissingColumns().size()
+							+ " of its report columns are missing. Generate all of its reports for the period, or check "
+							+ "the indicator definition."));
+		}
+		return Arrays.asList(rolling(context, indicator, settings, severity, current.getValue()),
+				lastYear(context, indicator, settings, severity, current.getValue()));
 	}
 
 	private DqResult rolling(DqRuleContext context, DqConfig.Indicator indicator, DqRuleSettings settings,
@@ -99,6 +112,8 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 			}
 			double average = sum / history.size();
 			detail.put("average", average);
+			detail.put("expectedMin", average * (1 - band));
+			detail.put("expectedMax", average * (1 + band));
 			if (average == 0) {
 				boolean change = current != 0;
 				result = result(context, indicator.getCode(), change ? severity : DqOutcome.PASS, indicator.getName()
@@ -131,6 +146,11 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 		Map<String, Object> detail = new LinkedHashMap<String, Object>();
 		detail.put("baseline", BASELINE_LAST_YEAR);
 		String threshold = "ratio " + format(ratioMin) + " to " + format(ratioMax) + " of the same month last year";
+		if (previous != null) {
+			detail.put("previous", previous);
+			detail.put("expectedMin", previous * ratioMin);
+			detail.put("expectedMax", previous * ratioMax);
+		}
 
 		DqResult result;
 		if (previous == null) {

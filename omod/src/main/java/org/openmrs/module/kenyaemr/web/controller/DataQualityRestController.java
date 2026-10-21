@@ -20,8 +20,12 @@ import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
+import org.openmrs.module.kenyaemr.dq.DqTrends;
 import org.openmrs.module.kenyaemr.dq.ServiceDqRuleContext;
+import org.openmrs.module.kenyaemr.dq.rule.ConsistencyOverTimeRule;
 import org.openmrs.module.kenyaemr.dq.rule.DuplicateEpisodeRule;
+import org.openmrs.module.kenyaemr.dq.rule.IndicatorRatioRule;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
@@ -261,41 +265,80 @@ public class DataQualityRestController extends BaseRestController {
 	}
 
 	/**
-	 * Monthly values of one indicator with its T22-03 outcome, for the trend panel
+	 * Monthly values of one indicator with its T22-03 expected ranges, for the trend chart. Each
+	 * month is checked against the values stored now, so a backfilled month shows the range the
+	 * rule would apply today.
+	 *
+	 * @param to the last month, default last month
+	 * @param months how many months, 1 to 36
 	 */
 	@GetMapping("/indicators/{code}/trend")
 	public ResponseEntity<Object> getTrend(@PathVariable("code") String code,
 	                                       @RequestParam(value = "to", required = false) String to,
 	                                       @RequestParam(value = "months", defaultValue = "12") int months) {
 		requireAuthentication();
-		DqService service = service();
 		DqConfig config = DqConfigStore.getConfig();
 		DqConfig.Indicator indicator = config.getIndicator(code);
 		if (indicator == null) {
 			return notFound("No indicator " + code);
 		}
 		Date last = to != null ? parse(to, MONTH) : DqPeriods.previousMonth(new Date());
-		Date first = DqPeriods.addMonths(last, -(Math.max(1, Math.min(months, 36)) - 1));
-		ServiceDqRuleContext context = new ServiceDqRuleContext(service, config, null, first, last);
+		Date first = firstMonth(last, months);
+		ServiceDqRuleContext context = new ServiceDqRuleContext(service(), config, null, first, last);
+		// The rolling baseline of the first month reaches back 12 months
+		context.preload(code, DqPeriods.addMonths(first, -12), last);
 
-		Map<Long, DqOutcome> flags = new HashMap<Long, DqOutcome>();
-		for (DqResult result : service.getResults("T22-03", first, last)) {
-			if (code.equals(result.getIndicatorCode()) && (result.getReportRun() == null
-					|| result.getReportRun().getStatus() != DqRunStatus.SUPERSEDED)) {
-				DqOutcome current = flags.get(result.getPeriodStart().getTime());
-				if (current == null || result.getOutcome().compareTo(current) > 0) {
-					flags.put(result.getPeriodStart().getTime(), result.getOutcome());
-				}
+		List<SimpleObject> points = new ArrayList<SimpleObject>();
+		for (DqTrends.IndicatorPoint point : DqTrends.indicatorTrend(context, indicator, first, last)) {
+			points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("value", point.getValue())
+					.add("complete", point.isComplete()).add("rolling", baseline(point.getRolling()))
+					.add("lastYear", baseline(point.getLastYear())));
+		}
+		DqRuleSettings settings = config.getRuleSettings(ConsistencyOverTimeRule.ID, indicator);
+		SimpleObject rule = new SimpleObject().add("enabled", settings.isEnabled())
+				.add("band", settings.getDouble("band", 0.20)).add("ratioMin", settings.getDouble("ratioMin", 0.8))
+				.add("ratioMax", settings.getDouble("ratioMax", 1.2))
+				.add("minHistoryMonths", settings.getInteger("minHistoryMonths", 3));
+		return ok(new SimpleObject().add("code", code).add("name", indicator.getName())
+				.add("tracked", indicator.isTracked()).add("rule", rule).add("results", points));
+	}
+
+	/**
+	 * Monthly numerator, denominator and ratio of a ratio rule (T22-04, X-RPT-01), for the trend chart
+	 */
+	@GetMapping("/rules/{ruleId}/trend")
+	public ResponseEntity<Object> getRuleTrend(@PathVariable("ruleId") String ruleId,
+	                                           @RequestParam(value = "to", required = false) String to,
+	                                           @RequestParam(value = "months", defaultValue = "12") int months) {
+		requireAuthentication();
+		IndicatorRatioRule rule = DqTrends.ratioRule(ruleId);
+		if (rule == null) {
+			return notFound("No ratio rule " + ruleId);
+		}
+		DqConfig config = DqConfigStore.getConfig();
+		DqRuleSettings settings = config.getRuleSettings(ruleId, null);
+		DqConfig.Indicator numerator = config.getIndicator(settings.getString("numerator", null));
+		DqConfig.Indicator denominator = config.getIndicator(settings.getString("denominator", null));
+		Date last = to != null ? parse(to, MONTH) : DqPeriods.previousMonth(new Date());
+		Date first = firstMonth(last, months);
+		ServiceDqRuleContext context = new ServiceDqRuleContext(service(), config, null, first, last);
+		for (DqConfig.Indicator indicator : new DqConfig.Indicator[] { numerator, denominator }) {
+			if (indicator != null) {
+				context.preload(indicator.getCode(), first, last);
 			}
 		}
 
 		List<SimpleObject> points = new ArrayList<SimpleObject>();
-		for (Date month = first; !month.after(last); month = DqPeriods.addMonths(month, 1)) {
-			DqIndicatorCalculator.IndicatorValue value = context.getIndicator(code, month);
-			points.add(new SimpleObject().add("period", format(month, MONTH)).add("emrValue", value.getValue())
-					.add("complete", value.isComplete()).add("t2203", flags.get(month.getTime())));
+		for (DqTrends.RatioPoint point : DqTrends.ratioTrend(context, rule, first, last)) {
+			points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH))
+					.add("numerator", point.getNumerator()).add("denominator", point.getDenominator())
+					.add("ratio", point.getRatio()).add("outcome", point.getOutcome().name())
+					.add("message", point.getMessage()));
 		}
-		return ok(new SimpleObject().add("code", code).add("name", indicator.getName()).add("results", points));
+		return ok(new SimpleObject().add("ruleId", ruleId).add("enabled", settings.isEnabled())
+				.add("numerator", indicatorRef(numerator)).add("denominator", indicatorRef(denominator))
+				.add("min", settings.getDouble("min", null)).add("max", settings.getDouble("max", null))
+				.add("results", points));
 	}
 
 	@GetMapping("/tickets")
@@ -453,6 +496,23 @@ public class DataQualityRestController extends BaseRestController {
 				.add("numerator", result.getNumerator()).add("denominator", result.getDenominator())
 				.add("threshold", result.getThreshold()).add("detail", result.getDetail())
 				.add("period", result.getPeriodStart()).add("evaluatedAt", result.getEvaluatedAt());
+	}
+
+	private static SimpleObject baseline(DqTrends.Baseline baseline) {
+		if (baseline == null) {
+			return null;
+		}
+		return new SimpleObject().add("outcome", baseline.getOutcome().name()).add("reference", baseline.getReference())
+				.add("monthsOfHistory", baseline.getMonthsOfHistory()).add("expectedMin", baseline.getExpectedMin())
+				.add("expectedMax", baseline.getExpectedMax()).add("message", baseline.getMessage());
+	}
+
+	private static SimpleObject indicatorRef(DqConfig.Indicator indicator) {
+		return indicator == null ? null : new SimpleObject().add("code", indicator.getCode()).add("name", indicator.getName());
+	}
+
+	private static Date firstMonth(Date last, int months) {
+		return DqPeriods.addMonths(last, -(Math.max(1, Math.min(months, 36)) - 1));
 	}
 
 	private static SimpleObject ticket(DqTicket ticket) {
