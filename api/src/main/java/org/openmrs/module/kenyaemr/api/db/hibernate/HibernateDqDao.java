@@ -210,7 +210,11 @@ public class HibernateDqDao implements DqDao {
 		SQLQuery query = session().createSQLQuery(sql);
 		if (parameters != null) {
 			for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
-				query.setParameter(parameter.getKey(), parameter.getValue());
+				if (parameter.getValue() instanceof Collection) {
+					query.setParameterList(parameter.getKey(), (Collection<?>) parameter.getValue());
+				} else {
+					query.setParameter(parameter.getKey(), parameter.getValue());
+				}
 			}
 		}
 		List<Object[]> rows = new ArrayList<Object[]>();

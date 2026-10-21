@@ -92,6 +92,15 @@ public class DqRuleSettings {
 	}
 
 	/**
+	 * @return the configured list, or an empty list when unset or not a list
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Object> getList(String key) {
+		Object value = values.get(key);
+		return value instanceof List ? (List<Object>) value : Collections.emptyList();
+	}
+
+	/**
 	 * @return a list of objects, such as indicator pairs, or an empty list
 	 */
 	@SuppressWarnings("unchecked")

@@ -31,14 +31,47 @@ import java.util.Map;
 public interface DqService extends OpenmrsService {
 
 	/**
-	 * Evaluates a report for a month and saves it as a new version. The previous version, if any,
-	 * is marked SUPERSEDED.
+	 * Evaluates a report for a month, saves it as a new version and runs its data quality rules.
+	 * The previous version, if any, is marked SUPERSEDED.
 	 *
 	 * @param reportName the report descriptor name, e.g. "MOH-743 Report"
 	 * @param periodStart any date in the month to report on
-	 * @return the saved run
+	 * @return the saved run, BLOCKED or AWAITING_APPROVAL
 	 */
 	DqReportRun generateReportRun(String reportName, Date periodStart);
+
+	/**
+	 * As {@link #generateReportRun(String, Date)}, optionally leaving the run GENERATED so that rules
+	 * comparing several reports can run once all of them exist
+	 */
+	DqReportRun generateReportRun(String reportName, Date periodStart, boolean evaluateRules);
+
+	/**
+	 * Runs the monthly rules on a GENERATED run, saves the results and any tickets, and moves the
+	 * run to BLOCKED or AWAITING_APPROVAL. A run is evaluated once; to check again, regenerate it.
+	 *
+	 * @return the saved results
+	 */
+	List<DqResult> evaluateReportRun(DqReportRun run);
+
+	/**
+	 * Approves a run on behalf of the authenticated user (the HRIO). Refused while a hard block is
+	 * open, for a superseded or already approved run, or when a warning has no override.
+	 *
+	 * @param overrides one per warning not already overridden, each with its result and a reason
+	 * code from the configured list; creator and date are filled in
+	 * @return the approved run
+	 * @throws org.openmrs.api.APIException explaining why approval is refused
+	 */
+	DqReportRun approveReportRun(DqReportRun run, List<DqOverride> overrides);
+
+	/**
+	 * Runs the weekly rules (T22-08) for the Monday-to-Sunday week containing the date. A week that
+	 * has already been checked is not checked again.
+	 *
+	 * @return the results for the week
+	 */
+	List<DqResult> evaluateWeek(Date anyDateInWeek);
 
 	DqReportRun saveReportRun(DqReportRun run);
 
