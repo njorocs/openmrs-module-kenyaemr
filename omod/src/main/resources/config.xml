@@ -70,6 +70,11 @@
 		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.OutpatientToInpatientCheckinOnAdmission</class>
 	</advice>
 
+	<privilege>
+		<name>Approve Data Quality Reports</name>
+		<description>Allows an HRIO to approve a report for submission after its data quality checks</description>
+	</privilege>
+
 	<messages>
 		<lang>en</lang>
 		<file>messages.properties</file>

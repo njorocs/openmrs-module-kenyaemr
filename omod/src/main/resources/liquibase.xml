@@ -762,6 +762,29 @@
 
 	</changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1050">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config
+				WHERE schedulable_class = 'org.openmrs.module.kenyaemr.task.DataQualityTask'
+			</sqlCheck>
+		</preConditions>
+		<comment>Data quality: daily task that generates and checks last month's reports and last week's test positivity</comment>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Data Quality Checks Task" />
+			<column name="description" value="Generates last month's expected reports, runs the TR-26-110 data quality checks and the weekly test positivity check" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemr.task.DataQualityTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2026-10-01T01:00:00" />
+			<column name="repeat_interval" value="86400" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="1" />
+			<column name="started" value="1" />
+			<column name="uuid" value="2fe2e2a9-c39b-43ac-a870-f9be73cfa563" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
 
 

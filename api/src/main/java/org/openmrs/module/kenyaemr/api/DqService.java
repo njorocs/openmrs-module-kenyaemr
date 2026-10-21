@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
@@ -29,6 +30,9 @@ import java.util.Map;
  */
 @Transactional
 public interface DqService extends OpenmrsService {
+
+	/** Held by the HRIO who approves reports for submission */
+	String PRIVILEGE_APPROVE = "Approve Data Quality Reports";
 
 	/**
 	 * Evaluates a report for a month, saves it as a new version and runs its data quality rules.
@@ -63,6 +67,7 @@ public interface DqService extends OpenmrsService {
 	 * @return the approved run
 	 * @throws org.openmrs.api.APIException explaining why approval is refused
 	 */
+	@Authorized(PRIVILEGE_APPROVE)
 	DqReportRun approveReportRun(DqReportRun run, List<DqOverride> overrides);
 
 	/**
