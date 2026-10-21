@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
     public class ConfigurableAdxGenerationStrategy implements AdxGenerationStrategy {
     private static final Log log = LogFactory.getLog(ConfigurableAdxGenerationStrategy.class);
 
-    private static final String MOH_731_REPORT_NAME = "Revised MOH 731";
+    private static final String MOH_731_REPORT_NAME = ReportValueExtractor.MOH_731_REPORT_NAME;
     private static final String MONTHLY_REPORT_NAME = "Monthly report";
     private static final String OUTPUT_FORMAT_XML = "xml";
     private static final String OUTPUT_FORMAT_JSON = "json";
@@ -559,111 +559,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
     }
     private void writeDataSet(Writer writer, DataSet dataset, AdxConfiguration.AdxDatasetMapping datasetMapping,
                               ReportData reportData, AdxConfiguration config) throws IOException {
-        List<DataSetColumn> columns = dataset.getMetaData().getColumns();
         String reportName = reportData.getDefinition().getName();
-        String datasetName = dataset.getDefinition().getName();
+        for (ReportCellValue cell : ReportValueExtractor.extractDataSet(dataset, datasetMapping, reportName, config)) {
+            if (!cell.isSendable()) {
+                continue;
+            }
 
-        for (DataSetRow row : dataset) {
-            for (DataSetColumn column : columns) {
-                String columnName = column.getName();
+            String valueStr = escapeXml(cell.getValue());
+            String dataElementName = escapeXml(cell.getDataElement());
 
-                // Skip excluded columns
-                if (datasetMapping != null && datasetMapping.getExcludeColumns().contains(columnName)) {
-                    continue;
-                }
-
-                // Special filtering for MOH 705A - only include totals (ending with -32)
-                if ("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) {
-                    if (!columnName.endsWith("-32")) {
-                        continue; // Skip non-total columns
-                    }
-                }
-
-                // Special filtering for MOH 705B - only include totals (ending with -32)
-                if ("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) {
-                    if (!columnName.endsWith("-32")) {
-                        continue; // Skip non-total columns
-                    }
-                }
-
-                Object value = row.getColumnValue(column);
-
-                // Universal zero value exclusion for ALL reports
-                if (value == null || "0".equals(value.toString()) || StringUtils.isBlank(value.toString())) {
-                    continue;
-                }
-
-                // Determine the mapping key to use
-                String mappingKey = columnName;
-                if ("MOH-743 Report".equals(reportName)) {
-                    // For MOH 743, try composite key first (datasetName.columnName)
-                    String compositeKey = datasetName + "." + columnName;
-                    if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(compositeKey)) {
-                        mappingKey = compositeKey;
-                    }
-                    // Otherwise fall back to direct column name mapping
-                }
-
-                // Apply field mapping if configured
-                String dataElementName = mappingKey;
-                String categoryOptionCombo = null;
-
-                if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
-                    MappedDataElement mapped = resolveMappedDataElement(datasetMapping.getFieldMappings().get(mappingKey));
-                    if (mapped == null) {
-                        log.debug("Skipping column " + mappingKey + " of report " + reportName
-                                + " because its mapping carries no data element");
-                        continue;
-                    }
-                    dataElementName = mapped.getDataElement();
-                    categoryOptionCombo = mapped.getCategoryOptionCombo();
-                }
-
-                // Exclude unmapped data elements for non-MOH 731 reports
-                if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
-                    continue;
-                }
-
-                // Exclude date elements for non-MOH 731 reports
-                if ("date".equals(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
-                    continue;
-                }
-
-                // Special processing for MOH 705A - remove -32 suffix from totals
-                if (("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) &&
-                        dataElementName.endsWith("-32")) {
-                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
-                }
-
-                // Special processing for MOH 705B - remove -32 suffix from totals
-                if (("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) &&
-                        dataElementName.endsWith("-32")) {
-                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
-                }
-
-                // Apply value transformations if configured
-                String valueStr = value.toString();
-                if (datasetMapping != null && datasetMapping.getTransformations().containsKey(mappingKey)) {
-                    valueStr = applyTransformation(valueStr, datasetMapping.getTransformations().get(mappingKey));
-                }
-
-                // Add prefix for data element name
-                String prefix = getColumnPrefix(config);
-                if (prefix != null && !prefix.isEmpty()) {
-                    dataElementName = prefix + dataElementName;
-                }
-
-                // Escape XML special characters
-                valueStr = escapeXml(valueStr);
-                dataElementName = escapeXml(dataElementName);
-
-                // Write dataValue with or without categoryOptionCombo
-                if (categoryOptionCombo != null && !categoryOptionCombo.isEmpty()) {
-                    writer.write("<dataValue dataElement=\"" + dataElementName + "\" value=\"" + valueStr +
-                            "\" categoryOptionCombo=\"" + escapeXml(categoryOptionCombo) + "\"/>\n");
-                } else {
-                    writer.write("<dataValue dataElement=\"" + dataElementName + "\" value=\"" + valueStr + "\"/>\n");
-                }
+            // Write dataValue with or without categoryOptionCombo
+            if (cell.getCategoryOptionCombo() != null && !cell.getCategoryOptionCombo().isEmpty()) {
+                writer.write("<dataValue dataElement=\"" + dataElementName + "\" value=\"" + valueStr +
+                        "\" categoryOptionCombo=\"" + escapeXml(cell.getCategoryOptionCombo()) + "\"/>\n");
+            } else {
+                writer.write("<dataValue dataElement=\"" + dataElementName + "\" value=\"" + valueStr + "\"/>\n");
             }
         }
     }
@@ -683,59 +593,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
         return dsKey; // Fallback to original key
     }
 
-    /**
-     * Resolves a configured field mapping into its data element and, where present, its category
-     * option combo. Mappings take the form {@code dataElement} or
-     * {@code dataElement|categoryOptionCombo}. Placeholders that carry no data element - such as
-     * {@code "|"}, used for indicators that have no KHIS code yet - resolve to null so that the
-     * column is skipped instead of breaking the whole payload.
-     *
-     * @return the resolved mapping, or null when the mapping has no usable data element
-     */
-    private MappedDataElement resolveMappedDataElement(String mappedValue) {
-        if (StringUtils.isBlank(mappedValue)) {
-            return null;
-        }
 
-        String dataElement = mappedValue;
-        String categoryOptionCombo = null;
-
-        int separator = mappedValue.indexOf('|');
-        if (separator >= 0) {
-            dataElement = mappedValue.substring(0, separator);
-            categoryOptionCombo = mappedValue.substring(separator + 1);
-        }
-
-        dataElement = StringUtils.trimToNull(dataElement);
-        if (dataElement == null) {
-            return null;
-        }
-
-        return new MappedDataElement(dataElement, StringUtils.trimToNull(categoryOptionCombo));
-    }
-
-    /**
-     * A resolved field mapping: the DHIS2 data element with its optional category option combo
-     */
-    private static final class MappedDataElement {
-
-        private final String dataElement;
-
-        private final String categoryOptionCombo;
-
-        private MappedDataElement(String dataElement, String categoryOptionCombo) {
-            this.dataElement = dataElement;
-            this.categoryOptionCombo = categoryOptionCombo;
-        }
-
-        private String getDataElement() {
-            return dataElement;
-        }
-
-        private String getCategoryOptionCombo() {
-            return categoryOptionCombo;
-        }
-    }
 
     /**
      * Gets the MFL code for the facility
@@ -886,14 +744,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
     }
 
     private AdxConfiguration.AdxDatasetMapping findDatasetMapping(AdxConfiguration config, String datasetName) {
-        if (config == null || config.getDatasets() == null) {
-            return null;
-        }
-
-        return config.getDatasets().stream()
-                .filter(mapping -> datasetName.equals(mapping.getName()))
-                .findFirst()
-                .orElse(null);
+        return ReportValueExtractor.findDatasetMapping(config, datasetName);
     }
     private boolean shouldIncludeFacilityDatasetForReport(AdxConfiguration config, String datasetMapping, String reportName) {
         if (StringUtils.isBlank(datasetMapping)) {
@@ -988,22 +839,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
      * Gets the column prefix from configuration
      */
     private String getColumnPrefix(AdxConfiguration config) {
-        return config != null && StringUtils.isNotBlank(config.getPrefix()) ?
-                config.getPrefix() : "";
+        return ReportValueExtractor.getColumnPrefix(config);
     }
 
     private String applyTransformation(String value, String transformation) {
-        // Simple transformation logic - can be extended
-        switch (transformation.toLowerCase()) {
-            case "uppercase":
-                return value.toUpperCase();
-            case "lowercase":
-                return value.toLowerCase();
-            case "trim":
-                return value.trim();
-            default:
-                return value;
-        }
+        return ReportValueExtractor.applyTransformation(value, transformation);
     }
 
     private String escapeXml(String text) {
@@ -1106,94 +946,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
     private void writeJsonDataSet(ArrayNode dataValuesArray, DataSet dataset, AdxConfiguration.AdxDatasetMapping datasetMapping,
                                   ReportData reportData, AdxConfiguration config, String datasetName) throws IOException {
-        List<DataSetColumn> columns = dataset.getMetaData().getColumns();
         String reportName = reportData.getDefinition().getName();
-        String dsDefinitionName = dataset.getDefinition().getName();
-
-        for (DataSetRow row : dataset) {
-            for (DataSetColumn column : columns) {
-                String columnName = column.getName();
-
-                if (datasetMapping != null && datasetMapping.getExcludeColumns().contains(columnName)) {
-                    continue;
-                }
-
-                if ("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) {
-                    if (!columnName.endsWith("-32")) {
-                        continue;
-                    }
-                }
-
-                if ("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) {
-                    if (!columnName.endsWith("-32")) {
-                        continue;
-                    }
-                }
-
-                Object value = row.getColumnValue(column);
-
-                if (value == null || "0".equals(value.toString()) || StringUtils.isBlank(value.toString())) {
-                    continue;
-                }
-
-                String mappingKey = columnName;
-                if ("MOH-743 Report".equals(reportName)) {
-                    String compositeKey = dsDefinitionName + "." + columnName;
-                    if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(compositeKey)) {
-                        mappingKey = compositeKey;
-                    }
-                }
-
-                String dataElementName = mappingKey;
-                String categoryOptionCombo = null;
-
-                if (datasetMapping != null && datasetMapping.getFieldMappings().containsKey(mappingKey)) {
-                    MappedDataElement mapped = resolveMappedDataElement(datasetMapping.getFieldMappings().get(mappingKey));
-                    if (mapped == null) {
-                        log.debug("Skipping column " + mappingKey + " of report " + reportName
-                                + " because its mapping carries no data element");
-                        continue;
-                    }
-                    dataElementName = mapped.getDataElement();
-                    categoryOptionCombo = mapped.getCategoryOptionCombo();
-                }
-
-                if (datasetMapping != null && !datasetMapping.getFieldMappings().containsKey(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
-                    continue;
-                }
-
-                if ("date".equals(mappingKey) && !MOH_731_REPORT_NAME.equals(reportName)) {
-                    continue;
-                }
-
-                if (("MOH 705A Outpatient summary".equals(reportName) || "MOH705A".equals(reportName)) &&
-                        dataElementName.endsWith("-32")) {
-                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
-                }
-
-                if (("MOH 705B Outpatient summary".equals(reportName) || "MOH705B".equals(reportName)) &&
-                        dataElementName.endsWith("-32")) {
-                    dataElementName = dataElementName.substring(0, dataElementName.length() - 3);
-                }
-
-                String valueStr = value.toString();
-                if (datasetMapping != null && datasetMapping.getTransformations().containsKey(mappingKey)) {
-                    valueStr = applyTransformation(valueStr, datasetMapping.getTransformations().get(mappingKey));
-                }
-
-                String prefix = getColumnPrefix(config);
-                if (prefix != null && !prefix.isEmpty()) {
-                    dataElementName = prefix + dataElementName;
-                }
-
-                ObjectNode dataValue = objectMapper.createObjectNode();
-                dataValue.put("dataElement", dataElementName);
-                if (categoryOptionCombo != null && !categoryOptionCombo.isEmpty()) {
-                    dataValue.put("categoryOptionCombo", categoryOptionCombo);
-                }
-                dataValue.put("value", valueStr);
-                dataValuesArray.add(dataValue);
+        for (ReportCellValue cell : ReportValueExtractor.extractDataSet(dataset, datasetMapping, reportName, config)) {
+            if (!cell.isSendable()) {
+                continue;
             }
+
+            ObjectNode dataValue = objectMapper.createObjectNode();
+            dataValue.put("dataElement", cell.getDataElement());
+            if (cell.getCategoryOptionCombo() != null && !cell.getCategoryOptionCombo().isEmpty()) {
+                dataValue.put("categoryOptionCombo", cell.getCategoryOptionCombo());
+            }
+            dataValue.put("value", cell.getValue());
+            dataValuesArray.add(dataValue);
         }
     }
 

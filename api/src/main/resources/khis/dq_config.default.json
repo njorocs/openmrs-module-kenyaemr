@@ -1,0 +1,136 @@
+{
+  "expectedReports": [
+    { "report": "MOH 705A Outpatient summary", "frequency": "MONTHLY", "deadlineDay": 5, "target": "KHIS" },
+    { "report": "MOH 705B Outpatient summary", "frequency": "MONTHLY", "deadlineDay": 5, "target": "KHIS" },
+    { "report": "MOH 706", "frequency": "MONTHLY", "deadlineDay": 5, "target": "KHIS" },
+    { "report": "MOH 711", "frequency": "MONTHLY", "deadlineDay": 5, "target": "KHIS" },
+    { "report": "MOH-743 Report", "frequency": "MONTHLY", "deadlineDay": 5, "target": "KHIS" },
+    { "report": "MOH 643", "frequency": "MONTHLY", "deadlineDay": 7, "target": "KNLMS" }
+  ],
+  "indicators": [
+    {
+      "code": "MAL_SUSPECTED_705",
+      "name": "Suspected malaria (MOH 705A + 705B)",
+      "tracked": false,
+      "parts": [
+        { "report": "MOH 705A Outpatient summary", "dataset": "MOH705A", "columns": ["SMC-32"] },
+        { "report": "MOH 705B Outpatient summary", "dataset": "MOH705B", "columns": ["SUA-32"] }
+      ]
+    },
+    {
+      "code": "MAL_TESTED_705",
+      "name": "Suspected malaria tested (MOH 705A + 705B)",
+      "tracked": false,
+      "parts": [
+        { "report": "MOH 705A Outpatient summary", "dataset": "MOH705A", "columns": ["TMC-32"] },
+        { "report": "MOH 705B Outpatient summary", "dataset": "MOH705B", "columns": ["TMC-32"] }
+      ]
+    },
+    {
+      "code": "MAL_CONFIRMED_705",
+      "name": "Confirmed malaria (MOH 705A + 705B)",
+      "tracked": true,
+      "parts": [
+        { "report": "MOH 705A Outpatient summary", "dataset": "MOH705A", "columns": ["CMC-32"] },
+        { "report": "MOH 705B Outpatient summary", "dataset": "MOH705B", "columns": ["COA-32"] }
+      ]
+    },
+    {
+      "code": "MAL_TESTS_706",
+      "name": "Malaria tests performed (MOH 706)",
+      "tracked": true,
+      "parts": [
+        { "report": "MOH 706", "dataset": "MOH706", "columns": ["BST-01", "BST-02", "BSRT", "BSPC"] }
+      ]
+    },
+    {
+      "code": "MAL_POSITIVE_706",
+      "name": "Malaria tests positive (MOH 706)",
+      "tracked": false,
+      "parts": [
+        { "report": "MOH 706", "dataset": "MOH706", "columns": ["BSP-01", "BSP-02", "BSRTP", "BSPCP"] }
+      ]
+    },
+    {
+      "code": "MAL_CONFIRMED_743",
+      "name": "Confirmed malaria, microscopy and RDT (MOH 743)",
+      "tracked": true,
+      "parts": [
+        {
+          "report": "MOH-743 Report",
+          "dataset": "SUSPECTED_MALARIA_AGE",
+          "columns": ["MICRO_LESS_5_POS", "MICRO_MORE_5_POS", "RTD_LESS_5_POS", "RTD_MORE_5_POS"]
+        }
+      ]
+    },
+    {
+      "code": "MAL_TREATED_ACT_743",
+      "name": "Patients given an ACT (MOH 743)",
+      "tracked": true,
+      "parts": [
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Patients Given an ACT by Weight Band Category",
+          "columns": [
+            "under_5_years_5_to_under_10_kg", "aged_5_years_and_above_5_to_under_10_kg",
+            "under_5_years_10_to_under_15_kg", "aged_5_years_and_above_10_to_under_15_kg",
+            "under_5_years_15_to_under_20_kg", "aged_5_years_and_above_15_to_under_20_kg",
+            "under_5_years_20_to_under_25_kg", "aged_5_years_and_above_20_to_under_25_kg",
+            "under_5_years_25_to_under_30_kg", "aged_5_years_and_above_25_to_under_30_kg",
+            "under_5_years_30_to_under_35_kg", "aged_5_years_and_above_30_to_under_35_kg",
+            "under_5_years_35_to_under_60_kg", "aged_5_years_and_above_35_to_under_60_kg",
+            "under_5_years_60_to_under_80_kg", "aged_5_years_and_above_60_to_under_80_kg",
+            "under_5_years_80_and_above_kg", "aged_5_years_and_above_80_and_above_kg"
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "T22-04": {
+      "numerator": "MAL_TREATED_ACT_743",
+      "denominator": "MAL_CONFIRMED_743",
+      "max": 1.0,
+      "severity": "BLOCK"
+    },
+    "T22-03": {
+      "band": 0.20,
+      "ratioMin": 0.8,
+      "ratioMax": 1.2,
+      "minHistoryMonths": 3,
+      "severity": "WARN"
+    },
+    "T22-05": {
+      "enabled": false,
+      "tolerance": 0.10,
+      "severity": "WARN",
+      "ticket": true,
+      "pairs": []
+    },
+    "X-RPT-01": {
+      "numerator": "MAL_TESTED_705",
+      "denominator": "MAL_TESTS_706",
+      "min": 0.9,
+      "max": 1.1,
+      "severity": "WARN",
+      "ticket": true
+    },
+    "T22-07": {
+      "windowDays": 14,
+      "severity": "WARN"
+    },
+    "T22-08": {
+      "changeThreshold": 0.5,
+      "minTests": 20,
+      "severity": "TICKET"
+    }
+  },
+  "overrideReasons": [
+    "SEASONAL_VARIATION",
+    "OUTBREAK",
+    "SERVICE_CHANGE",
+    "DATA_VERIFIED_CORRECT",
+    "STOCK_OR_SUPPLY_ISSUE",
+    "OTHER"
+  ]
+}

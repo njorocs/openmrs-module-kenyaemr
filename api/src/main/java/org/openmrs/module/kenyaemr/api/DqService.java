@@ -30,6 +30,16 @@ import java.util.Map;
 @Transactional
 public interface DqService extends OpenmrsService {
 
+	/**
+	 * Evaluates a report for a month and saves it as a new version. The previous version, if any,
+	 * is marked SUPERSEDED.
+	 *
+	 * @param reportName the report descriptor name, e.g. "MOH-743 Report"
+	 * @param periodStart any date in the month to report on
+	 * @return the saved run
+	 */
+	DqReportRun generateReportRun(String reportName, Date periodStart);
+
 	DqReportRun saveReportRun(DqReportRun run);
 
 	@Transactional(readOnly = true)

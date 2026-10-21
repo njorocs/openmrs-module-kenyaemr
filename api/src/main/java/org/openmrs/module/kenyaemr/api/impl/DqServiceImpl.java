@@ -9,12 +9,16 @@
  */
 package org.openmrs.module.kenyaemr.api.impl;
 
+import org.openmrs.api.context.Context;
+import org.openmrs.api.context.Daemon;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemr.api.DqService;
 import org.openmrs.module.kenyaemr.api.db.DqDao;
+import org.openmrs.module.kenyaemr.dq.DqReportGenerator;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
+import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
 import org.openmrs.module.kenyaemr.model.dq.DqTicketStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
@@ -33,6 +37,27 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 
 	public void setDqDao(DqDao dqDao) {
 		this.dqDao = dqDao;
+	}
+
+	@Override
+	public DqReportRun generateReportRun(String reportName, Date periodStart) {
+		DqReportGenerator.GeneratedRun generated = new DqReportGenerator().generate(reportName, periodStart);
+		DqReportRun run = generated.getRun();
+
+		DqReportRun previous = dqDao.getLatestReportRun(reportName, run.getPeriodStart());
+		if (previous != null && previous.getStatus() != DqRunStatus.SUPERSEDED) {
+			previous.setStatus(DqRunStatus.SUPERSEDED);
+			dqDao.saveReportRun(previous);
+		}
+
+		run.setVersion(previous != null ? previous.getVersion() + 1 : 1);
+		// Left empty when the scheduled task generates the run
+		if (Context.isAuthenticated() && !Daemon.isDaemonThread()) {
+			run.setGeneratedBy(Context.getAuthenticatedUser());
+		}
+		dqDao.saveReportRun(run);
+		dqDao.saveValues(generated.getValues());
+		return run;
 	}
 
 	@Override
