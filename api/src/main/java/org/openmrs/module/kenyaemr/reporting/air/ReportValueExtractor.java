@@ -45,7 +45,12 @@ public final class ReportValueExtractor {
 		String reportName = reportData.getDefinition().getName();
 		for (Map.Entry<String, DataSet> entry : reportData.getDataSets().entrySet()) {
 			AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, entry.getKey());
-			cells.addAll(extractDataSet(entry.getValue(), datasetMapping, reportName, config));
+			for (ReportCellValue cell : extractDataSet(entry.getValue(), datasetMapping, reportName, config)) {
+				// A dataset definition without a name is identified by its key in the report
+				cells.add(cell.getDatasetName() != null ? cell : new ReportCellValue(entry.getKey(), cell.getColumnName(),
+						cell.getMappingKey(), cell.getDataElement(), cell.getCategoryOptionCombo(), cell.getValue(),
+						cell.isMapped(), cell.isSendable()));
+			}
 		}
 		return cells;
 	}
