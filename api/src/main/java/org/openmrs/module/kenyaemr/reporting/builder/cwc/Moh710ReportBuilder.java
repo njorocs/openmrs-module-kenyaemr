@@ -131,8 +131,8 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 		addSingleDailyVaccineRow(dsd, "Tetanus Taxoid Vaccine for Trauma", "TTV for Trauma", vaccine(6, TETANUS_TAXOID));*/
 
 		// === MR-2: 2 rows with 31 daily columns: 18-24mo and >2yr ===
-		addDailyVaccineColumnsForAge(dsd, "MR-2_18_24", "MR-2 18-24 months", vaccine(2, MEASLES_RUBELLA), 1, 2, "18-24mo");
-		addDailyVaccineColumnsForAge(dsd, "MR-2_GT2", "MR-2 24 months+", vaccine(2, MEASLES_RUBELLA), 2, null, ">2yr");
+		addDailyVaccineColumnsForAge(dsd, "MR-2_18_24", "MR-2 18-24 months", vaccine(2, MEASLES_RUBELLA), 18, 24, "18-24mo");
+		addDailyVaccineColumnsForAge(dsd, "MR-2_GT2", "MR-2 24 months+", vaccine(2, MEASLES_RUBELLA), 24, null, ">2yr");
 
 		// === HPV: single rows per dose ===
 		addSingleDailyVaccineRow(dsd, "HPV-1", "HPV 1", vaccine(1, HPV));
@@ -144,6 +144,7 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 	/**
 	 *
 	 * Adds one row of 31 daily columns for a single age band of a vaccine
+	 * minAge and maxAge are in months (maxAge exclusive, null for no limit)
 	 */
 	private void addDailyVaccineColumnsForAge(CohortIndicatorDataSetDefinition dsd, String baseName, String label, RowIndicators row, Integer minAge, Integer maxAge, String ageSuffix) {
 		for (int day = 1; day <= 31; day++) {
@@ -170,8 +171,8 @@ public class Moh710ReportBuilder extends AbstractReportBuilder {
 	 * Adds two rows (under 1 year and 1 year+) of 31 daily columns each for a vaccine
 	 */
 	private void addDailyVaccineRows(CohortIndicatorDataSetDefinition dsd, String baseName, String label, RowIndicators row) {
-		addDailyVaccineColumnsForAge(dsd, baseName, label, row, 0, 1, "<1yr");
-		addDailyVaccineColumnsForAge(dsd, baseName + "_01", label, row, 1, null, ">=1yr");
+		addDailyVaccineColumnsForAge(dsd, baseName, label, row, 0, 12, "<1yr");
+		addDailyVaccineColumnsForAge(dsd, baseName + "_01", label, row, 12, null, ">=1yr");
 	}
 
 	/**

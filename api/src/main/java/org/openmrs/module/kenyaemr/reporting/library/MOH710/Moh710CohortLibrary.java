@@ -22,8 +22,8 @@ public class Moh710CohortLibrary {
 
 	/**
 	 * Unique children given a vaccine dose on a specific calendar day of the month with age filter as-of that day
-	 * @param minAge the minimum age in years
-	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @param minAge the minimum age in months
+	 * @param maxAge the maximum age in months (exclusive, null for no upper limit)
 	 * @param sequence the dose number in etl_immunization.sequence (null for any dose)
 	 * @param vaccines the vaccine concept ids in etl_immunization.vaccine
 	 * @return the cohort definition
@@ -34,8 +34,8 @@ public class Moh710CohortLibrary {
 
 	/**
 	 * Unique children given a vaccine dose during the reporting period with age filter as-of vaccination date
-	 * @param minAge the minimum age in years
-	 * @param maxAge the maximum age in years (exclusive, null for no upper limit)
+	 * @param minAge the minimum age in months
+	 * @param maxAge the maximum age in months (exclusive, null for no upper limit)
 	 * @param sequence the dose number in etl_immunization.sequence (null for any dose)
 	 * @param vaccines the vaccine concept ids in etl_immunization.vaccine
 	 * @return the cohort definition
@@ -85,10 +85,10 @@ public class Moh710CohortLibrary {
 				"WHERE " + condition + "\n" +
 				"  AND DATE(" + dateColumn + ") = d_ref.target_date\n" +
 				(minAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, d_ref.target_date) >= " + minAge + "\n"
+						? "  AND TIMESTAMPDIFF(MONTH, p.dob, d_ref.target_date) >= " + minAge + "\n"
 						: "") +
 				(maxAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, d_ref.target_date) < " + maxAge + "\n"
+						? "  AND TIMESTAMPDIFF(MONTH, p.dob, d_ref.target_date) < " + maxAge + "\n"
 						: "") +
 				"GROUP BY i.patient_id";
 
@@ -111,10 +111,10 @@ public class Moh710CohortLibrary {
 				"WHERE " + condition + "\n" +
 				"  AND " + date + " BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 				(minAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, " + date + ") >= " + minAge + "\n"
+						? "  AND TIMESTAMPDIFF(MONTH, p.dob, " + date + ") >= " + minAge + "\n"
 						: "") +
 				(maxAge != null
-						? "  AND TIMESTAMPDIFF(YEAR, p.dob, " + date + ") < " + maxAge + "\n"
+						? "  AND TIMESTAMPDIFF(MONTH, p.dob, " + date + ") < " + maxAge + "\n"
 						: "") +
 				"GROUP BY i.patient_id";
 
