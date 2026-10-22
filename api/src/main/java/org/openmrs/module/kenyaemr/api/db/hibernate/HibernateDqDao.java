@@ -15,6 +15,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.kenyaemr.api.db.DqDao;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
+import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
@@ -114,6 +115,19 @@ public class HibernateDqDao implements DqDao {
 		return session().createQuery("from DqValue v where v.reportRun = :run order by v.id")
 				.setParameter("run", run)
 				.list();
+	}
+
+	@Override
+	public DqReportPayload savePayload(DqReportPayload payload) {
+		session().saveOrUpdate(payload);
+		return payload;
+	}
+
+	@Override
+	public DqReportPayload getPayload(DqReportRun run) {
+		return (DqReportPayload) session().createQuery("from DqReportPayload p where p.reportRun = :run")
+				.setParameter("run", run)
+				.uniqueResult();
 	}
 
 	@Override

@@ -785,6 +785,38 @@
 		</insert>
 	</changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261022-1000">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_report_payload" />
+			</not>
+		</preConditions>
+		<comment>Data quality: the KHIS payload of each report version, sent as is once approved</comment>
+		<createTable tableName="kenyaemr_dq_report_payload">
+			<column name="payload_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="report_run_id" type="INT">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="format" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="endpoint_path" type="VARCHAR(500)"></column>
+			<column name="content" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="content_hash" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_report_payload_run_fk" baseTableName="kenyaemr_dq_report_payload"
+			baseColumnNames="report_run_id" referencedTableName="kenyaemr_dq_report_run" referencedColumnNames="report_run_id" />
+	</changeSet>
+
 </databaseChangeLog>
 
 

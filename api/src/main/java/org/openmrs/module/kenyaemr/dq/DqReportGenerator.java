@@ -9,15 +9,21 @@
  */
 package org.openmrs.module.kenyaemr.dq;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
+import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
 import org.openmrs.module.kenyaemr.reporting.air.AdxConfiguration;
+import org.openmrs.module.kenyaemr.reporting.air.AdxMetadata;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableJsonReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.air.ReportCellValue;
 import org.openmrs.module.kenyaemr.reporting.air.ReportValueExtractor;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -27,6 +33,7 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.util.OpenmrsClassLoader;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -39,6 +46,8 @@ import java.util.List;
  * {@link DqValue} per report cell
  */
 public class DqReportGenerator {
+
+	private static final Log log = LogFactory.getLog(DqReportGenerator.class);
 
 	/**
 	 * Evaluates the report. Nothing is saved.
@@ -79,7 +88,50 @@ public class DqReportGenerator {
 
 		List<DqValue> values = toValues(run, cells);
 		run.setValuesHash(hash(values));
-		return new GeneratedRun(run, values);
+		return new GeneratedRun(run, values, renderPayload(run, reportData, config));
+	}
+
+	/**
+	 * Renders the payload the existing send button would post, so the approved version can be sent
+	 * exactly as it was checked. A report without a KHIS mapping, or one that fails to render, gets
+	 * none and cannot be sent through the pipeline; the run itself is still saved and checked.
+	 */
+	static DqReportPayload renderPayload(DqReportRun run, ReportData reportData, AdxConfiguration config) {
+		if (config == null) {
+			return null;
+		}
+		boolean json = "json".equalsIgnoreCase(config.getOutputFormat());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			if (json) {
+				new ConfigurableJsonReportRenderer().render(reportData, null, out);
+			} else {
+				new ConfigurableAdxReportRenderer().render(reportData, null, out);
+			}
+		}
+		catch (Exception e) {
+			log.warn("Could not render the KHIS payload of " + run.getReportName() + " for " + run.getPeriodStart(), e);
+			return null;
+		}
+
+		DqReportPayload payload = new DqReportPayload();
+		payload.setReportRun(run);
+		payload.setFormat(json ? DqReportPayload.FORMAT_JSON : DqReportPayload.FORMAT_ADX);
+		payload.setContent(new String(out.toByteArray(), StandardCharsets.UTF_8));
+		payload.setContentHash(sha256(payload.getContent()));
+		payload.setEndpointPath(endpointPath(new ConfigurableAdxGenerationStrategy().getAdxMetadata(reportData)));
+		payload.setCreatedAt(new Date());
+		return payload;
+	}
+
+	/**
+	 * @return the part of the configured endpoint from "api/" on; the server address is read when
+	 * sending so that it is never baked into a stored payload
+	 */
+	static String endpointPath(AdxMetadata metadata) {
+		String url = metadata != null ? metadata.getEndpointUrl() : null;
+		int api = url != null ? url.indexOf("/api/") : -1;
+		return api >= 0 ? url.substring(api + 1) : null;
 	}
 
 	static List<DqValue> toValues(DqReportRun run, List<ReportCellValue> cells) {
@@ -106,14 +158,19 @@ public class DqReportGenerator {
 	 * @return a SHA-256 over every cell, so an unchanged regeneration can be recognised
 	 */
 	static String hash(List<DqValue> values) {
+		StringBuilder lines = new StringBuilder();
+		for (DqValue value : values) {
+			lines.append(value.getDatasetName()).append('\u0000').append(value.getColumnName()).append('\u0000')
+					.append(value.getValueText()).append('\n');
+		}
+		return sha256(lines.toString());
+	}
+
+	static String sha256(String text) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			for (DqValue value : values) {
-				String line = value.getDatasetName() + "\u0000" + value.getColumnName() + "\u0000" + value.getValueText() + "\n";
-				digest.update(line.getBytes(StandardCharsets.UTF_8));
-			}
 			StringBuilder hex = new StringBuilder();
-			for (byte b : digest.digest()) {
+			for (byte b : digest.digest(text.getBytes(StandardCharsets.UTF_8))) {
 				hex.append(String.format("%02x", b));
 			}
 			return hex.toString();
@@ -167,9 +224,12 @@ public class DqReportGenerator {
 
 		private final List<DqValue> values;
 
-		public GeneratedRun(DqReportRun run, List<DqValue> values) {
+		private final DqReportPayload payload;
+
+		public GeneratedRun(DqReportRun run, List<DqValue> values, DqReportPayload payload) {
 			this.run = run;
 			this.values = values;
+			this.payload = payload;
 		}
 
 		public DqReportRun getRun() {
@@ -178,6 +238,13 @@ public class DqReportGenerator {
 
 		public List<DqValue> getValues() {
 			return values;
+		}
+
+		/**
+		 * @return the KHIS payload, or null when the report has none
+		 */
+		public DqReportPayload getPayload() {
+			return payload;
 		}
 	}
 }

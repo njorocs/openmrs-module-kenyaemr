@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.api;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
+import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
@@ -96,6 +97,13 @@ public interface DqService extends OpenmrsService {
 
 	@Transactional(readOnly = true)
 	List<DqValue> getValues(DqReportRun run);
+
+	/**
+	 * @return the KHIS payload rendered when the version was generated, or null when the report has
+	 * no KHIS mapping
+	 */
+	@Transactional(readOnly = true)
+	DqReportPayload getPayload(DqReportRun run);
 
 	@Transactional(readOnly = true)
 	List<DqValue> getLatestValues(Collection<String> reportNames, Date fromPeriod, Date toPeriod);

@@ -123,4 +123,16 @@
         <many-to-one name="resolvedBy" class="org.openmrs.User" column="resolved_by"/>
     </class>
 
+    <class name="DqReportPayload" table="kenyaemr_dq_report_payload">
+        <id name="id" column="payload_id">
+            <generator class="native"/>
+        </id>
+        <many-to-one name="reportRun" class="DqReportRun" column="report_run_id" not-null="true" unique="true"/>
+        <property name="format" column="format" type="string" length="10" not-null="true"/>
+        <property name="endpointPath" column="endpoint_path" type="string" length="500"/>
+        <property name="content" column="content" type="text" not-null="true"/>
+        <property name="contentHash" column="content_hash" type="string" length="64" not-null="true"/>
+        <property name="createdAt" column="created_at" type="timestamp" not-null="true"/>
+    </class>
+
 </hibernate-mapping>

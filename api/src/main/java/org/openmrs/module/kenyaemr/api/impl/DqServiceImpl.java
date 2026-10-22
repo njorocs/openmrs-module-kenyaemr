@@ -26,6 +26,7 @@ import org.openmrs.module.kenyaemr.dq.rule.DqRuleContext;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleEngine;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
+import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
@@ -79,6 +80,9 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		}
 		dqDao.saveReportRun(run);
 		dqDao.saveValues(generated.getValues());
+		if (generated.getPayload() != null) {
+			dqDao.savePayload(generated.getPayload());
+		}
 		if (evaluateRules) {
 			evaluateReportRun(run);
 		}
@@ -225,6 +229,11 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 	@Override
 	public List<DqValue> getValues(DqReportRun run) {
 		return dqDao.getValues(run);
+	}
+
+	@Override
+	public DqReportPayload getPayload(DqReportRun run) {
+		return dqDao.getPayload(run);
 	}
 
 	@Override

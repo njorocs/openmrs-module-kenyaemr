@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.kenyaemr.fragment.controller.report;
 
+import org.openmrs.module.kenyaemr.api.DqService;
+import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
+import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,6 +89,8 @@ public class DataExportViewFragmentController {
     DateFormat periodFormat = new SimpleDateFormat("yyyyMM");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "Revised MOH 731";
+    /** Owned by kenyaemrIL, which sends approved versions when it is true */
+    public static final String GP_KHIS_PIPELINE_ENABLED = "khisAggregate.enabled";
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
@@ -235,6 +241,9 @@ public class DataExportViewFragmentController {
             }
 
             ReportData reportData = reportService.loadReportData(reportRequest);
+            if ("true".equalsIgnoreCase(StringUtils.trim(Context.getAdministrationService().getGlobalProperty(GP_KHIS_PIPELINE_ENABLED)))) {
+                return sendThroughApproval(reportData);
+            }
             String outputFormat = detectOutputFormat(reportData);
 
             log.info("Building document for request " + reportRequest.getId() + " with format: " + outputFormat);
@@ -253,6 +262,34 @@ public class DataExportViewFragmentController {
                     "statusMsg", "Failed to build document: " + message
             );
         }
+    }
+
+    /**
+     * With the KHIS pipeline on, a report reaches KHIS only as an approved data quality version, which
+     * kenyaemrIL queues and sends. The button then says where that version stands instead of posting.
+     */
+    private SimpleObject sendThroughApproval(ReportData reportData) {
+        String reportName = reportData.getDefinition().getName();
+        Date start = (Date) reportData.getContext().getParameterValue("startDate");
+        if (start == null) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                    "statusMsg", "This report has no start date, so it cannot be matched to a data quality version.");
+        }
+        String month = new SimpleDateFormat("MMMM yyyy").format(start);
+        DqReportRun run = Context.getService(DqService.class).getLatestReportRun(reportName, DqPeriods.monthStart(start));
+        if (run == null) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.CONFLICT.value()),
+                    "statusMsg", "Reports now reach KHIS after data quality approval. Generate and approve " + reportName
+                            + " for " + month + " on the Data quality page; it is sent automatically once approved.");
+        }
+        if (run.getStatus() == DqRunStatus.APPROVED) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.ACCEPTED.value()),
+                    "statusMsg", reportName + " for " + month + " (version " + run.getVersion() + ") is approved and is "
+                            + "sent to KHIS automatically. Follow its status on the Data quality page.");
+        }
+        return SimpleObject.create("statusCode", String.valueOf(HttpStatus.CONFLICT.value()),
+                "statusMsg", reportName + " for " + month + " (version " + run.getVersion() + ") is " + run.getStatus()
+                        + ". Approve it on the Data quality page; it is sent to KHIS automatically once approved.");
     }
 
     public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,

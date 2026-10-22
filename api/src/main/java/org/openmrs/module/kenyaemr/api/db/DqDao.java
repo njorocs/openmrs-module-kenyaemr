@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemr.api.db;
 
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
+import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
@@ -48,6 +49,10 @@ public interface DqDao {
 	void saveValues(Collection<DqValue> values);
 
 	List<DqValue> getValues(DqReportRun run);
+
+	DqReportPayload savePayload(DqReportPayload payload);
+
+	DqReportPayload getPayload(DqReportRun run);
 
 	/**
 	 * @return values of the latest version per period of the named reports, for periods in range
