@@ -81,6 +81,11 @@
 	</messages>
 
 	<globalProperty>
+		<property>kenyaemr.dq.autoApproveOnDeadline</property>
+		<defaultValue>false</defaultValue>
+		<description>Auto-send on the deadline: when true, last month's reports still awaiting approval with no open block are approved automatically from their deadline day (e.g. the 5th), with unanswered warnings recorded as unreviewed. With khisAggregate.enabled they are then sent to KHIS.</description>
+	</globalProperty>
+	<globalProperty>
 		<property>kenyaemr.autoUpdateReleaseUrl</property>
 		<defaultValue>https://api.github.com/repos/palladiumkenya/KenyaHMIS-KenyaEMR-Ver2.x/releases/latest</defaultValue>
 		<description>

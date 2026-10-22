@@ -817,6 +817,29 @@
 			baseColumnNames="report_run_id" referencedTableName="kenyaemr_dq_report_run" referencedColumnNames="report_run_id" />
 	</changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261022-1010">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config
+				WHERE schedulable_class = 'org.openmrs.module.kenyaemr.task.DataQualityAutoApprovalTask'
+			</sqlCheck>
+		</preConditions>
+		<comment>Data quality: optional auto-send on the deadline, run late in the day; does nothing unless kenyaemr.dq.autoApproveOnDeadline is true</comment>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Data Quality Auto Approval Task" />
+			<column name="description" value="On a report's deadline day, approves last month's reports still awaiting approval with no open block, so they are sent to KHIS on time" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemr.task.DataQualityAutoApprovalTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2026-10-01T18:00:00" />
+			<column name="repeat_interval" value="86400" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="1" />
+			<column name="started" value="1" />
+			<column name="uuid" value="dc459391-a806-42b8-8c5b-37d5cc370f06" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
 
 

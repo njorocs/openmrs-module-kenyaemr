@@ -34,4 +34,12 @@ public class DqPeriodsTest {
 		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 25)));
 		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 19)));
 	}
+
+	@Test
+	public void deadline_shouldFallInTheFollowingMonth() {
+		Assert.assertEquals(TestUtils.date(2026, 10, 5), DqPeriods.deadline(TestUtils.date(2026, 9, 1), 5));
+		Assert.assertEquals(TestUtils.date(2027, 1, 7), DqPeriods.deadline(TestUtils.date(2026, 12, 15), 7));
+		// Day 31 of February is its last day
+		Assert.assertEquals(TestUtils.date(2026, 2, 28), DqPeriods.deadline(TestUtils.date(2026, 1, 1), 31));
+	}
 }

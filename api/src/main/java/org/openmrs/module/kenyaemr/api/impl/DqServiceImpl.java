@@ -51,6 +51,9 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 	/** The override reason that needs a free-text note */
 	static final String OTHER_REASON = "OTHER";
 
+	/** Recorded on warnings that were never answered when a report is approved automatically */
+	public static final String UNREVIEWED_REASON = "UNREVIEWED";
+
 	private DqDao dqDao;
 
 	public void setDqDao(DqDao dqDao) {
@@ -167,6 +170,53 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		run.setApprovedBy(Context.getAuthenticatedUser());
 		run.setApprovedAt(now);
 		run.setApprovalMode(DqReportRun.APPROVAL_MODE_MANUAL);
+		return dqDao.saveReportRun(run);
+	}
+
+	@Override
+	public List<DqReportRun> autoApproveDueReports(Date now) {
+		Date month = DqPeriods.previousMonth(now);
+		List<DqReportRun> approved = new ArrayList<DqReportRun>();
+		for (DqConfig.ExpectedReport report : DqConfigStore.getConfig().getExpectedReports()) {
+			if (!isDeadlineReached(report, month, now)) {
+				continue;
+			}
+			DqReportRun run = dqDao.getLatestReportRun(report.getReport(), month);
+			if (run == null || run.getStatus() != DqRunStatus.AWAITING_APPROVAL) {
+				continue;
+			}
+			approved.add(autoApprove(run, now));
+		}
+		return approved;
+	}
+
+	/**
+	 * @return true from the start of a monthly report's deadline day for that month
+	 */
+	static boolean isDeadlineReached(DqConfig.ExpectedReport report, Date month, Date now) {
+		return DqConfig.ExpectedReport.FREQUENCY_MONTHLY.equals(report.getFrequency()) && report.getDeadlineDay() != null
+				&& !now.before(DqPeriods.deadline(month, report.getDeadlineDay()));
+	}
+
+	private DqReportRun autoApprove(DqReportRun run, Date now) {
+		Set<String> overridden = new HashSet<String>();
+		for (DqOverride existing : dqDao.getOverrides(run)) {
+			overridden.add(existing.getResult().getUuid());
+		}
+		for (DqResult result : dqDao.getResults(run)) {
+			if (result.getOutcome() == DqOutcome.WARN && !overridden.contains(result.getUuid())) {
+				DqOverride override = new DqOverride();
+				override.setResult(result);
+				override.setReasonCode(UNREVIEWED_REASON);
+				override.setNote("Approved automatically on the deadline; nobody reviewed this warning.");
+				override.setCreator(Context.getAuthenticatedUser());
+				override.setDateCreated(now);
+				dqDao.saveOverride(override);
+			}
+		}
+		run.setStatus(DqRunStatus.APPROVED);
+		run.setApprovedAt(now);
+		run.setApprovalMode(DqReportRun.APPROVAL_MODE_AUTO);
 		return dqDao.saveReportRun(run);
 	}
 

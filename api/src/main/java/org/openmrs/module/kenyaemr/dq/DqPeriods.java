@@ -57,6 +57,16 @@ public final class DqPeriods {
 		return addMonths(monthStart(date), -1);
 	}
 
+	/**
+	 * @return midnight on the deadline day of a month's report, in the month after it; a day past
+	 * the end of that month falls on its last day
+	 */
+	public static Date deadline(Date month, int deadlineDay) {
+		Calendar calendar = startOfDay(addMonths(monthStart(month), 1));
+		calendar.set(Calendar.DAY_OF_MONTH, Math.min(Math.max(deadlineDay, 1), calendar.getActualMaximum(Calendar.DAY_OF_MONTH)));
+		return calendar.getTime();
+	}
+
 	public static Date addMonths(Date monthStart, int months) {
 		Calendar calendar = startOfDay(monthStart);
 		calendar.add(Calendar.MONTH, months);

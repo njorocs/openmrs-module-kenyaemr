@@ -23,6 +23,7 @@ public class DqReportRun extends BaseOpenmrsObject {
 
 	public static final String APPROVAL_MODE_MANUAL = "MANUAL";
 
+	/** Approved by the deadline task because nobody approved it in time (auto-send on the 5th) */
 	public static final String APPROVAL_MODE_AUTO = "AUTO";
 
 	private Integer id;

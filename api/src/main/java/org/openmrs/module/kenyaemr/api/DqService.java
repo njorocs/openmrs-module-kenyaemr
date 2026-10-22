@@ -72,6 +72,17 @@ public interface DqService extends OpenmrsService {
 	DqReportRun approveReportRun(DqReportRun run, List<DqOverride> overrides);
 
 	/**
+	 * Auto-send on the deadline: approves last month's reports that are still awaiting approval once
+	 * their deadline day has come. Warnings nobody answered are recorded with reason UNREVIEWED.
+	 * Blocked reports, and versions never checked, are left alone.
+	 *
+	 * @param now the current time
+	 * @return the runs approved
+	 */
+	@Authorized(PRIVILEGE_APPROVE)
+	List<DqReportRun> autoApproveDueReports(Date now);
+
+	/**
 	 * Runs the weekly rules (T22-08) for the Monday-to-Sunday week containing the date. A week that
 	 * has already been checked is not checked again.
 	 *
