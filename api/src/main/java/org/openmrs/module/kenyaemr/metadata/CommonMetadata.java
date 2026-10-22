@@ -380,6 +380,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String MORTUARY = "02b67c47-6071-4091-953d-ad21452e830c";
 	}
 
+	public static final class _LocationTag {
+		/** Location tag (and, at some sites, location) UUID for the isolation ward. */
+		public static final String ISOLATION_WARD = "cc5cb426-5433-4e9a-ad22-456e6b627b05";
+	}
+
 	public static final class EmrDatabaseEtl {
 		public static final String ETL_DATABASE = EmrDatabaseUtil.getEtlDatabaseName();
 		public static final String DATATOOLS_DATABASE = EmrDatabaseUtil.getDataToolsSchema();
