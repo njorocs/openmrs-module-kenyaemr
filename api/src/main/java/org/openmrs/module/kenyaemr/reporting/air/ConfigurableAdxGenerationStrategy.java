@@ -163,8 +163,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
                 AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
                 String datasetName = getDatasetName(datasetMapping, dsKey, reportName);
 
-                // Exclude unmapped datasets for non-MOH 731 reports
-                if (datasetMapping == null && !MOH_731_REPORT_NAME.equals(reportName)) {
+                if (!ReportValueExtractor.isDatasetSent(datasetMapping, reportName)) {
                     continue;
                 }
 
@@ -900,8 +899,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
             String datasetUid = "";
             String adxDatasetName = "";
 
+            // The payload names the first dataset that is sent, never an unmapped dataset's raw key
             for (String dsKey : reportData.getDataSets().keySet()) {
                 AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
+                if (!ReportValueExtractor.isDatasetSent(datasetMapping, reportName)) {
+                    continue;
+                }
                 adxDatasetName = getDatasetName(datasetMapping, dsKey, reportName);
 
                 if (StringUtils.isNotBlank(adxDatasetName)) {
@@ -921,7 +924,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
                 AdxConfiguration.AdxDatasetMapping datasetMapping = findDatasetMapping(config, dsKey);
                 String datasetName = getDatasetName(datasetMapping, dsKey, reportName);
 
-                if (StringUtils.isBlank(datasetName)) {
+                // Same rule as the ADX writer: unmapped datasets would send raw column names as data elements
+                if (!ReportValueExtractor.isDatasetSent(datasetMapping, reportName) || StringUtils.isBlank(datasetName)) {
                     continue;
                 }
 

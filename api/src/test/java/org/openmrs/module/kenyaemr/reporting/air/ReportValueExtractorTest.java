@@ -144,6 +144,16 @@ public class ReportValueExtractorTest {
 		Assert.assertEquals("SUSPECTED_MALARIA_AGE", cells.get(1).getDatasetName());
 		Assert.assertEquals("2", cells.get(1).getValue());
 		Assert.assertFalse(cells.get(1).isMapped());
+		Assert.assertFalse(cells.get(1).isSendable());
+	}
+
+	@Test
+	public void isDatasetSent_shouldOnlySendMappedDatasetsExceptForMoh731() {
+		AdxConfiguration.AdxDatasetMapping mapping = mapping("Positive Result", "Positive Result.microscopy", "E64sUrp6DrX");
+
+		Assert.assertTrue(ReportValueExtractor.isDatasetSent(mapping, "MOH-743 Report"));
+		Assert.assertFalse(ReportValueExtractor.isDatasetSent(null, "MOH-743 Report"));
+		Assert.assertTrue(ReportValueExtractor.isDatasetSent(null, ReportValueExtractor.MOH_731_REPORT_NAME));
 	}
 
 	private static ReportCellValue single(List<ReportCellValue> cells) {

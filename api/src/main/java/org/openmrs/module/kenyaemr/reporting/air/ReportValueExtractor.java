@@ -56,6 +56,16 @@ public final class ReportValueExtractor {
 	}
 
 	/**
+	 * Whether the ADX and JSON writers send a dataset at all. Only mapped datasets are sent, except
+	 * for MOH 731, which has always sent its unmapped datasets under their raw column names.
+	 *
+	 * @param datasetMapping the dataset's KHIS mapping, or null when it has none
+	 */
+	public static boolean isDatasetSent(AdxConfiguration.AdxDatasetMapping datasetMapping, String reportName) {
+		return datasetMapping != null || MOH_731_REPORT_NAME.equals(reportName);
+	}
+
+	/**
 	 * Extracts one dataset, applying the same filtering, mapping and transformation rules the ADX
 	 * writer has always applied
 	 */
@@ -109,7 +119,8 @@ public final class ReportValueExtractor {
 						categoryOptionCombo = resolved[1];
 						mapped = true;
 					}
-				} else if (datasetMapping != null && !moh731) {
+				} else if (!moh731) {
+					// An unmapped column, or a column of an unmapped dataset, which isDatasetSent keeps out
 					sendable = false;
 				}
 
