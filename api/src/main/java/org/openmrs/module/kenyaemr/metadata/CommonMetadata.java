@@ -10,38 +10,35 @@
 package org.openmrs.module.kenyaemr.metadata;
 
 import org.openmrs.Form;
-import org.openmrs.Concept;
-import org.openmrs.ConceptName;
-import org.openmrs.ConceptDatatype;
-import org.openmrs.ConceptClass;
-import java.util.Locale;
-import org.openmrs.Concept;
-import org.openmrs.ConceptName;
-import org.openmrs.ConceptDatatype;
-import org.openmrs.ConceptClass;
-import java.util.Locale;
 import org.openmrs.PatientIdentifierType.LocationBehavior;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.PersonAttributeType;
 import org.openmrs.customdatatype.datatype.DateDatatype;
+import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.Metadata;
 import org.openmrs.module.kenyaemr.datatype.FormDatatype;
 import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
-import org.openmrs.module.kenyaemr.util.EmrDatabaseUtil;
-import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
-import org.springframework.stereotype.Component;
-
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallPrograms;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallRelationshipTypes;
-import org.openmrs.customdatatype.datatype.FreeTextDatatype;
+import org.openmrs.module.kenyaemr.util.EmrDatabaseUtil;
+import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.encounterType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.form;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.globalProperty;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.patientIdentifierType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.personAttributeType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.program;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.providerAttributeType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.relationshipType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.visitAttributeType;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.visitType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
+import org.springframework.stereotype.Component;
 
 /**
  * Common metadata bundle
@@ -175,6 +172,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String MENTAL_HEALTH_ENROLLMENT = "5fa0cb92-b8c4-4900-8681-fdb43840ea96";
 		public static final String MENTAL_HEALTH_FOLLOWUP = "4aa66381-665f-4ed9-bb7d-25566d63b49f";
 		public static final String ICU_START_UP_ENCOUNTER = "bd3f7608-376b-4061-8ccf-d7a1318705fe";
+		public static final String CASE_INVESTIGATION = "b14f1dcc-5eac-47f1-8cdc-9eb168a6dd1";
+		
 	}
 
 	public static final class _Form {
@@ -270,6 +269,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		public static final String PHYSIOTHERAPY_FORM = "18c209ac-0787-4b51-b9aa-aa8b1581239c";
 		public static final String MENTAL_HEALTH_ENROLLMENT_FORM = "e2633aa9-4a45-4b8b-8263-37a71817b7bf";
 		public static final String DIAGNOSIS_MGXT_FORM = "2c889d09-094f-478c-b800-8212f8aaf17f";
+		public static final String CASE_INVESTIGATION_FORM = "47352c6c-af86-4996-81fe-bb9c224fe80b";
 	}
 
 	public static final class _OrderType {
@@ -497,6 +497,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		install(encounterType("Psychiatric", "Psychiatric encounter type", _EncounterType.PSYCHIATRIC));
 		install(encounterType(("Mental Health Enrollment"), "Mental Health Enrollment encounter type ", _EncounterType.MENTAL_HEALTH_ENROLLMENT));
 		install(encounterType("Mental Health Followup", "Mental Health Followup Encounter Type ", _EncounterType.MENTAL_HEALTH_FOLLOWUP));
+		install(encounterType("Case Investigation Form", "Encounter for following up on cases identified during screening", _EncounterType.CASE_INVESTIGATION));
 
 
 
@@ -628,6 +629,8 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					_Form.MENTAL_HEALTH_ENROLLMENT_FORM));
 			install(form("Diagnosis and Management Form", "Form for Diagnosis and Clinical Management", _EncounterType.CONSULTATION, "1",
 					_Form.DIAGNOSIS_MGXT_FORM));
+			install(form("Case Investigation Form", "Form for Case finding and investigation", _EncounterType.CASE_INVESTIGATION, "1",
+					_Form.CASE_INVESTIGATION_FORM));
 			
 
 		} else {
