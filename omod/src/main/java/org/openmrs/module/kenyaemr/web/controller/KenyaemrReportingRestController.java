@@ -11,9 +11,15 @@ package org.openmrs.module.kenyaemr.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Cohort;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.Program;
 import org.openmrs.User;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
+import org.openmrs.calculation.patient.PatientCalculationContext;
+import org.openmrs.calculation.patient.PatientCalculationService;
+import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.appframework.domain.AppDescriptor;
 import org.openmrs.module.appframework.service.AppFrameworkService;
 import org.openmrs.module.kenyacore.program.ProgramDescriptor;
@@ -23,6 +29,9 @@ import org.openmrs.module.kenyacore.report.IndicatorReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportManager;
 import org.openmrs.module.kenyaemr.EmrConstants;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.DateOfEnrollmentArtCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.LastViralLoadResultCalculation;
 import org.openmrs.module.kenyaemr.page.controller.ReportExportPageController;
 import org.openmrs.module.kenyaemr.reporting.air.AdxConfiguration;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
@@ -42,13 +51,14 @@ import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.renderer.ReportRenderer;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reporting.web.renderers.DefaultWebRenderer;
+import org.openmrs.module.reportingcompatibility.service.ReportingCompatibilityService;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
-import org.openmrs.util.OpenmrsClassLoader;
-import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.ui.framework.page.FileDownload;
 import org.openmrs.ui.framework.resource.ResourceFactory;
+import org.openmrs.util.OpenmrsClassLoader;
+import org.openmrs.util.OpenmrsUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -69,9 +79,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * REST API for KenyaEMR reports.
@@ -167,12 +179,13 @@ public class KenyaemrReportingRestController extends BaseRestController {
 
 		ReportDescriptor descriptor = reportManager.getReportDescriptorByUuid(uuid);
 		if (descriptor == null) {
-			return new ResponseEntity<Object>("Report not found", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<SimpleObject>(errorResponse("Report not found"), HttpStatus.NOT_FOUND);
 		}
 
 		ReportDefinition definition = getOrBuildDefinition(descriptor, true);
 		if (definition == null) {
-			return new ResponseEntity<Object>("Could not build report definition", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<SimpleObject>(errorResponse("Could not build report definition"),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		if (definition.getId() == null) {
@@ -184,7 +197,7 @@ public class KenyaemrReportingRestController extends BaseRestController {
 			parameters = buildParameterValues(definition, payload);
 		}
 		catch (IllegalArgumentException ex) {
-			return new ResponseEntity<Object>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<SimpleObject>(errorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 
 		Mapped<ReportDefinition> mappedDefinition = new Mapped<ReportDefinition>(definition, parameters);
@@ -197,6 +210,12 @@ public class KenyaemrReportingRestController extends BaseRestController {
 
 		request = reportService.queueReport(request);
 		reportService.processNextQueuedReports();
+		if (request.getId() != null) {
+			ReportRequest refreshed = reportService.getReportRequest(request.getId());
+			if (refreshed != null) {
+				request = refreshed;
+			}
+		}
 
 		return new ResponseEntity<SimpleObject>(simplifyRequest(request), HttpStatus.CREATED);
 	}
@@ -263,6 +282,107 @@ public class KenyaemrReportingRestController extends BaseRestController {
 		response.put("parameters", data.getContext().getParameterValues());
 		response.put("dataSets", simplifyDataSets(data));
 		return ResponseEntity.ok(response);
+	}
+
+	/**
+	 * Resolves the saved cohort behind an indicator into a paged patient list.
+	 */
+	@Authorized(value = { "View Patients", "View Reports" }, requireAll = true)
+	@GetMapping("/reportRequests/{id}/patients")
+	public ResponseEntity<?> getReportPatients(@PathVariable("id") Integer id,
+			@RequestParam("dataset") String dataset, @RequestParam("column") String column,
+			@RequestParam(value = "startIndex", defaultValue = "0") int startIndex,
+			@RequestParam(value = "limit", defaultValue = "50") int limit) {
+		if (startIndex < 0 || limit < 1 || limit > 200) {
+			return new ResponseEntity<Object>("startIndex must be non-negative and limit must be between 1 and 200",
+					HttpStatus.BAD_REQUEST);
+		}
+		ReportService service = Context.getService(ReportService.class);
+		ReportRequest request = service.getReportRequest(id);
+		if (request == null) {
+			return new ResponseEntity<Object>("Report request not found", HttpStatus.NOT_FOUND);
+		}
+		if (!ReportRequest.Status.COMPLETED.equals(request.getStatus())) {
+			return new ResponseEntity<Object>("Report request is not completed", HttpStatus.CONFLICT);
+		}
+		ReportData data = service.loadReportData(request);
+		DataSet dataSet = data.getDataSets().get(dataset);
+		if (dataSet == null || dataSet.getMetaData().getColumn(column) == null) {
+			return new ResponseEntity<Object>("Dataset or column not found", HttpStatus.NOT_FOUND);
+		}
+		if (!(dataSet instanceof MapDataSet)) {
+			return new ResponseEntity<Object>("Dataset does not contain indicator cohorts", HttpStatus.BAD_REQUEST);
+		}
+		Object value = ((MapDataSet) dataSet).getData(dataSet.getMetaData().getColumn(column));
+		Cohort cohort = getResultCohort(value);
+		if (cohort == null) {
+			return new ResponseEntity<Object>("Column has no saved patient cohort", HttpStatus.BAD_REQUEST);
+		}
+		List<Integer> ids = new ArrayList<Integer>(cohort.getMemberIds());
+		Collections.sort(ids);
+		int from = Math.min(startIndex, ids.size());
+		int to = from + Math.min(limit, ids.size() - from);
+		Set<Integer> page = new HashSet<Integer>(ids.subList(from, to));
+		List<SimpleObject> results = new ArrayList<SimpleObject>();
+		if (!page.isEmpty()) {
+			List<Patient> patients = Context.getService(ReportingCompatibilityService.class).getPatients(page);
+			Collections.sort(patients, new Comparator<Patient>() {
+				@Override
+				public int compare(Patient first, Patient second) {
+					return first.getPatientId().compareTo(second.getPatientId());
+				}
+			});
+			Date endDate = (Date) data.getContext().getParameterValues().get("endDate");
+			PatientCalculationContext context = Context.getService(PatientCalculationService.class).createCalculationContext();
+			if (endDate != null) {
+				context.setNow(endDate);
+			}
+			CalculationResultMap enrollment = new DateOfEnrollmentArtCalculation().evaluate(page, null, context);
+			CalculationResultMap art = new InitialArtStartDateCalculation().evaluate(page, null, context);
+			CalculationResultMap viralLoad = new LastViralLoadResultCalculation().evaluate(page, null, context);
+			for (Patient patient : patients) {
+				SimpleObject row = new SimpleObject();
+				row.put("id", patient.getPatientId());
+				row.put("uuid", patient.getUuid());
+				row.put("name", patient.getPersonName() != null ? patient.getPersonName().getFullName() : null);
+				row.put("gender", patient.getGender());
+				row.put("age", patient.getAge());
+				row.put("ageAtReporting", endDate != null ? patient.getAge(endDate) : null);
+				List<SimpleObject> identifiers = new ArrayList<SimpleObject>();
+				for (PatientIdentifier identifier : patient.getActiveIdentifiers()) {
+					SimpleObject item = new SimpleObject();
+					item.put("identifier", identifier.getIdentifier());
+					item.put("identifierType", identifier.getIdentifierType().getName());
+					identifiers.add(item);
+				}
+				row.put("identifiers", identifiers);
+				row.put("enrollmentDate", calculationValue(enrollment, patient.getPatientId()));
+				row.put("artStartDate", calculationValue(art, patient.getPatientId()));
+				row.put("lastViralLoad", calculationValue(viralLoad, patient.getPatientId()));
+				results.add(row);
+			}
+		}
+		SimpleObject response = new SimpleObject();
+		response.put("results", results);
+		response.put("totalCount", ids.size());
+		response.put("startIndex", startIndex);
+		response.put("limit", limit);
+		response.put("hasMore", to < ids.size());
+		return ResponseEntity.ok(response);
+	}
+
+	static Cohort getResultCohort(Object value) {
+		if (value instanceof Cohort) {
+			return (Cohort) value;
+		}
+		if (value instanceof CohortIndicatorAndDimensionResult) {
+			return ((CohortIndicatorAndDimensionResult) value).getCohortIndicatorAndDimensionCohort();
+		}
+		return null;
+	}
+
+	private Object calculationValue(CalculationResultMap results, Integer patientId) {
+		return results.get(patientId) != null ? results.get(patientId).getValue() : null;
 	}
 
 	/**
@@ -503,6 +623,7 @@ public class KenyaemrReportingRestController extends BaseRestController {
 		object.put("evaluateCompleteDatetime", formatDateTime(request.getEvaluateCompleteDatetime()));
 		object.put("priority", request.getPriority());
 		object.put("parameters", getParameterMappings(request));
+		object.put("error", buildRequestError(request));
 
 		User requestedBy = request.getRequestedBy();
 		if (requestedBy != null) {
@@ -517,9 +638,35 @@ public class KenyaemrReportingRestController extends BaseRestController {
 			object.put("report", simplifyDefinitionBrief(mapped.getParameterizable()));
 		}
 
+		object.put("patientsUrl", request.getId() != null && ReportRequest.Status.COMPLETED.equals(request.getStatus())
+				? "/ws/rest/v1/kenyaemr/reportRequests/" + request.getId() + "/patients" : null);
 		object.put("downloadUrls", buildDownloadUrls(request));
 		object.put("downloadFormats", buildDownloadFormats(request));
 		return object;
+	}
+
+	private SimpleObject buildRequestError(ReportRequest request) {
+		if (request == null || !ReportRequest.Status.FAILED.equals(request.getStatus())) {
+			return new SimpleObject();
+		}
+		String message = null;
+		try {
+			message = Context.getService(ReportService.class).loadReportError(request);
+		}
+		catch (RuntimeException ignored) {
+			// Fall through with a generic message when the error file cannot be loaded.
+		}
+		SimpleObject error = new SimpleObject();
+		error.put("message", StringUtils.isNotBlank(message) ? message : "Report evaluation failed");
+		return error;
+	}
+
+	private SimpleObject errorResponse(String message) {
+		SimpleObject response = new SimpleObject();
+		SimpleObject error = new SimpleObject();
+		error.put("message", message);
+		response.put("error", error);
+		return response;
 	}
 
 	private String formatDateTime(Date date) {
@@ -629,7 +776,12 @@ public class KenyaemrReportingRestController extends BaseRestController {
 	private SimpleObject simplifyDataSet(String key, DataSet dataSet, ReportDefinition definition) {
 		SimpleObject object = new SimpleObject();
 		object.put("key", key);
-		object.put("name", getDataSetDefinitionName(key, definition));
+		DataSetDefinition dataSetDefinition = getDataSetDefinition(key, definition);
+		object.put("name", dataSetDefinition != null && StringUtils.isNotBlank(dataSetDefinition.getName())
+				? dataSetDefinition.getName() : key);
+		if (dataSetDefinition != null && StringUtils.isNotBlank(dataSetDefinition.getDescription())) {
+			object.put("label", dataSetDefinition.getDescription());
+		}
 
 		List<SimpleObject> columns = new ArrayList<SimpleObject>();
 		for (DataSetColumn column : dataSet.getMetaData().getColumns()) {
@@ -650,14 +802,14 @@ public class KenyaemrReportingRestController extends BaseRestController {
 		return object;
 	}
 
-	private String getDataSetDefinitionName(String key, ReportDefinition definition) {
+	private DataSetDefinition getDataSetDefinition(String key, ReportDefinition definition) {
 		if (definition.getDataSetDefinitions().containsKey(key)) {
 			Mapped<? extends DataSetDefinition> mapped = definition.getDataSetDefinitions().get(key);
-			if (mapped != null && mapped.getParameterizable() != null) {
-				return mapped.getParameterizable().getName();
+			if (mapped != null) {
+				return mapped.getParameterizable();
 			}
 		}
-		return key;
+		return null;
 	}
 
 	private List<SimpleObject> simplifyRows(DataSet dataSet) {
@@ -688,6 +840,7 @@ public class KenyaemrReportingRestController extends BaseRestController {
 			Cohort cohort = (Cohort) value;
 			SimpleObject object = new SimpleObject();
 			object.put("type", "cohort");
+			object.put("hasPatientList", true);
 			object.put("size", cohort.size());
 			object.put("memberIds", cohort.getMemberIds());
 			return object;
@@ -696,6 +849,7 @@ public class KenyaemrReportingRestController extends BaseRestController {
 			CohortIndicatorAndDimensionResult result = (CohortIndicatorAndDimensionResult) value;
 			SimpleObject object = new SimpleObject();
 			object.put("type", "cohortIndicatorAndDimensionResult");
+			object.put("hasPatientList", getResultCohort(result) != null);
 			object.put("value", result.toString());
 			object.put("size", result.getCohortIndicatorAndDimensionCohort() != null ? result.getCohortIndicatorAndDimensionCohort().size() : null);
 			return object;
