@@ -74,7 +74,7 @@
         <legacyUiVersion>1.15.0</legacyUiVersion>
         <bahmniAppointmentsVersion>2.0.0</bahmniAppointmentsVersion>
         <queueVersion>2.9.0-SNAPSHOT</queueVersion>
-        <orderexpansionVersion>1.0.2-SNAPSHOT</orderexpansionVersion>
+        <orderexpansionVersion>1.0.2</orderexpansionVersion>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
