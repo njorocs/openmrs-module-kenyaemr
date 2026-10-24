@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * T22-03: consistency over time for every tracked indicator. Malaria is seasonal, so the two
+ * Rule type EXPECTED_RANGE (malaria T22-03): consistency over time for the indicators in the
+ * "indicators" setting, or for every indicator marked tracked when the setting is absent. Malaria is seasonal, so the two
  * baselines are separate results, labelled in the detail:
  * <ul>
  * <li>ROLLING_12_MONTHS: within ±band of the average of the previous 12 months (needs at least
@@ -41,8 +42,8 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 
 	public static final String BASELINE_LAST_YEAR = "SAME_MONTH_LAST_YEAR";
 
-	public ConsistencyOverTimeRule() {
-		super(ID);
+	public ConsistencyOverTimeRule(DqConfig.RuleDefinition definition) {
+		super(definition);
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 	 * expectedMax; or a single NOT_APPLICABLE result when the indicator cannot be calculated
 	 */
 	public List<DqResult> evaluateIndicator(DqRuleContext context, DqConfig.Indicator indicator) {
-		DqRuleSettings settings = settings(context, indicator);
+		DqRuleSettings settings = settings(indicator);
 		DqOutcome severity = settings.getOutcome("severity", DqOutcome.WARN);
 		DqIndicatorCalculator.IndicatorValue current = context.getIndicator(indicator.getCode(), context.getPeriodStart());
 		if (!current.isComplete()) {
@@ -175,9 +176,11 @@ public class ConsistencyOverTimeRule extends AbstractDqRule {
 	}
 
 	private List<DqConfig.Indicator> trackedIndicators(DqRuleContext context) {
+		List<String> codes = settings().getStrings("indicators");
 		List<DqConfig.Indicator> tracked = new ArrayList<DqConfig.Indicator>();
 		for (DqConfig.Indicator indicator : context.getConfig().getIndicators()) {
-			if (indicator.isTracked() && readsRun(context, indicator) && settings(context, indicator).isEnabled()) {
+			boolean checked = codes.isEmpty() ? indicator.isTracked() : codes.contains(indicator.getCode());
+			if (checked && readsRun(context, indicator) && settings(indicator).isEnabled()) {
 				tracked.add(indicator);
 			}
 		}

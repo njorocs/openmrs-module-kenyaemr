@@ -30,6 +30,10 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 
 	static final int mRDT = 161465;
 
+	/** Stock items of artemether-lumefantrine 20/120mg, as in MOH 743, for the T22-05 reconciliation */
+	static final String ARTEMETHER_LUMEFANTRINE_DRUGS = String.valueOf(Moh743ReportBuilder.ARTEMETHER_LUMEFANTRINE_20_120MG_BLISTER)
+			.replace('[', '(').replace(']', ')');
+
 	String indParams = "startDate=${startDate},endDate=${endDate}";
 
 	@Override
@@ -44,20 +48,24 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 	protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor,
 	                                                        ReportDefinition reportDefinition) {
 		return Arrays.asList(
-				ReportUtils.map(getDataSetDefinition("Malaria Rapid Diagnostic Test (mRDT)", mRDT), "startDate=${startDate},endDate=${endDate}")
+				ReportUtils.map(getDataSetDefinition("Malaria Rapid Diagnostic Test (mRDT)", "i.concept_id = " + mRDT), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs", "i.drug_id IN " + ARTEMETHER_LUMEFANTRINE_DRUGS), "startDate=${startDate},endDate=${endDate}")
 		);
 	}
 
-	private DataSetDefinition getDataSetDefinition(String datasetName, int commodityConceptId) {
+	/**
+	 * @param stockItemFilter which stock items the dataset covers, a condition on stockmgmt_stock_item i
+	 */
+	private DataSetDefinition getDataSetDefinition(String datasetName, String stockItemFilter) {
 		SqlDataSetDefinition sqlDataSetDefinition = new SqlDataSetDefinition();
 		sqlDataSetDefinition.setName(datasetName);
 		sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sqlDataSetDefinition.setSqlQuery(getFCDRRForLabCommodities(commodityConceptId));
+		sqlDataSetDefinition.setSqlQuery(getFCDRRForLabCommodities(stockItemFilter));
 		return sqlDataSetDefinition;
 	}
 
-	private String getFCDRRForLabCommodities(int commodityConceptId) {
+	private String getFCDRRForLabCommodities(String stockItemFilter) {
 		String query = "WITH RECURSIVE\n" +
 				"-- calendar of every day in the period (for days-out-of-stock)\n" +
 				"cal AS (\n" +
@@ -78,7 +86,7 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 				"        ss.name                                            AS source_name\n" +
 				"    FROM stockmgmt_stock_item_transaction t\n" +
 				"    JOIN stockmgmt_stock_item i\n" +
-				"         ON i.stock_item_id = t.stock_item_id AND i.concept_id = "+commodityConceptId+" AND i.voided = 0\n" +
+				"         ON i.stock_item_id = t.stock_item_id AND " + stockItemFilter + " AND i.voided = 0\n" +
 				"    LEFT JOIN stockmgmt_stock_operation op\n" +
 				"         ON op.stock_operation_id = t.stock_operation_id AND op.voided = 0\n" +
 				"    LEFT JOIN stockmgmt_stock_operation_type ot\n" +
@@ -152,7 +160,7 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 				"    FROM stockmgmt_stock_operation o\n" +
 				"    JOIN stockmgmt_stock_operation_type ot ON ot.stock_operation_type_id = o.operation_type_id\n" +
 				"    JOIN stockmgmt_stock_operation_item oi ON oi.stock_operation_id = o.stock_operation_id AND oi.voided = 0\n" +
-				"    JOIN stockmgmt_stock_item i ON i.stock_item_id = oi.stock_item_id AND i.concept_id = "+commodityConceptId+" AND i.voided = 0\n" +
+				"    JOIN stockmgmt_stock_item i ON i.stock_item_id = oi.stock_item_id AND " + stockItemFilter + " AND i.voided = 0\n" +
 				"    WHERE o.voided = 0\n" +
 				"      AND ot.operation_type IN ('requisition','externalrequisition')\n" +
 				"      AND DATE(o.operation_date) BETWEEN :startDate AND :endDate\n" +

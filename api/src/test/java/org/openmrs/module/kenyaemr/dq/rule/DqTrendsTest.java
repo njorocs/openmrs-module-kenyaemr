@@ -12,6 +12,8 @@ package org.openmrs.module.kenyaemr.dq.rule;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.module.kenyacore.test.TestUtils;
+import org.openmrs.module.kenyaemr.dq.DqConfig;
+import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.dq.DqTrends;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
@@ -81,9 +83,9 @@ public class DqTrendsTest {
 	@Test
 	public void ratioTrend_shouldCheckEachMonth() {
 		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march)
-				.indicator(TREATED, march, 130.0).indicator(CONFIRMED, march, 120.0);
+				.indicator("MAL_TREATED_743", march, 130.0).indicator("MAL_CONFIRMED_705", march, 120.0);
 
-		List<DqTrends.RatioPoint> points = DqTrends.ratioTrend(context, DqTrends.ratioRule(DqRuleEngine.T22_04),
+		List<DqTrends.RatioPoint> points = DqTrends.ratioTrend(context, DqTrends.ratioRule(context.getConfig(), DqRuleEngine.T22_04),
 				february, march);
 
 		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, points.get(0).getOutcome());
@@ -95,9 +97,29 @@ public class DqTrendsTest {
 	}
 
 	@Test
+	public void ratioTrend_shouldGiveEachPairOfARule() {
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march).indicator("MAL_SUSPECTED_705", march, 100.0)
+				.indicator("MAL_BST_706", march, 100.0).indicator("MAL_MICRO_TESTED_505", march, 50.0);
+		IndicatorRatioRule rule = DqTrends.ratioRule(context.getConfig(), DqRuleEngine.X_RPT_01);
+
+		Assert.assertEquals(2, rule.pairs().size());
+		Assert.assertEquals(DqOutcome.PASS, DqTrends.ratioTrend(context, rule, 0, march, march).get(0).getOutcome());
+		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 1, march, march).get(0).getOutcome());
+	}
+
+	@Test
 	public void ratioRule_shouldOnlyFindRatioRules() {
-		Assert.assertNotNull(DqTrends.ratioRule(DqRuleEngine.X_RPT_01));
-		Assert.assertNull(DqTrends.ratioRule(ConsistencyOverTimeRule.ID));
-		Assert.assertNull(DqTrends.ratioRule("NOPE"));
+		DqConfig config = DqConfigStore.getDefaultConfig();
+		Assert.assertNotNull(DqTrends.ratioRule(config, DqRuleEngine.X_RPT_01));
+		Assert.assertNull(DqTrends.ratioRule(config, ConsistencyOverTimeRule.ID));
+		Assert.assertNull(DqTrends.ratioRule(config, "NOPE"));
+	}
+
+	@Test
+	public void expectedRangeRule_shouldBeTheRuleThatListsTheIndicator() {
+		DqConfig config = DqConfigStore.getDefaultConfig();
+		Assert.assertEquals("T22-03", DqTrends.expectedRangeRule(config, config.getIndicator("MAL_CONFIRMED_705")).getId());
+		// An indicator no rule checks still gets a range drawn with the default settings
+		Assert.assertEquals("T22-03", DqTrends.expectedRangeRule(config, config.getIndicator("MAL_TESTS_706")).getId());
 	}
 }

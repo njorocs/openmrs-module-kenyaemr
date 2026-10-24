@@ -83,6 +83,8 @@
         <property name="message" column="message" type="string" length="1000"/>
         <property name="detail" column="detail" type="text"/>
         <property name="evaluatedAt" column="evaluated_at" type="timestamp" not-null="true"/>
+        <property name="programCode" column="program_code" type="string" length="50"/>
+        <property name="params" column="params" type="text"/>
     </class>
 
     <class name="DqOverride" table="kenyaemr_dq_override">
@@ -110,7 +112,8 @@
         <property name="khisValue" column="khis_value" type="double"/>
         <property name="variancePct" column="variance_pct" type="double"/>
         <property name="suggestedCause" column="suggested_cause" type="string" length="255"/>
-        <property name="assigneeRole" column="assignee_role" type="string" length="30"/>
+        <property name="assigneeRole" column="assignee_role" type="string" length="50"/>
+        <property name="programCode" column="program_code" type="string" length="50"/>
         <property name="status" column="status" length="20" not-null="true">
             <type name="org.hibernate.type.EnumType">
                 <param name="enumClass">org.openmrs.module.kenyaemr.model.dq.DqTicketStatus</param>

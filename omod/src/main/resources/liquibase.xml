@@ -840,6 +840,33 @@
 		</insert>
 	</changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261024-0900">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="kenyaemr_dq_result" columnName="program_code" />
+			</not>
+		</preConditions>
+		<comment>Data quality program areas: the program each result and ticket belongs to, and the rule settings a result was judged against. Results so far are all malaria.</comment>
+		<addColumn tableName="kenyaemr_dq_result">
+			<column name="program_code" type="VARCHAR(50)" />
+			<column name="params" type="TEXT" />
+		</addColumn>
+		<addColumn tableName="kenyaemr_dq_ticket">
+			<column name="program_code" type="VARCHAR(50)" />
+		</addColumn>
+		<update tableName="kenyaemr_dq_result">
+			<column name="program_code" value="MALARIA" />
+		</update>
+		<update tableName="kenyaemr_dq_ticket">
+			<column name="program_code" value="MALARIA" />
+		</update>
+		<modifyDataType tableName="kenyaemr_dq_ticket" columnName="assignee_role" newDataType="VARCHAR(50)" />
+		<createIndex indexName="kenyaemr_dq_result_program_period_idx" tableName="kenyaemr_dq_result">
+			<column name="program_code" />
+			<column name="period_start" />
+		</createIndex>
+	</changeSet>
+
 </databaseChangeLog>
 
 

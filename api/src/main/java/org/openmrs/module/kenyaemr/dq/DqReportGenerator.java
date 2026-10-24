@@ -58,22 +58,10 @@ public class DqReportGenerator {
 	 */
 	public GeneratedRun generate(String reportName, Date periodStart) {
 		ReportDescriptor descriptor = getDescriptor(reportName);
-		ReportDefinition definition = getOrBuildDefinition(descriptor);
 
 		Date start = DqPeriods.monthStart(periodStart);
 		Date end = DqPeriods.lastDayOfMonth(periodStart);
-
-		EvaluationContext context = new EvaluationContext();
-		context.addParameterValue("startDate", start);
-		context.addParameterValue("endDate", end);
-
-		ReportData reportData;
-		try {
-			reportData = Context.getService(ReportDefinitionService.class).evaluate(definition, context);
-		}
-		catch (EvaluationException e) {
-			throw new APIException("Could not evaluate " + reportName + " for " + start, e);
-		}
+		ReportData reportData = evaluate(descriptor, start, end);
 
 		AdxConfiguration config = new ConfigurableAdxGenerationStrategy().getConfigurationForReport(reportName);
 		List<ReportCellValue> cells = ReportValueExtractor.extractAll(reportData, config);
@@ -89,6 +77,37 @@ public class DqReportGenerator {
 		List<DqValue> values = toValues(run, cells);
 		run.setValuesHash(hash(values));
 		return new GeneratedRun(run, values, renderPayload(run, reportData, config));
+	}
+
+	/**
+	 * Evaluates a report for any period, e.g. a week, for checks that are not monthly. Nothing is
+	 * saved, and there is no payload.
+	 *
+	 * @return the cell values, attached to an unsaved run that names the report and period
+	 */
+	public List<DqValue> evaluateValues(String reportName, Date start, Date end) {
+		ReportDescriptor descriptor = getDescriptor(reportName);
+		ReportData reportData = evaluate(descriptor, start, end);
+		AdxConfiguration config = new ConfigurableAdxGenerationStrategy().getConfigurationForReport(reportName);
+		DqReportRun run = new DqReportRun();
+		run.setReportName(reportName);
+		run.setReportUuid(descriptor.getTargetUuid());
+		run.setPeriodStart(start);
+		run.setPeriodEnd(end);
+		return toValues(run, ReportValueExtractor.extractAll(reportData, config));
+	}
+
+	private ReportData evaluate(ReportDescriptor descriptor, Date start, Date end) {
+		ReportDefinition definition = getOrBuildDefinition(descriptor);
+		EvaluationContext context = new EvaluationContext();
+		context.addParameterValue("startDate", start);
+		context.addParameterValue("endDate", end);
+		try {
+			return Context.getService(ReportDefinitionService.class).evaluate(definition, context);
+		}
+		catch (EvaluationException e) {
+			throw new APIException("Could not evaluate " + descriptor.getName() + " for " + start, e);
+		}
 	}
 
 	/**

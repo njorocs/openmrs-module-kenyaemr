@@ -52,6 +52,12 @@ public class DqResult extends BaseOpenmrsObject {
 
 	private Date evaluatedAt;
 
+	/** The program area whose rule gave this result, e.g. MALARIA */
+	private String programCode;
+
+	/** The rule settings the result was judged against, as JSON, so later changes do not rewrite history */
+	private String params;
+
 	@Override
 	public Integer getId() {
 		return id;
@@ -164,5 +170,21 @@ public class DqResult extends BaseOpenmrsObject {
 
 	public void setEvaluatedAt(Date evaluatedAt) {
 		this.evaluatedAt = evaluatedAt;
+	}
+
+	public String getProgramCode() {
+		return programCode;
+	}
+
+	public void setProgramCode(String programCode) {
+		this.programCode = programCode;
+	}
+
+	public String getParams() {
+		return params;
+	}
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 }

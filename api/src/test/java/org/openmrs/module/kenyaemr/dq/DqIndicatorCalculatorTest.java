@@ -69,6 +69,42 @@ public class DqIndicatorCalculatorTest {
 	}
 
 	@Test
+	public void calculate_shouldAddEveryRowOfADataset() {
+		DqConfig.Indicator dispensed = stockIndicator(false);
+
+		DqIndicatorCalculator.IndicatorValue value = DqIndicatorCalculator.calculate(dispensed, Arrays.asList(
+				value("MOH 643", "AL", "quantity_used", "24"), value("MOH 643", "AL", "quantity_used", "6")));
+
+		Assert.assertEquals(Double.valueOf(30), value.getValue());
+	}
+
+	@Test
+	public void calculate_shouldCountAnEmptyStockDatasetAsZeroOnlyOnceTheReportExists() {
+		DqIndicatorCalculator.IndicatorValue generated = DqIndicatorCalculator.calculate(stockIndicator(true),
+				Collections.singletonList(value("MOH 643", "mRDT", "quantity_used", "5")));
+		DqIndicatorCalculator.IndicatorValue notGenerated = DqIndicatorCalculator.calculate(stockIndicator(true),
+				Collections.<DqValue>emptyList());
+
+		Assert.assertEquals(Double.valueOf(0), generated.getValue());
+		Assert.assertTrue(generated.isComplete());
+		Assert.assertFalse(notGenerated.isComplete());
+		Assert.assertFalse(DqIndicatorCalculator.calculate(stockIndicator(false),
+				Collections.singletonList(value("MOH 643", "mRDT", "quantity_used", "5"))).isComplete());
+	}
+
+	private static DqConfig.Indicator stockIndicator(boolean zeroWhenEmpty) {
+		DqConfig.Part part = new DqConfig.Part();
+		part.setReport("MOH 643");
+		part.setDataset("AL");
+		part.setColumns(Collections.singletonList("quantity_used"));
+		part.setZeroWhenEmpty(zeroWhenEmpty);
+		DqConfig.Indicator indicator = new DqConfig.Indicator();
+		indicator.setCode("MAL_ACT_DISPENSED_643");
+		indicator.setParts(Collections.singletonList(part));
+		return indicator;
+	}
+
+	@Test
 	public void parseNumber_shouldHandleBlankAndText() {
 		Assert.assertEquals(Double.valueOf(5), DqIndicatorCalculator.parseNumber(" 5 "));
 		Assert.assertNull(DqIndicatorCalculator.parseNumber(""));

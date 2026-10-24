@@ -14,6 +14,7 @@ import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
+import org.openmrs.module.kenyaemr.model.dq.DqValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,12 @@ class FakeRuleContext implements DqRuleContext {
 
 	private final LinkedList<List<Object[]>> queryResults;
 
+	private final Map<String, Date> sentToKhis;
+
+	private final List<DqValue> values = new ArrayList<DqValue>();
+
+	boolean khisTracked = true;
+
 	final List<Map<String, Object>> queryParameters = new ArrayList<Map<String, Object>>();
 
 	/**
@@ -73,6 +80,7 @@ class FakeRuleContext implements DqRuleContext {
 		this.indicators = new HashMap<String, DqIndicatorCalculator.IndicatorValue>();
 		this.generated = new HashSet<String>();
 		this.queryResults = new LinkedList<List<Object[]>>();
+		this.sentToKhis = new HashMap<String, Date>();
 	}
 
 	private FakeRuleContext(FakeRuleContext parent, Date monthStart) {
@@ -83,6 +91,35 @@ class FakeRuleContext implements DqRuleContext {
 		this.indicators = parent.indicators;
 		this.generated = parent.generated;
 		this.queryResults = parent.queryResults;
+		this.sentToKhis = parent.sentToKhis;
+	}
+
+	/**
+	 * A month-level context (G-RPT-01), with no run
+	 */
+	static FakeRuleContext month(Date month) {
+		return new FakeRuleContext(null, month, DqPeriods.lastDayOfMonth(month));
+	}
+
+	FakeRuleContext sent(String report, Date month, Date sentAt) {
+		sentToKhis.put(report + "@" + month.getTime(), sentAt);
+		return this;
+	}
+
+	/**
+	 * Adds a stored cell of the run, with the value KHIS holds for it
+	 */
+	FakeRuleContext value(String dataset, String column, String dataElement, Double emr, Double khis) {
+		DqValue value = new DqValue();
+		value.setReportRun(run);
+		value.setDatasetName(dataset);
+		value.setColumnName(column);
+		value.setDataElement(dataElement);
+		value.setCategoryOptionCombo(dataElement != null ? "COC" : null);
+		value.setValueNumeric(emr);
+		value.setKhisValue(khis);
+		values.add(value);
+		return this;
 	}
 
 	FakeRuleContext indicator(String code, Date month, Double value) {
@@ -142,6 +179,29 @@ class FakeRuleContext implements DqRuleContext {
 		DqIndicatorCalculator.IndicatorValue value = indicators.get(code + "@" + monthStart.getTime());
 		return value != null ? value : new DqIndicatorCalculator.IndicatorValue(code, null,
 				Collections.singletonList("not generated"));
+	}
+
+	/**
+	 * Week values are set with {@link #indicator(String, Date, Double)} on the week's first day
+	 */
+	@Override
+	public DqIndicatorCalculator.IndicatorValue getIndicator(String code, Date start, Date end) {
+		return getIndicator(code, start);
+	}
+
+	@Override
+	public List<DqValue> getValues(DqReportRun run) {
+		return values;
+	}
+
+	@Override
+	public boolean isKhisSubmissionTracked() {
+		return khisTracked;
+	}
+
+	@Override
+	public Date getFirstSentToKhis(String reportName, Date monthStart) {
+		return sentToKhis.get(reportName + "@" + monthStart.getTime());
 	}
 
 	@Override

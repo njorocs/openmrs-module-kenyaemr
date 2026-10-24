@@ -9,10 +9,13 @@
  */
 package org.openmrs.module.kenyaemr.dq;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.kenyaemr.dq.rule.DqRuleTypes;
+import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxGenerationStrategy;
 import org.openmrs.util.OpenmrsUtil;
 
 import java.io.File;
@@ -21,21 +24,37 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Source of the data quality configuration. It lives in {@code kenyaemr/khis/dq_config.json} under
- * the OpenMRS application data directory so that M&E can edit it without a release. A missing file
- * is seeded from the default bundled in the module, and the file is re-read whenever it changes.
+ * Source of the data quality configuration. It lives under {@code kenyaemr/khis} in the OpenMRS
+ * application data directory so that each facility can set it, within the national M&E guidelines,
+ * without a release:
+ * <ul>
+ * <li>{@code dq_config.json}: shared settings (override reasons, and any reports or indicators not
+ * tied to one program)</li>
+ * <li>{@code dq_programs/<name>.json}: one file per program area, holding the program, its rules,
+ * and the expected reports and indicators it needs</li>
+ * </ul>
+ * A missing file is seeded from the default bundled in the module, and the files are re-read
+ * whenever one changes. A program file's reports and indicators replace those of the same name in
+ * dq_config.json; all indicators form one library that every program's rules can use.
  */
 public final class DqConfigStore {
 
 	private static final Log log = LogFactory.getLog(DqConfigStore.class);
 
 	static final String DEFAULT_RESOURCE = "khis/dq_config.default.json";
+
+	static final String PROGRAMS_DIRECTORY = "dq_programs";
+
+	/** Program files bundled in the module, seeded into dq_programs when missing */
+	static final List<String> BUNDLED_PROGRAMS = Arrays.asList("malaria");
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,66 +64,108 @@ public final class DqConfigStore {
 	}
 
 	/**
-	 * @return the current configuration; the last good one if the file has become unreadable, or the
+	 * @return the current configuration; the last good one if a file has become unreadable, or the
 	 * bundled default if there has never been a good one
 	 */
 	public static DqConfig getConfig() {
 		File file = getFile();
 		try {
 			if (!file.exists()) {
-				seedFile(file);
+				seedFile(DEFAULT_RESOURCE, file);
+			}
+			for (String name : BUNDLED_PROGRAMS) {
+				File programFile = new File(getProgramsDirectory(), name + ".json");
+				if (!programFile.exists()) {
+					seedFile(programResource(name), programFile);
+				}
 			}
 			if (!file.exists()) {
 				return getDefaultConfig();
 			}
 
-			long lastModified = file.lastModified();
+			List<File> programFiles = programFiles();
+			String signature = signature(file, programFiles);
 			Cached current = cached;
-			if (current != null && current.lastModified == lastModified) {
+			if (current != null && current.signature.equals(signature)) {
 				return current.config;
 			}
 
 			DqConfig config = objectMapper.readValue(file, DqConfig.class);
-			for (String problem : validate(config)) {
-				log.warn("Data quality configuration " + file.getAbsolutePath() + ": " + problem);
+			for (File programFile : programFiles) {
+				merge(config, objectMapper.readValue(programFile, ProgramFile.class));
 			}
-			cached = new Cached(lastModified, config);
+			for (String problem : validate(config)) {
+				log.warn("Data quality configuration in " + file.getParent() + ": " + problem);
+			}
+			try {
+				for (String problem : mappingProblems(config)) {
+					log.warn("Data quality configuration: " + problem);
+				}
+			}
+			catch (RuntimeException e) {
+				log.warn("Could not check the KHIS mappings of the expected reports", e);
+			}
+			cached = new Cached(signature, config);
 			return config;
 		}
 		catch (Exception e) {
-			log.error("Error loading data quality configuration from " + file.getAbsolutePath(), e);
+			log.error("Error loading data quality configuration from " + file.getParent(), e);
 			Cached current = cached;
 			return current != null ? current.config : getDefaultConfig();
 		}
 	}
 
 	/**
-	 * @return the configuration bundled in the module
+	 * @return the configuration bundled in the module, with its program files
 	 */
 	public static DqConfig getDefaultConfig() {
-		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(DEFAULT_RESOURCE);
-		if (in == null) {
-			log.error("Bundled data quality configuration not found: " + DEFAULT_RESOURCE);
+		DqConfig config = read(DEFAULT_RESOURCE, DqConfig.class);
+		if (config == null) {
 			return new DqConfig();
 		}
-		try {
-			return objectMapper.readValue(in, DqConfig.class);
-		}
-		catch (IOException e) {
-			log.error("Failed to read bundled data quality configuration: " + DEFAULT_RESOURCE, e);
-			return new DqConfig();
-		}
-		finally {
-			try {
-				in.close();
+		for (String name : BUNDLED_PROGRAMS) {
+			ProgramFile programFile = read(programResource(name), ProgramFile.class);
+			if (programFile != null) {
+				merge(config, programFile);
 			}
-			catch (IOException ignored) {
+		}
+		return config;
+	}
+
+	/**
+	 * Adds a program file to the configuration: its reports and indicators replace those with the
+	 * same name, and its program replaces one with the same code
+	 */
+	static void merge(DqConfig config, ProgramFile programFile) {
+		for (DqConfig.ExpectedReport report : programFile.getExpectedReports()) {
+			DqConfig.ExpectedReport existing = config.getExpectedReport(report.getReport());
+			if (existing != null) {
+				config.getExpectedReports().set(config.getExpectedReports().indexOf(existing), report);
+			} else {
+				config.getExpectedReports().add(report);
 			}
+		}
+		for (DqConfig.Indicator indicator : programFile.getIndicators()) {
+			DqConfig.Indicator existing = config.getIndicator(indicator.getCode());
+			if (existing != null) {
+				config.getIndicators().set(config.getIndicators().indexOf(existing), indicator);
+			} else {
+				config.getIndicators().add(indicator);
+			}
+		}
+		DqConfig.Program program = programFile.getProgram();
+		if (program != null) {
+			DqConfig.Program existing = config.getProgram(program.getCode());
+			if (existing != null) {
+				config.getPrograms().remove(existing);
+			}
+			config.getPrograms().add(program);
 		}
 	}
 
 	/**
-	 * Checks that the configuration hangs together
+	 * Checks that the configuration hangs together. A typing mistake in a code or report name would
+	 * otherwise make a check silently read zero.
 	 *
 	 * @return a description of each problem found, empty when there are none
 	 */
@@ -141,35 +202,147 @@ public final class DqConfigStore {
 			}
 		}
 
-		for (Map.Entry<String, Map<String, Object>> rule : config.getRules().entrySet()) {
-			for (String key : new String[] { "numerator", "denominator" }) {
-				Object code = rule.getValue().get(key);
-				if (code != null && !codes.contains(code.toString())) {
-					problems.add("rule " + rule.getKey() + " refers to unknown indicator " + code);
+		Set<String> programCodes = new HashSet<String>();
+		Set<String> ruleIds = new HashSet<String>();
+		for (DqConfig.Program program : config.getPrograms()) {
+			String name = "program " + program.getCode();
+			if (StringUtils.isBlank(program.getCode())) {
+				problems.add("a program has no code");
+				continue;
+			}
+			if (!programCodes.add(program.getCode().toUpperCase())) {
+				problems.add(name + " is defined more than once");
+			}
+			for (String code : program.getIndicators()) {
+				if (!codes.contains(code)) {
+					problems.add(name + " watches unknown indicator " + code);
 				}
 			}
-			DqRuleSettings settings = new DqRuleSettings(rule.getValue());
-			for (Map<String, Object> pair : settings.getObjectList("pairs")) {
-				for (Object code : pair.values()) {
-					if (code != null && !codes.contains(code.toString())) {
-						problems.add("rule " + rule.getKey() + " pairs refer to unknown indicator " + code);
+			for (String report : program.getOwns()) {
+				if (!reports.contains(report)) {
+					problems.add(name + " owns " + report + ", which is not an expected report");
+				}
+			}
+			for (Map<String, Object> values : program.getRules()) {
+				DqConfig.RuleDefinition rule = new DqConfig.RuleDefinition(program, values);
+				String ruleName = "rule " + (rule.getId() != null ? rule.getId() : "(no id)") + " of " + name;
+				if (StringUtils.isBlank(rule.getId())) {
+					problems.add("a rule of " + name + " has no id");
+				} else if (!ruleIds.add(rule.getId())) {
+					problems.add("rule id " + rule.getId() + " is used more than once; rule ids must be unique across programs");
+				}
+				if (!DqRuleTypes.isKnown(rule.getType())) {
+					problems.add(ruleName + " has type " + rule.getType() + "; it must be one of " + DqRuleTypes.TYPES);
+				}
+				for (String code : rule.getIndicatorCodes()) {
+					if (!codes.contains(code)) {
+						problems.add(ruleName + " refers to unknown indicator " + code);
 					}
 				}
+				for (String report : rule.getSettings().getStrings("reports")) {
+					if (!reports.contains(report)) {
+						problems.add(ruleName + " checks " + report + ", which is not an expected report");
+					}
+				}
+				if (rule.getGates() != null && !program.getOwns().contains(rule.getGates())) {
+					problems.add(ruleName + " gates " + rule.getGates() + ", which " + name
+							+ " does not own, so it is shown as a warning");
+				}
+			}
+		}
+
+		if (!config.getPrograms().isEmpty() && !config.getRules().isEmpty()) {
+			problems.add("dq_config.json still has a \"rules\" section; rules now live in the program files in "
+					+ PROGRAMS_DIRECTORY + ", and an entry there wins over one here");
+		}
+		return problems;
+	}
+
+	/**
+	 * @return a problem for each expected KHIS report with no KHIS mapping: it is generated and
+	 * checked, but cannot be sent, and the administrator is alerted each month it is approved
+	 */
+	public static List<String> mappingProblems(DqConfig config) {
+		List<String> problems = new ArrayList<String>();
+		ConfigurableAdxGenerationStrategy mappings = new ConfigurableAdxGenerationStrategy();
+		for (DqConfig.ExpectedReport report : config.getExpectedReports()) {
+			if ("KHIS".equalsIgnoreCase(report.getTarget()) && report.getReport() != null
+					&& mappings.getConfigurationForReport(report.getReport()) == null) {
+				problems.add(report.getReport() + " is sent to KHIS but has no KHIS mapping in khis_dataset_mapping.json, "
+						+ "so it is checked but cannot be sent");
 			}
 		}
 		return problems;
 	}
 
 	static File getFile() {
-		return new File(OpenmrsUtil.getApplicationDataDirectory() + File.separator + "kenyaemr" + File.separator
-				+ "khis" + File.separator + "dq_config.json");
+		return new File(getKhisDirectory(), "dq_config.json");
 	}
 
-	private static synchronized void seedFile(File file) {
+	static File getProgramsDirectory() {
+		return new File(getKhisDirectory(), PROGRAMS_DIRECTORY);
+	}
+
+	private static File getKhisDirectory() {
+		return new File(OpenmrsUtil.getApplicationDataDirectory() + File.separator + "kenyaemr" + File.separator + "khis");
+	}
+
+	static String programResource(String name) {
+		return "khis/" + PROGRAMS_DIRECTORY + "/" + name + ".default.json";
+	}
+
+	/**
+	 * @return the program files, in name order so that the result does not depend on the file system
+	 */
+	private static List<File> programFiles() {
+		File[] files = getProgramsDirectory().listFiles();
+		List<File> programFiles = new ArrayList<File>();
+		if (files != null) {
+			for (File file : files) {
+				if (file.isFile() && file.getName().endsWith(".json")) {
+					programFiles.add(file);
+				}
+			}
+		}
+		Collections.sort(programFiles);
+		return programFiles;
+	}
+
+	private static String signature(File file, List<File> programFiles) {
+		StringBuilder signature = new StringBuilder(file.getName()).append(':').append(file.lastModified());
+		for (File programFile : programFiles) {
+			signature.append(';').append(programFile.getName()).append(':').append(programFile.lastModified());
+		}
+		return signature.toString();
+	}
+
+	private static <T> T read(String resource, Class<T> type) {
+		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(resource);
+		if (in == null) {
+			log.error("Bundled data quality configuration not found: " + resource);
+			return null;
+		}
+		try {
+			return objectMapper.readValue(in, type);
+		}
+		catch (IOException e) {
+			log.error("Failed to read bundled data quality configuration: " + resource, e);
+			return null;
+		}
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ignored) {
+			}
+		}
+	}
+
+	private static synchronized void seedFile(String resource, File file) {
 		if (file.exists()) {
 			return;
 		}
-		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(DEFAULT_RESOURCE);
+		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(resource);
 		if (in == null) {
 			return;
 		}
@@ -194,14 +367,51 @@ public final class DqConfigStore {
 		}
 	}
 
+	/**
+	 * One program's file: the program, and the expected reports and indicators it brings
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class ProgramFile {
+
+		private DqConfig.Program program;
+
+		private List<DqConfig.ExpectedReport> expectedReports = new ArrayList<DqConfig.ExpectedReport>();
+
+		private List<DqConfig.Indicator> indicators = new ArrayList<DqConfig.Indicator>();
+
+		public DqConfig.Program getProgram() {
+			return program;
+		}
+
+		public void setProgram(DqConfig.Program program) {
+			this.program = program;
+		}
+
+		public List<DqConfig.ExpectedReport> getExpectedReports() {
+			return expectedReports;
+		}
+
+		public void setExpectedReports(List<DqConfig.ExpectedReport> expectedReports) {
+			this.expectedReports = expectedReports != null ? expectedReports : new ArrayList<DqConfig.ExpectedReport>();
+		}
+
+		public List<DqConfig.Indicator> getIndicators() {
+			return indicators;
+		}
+
+		public void setIndicators(List<DqConfig.Indicator> indicators) {
+			this.indicators = indicators != null ? indicators : new ArrayList<DqConfig.Indicator>();
+		}
+	}
+
 	private static final class Cached {
 
-		private final long lastModified;
+		private final String signature;
 
 		private final DqConfig config;
 
-		private Cached(long lastModified, DqConfig config) {
-			this.lastModified = lastModified;
+		private Cached(String signature, DqConfig config) {
+			this.signature = signature;
 			this.config = config;
 		}
 	}

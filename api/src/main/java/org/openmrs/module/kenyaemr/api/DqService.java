@@ -90,6 +90,36 @@ public interface DqService extends OpenmrsService {
 	 */
 	List<DqResult> evaluateWeek(Date anyDateInWeek);
 
+	/**
+	 * Runs the month-level rules (G-RPT-01 timeliness) for a month, once each rule's deadlines are
+	 * over. A rule already checked for the month is not checked again.
+	 *
+	 * @param month any date in the month
+	 * @param now the current time; rules whose deadline day has not ended are skipped
+	 * @return the results saved now
+	 */
+	List<DqResult> evaluateMonth(Date month, Date now);
+
+	/**
+	 * Records the values KHIS holds for a sent report version, read back from KHIS. Each stored cell
+	 * with a KHIS mapping gets the value KHIS has for its data element and category option combo,
+	 * or none when KHIS has no value.
+	 *
+	 * @param khisValues KHIS value by "dataElement|categoryOptionCombo"
+	 * @param readAt when KHIS was read
+	 * @return how many cells were compared
+	 */
+	int recordKhisValues(DqReportRun run, Map<String, Double> khisValues, Date readAt);
+
+	/**
+	 * Runs the KHIS parity rules (G-RPT-02) on a report version whose KHIS values have been recorded,
+	 * saving the results and any reconciliation tickets. A version already compared is not compared
+	 * again.
+	 *
+	 * @return the results
+	 */
+	List<DqResult> evaluateKhisParity(DqReportRun run);
+
 	DqReportRun saveReportRun(DqReportRun run);
 
 	@Transactional(readOnly = true)
@@ -129,6 +159,15 @@ public interface DqService extends OpenmrsService {
 
 	@Transactional(readOnly = true)
 	List<DqResult> getResults(String ruleId, Date fromPeriod, Date toPeriod);
+
+	/**
+	 * @param programCode the program, or null for all
+	 * @param ruleId the rule, or null for all
+	 * @return the results for periods starting in the range, leaving out those of superseded
+	 * report versions
+	 */
+	@Transactional(readOnly = true)
+	List<DqResult> getProgramResults(String programCode, String ruleId, Date fromPeriod, Date toPeriod);
 
 	DqOverride saveOverride(DqOverride override);
 

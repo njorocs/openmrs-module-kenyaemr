@@ -101,6 +101,19 @@ public class DqRuleSettings {
 	}
 
 	/**
+	 * @return the configured list as trimmed strings, or an empty list
+	 */
+	public List<String> getStrings(String key) {
+		List<String> strings = new ArrayList<String>();
+		for (Object item : getList(key)) {
+			if (item != null && !item.toString().trim().isEmpty()) {
+				strings.add(item.toString().trim());
+			}
+		}
+		return strings;
+	}
+
+	/**
 	 * @return a list of objects, such as indicator pairs, or an empty list
 	 */
 	@SuppressWarnings("unchecked")

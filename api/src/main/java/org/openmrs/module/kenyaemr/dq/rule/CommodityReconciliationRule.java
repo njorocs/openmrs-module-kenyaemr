@@ -19,29 +19,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * T22-05 / G-RPT-03: ACT consumed ÷ ACT treated, per product, within ±tolerance. Implemented once
- * and reported under T22-05.
+ * Rule type RECONCILIATION: a commodity consumed should match the patients treated with it, within
+ * ±tolerance. For malaria, T22-05 (the same check as G-RPT-03, implemented once): ACT dispensed in
+ * MOH 643 against patients given an ACT in MOH 743, within 10%.
  * <p>
- * Settings: pairs (a list of {consumed, treated} indicator codes, one per ACT product), tolerance,
- * severity. The EMR's MOH 643 currently covers only the mRDT, so no product pairs are configured
- * by default and the rule is disabled until M&E defines them.
+ * Settings: pairs (a list of {consumed, treated} indicator codes, e.g. one per ACT product),
+ * tolerance (default 0.10), severity (default WARN).
  */
 public class CommodityReconciliationRule extends AbstractDqRule {
 
-	public static final String ID = "T22-05";
-
-	public CommodityReconciliationRule() {
-		super(ID);
+	public CommodityReconciliationRule(DqConfig.RuleDefinition definition) {
+		super(definition);
 	}
 
 	@Override
 	public boolean appliesTo(DqRuleContext context) {
-		DqRuleSettings settings = settings(context, null);
-		if (!settings.isEnabled()) {
-			return false;
-		}
 		DqConfig config = context.getConfig();
-		for (Map<String, Object> pair : settings.getObjectList("pairs")) {
+		for (Map<String, Object> pair : settings().getObjectList("pairs")) {
 			if (readsRun(context, config.getIndicator(String.valueOf(pair.get("consumed"))))
 					|| readsRun(context, config.getIndicator(String.valueOf(pair.get("treated"))))) {
 				return true;
@@ -52,7 +46,7 @@ public class CommodityReconciliationRule extends AbstractDqRule {
 
 	@Override
 	public List<DqResult> evaluate(DqRuleContext context) {
-		DqRuleSettings settings = settings(context, null);
+		DqRuleSettings settings = settings();
 		double tolerance = settings.getDouble("tolerance", 0.10);
 		DqOutcome severity = settings.getOutcome("severity", DqOutcome.WARN);
 

@@ -67,6 +67,8 @@ public interface DqDao {
 
 	List<DqResult> getResults(String ruleId, Date fromPeriod, Date toPeriod);
 
+	List<DqResult> getProgramResults(String programCode, String ruleId, Date fromPeriod, Date toPeriod);
+
 	DqOverride saveOverride(DqOverride override);
 
 	List<DqOverride> getOverrides(DqReportRun run);

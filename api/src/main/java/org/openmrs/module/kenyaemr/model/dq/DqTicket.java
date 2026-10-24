@@ -55,6 +55,9 @@ public class DqTicket extends BaseOpenmrsObject {
 
 	private User resolvedBy;
 
+	/** The program area whose rule opened the ticket */
+	private String programCode;
+
 	@Override
 	public Integer getId() {
 		return id;
@@ -175,5 +178,13 @@ public class DqTicket extends BaseOpenmrsObject {
 
 	public void setResolvedBy(User resolvedBy) {
 		this.resolvedBy = resolvedBy;
+	}
+
+	public String getProgramCode() {
+		return programCode;
+	}
+
+	public void setProgramCode(String programCode) {
+		this.programCode = programCode;
 	}
 }

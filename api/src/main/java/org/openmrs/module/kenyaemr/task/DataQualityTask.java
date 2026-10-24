@@ -29,7 +29,8 @@ import java.util.List;
  * <ul>
  * <li>every expected monthly report not yet generated for last month is generated, then all newly
  * generated reports are checked together, so rules that compare reports (X-RPT-01) see both;</li>
- * <li>last week's test positivity (T22-08) is checked once.</li>
+ * <li>last week's weekly checks (T22-08 test positivity) run once;</li>
+ * <li>once last month's deadlines are over, its month-level checks (G-RPT-01 timeliness) run once.</li>
  * </ul>
  * So on the 1st the HRIO finds last month's reports waiting for approval, and a server that was
  * down on the 1st catches up when it comes back.
@@ -53,6 +54,12 @@ public class DataQualityTask extends AbstractTask {
 			}
 			catch (RuntimeException e) {
 				log.error("Data quality: weekly check failed", e);
+			}
+			try {
+				service.evaluateMonth(DqPeriods.previousMonth(today), today);
+			}
+			catch (RuntimeException e) {
+				log.error("Data quality: monthly timeliness check failed", e);
 			}
 		}
 		finally {

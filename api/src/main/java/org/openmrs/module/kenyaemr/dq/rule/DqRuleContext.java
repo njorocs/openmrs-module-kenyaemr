@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.dq.rule;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
+import org.openmrs.module.kenyaemr.model.dq.DqValue;
 
 import java.util.Date;
 import java.util.List;
@@ -46,6 +47,28 @@ public interface DqRuleContext {
 	 * value is null when none of those reports has been generated for the month
 	 */
 	DqIndicatorCalculator.IndicatorValue getIndicator(String code, Date monthStart);
+
+	/**
+	 * @param code the indicator code
+	 * @return the indicator for any period, e.g. a week; a period other than a whole month is counted
+	 * by running the indicator's reports for it, without storing anything
+	 */
+	DqIndicatorCalculator.IndicatorValue getIndicator(String code, Date start, Date end);
+
+	/**
+	 * @return the stored values of a report version, with the KHIS values read back
+	 */
+	List<DqValue> getValues(DqReportRun run);
+
+	/**
+	 * @return true when sending to KHIS is recorded on this server (the KenyaEMR IL module's ledger)
+	 */
+	boolean isKhisSubmissionTracked();
+
+	/**
+	 * @return when any version of the report for the month first reached KHIS, or null if none has
+	 */
+	Date getFirstSentToKhis(String reportName, Date monthStart);
 
 	/**
 	 * @return true when the report has been generated for the month

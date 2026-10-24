@@ -39,6 +39,11 @@ public class ServiceDqRuleContext implements DqRuleContext {
 
 	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators;
 
+	/** Values of reports run for a period other than a month, by report and period */
+	private final Map<String, List<DqValue>> liveValues = new HashMap<String, List<DqValue>>();
+
+	private Boolean khisSubmissionTracked;
+
 	/**
 	 * @param run the run being checked, or null for a weekly check
 	 */
@@ -118,6 +123,59 @@ public class ServiceDqRuleContext implements DqRuleContext {
 			indicators.put(key, value);
 		}
 		return value;
+	}
+
+	@Override
+	public DqIndicatorCalculator.IndicatorValue getIndicator(String code, Date start, Date end) {
+		if (start.equals(DqPeriods.monthStart(start)) && DqPeriods.lastDayOfMonth(start).equals(end)) {
+			return getIndicator(code, start);
+		}
+		String key = code + "@" + start.getTime() + "-" + end.getTime();
+		DqIndicatorCalculator.IndicatorValue value = indicators.get(key);
+		if (value == null) {
+			DqConfig.Indicator indicator = config.getIndicator(code);
+			if (indicator == null) {
+				return new DqIndicatorCalculator.IndicatorValue(code, null, Collections.singletonList("indicator " + code
+						+ " is not configured"));
+			}
+			List<DqValue> values = new ArrayList<DqValue>();
+			for (String report : indicator.getReports()) {
+				String reportKey = report + "@" + start.getTime() + "-" + end.getTime();
+				if (!liveValues.containsKey(reportKey)) {
+					liveValues.put(reportKey, new DqReportGenerator().evaluateValues(report, start, end));
+				}
+				values.addAll(liveValues.get(reportKey));
+			}
+			value = DqIndicatorCalculator.calculate(indicator, values);
+			indicators.put(key, value);
+		}
+		return value;
+	}
+
+	@Override
+	public List<DqValue> getValues(DqReportRun run) {
+		return service.getValues(run);
+	}
+
+	@Override
+	public boolean isKhisSubmissionTracked() {
+		if (khisSubmissionTracked == null) {
+			List<Object[]> rows = service.executeSqlQuery("select count(*), 0 from information_schema.tables "
+					+ "where table_schema = database() and table_name = 'il_report_submission'", new HashMap<String, Object>());
+			khisSubmissionTracked = !rows.isEmpty() && rows.get(0)[0] instanceof Number && ((Number) rows.get(0)[0]).intValue() > 0;
+		}
+		return khisSubmissionTracked;
+	}
+
+	@Override
+	public Date getFirstSentToKhis(String reportName, Date monthStart) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("reportName", reportName);
+		parameters.put("periodStart", monthStart);
+		List<Object[]> rows = service.executeSqlQuery("select min(s.sent_at), 0 from il_report_submission s "
+				+ "where s.report_name = :reportName and s.period_start = :periodStart and s.target_system = 'KHIS' "
+				+ "and s.sent_at is not null", parameters);
+		return rows.isEmpty() || !(rows.get(0)[0] instanceof Date) ? null : (Date) rows.get(0)[0];
 	}
 
 	@Override

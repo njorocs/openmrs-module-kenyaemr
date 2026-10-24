@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +32,75 @@ public class DqConfigStoreTest {
 		Assert.assertNotNull(config.getExpectedReport("MOH-743 Report"));
 		Assert.assertFalse(config.getOverrideReasons().isEmpty());
 		Assert.assertEquals(DqOutcome.BLOCK, config.getRuleSettings("T22-04", null).getOutcome("severity", DqOutcome.WARN));
-		Assert.assertFalse(config.getRuleSettings("T22-05", null).isEnabled());
+		Assert.assertEquals(Double.valueOf(0.10), config.getRuleSettings("T22-05", null).getDouble("tolerance", null));
+		Assert.assertEquals("KHIS", config.getExpectedReport("MOH 643").getTarget());
+		Assert.assertNotNull(config.getExpectedReport("MOH 505 IDSR Epidemic Case Monitoring"));
+
+		DqConfig.Program malaria = config.getProgram("malaria");
+		Assert.assertEquals("Malaria", malaria.getName());
+		Assert.assertEquals(8, malaria.getRules().size());
+		Assert.assertTrue(config.getReports(malaria).contains("MOH 711"));
+		Assert.assertTrue(config.isTracked(config.getIndicator("MAL_CONFIRMED_705")));
+		Assert.assertFalse(config.isTracked(config.getIndicator("MAL_TESTS_706")));
+	}
+
+	@Test
+	public void merge_shouldLetAProgramFileReplaceReportsIndicatorsAndPrograms() {
+		DqConfig config = new DqConfig();
+		DqConfig.ExpectedReport knlms = new DqConfig.ExpectedReport();
+		knlms.setReport("MOH 643");
+		knlms.setTarget("KNLMS");
+		config.getExpectedReports().add(knlms);
+		DqConfig.Indicator old = new DqConfig.Indicator();
+		old.setCode("MAL_TESTED_705");
+		config.getIndicators().add(old);
+
+		DqConfigStore.ProgramFile file = new DqConfigStore.ProgramFile();
+		DqConfig.ExpectedReport khis = new DqConfig.ExpectedReport();
+		khis.setReport("MOH 643");
+		file.getExpectedReports().add(khis);
+		DqConfig.Indicator updated = new DqConfig.Indicator();
+		updated.setCode("MAL_TESTED_705");
+		updated.setName("updated");
+		file.getIndicators().add(updated);
+		DqConfig.Program program = new DqConfig.Program();
+		program.setCode("TB");
+		file.setProgram(program);
+
+		DqConfigStore.merge(config, file);
+		DqConfigStore.merge(config, file);
+
+		Assert.assertEquals(1, config.getExpectedReports().size());
+		Assert.assertEquals("KHIS", config.getExpectedReport("MOH 643").getTarget());
+		Assert.assertEquals("updated", config.getIndicator("MAL_TESTED_705").getName());
+		Assert.assertEquals(1, config.getIndicators().size());
+		Assert.assertEquals(1, config.getPrograms().size());
+	}
+
+	@Test
+	public void validate_shouldFindProgramMistakes() {
+		DqConfig config = DqConfigStore.getDefaultConfig();
+		DqConfig.Program malaria = config.getProgram("MALARIA");
+		Map<String, Object> duplicate = new HashMap<String, Object>(malaria.getRules().get(0));
+		duplicate.put("type", "NOT_A_TYPE");
+		duplicate.put("indicators", Arrays.asList("MAL_TYPO"));
+		malaria.getRules().add(duplicate);
+		Map<String, Object> gated = new HashMap<String, Object>();
+		gated.put("id", "X-GATED");
+		gated.put("type", "RATIO");
+		gated.put("gates", "MOH 706");
+		malaria.getRules().add(gated);
+		malaria.getIndicators().add("MAL_OTHER_TYPO");
+		config.getRules().put("T22-04", new HashMap<String, Object>());
+
+		String problems = DqConfigStore.validate(config).toString();
+
+		Assert.assertTrue(problems, problems.contains("rule id T22-03 is used more than once"));
+		Assert.assertTrue(problems, problems.contains("has type NOT_A_TYPE"));
+		Assert.assertTrue(problems, problems.contains("refers to unknown indicator MAL_TYPO"));
+		Assert.assertTrue(problems, problems.contains("watches unknown indicator MAL_OTHER_TYPO"));
+		Assert.assertTrue(problems, problems.contains("gates MOH 706, which program MALARIA does not own"));
+		Assert.assertTrue(problems, problems.contains("still has a \"rules\" section"));
 	}
 
 	@Test
@@ -39,19 +108,21 @@ public class DqConfigStoreTest {
 		DqConfig config = DqConfigStore.getDefaultConfig();
 		config.getExpectedReports().remove(config.getExpectedReport("MOH 706"));
 		Map<String, Object> rule = new HashMap<String, Object>();
+		rule.put("id", "X-RPT-02");
+		rule.put("type", "RATIO");
 		rule.put("numerator", "NO_SUCH_INDICATOR");
-		config.getRules().put("X-RPT-01", rule);
+		config.getProgram("MALARIA").getRules().add(rule);
 
 		String problems = DqConfigStore.validate(config).toString();
 
 		Assert.assertTrue(problems, problems.contains("MAL_TESTS_706 reads from MOH 706, which is not an expected report"));
-		Assert.assertTrue(problems, problems.contains("rule X-RPT-01 refers to unknown indicator NO_SUCH_INDICATOR"));
+		Assert.assertTrue(problems, problems.contains("rule X-RPT-02 of program MALARIA refers to unknown indicator NO_SUCH_INDICATOR"));
 	}
 
 	@Test
 	public void getRuleSettings_shouldLayerIndicatorSettingsOverGlobalOnes() {
 		DqConfig config = DqConfigStore.getDefaultConfig();
-		DqConfig.Indicator indicator = config.getIndicator("MAL_CONFIRMED_743");
+		DqConfig.Indicator indicator = config.getIndicator("MAL_CONFIRMED_705");
 		Map<String, Object> own = new HashMap<String, Object>();
 		own.put("band", 0.35);
 		indicator.getRules().put("T22-03", own);

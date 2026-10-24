@@ -14,8 +14,10 @@ import org.openmrs.module.kenyaemr.model.dq.DqValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Adds up an indicator from stored report values
@@ -31,9 +33,16 @@ public final class DqIndicatorCalculator {
 	 * @return the indicator value, with the columns that were not found
 	 */
 	public static IndicatorValue calculate(DqConfig.Indicator indicator, Collection<DqValue> values) {
-		Map<String, DqValue> byKey = new HashMap<String, DqValue>();
+		// A dataset with several rows (e.g. one per unit of issue) has the same column more than once
+		Map<String, List<DqValue>> byKey = new HashMap<String, List<DqValue>>();
+		Set<String> reports = new HashSet<String>();
 		for (DqValue value : values) {
-			byKey.put(key(value.getReportRun().getReportName(), value.getDatasetName(), value.getColumnName()), value);
+			String key = key(value.getReportRun().getReportName(), value.getDatasetName(), value.getColumnName());
+			if (!byKey.containsKey(key)) {
+				byKey.put(key, new ArrayList<DqValue>());
+			}
+			byKey.get(key).add(value);
+			reports.add(value.getReportRun().getReportName());
 		}
 
 		double sum = 0;
@@ -41,17 +50,23 @@ public final class DqIndicatorCalculator {
 		List<String> missing = new ArrayList<String>();
 		for (DqConfig.Part part : indicator.getParts()) {
 			for (String column : part.getColumns()) {
-				DqValue value = byKey.get(key(part.getReport(), part.getDataset(), column));
-				if (value == null) {
+				List<DqValue> cells = byKey.get(key(part.getReport(), part.getDataset(), column));
+				if (cells == null && part.isZeroWhenEmpty() && reports.contains(part.getReport())) {
+					found++;
+					continue;
+				}
+				if (cells == null) {
 					missing.add(part.getReport() + " / " + part.getDataset() + " / " + column);
 					continue;
 				}
 				found++;
-				// An empty cell counts as zero; a non-numeric one is reported as missing
-				if (value.getValueNumeric() != null) {
-					sum += value.getValueNumeric();
-				} else if (value.getValueText() != null && !value.getValueText().trim().isEmpty()) {
-					missing.add(part.getReport() + " / " + part.getDataset() + " / " + column + " (not a number)");
+				for (DqValue value : cells) {
+					// An empty cell counts as zero; a non-numeric one is reported as missing
+					if (value.getValueNumeric() != null) {
+						sum += value.getValueNumeric();
+					} else if (value.getValueText() != null && !value.getValueText().trim().isEmpty()) {
+						missing.add(part.getReport() + " / " + part.getDataset() + " / " + column + " (not a number)");
+					}
 				}
 			}
 		}

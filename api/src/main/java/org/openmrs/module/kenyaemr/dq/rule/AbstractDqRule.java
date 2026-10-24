@@ -18,7 +18,10 @@ import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Shared helpers for building results
@@ -30,19 +33,61 @@ public abstract class AbstractDqRule implements DqRule {
 	/** Tolerance for threshold comparisons, so that a ratio of exactly 1.0 is not failed by rounding */
 	protected static final double EPSILON = 1e-9;
 
-	private final String id;
+	private final DqConfig.RuleDefinition definition;
 
-	protected AbstractDqRule(String id) {
-		this.id = id;
+	protected AbstractDqRule(DqConfig.RuleDefinition definition) {
+		this.definition = definition;
 	}
 
 	@Override
 	public String getId() {
-		return id;
+		return definition.getId();
 	}
 
-	protected DqRuleSettings settings(DqRuleContext context, DqConfig.Indicator indicator) {
-		return context.getConfig().getRuleSettings(id, indicator);
+	@Override
+	public String getProgram() {
+		return definition.getProgramCode();
+	}
+
+	@Override
+	public DqConfig.RuleDefinition getDefinition() {
+		return definition;
+	}
+
+	@Override
+	public Schedule getSchedule() {
+		return Schedule.REPORT;
+	}
+
+	/**
+	 * @return the reports of the indicators the rule names
+	 */
+	@Override
+	public Set<String> getReports(DqConfig config) {
+		Set<String> reports = new LinkedHashSet<String>();
+		for (String code : definition.getIndicatorCodes()) {
+			DqConfig.Indicator indicator = config.getIndicator(code);
+			if (indicator != null) {
+				reports.addAll(indicator.getReports());
+			}
+		}
+		return reports;
+	}
+
+	/**
+	 * @return the rule's settings, with an indicator's own settings for this rule layered over them
+	 * @param indicator the indicator, or null for the rule's settings only
+	 */
+	protected DqRuleSettings settings(DqConfig.Indicator indicator) {
+		Map<String, Object> merged = new LinkedHashMap<String, Object>(definition.getValues());
+		if (indicator != null && indicator.getRules().get(getId()) != null) {
+			merged.putAll(indicator.getRules().get(getId()));
+		}
+		return new DqRuleSettings(merged);
+	}
+
+	protected DqRuleSettings settings() {
+		return settings(null);
 	}
 
 	/**
@@ -55,7 +100,9 @@ public abstract class AbstractDqRule implements DqRule {
 
 	protected DqResult result(DqRuleContext context, String indicatorCode, DqOutcome outcome, String message) {
 		DqResult result = new DqResult();
-		result.setRuleId(id);
+		result.setRuleId(getId());
+		result.setProgramCode(getProgram());
+		result.setParams(json(definition.getValues()));
 		result.setIndicatorCode(indicatorCode);
 		result.setReportRun(context.getRun());
 		result.setPeriodStart(context.getPeriodStart());

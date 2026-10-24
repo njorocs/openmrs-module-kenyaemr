@@ -24,6 +24,8 @@ import org.openmrs.module.kenyaemr.dq.ServiceDqRuleContext;
 import org.openmrs.module.kenyaemr.dq.rule.DqRule;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleContext;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleEngine;
+import org.openmrs.module.kenyaemr.dq.rule.DqRuleTypes;
+import org.openmrs.module.kenyaemr.dq.rule.TimelinessRule;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
@@ -100,7 +102,7 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		}
 		DqConfig config = DqConfigStore.getConfig();
 		DqRuleContext context = new ServiceDqRuleContext(this, config, run, run.getPeriodStart(), run.getPeriodEnd());
-		List<DqResult> results = DqRuleEngine.evaluate(context, DqRuleEngine.monthlyRules());
+		List<DqResult> results = DqRuleEngine.evaluate(context, DqRuleTypes.rules(config, DqRule.Schedule.REPORT));
 		saveResultsAndTickets(results, config);
 
 		run.setStatus(DqRuleEngine.statusFor(results));
@@ -223,18 +225,88 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 	@Override
 	public List<DqResult> evaluateWeek(Date anyDateInWeek) {
 		Date weekStart = DqPeriods.weekStart(anyDateInWeek);
+		DqConfig config = DqConfigStore.getConfig();
 		List<DqResult> existing = new ArrayList<DqResult>();
-		for (DqRule rule : DqRuleEngine.weeklyRules()) {
-			existing.addAll(dqDao.getResults(rule.getId(), weekStart, weekStart));
+		List<DqRule> unchecked = new ArrayList<DqRule>();
+		for (DqRule rule : DqRuleTypes.rules(config, DqRule.Schedule.WEEK)) {
+			List<DqResult> results = dqDao.getResults(rule.getId(), weekStart, weekStart);
+			if (results.isEmpty()) {
+				unchecked.add(rule);
+			}
+			existing.addAll(results);
 		}
-		if (!existing.isEmpty()) {
+		if (unchecked.isEmpty()) {
 			return existing;
 		}
-		DqConfig config = DqConfigStore.getConfig();
 		DqRuleContext context = new ServiceDqRuleContext(this, config, null, weekStart, DqPeriods.weekEnd(weekStart));
-		List<DqResult> results = DqRuleEngine.evaluate(context, DqRuleEngine.weeklyRules());
+		List<DqResult> results = DqRuleEngine.evaluate(context, unchecked);
+		saveResultsAndTickets(results, config);
+		existing.addAll(results);
+		return existing;
+	}
+
+	@Override
+	public List<DqResult> evaluateMonth(Date month, Date now) {
+		Date monthStart = DqPeriods.monthStart(month);
+		DqConfig config = DqConfigStore.getConfig();
+		List<DqRule> due = new ArrayList<DqRule>();
+		for (DqRule rule : DqRuleTypes.rules(config, DqRule.Schedule.MONTH)) {
+			Date deadline = rule instanceof TimelinessRule ? ((TimelinessRule) rule).lastDeadline(config, monthStart) : null;
+			if (deadline != null && now.before(deadline)) {
+				continue;
+			}
+			if (dqDao.getResults(rule.getId(), monthStart, monthStart).isEmpty()) {
+				due.add(rule);
+			}
+		}
+		if (due.isEmpty()) {
+			return Collections.emptyList();
+		}
+		DqRuleContext context = new ServiceDqRuleContext(this, config, null, monthStart, DqPeriods.lastDayOfMonth(monthStart));
+		List<DqResult> results = DqRuleEngine.evaluate(context, due);
 		saveResultsAndTickets(results, config);
 		return results;
+	}
+
+	@Override
+	public int recordKhisValues(DqReportRun run, Map<String, Double> khisValues, Date readAt) {
+		int compared = 0;
+		for (DqValue value : dqDao.getValues(run)) {
+			if (value.getDataElement() == null) {
+				continue;
+			}
+			value.setKhisValue(khisValues.get(value.getDataElement() + "|" + value.getCategoryOptionCombo()));
+			value.setKhisLastUpdated(readAt);
+			compared++;
+		}
+		return compared;
+	}
+
+	@Override
+	public List<DqResult> evaluateKhisParity(DqReportRun run) {
+		DqConfig config = DqConfigStore.getConfig();
+		List<DqRule> rules = new ArrayList<DqRule>();
+		List<DqResult> existing = new ArrayList<DqResult>();
+		for (DqRule rule : DqRuleTypes.rules(config, DqRule.Schedule.KHIS_READBACK)) {
+			boolean compared = false;
+			for (DqResult result : dqDao.getResults(run)) {
+				if (rule.getId().equals(result.getRuleId())) {
+					existing.add(result);
+					compared = true;
+				}
+			}
+			if (!compared) {
+				rules.add(rule);
+			}
+		}
+		if (rules.isEmpty()) {
+			return existing;
+		}
+		DqRuleContext context = new ServiceDqRuleContext(this, config, run, run.getPeriodStart(), run.getPeriodEnd());
+		List<DqResult> results = DqRuleEngine.evaluate(context, rules);
+		saveResultsAndTickets(results, config);
+		existing.addAll(results);
+		return existing;
 	}
 
 	private void saveResultsAndTickets(List<DqResult> results, DqConfig config) {
@@ -309,6 +381,11 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 	@Override
 	public List<DqResult> getResults(String ruleId, Date fromPeriod, Date toPeriod) {
 		return dqDao.getResults(ruleId, fromPeriod, toPeriod);
+	}
+
+	@Override
+	public List<DqResult> getProgramResults(String programCode, String ruleId, Date fromPeriod, Date toPeriod) {
+		return dqDao.getProgramResults(programCode, ruleId, fromPeriod, toPeriod);
 	}
 
 	@Override

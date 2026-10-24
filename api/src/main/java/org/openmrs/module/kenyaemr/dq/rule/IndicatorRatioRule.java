@@ -14,43 +14,60 @@ import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A rule that bounds the ratio of two configured indicators. Used for:
+ * Rule type RATIO: the ratio of two indicators must lie within bounds. For malaria:
  * <ul>
- * <li>T22-04: patients treated with an ACT ÷ confirmed cases must not exceed 1 (hard block)</li>
- * <li>X-RPT-01: suspected cases tested (MOH 705A/B) ÷ tests performed (MOH 706) within 90-110%</li>
+ * <li>T22-04: patients treated (MOH 743) ÷ confirmed cases (MOH 705A/B) must not exceed 1</li>
+ * <li>X-RPT-01: suspected cases (MOH 705A/B) against tests in MOH 706 and in MOH 505, 90-110%</li>
  * </ul>
- * Settings: numerator, denominator (indicator codes), min, max, severity.
+ * Settings: numerator and denominator (indicator codes), or "pairs", a list of {numerator,
+ * denominator} each checked on its own; min, max, severity (default WARN).
  */
 public class IndicatorRatioRule extends AbstractDqRule {
 
-	private final DqOutcome defaultSeverity;
-
-	public IndicatorRatioRule(String id, DqOutcome defaultSeverity) {
-		super(id);
-		this.defaultSeverity = defaultSeverity;
+	public IndicatorRatioRule(DqConfig.RuleDefinition definition) {
+		super(definition);
 	}
 
 	@Override
 	public boolean appliesTo(DqRuleContext context) {
-		DqRuleSettings settings = settings(context, null);
-		if (!settings.isEnabled()) {
-			return false;
-		}
 		DqConfig config = context.getConfig();
-		return readsRun(context, config.getIndicator(settings.getString("numerator", null)))
-				|| readsRun(context, config.getIndicator(settings.getString("denominator", null)));
+		for (String[] pair : pairs()) {
+			if (readsRun(context, config.getIndicator(pair[0])) || readsRun(context, config.getIndicator(pair[1]))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public List<DqResult> evaluate(DqRuleContext context) {
-		DqRuleSettings settings = settings(context, null);
-		return Collections.singletonList(new RatioCheck(this).check(context,
-				settings.getString("numerator", null), settings.getString("denominator", null),
-				settings.getDouble("min", null), settings.getDouble("max", null),
-				settings.getOutcome("severity", defaultSeverity)));
+		DqRuleSettings settings = settings();
+		List<DqResult> results = new ArrayList<DqResult>();
+		RatioCheck check = new RatioCheck(this);
+		for (String[] pair : pairs()) {
+			results.add(check.check(context, pair[0], pair[1], settings.getDouble("min", null),
+					settings.getDouble("max", null), settings.getOutcome("severity", DqOutcome.WARN)));
+		}
+		return results;
+	}
+
+	/**
+	 * @return {numerator, denominator} codes: the "pairs" list, or the single numerator and denominator
+	 */
+	public List<String[]> pairs() {
+		DqRuleSettings settings = settings();
+		List<String[]> pairs = new ArrayList<String[]>();
+		for (Map<String, Object> pair : settings.getObjectList("pairs")) {
+			pairs.add(new String[] { String.valueOf(pair.get("numerator")), String.valueOf(pair.get("denominator")) });
+		}
+		if (pairs.isEmpty() && settings.has("numerator")) {
+			pairs.add(new String[] { settings.getString("numerator", null), settings.getString("denominator", null) });
+		}
+		return pairs;
 	}
 }

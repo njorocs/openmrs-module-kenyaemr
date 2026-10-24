@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.module.kenyaemr.dq.rule.ConsistencyOverTimeRule;
 import org.openmrs.module.kenyaemr.dq.rule.DqRule;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleContext;
-import org.openmrs.module.kenyaemr.dq.rule.DqRuleEngine;
+import org.openmrs.module.kenyaemr.dq.rule.DqRuleTypes;
 import org.openmrs.module.kenyaemr.dq.rule.IndicatorRatioRule;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public final class DqTrends {
 	 */
 	public static List<IndicatorPoint> indicatorTrend(DqRuleContext context, DqConfig.Indicator indicator, Date first,
 	                                                  Date last) {
-		ConsistencyOverTimeRule rule = new ConsistencyOverTimeRule();
+		ConsistencyOverTimeRule rule = expectedRangeRule(context.getConfig(), indicator);
 		List<IndicatorPoint> points = new ArrayList<IndicatorPoint>();
 		for (Date month = DqPeriods.monthStart(first); !month.after(last); month = DqPeriods.addMonths(month, 1)) {
 			DqRuleContext monthContext = context.forMonth(month);
@@ -68,30 +69,62 @@ public final class DqTrends {
 	}
 
 	/**
-	 * A ratio rule's numerator, denominator and ratio for each month
+	 * A ratio rule's numerator, denominator and ratio for each month, for its first pair
 	 *
 	 * @param context any context; it supplies the configuration and stored values
-	 * @param rule a rule from {@link #ratioRule(String)}
+	 * @param rule a rule from {@link #ratioRule(DqConfig, String)}
 	 */
 	public static List<RatioPoint> ratioTrend(DqRuleContext context, IndicatorRatioRule rule, Date first, Date last) {
+		return ratioTrend(context, rule, 0, first, last);
+	}
+
+	/**
+	 * As {@link #ratioTrend(DqRuleContext, IndicatorRatioRule, Date, Date)} for one of the rule's
+	 * pairs, e.g. X-RPT-01 has MOH 705 against MOH 706 and against MOH 505
+	 */
+	public static List<RatioPoint> ratioTrend(DqRuleContext context, IndicatorRatioRule rule, int pair, Date first, Date last) {
 		List<RatioPoint> points = new ArrayList<RatioPoint>();
 		for (Date month = DqPeriods.monthStart(first); !month.after(last); month = DqPeriods.addMonths(month, 1)) {
-			DqResult result = rule.evaluate(context.forMonth(month)).get(0);
+			DqResult result = rule.evaluate(context.forMonth(month)).get(pair);
 			points.add(new RatioPoint(month, result));
 		}
 		return points;
 	}
 
 	/**
-	 * @return the monthly rule that bounds a ratio of two indicators (T22-04, X-RPT-01), or null
+	 * @return the rule that bounds a ratio of two indicators (T22-04, X-RPT-01), or null
 	 */
-	public static IndicatorRatioRule ratioRule(String ruleId) {
-		for (DqRule rule : DqRuleEngine.monthlyRules()) {
-			if (rule instanceof IndicatorRatioRule && rule.getId().equals(ruleId)) {
-				return (IndicatorRatioRule) rule;
+	public static IndicatorRatioRule ratioRule(DqConfig config, String ruleId) {
+		DqRule rule = DqRuleTypes.rule(config, ruleId);
+		return rule instanceof IndicatorRatioRule && !((IndicatorRatioRule) rule).pairs().isEmpty()
+				? (IndicatorRatioRule) rule : null;
+	}
+
+	/**
+	 * @return the expected-range rule (T22-03) that checks the indicator: the first that lists it, or
+	 * failing that the first with no list; with no such rule, one with the default settings
+	 */
+	public static ConsistencyOverTimeRule expectedRangeRule(DqConfig config, DqConfig.Indicator indicator) {
+		DqConfig.RuleDefinition fallback = null;
+		for (DqConfig.RuleDefinition definition : config.getRuleDefinitions()) {
+			if (!DqConfig.RuleDefinition.TYPE_EXPECTED_RANGE.equals(definition.getType())) {
+				continue;
+			}
+			List<String> codes = definition.getSettings().getStrings("indicators");
+			if (codes.contains(indicator.getCode())) {
+				return new ConsistencyOverTimeRule(definition);
+			}
+			if (codes.isEmpty() && fallback == null) {
+				fallback = definition;
 			}
 		}
-		return null;
+		if (fallback == null) {
+			Map<String, Object> values = new LinkedHashMap<String, Object>();
+			values.put("id", ConsistencyOverTimeRule.ID);
+			values.put("type", DqConfig.RuleDefinition.TYPE_EXPECTED_RANGE);
+			fallback = new DqConfig.RuleDefinition(null, values);
+		}
+		return new ConsistencyOverTimeRule(fallback);
 	}
 
 	@SuppressWarnings("unchecked")

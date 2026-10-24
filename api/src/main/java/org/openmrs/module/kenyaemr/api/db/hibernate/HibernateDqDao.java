@@ -18,6 +18,7 @@ import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
+import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
 import org.openmrs.module.kenyaemr.model.dq.DqTicketStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
@@ -176,6 +177,26 @@ public class HibernateDqDao implements DqDao {
 				.setParameter("fromPeriod", fromPeriod)
 				.setParameter("toPeriod", toPeriod)
 				.list();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DqResult> getProgramResults(String programCode, String ruleId, Date fromPeriod, Date toPeriod) {
+		Query query = session().createQuery("from DqResult r left join fetch r.reportRun run "
+				+ "where r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod "
+				+ "and (run is null or run.status <> :superseded)"
+				+ (programCode != null ? " and r.programCode = :programCode" : "")
+				+ (ruleId != null ? " and r.ruleId = :ruleId" : "")
+				+ " order by r.periodStart, r.ruleId, r.indicatorCode");
+		query.setParameter("fromPeriod", fromPeriod).setParameter("toPeriod", toPeriod)
+				.setParameter("superseded", DqRunStatus.SUPERSEDED);
+		if (programCode != null) {
+			query.setParameter("programCode", programCode);
+		}
+		if (ruleId != null) {
+			query.setParameter("ruleId", ruleId);
+		}
+		return query.list();
 	}
 
 	@Override
