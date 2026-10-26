@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.dq;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,8 +22,8 @@ import org.openmrs.util.OpenmrsUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,7 +43,9 @@ import java.util.Set;
  * and the expected reports and indicators it needs</li>
  * </ul>
  * A missing file is seeded from the default bundled in the module, and the files are re-read
- * whenever one changes. A program file's reports and indicators replace those of the same name in
+ * whenever one changes. The bundled default each file came from is kept in {@code .dq_defaults},
+ * so that when a new module version brings a different default, the file is upgraded to it while
+ * keeping the facility's own settings ({@link DqConfigUpgrade}). A program file's reports and indicators replace those of the same name in
  * dq_config.json; all indicators form one library that every program's rules can use.
  */
 public final class DqConfigStore {
@@ -60,6 +63,9 @@ public final class DqConfigStore {
 
 	private static volatile Cached cached;
 
+	/** Whether the files have been checked against the bundled defaults since the module started */
+	private static volatile boolean upgradeChecked;
+
 	private DqConfigStore() {
 	}
 
@@ -70,15 +76,12 @@ public final class DqConfigStore {
 	public static DqConfig getConfig() {
 		File file = getFile();
 		try {
-			if (!file.exists()) {
-				seedFile(DEFAULT_RESOURCE, file);
-			}
+			ensureFile(DEFAULT_RESOURCE, file, new File(getBaseDirectory(), file.getName()));
 			for (String name : BUNDLED_PROGRAMS) {
-				File programFile = new File(getProgramsDirectory(), name + ".json");
-				if (!programFile.exists()) {
-					seedFile(programResource(name), programFile);
-				}
+				ensureFile(programResource(name), new File(getProgramsDirectory(), name + ".json"),
+						new File(new File(getBaseDirectory(), PROGRAMS_DIRECTORY), name + ".json"));
 			}
+			upgradeChecked = true;
 			if (!file.exists()) {
 				return getDefaultConfig();
 			}
@@ -291,6 +294,13 @@ public final class DqConfigStore {
 		return new File(getKhisDirectory(), PROGRAMS_DIRECTORY);
 	}
 
+	/**
+	 * @return where the bundled default each file came from is kept, for upgrades
+	 */
+	static File getBaseDirectory() {
+		return new File(getKhisDirectory(), ".dq_defaults");
+	}
+
 	private static File getKhisDirectory() {
 		return new File(OpenmrsUtil.getApplicationDataDirectory() + File.separator + "kenyaemr" + File.separator + "khis");
 	}
@@ -346,32 +356,55 @@ public final class DqConfigStore {
 		}
 	}
 
-	private static synchronized void seedFile(String resource, File file) {
-		if (file.exists()) {
+	/**
+	 * Seeds a missing file from the bundled default, or, once after the module starts, upgrades an
+	 * existing one to a changed default
+	 */
+	private static synchronized void ensureFile(String resource, File file, File baseFile) {
+		if (file.exists() && upgradeChecked) {
 			return;
 		}
-		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(resource);
-		if (in == null) {
+		String bundled = readText(resource);
+		if (bundled == null) {
 			return;
 		}
 		try {
-			File dir = file.getParentFile();
-			if (dir != null && !dir.exists() && !dir.mkdirs()) {
-				log.error("Failed to create directory: " + dir.getAbsolutePath());
-				return;
+			if (!file.exists()) {
+				write(file, bundled);
+				write(baseFile, bundled);
+				log.info("Seeded data quality configuration: " + file.getAbsolutePath());
+			} else {
+				DqConfigUpgrade.upgrade(bundled, file, baseFile);
 			}
-			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			log.info("Seeded data quality configuration: " + file.getAbsolutePath());
 		}
 		catch (IOException e) {
-			log.error("Failed to seed data quality configuration: " + file.getAbsolutePath(), e);
+			log.error("Failed to seed or upgrade data quality configuration: " + file.getAbsolutePath(), e);
+		}
+	}
+
+	private static void write(File file, String content) throws IOException {
+		File dir = file.getParentFile();
+		if (dir != null && !dir.exists() && !dir.mkdirs()) {
+			throw new IOException("Failed to create directory " + dir.getAbsolutePath());
+		}
+		Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static String readText(String resource) {
+		InputStream in = DqConfigStore.class.getClassLoader().getResourceAsStream(resource);
+		if (in == null) {
+			log.error("Bundled data quality configuration not found: " + resource);
+			return null;
+		}
+		try {
+			return IOUtils.toString(in, StandardCharsets.UTF_8);
+		}
+		catch (IOException e) {
+			log.error("Failed to read bundled data quality configuration: " + resource, e);
+			return null;
 		}
 		finally {
-			try {
-				in.close();
-			}
-			catch (IOException ignored) {
-			}
+			IOUtils.closeQuietly(in);
 		}
 	}
 
