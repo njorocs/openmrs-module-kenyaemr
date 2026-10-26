@@ -860,7 +860,7 @@
 		<update tableName="kenyaemr_dq_ticket">
 			<column name="program_code" value="MALARIA" />
 		</update>
-		<modifyDataType tableName="kenyaemr_dq_ticket" columnName="assignee_role" newDataType="VARCHAR(50)" />
+		<sql>ALTER TABLE kenyaemr_dq_ticket MODIFY COLUMN assignee_role VARCHAR(50) NULL</sql>
 		<createIndex indexName="kenyaemr_dq_result_program_period_idx" tableName="kenyaemr_dq_result">
 			<column name="program_code" />
 			<column name="period_start" />
