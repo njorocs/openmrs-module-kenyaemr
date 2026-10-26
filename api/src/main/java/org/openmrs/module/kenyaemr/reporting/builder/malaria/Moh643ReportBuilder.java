@@ -31,9 +31,6 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 
 	static final int mRDT = 161465;
 
-	/** Stock items of artemether-lumefantrine 20/120mg, as in MOH 743, for the T22-05 reconciliation */
-	static final String ARTEMETHER_LUMEFANTRINE_DRUGS = MalariaDrugs.sql(MalariaDrugs.ARTEMETHER_LUMEFANTRINE);
-
 	String indParams = "startDate=${startDate},endDate=${endDate}";
 
 	@Override
@@ -49,8 +46,32 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 	                                                        ReportDefinition reportDefinition) {
 		return Arrays.asList(
 				ReportUtils.map(getDataSetDefinition("Malaria Rapid Diagnostic Test (mRDT)", "i.concept_id = " + mRDT), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs", "i.drug_id IN " + ARTEMETHER_LUMEFANTRINE_DRUGS), "startDate=${startDate},endDate=${endDate}")
+				ReportUtils.map(actCoursesDispensed(), "startDate=${startDate},endDate=${endDate}")
 		);
+	}
+
+	/**
+	 * ACT treatment courses dispensed to patients, for the data quality check T22-05 against the
+	 * patients given an ACT in MOH 743. Stock quantities are in each product's own unit (tablets or
+	 * blisters), so courses are counted instead: one per patient per order, or per day when the
+	 * dispensing has no order. Not on the paper form.
+	 */
+	private DataSetDefinition actCoursesDispensed() {
+		SqlDataSetDefinition sqlDataSetDefinition = new SqlDataSetDefinition();
+		sqlDataSetDefinition.setName("DQ_ACT_COURSES");
+		sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+		sqlDataSetDefinition.setSqlQuery("SELECT COUNT(DISTINCT COALESCE(t.patient_id, o.patient_id),\n" +
+				"        COALESCE(CAST(t.order_id AS CHAR), DATE_FORMAT(t.date_created, '%Y-%m-%d'))) AS courses_dispensed\n" +
+				"FROM stockmgmt_stock_item_transaction t\n" +
+				"JOIN stockmgmt_stock_item i ON i.stock_item_id = t.stock_item_id AND i.voided = 0\n" +
+				"     AND i.drug_id IN " + MalariaDrugs.sql(MalariaDrugs.ACTS) + "\n" +
+				"LEFT JOIN orders o ON o.order_id = t.order_id\n" +
+				"WHERE t.stock_operation_id IS NULL\n" +
+				"  AND t.quantity < 0\n" +
+				"  AND (t.patient_id IS NOT NULL OR t.order_id IS NOT NULL)\n" +
+				"  AND DATE(t.date_created) BETWEEN :startDate AND :endDate");
+		return sqlDataSetDefinition;
 	}
 
 	/**

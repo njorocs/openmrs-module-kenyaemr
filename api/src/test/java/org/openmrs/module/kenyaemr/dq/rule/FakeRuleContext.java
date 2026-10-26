@@ -110,12 +110,20 @@ class FakeRuleContext implements DqRuleContext {
 	 * Adds a stored cell of the run, with the value KHIS holds for it
 	 */
 	FakeRuleContext value(String dataset, String column, String dataElement, Double emr, Double khis) {
+		return value(dataset, column, dataElement, dataElement != null ? "COC" : null, emr, khis);
+	}
+
+	/**
+	 * Adds a report value with its category option combo, as recorded after a KHIS read-back
+	 */
+	FakeRuleContext value(String dataset, String column, String dataElement, String categoryOptionCombo, Double emr,
+	        Double khis) {
 		DqValue value = new DqValue();
 		value.setReportRun(run);
 		value.setDatasetName(dataset);
 		value.setColumnName(column);
 		value.setDataElement(dataElement);
-		value.setCategoryOptionCombo(dataElement != null ? "COC" : null);
+		value.setCategoryOptionCombo(categoryOptionCombo);
 		value.setValueNumeric(emr);
 		value.setKhisValue(khis);
 		values.add(value);

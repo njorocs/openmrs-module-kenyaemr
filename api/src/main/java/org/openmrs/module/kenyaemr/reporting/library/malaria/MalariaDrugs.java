@@ -18,10 +18,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * Drug ids (drug.drug_id) of the malaria commodities, shared by the MOH 743 commodity rows and
- * patient counts, so both count the same products. Each
- * list has the current drug and, for counting past orders, the retired brand entries of the same
- * product. The RDT kit and nets are stock items without a drug, so they are named by concept.
+ * Drug ids (drug.drug_id) of the malaria commodities, shared by the MOH 743 commodity rows, the
+ * MOH 743 patient counts and the MOH 643 ACT courses, so the three count the same products.
+ * Each list has the current drug and, for counting past orders, the retired brand entries of the
+ * same product. The RDT kit and nets are stock items without a drug, so they are named by concept.
  */
 public final class MalariaDrugs {
 
@@ -87,6 +87,12 @@ public final class MalariaDrugs {
 			DIHYDROARTEMISININ_PIPERAQUINE_20_160MG_TAB, DIHYDROARTEMISININ_PIPERAQUINE_40_320MG_DISPERSIBLE_TAB,
 			DIHYDROARTEMISININ_PIPERAQUINE_40_320MG_TAB, ARTESUNATE_AMODIAQUINE_67_25MG_TAB,
 			ARTESUNATE_AMODIAQUINE_135_50MG_TAB, ARTESUNATE_AMODIAQUINE_270_100MG_TAB);
+
+	/**
+	 * Drugs that treat malaria, for "treated for malaria" (T22-04): the MOH 743 drugs except the RDT,
+	 * sulphadoxine-pyrimethamine (prevention in pregnancy, IPTp) and nets
+	 */
+	public static final List<Integer> TREATMENT = union(ACTS, ARTESUNATE_INJECTION, PRIMAQUINE_7_5MG_TAB, PRIMAQUINE_15MG_TAB);
 
 	private MalariaDrugs() {
 	}

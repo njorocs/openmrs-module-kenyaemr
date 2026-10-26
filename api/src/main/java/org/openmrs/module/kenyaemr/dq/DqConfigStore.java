@@ -239,7 +239,7 @@ public final class DqConfigStore {
 						problems.add(ruleName + " refers to unknown indicator " + code);
 					}
 				}
-				for (String report : rule.getSettings().getStrings("reports")) {
+				for (String report : rule.getSettings().getReportNames()) {
 					if (!reports.contains(report)) {
 						problems.add(ruleName + " checks " + report + ", which is not an expected report");
 					}

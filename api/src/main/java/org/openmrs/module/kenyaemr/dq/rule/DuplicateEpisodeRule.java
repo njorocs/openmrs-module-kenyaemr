@@ -40,9 +40,14 @@ import java.util.Set;
  * "severeNamePatterns" (SQL LIKE, default '%severe%malaria%' and '%malaria%severe%'), as an
  * encounter diagnosis or a coded observation.
  * <p>
+ * Positive tests are counted in MOH 705A (under 5) and MOH 705B (5 and over), so the warning
+ * attaches to the report that counts the patient: "reports" lists each report with its age band,
+ * {report, minAgeYears, maxAgeYears} (age at the repeat test, max exclusive). Without it the
+ * warning attaches to "report", for patients of any age.
+ * <p>
  * Patient-level detail is not stored: the list is rebuilt with {@link #listPairs(DqRuleContext)}
- * when someone opens it. Settings: report (whose approval the warning attaches to), windowDays,
- * crossPeriodOnly, severeConcepts, severeNamePatterns, severity, labTests, positiveResults.
+ * when someone opens it. Settings: reports or report, windowDays, crossPeriodOnly, severeConcepts,
+ * severeNamePatterns, severity, labTests, positiveResults.
  */
 public class DuplicateEpisodeRule extends AbstractDqRule {
 
@@ -58,16 +63,55 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 
 	@Override
 	public Set<String> getReports(DqConfig config) {
-		return new LinkedHashSet<String>(Collections.singletonList(report()));
+		Set<String> reports = new LinkedHashSet<String>();
+		for (Map<String, Object> band : bands(settings())) {
+			reports.add(String.valueOf(band.get("report")));
+		}
+		return reports;
 	}
 
 	@Override
 	public boolean appliesTo(DqRuleContext context) {
-		return context.getRun() != null && report().equals(context.getRun().getReportName());
+		return band(context, settings()) != null;
 	}
 
-	private String report() {
-		return settings().getString("report", DEFAULT_REPORT);
+	/**
+	 * @return the "reports" entries, else one entry for "report" with no age band
+	 */
+	static List<Map<String, Object>> bands(DqRuleSettings settings) {
+		List<Map<String, Object>> bands = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> band : settings.getObjectList("reports")) {
+			if (band.get("report") != null) {
+				bands.add(band);
+			}
+		}
+		if (bands.isEmpty()) {
+			bands.add(Collections.<String, Object>singletonMap("report", settings.getString("report", DEFAULT_REPORT)));
+		}
+		return bands;
+	}
+
+	/**
+	 * @return the age band of the report being checked, or null when the rule does not cover it
+	 */
+	static Map<String, Object> band(DqRuleContext context, DqRuleSettings settings) {
+		if (context.getRun() == null) {
+			return null;
+		}
+		for (Map<String, Object> band : bands(settings)) {
+			if (context.getRun().getReportName().equals(band.get("report"))) {
+				return band;
+			}
+		}
+		return null;
+	}
+
+	private static Integer age(Map<String, Object> band, String key) {
+		Object value = band != null ? band.get(key) : null;
+		if (value instanceof Number) {
+			return ((Number) value).intValue();
+		}
+		return value != null ? Integer.valueOf(value.toString().trim()) : null;
 	}
 
 	@Override
@@ -95,6 +139,13 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 		result.setThreshold("no repeat positive within " + windowDays + " days unless severe");
 
 		Map<String, Object> detail = new LinkedHashMap<String, Object>();
+		Map<String, Object> band = band(context, settings);
+		if (age(band, "minAgeYears") != null) {
+			detail.put("minAgeYears", age(band, "minAgeYears"));
+		}
+		if (age(band, "maxAgeYears") != null) {
+			detail.put("maxAgeYears", age(band, "maxAgeYears"));
+		}
 		detail.put("windowDays", windowDays);
 		detail.put("crossPeriodOnly", crossPeriodOnly);
 		detail.put("labTests", MalariaLabSettings.labTests(settings));
@@ -118,14 +169,20 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 		boolean byId = !severeConcepts(settings).isEmpty();
 		String severe = byId ? "(:severeConcepts)"
 				: "(select n.concept_id from concept_name n where n.voided = 0 and (" + namePredicates(settings) + "))";
+		Map<String, Object> band = band(context, settings);
+		boolean byAge = age(band, "minAgeYears") != null || age(band, "maxAgeYears") != null;
+		String ageAtTest = "timestampdiff(year, dem.DOB, b.date_test_requested)";
 		return "select b.patient_id, max(a.date_test_requested) as first_date, b.date_test_requested as second_date "
 				+ "from " + lab + " a "
 				+ "join " + lab + " b on b.patient_id = a.patient_id "
 				+ "and b.date_test_requested > a.date_test_requested "
 				+ "and b.date_test_requested <= date_add(a.date_test_requested, interval :windowDays day) "
+				+ (byAge ? "join " + context.getEtlDatabase() + ".etl_patient_demographics dem on dem.patient_id = b.patient_id " : "")
 				+ "where a.lab_test in (:labTests) and b.lab_test in (:labTests) "
 				+ "and lower(a.result_name) in (:positiveResults) and lower(b.result_name) in (:positiveResults) "
 				+ "and b.date_test_requested between :startDate and :endDate "
+				+ (age(band, "minAgeYears") != null ? "and " + ageAtTest + " >= :minAgeYears " : "")
+				+ (age(band, "maxAgeYears") != null ? "and " + ageAtTest + " < :maxAgeYears " : "")
 				+ (settings.getBoolean("crossPeriodOnly", true) ? "and a.date_test_requested < :startDate " : "")
 				+ "and not exists (select 1 from encounter_diagnosis d where d.patient_id = b.patient_id and d.voided = 0 "
 				+ "and d.diagnosis_coded in " + severe + " "
@@ -151,6 +208,13 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 		parameters.put("positiveResults", MalariaLabSettings.positiveResults(settings));
 		parameters.put("startDate", context.getPeriodStart());
 		parameters.put("endDate", context.getPeriodEnd());
+		Map<String, Object> band = band(context, settings);
+		if (age(band, "minAgeYears") != null) {
+			parameters.put("minAgeYears", age(band, "minAgeYears"));
+		}
+		if (age(band, "maxAgeYears") != null) {
+			parameters.put("maxAgeYears", age(band, "maxAgeYears"));
+		}
 		List<Integer> concepts = severeConcepts(settings);
 		if (!concepts.isEmpty()) {
 			parameters.put("severeConcepts", concepts);

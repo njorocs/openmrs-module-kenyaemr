@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class DqRulesTest {
 	private static final String MOH_743 = "MOH-743 Report";
 
 	private static final String MOH_705A = "MOH 705A Outpatient summary";
+
+	private static final String MOH_705B = "MOH 705B Outpatient summary";
 
 	private static final String MOH_706 = "MOH 706";
 
@@ -85,16 +88,18 @@ public class DqRulesTest {
 	// X-RPT-01: suspected (MOH 705A/B) against blood smears (MOH 706) and microscopy (MOH 505)
 
 	@Test
-	public void xrpt01_shouldCheckBothComparisons() {
+	public void xrpt01_shouldCheckEachComparison() {
 		List<DqResult> results = rule("X-RPT-01").evaluate(FakeRuleContext.monthly(MOH_705A, march)
 				.indicator(SUSPECTED, march, 90.0).indicator("MAL_BST_706", march, 100.0)
 				.indicator("MAL_MICRO_TESTED_505", march, 70.0));
 
-		Assert.assertEquals(2, results.size());
+		Assert.assertEquals(3, results.size());
 		Assert.assertEquals(SUSPECTED + "/MAL_BST_706", results.get(0).getIndicatorCode());
 		Assert.assertEquals(DqOutcome.PASS, results.get(0).getOutcome());
 		Assert.assertEquals(SUSPECTED + "/MAL_MICRO_TESTED_505", results.get(1).getIndicatorCode());
 		Assert.assertEquals(DqOutcome.WARN, results.get(1).getOutcome());
+		Assert.assertEquals("MAL_BST_706/MAL_MICRO_TESTED_505", results.get(2).getIndicatorCode());
+		Assert.assertEquals(DqOutcome.WARN, results.get(2).getOutcome());
 	}
 
 	@Test
@@ -187,11 +192,11 @@ public class DqRulesTest {
 				.indicator("MAL_ACT_DISPENSED_643", march, 110.0).indicator("MAL_TREATED_ACT_743", march, 100.0)).getOutcome());
 	}
 
-	// T22-07: positive again within 14 days of a positive counted last month
+	// T22-07: positive again within 14 days of a positive counted last month, in MOH 705A/B
 
 	@Test
 	public void t2207_shouldWarnWhenRepeatPositivesAreFound() {
-		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march).queryReturns(new Object[] { 2L });
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_705A, march).queryReturns(new Object[] { 2L });
 
 		DqResult result = single(rule("T22-07"), context);
 
@@ -201,21 +206,44 @@ public class DqRulesTest {
 		Map<String, Object> parameters = context.queryParameters.get(0);
 		Assert.assertEquals(14, parameters.get("windowDays"));
 		Assert.assertEquals(march, parameters.get("startDate"));
-		Assert.assertEquals("%severe%malaria%", parameters.get("severeName0"));
+		Assert.assertEquals(Arrays.asList(152295, 2002634, 158379, 2002639), parameters.get("severeConcepts"));
+		Assert.assertEquals(5, parameters.get("maxAgeYears"));
+		Assert.assertNull(parameters.get("minAgeYears"));
 	}
 
 	@Test
-	public void t2207_shouldPassWithNoPairsAndOnlyApplyToMoh743() {
-		Assert.assertEquals(DqOutcome.PASS, single(rule("T22-07"),
-				FakeRuleContext.monthly(MOH_743, march).queryReturns(new Object[] { 0L })).getOutcome());
+	public void t2207_shouldPassWithNoPairsAndOnlyApplyToMoh705() {
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_705B, march).queryReturns(new Object[] { 0L });
+
+		Assert.assertEquals(DqOutcome.PASS, single(rule("T22-07"), context).getOutcome());
+		Assert.assertEquals(5, context.queryParameters.get(0).get("minAgeYears"));
+		Assert.assertNull(context.queryParameters.get(0).get("maxAgeYears"));
+		Assert.assertFalse(rule("T22-07").appliesTo(FakeRuleContext.monthly(MOH_743, march)));
 		Assert.assertFalse(rule("T22-07").appliesTo(FakeRuleContext.monthly(MOH_706, march)));
+		Assert.assertEquals(new LinkedHashSet<String>(Arrays.asList(MOH_705A, MOH_705B)),
+				rule("T22-07").getReports(FakeRuleContext.monthly(MOH_705A, march).getConfig()));
+	}
+
+	@Test
+	public void t2207_shouldCheckOneReportForAllAgesWithoutReports() {
+		Map<String, Object> values = definition("T22-07");
+		values.remove("reports");
+		values.put("report", MOH_743);
+		DuplicateEpisodeRule rule = new DuplicateEpisodeRule(new DqConfig.RuleDefinition(null, values));
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march).queryReturns(new Object[] { 0L });
+
+		single(rule, context);
+
+		Assert.assertFalse(rule.appliesTo(FakeRuleContext.monthly(MOH_705A, march)));
+		Assert.assertFalse(context.queryParameters.get(0).containsKey("minAgeYears"));
+		Assert.assertFalse(context.queryParameters.get(0).containsKey("maxAgeYears"));
 	}
 
 	@Test
 	public void t2207_shouldUseConfiguredSevereConcepts() {
 		Map<String, Object> values = definition("T22-07");
 		values.put("severeConcepts", Arrays.asList(160155, "not a number"));
-		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march).queryReturns(new Object[] { 0L });
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_705A, march).queryReturns(new Object[] { 0L });
 
 		single(new DuplicateEpisodeRule(new DqConfig.RuleDefinition(null, values)), context);
 
@@ -297,13 +325,46 @@ public class DqRulesTest {
 	// G-RPT-02: EMR against KHIS, within 5%
 
 	@Test
-	public void grpt02_shouldTicketAVarianceAboveFivePercent() {
+	public void grpt02_shouldCompareEveryDataElementOfTheReport() {
+		FakeRuleContext context = FakeRuleContext.monthly(MOH_705A, march)
+				.value("MOH705A", "CMC-32", "deCMC", "male", 60.0, 56.0)
+				.value("MOH705A", "CMC-32F", "deCMC", "female", 40.0, 38.0)
+				.value("MOH705A", "DIA-32", "deDIA", "total", 50.0, 50.0)
+				.value("MOH705A", "date", null, null, 1.0, null);
+
+		List<DqResult> results = rule("G-RPT-02").evaluate(context);
+
+		Assert.assertEquals(2, results.size());
+		DqResult confirmed = result(results, "deCMC");
+		Assert.assertEquals(DqOutcome.TICKET, confirmed.getOutcome());
+		Assert.assertEquals(100.0, confirmed.getNumerator(), 0);
+		Assert.assertEquals(94.0, confirmed.getDenominator(), 0);
+		Assert.assertTrue(confirmed.getMessage(), confirmed.getMessage().startsWith("CMC-32, CMC-32F in MOH 705A"));
+		// Not a malaria indicator, compared all the same
+		Assert.assertEquals(DqOutcome.PASS, result(results, "deDIA").getOutcome());
+
+		DqTicket ticket = DqRuleEngine.ticketsFor(Collections.singletonList(confirmed), context.getConfig()).get(0);
+		Assert.assertEquals("deCMC", ticket.getIndicatorCode());
+		Assert.assertEquals(-6.0, ticket.getVariancePct(), 1e-9);
+	}
+
+	@Test
+	public void grpt02_shouldSayWhenNothingCanBeCompared() {
+		List<DqResult> results = rule("G-RPT-02").evaluate(FakeRuleContext.monthly(MOH_705A, march)
+				.value("MOH705A", "SMC-32", null, 250.0, null));
+
+		Assert.assertEquals(1, results.size());
+		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, results.get(0).getOutcome());
+	}
+
+	@Test
+	public void grpt02_shouldTicketAnIndicatorVarianceAboveFivePercent() {
 		FakeRuleContext context = FakeRuleContext.monthly(MOH_705A, march)
 				.value("MOH705A", "CMC-32", "deCMC", 100.0, 94.0)
 				.value("MOH705A", "TMC-32", "deTMC", 200.0, 200.0)
 				.value("MOH705A", "SMC-32", null, 250.0, null);
 
-		List<DqResult> results = rule("G-RPT-02").evaluate(context);
+		List<DqResult> results = indicatorParity(context).evaluate(context);
 
 		DqResult confirmed = result(results, CONFIRMED);
 		Assert.assertEquals(DqOutcome.TICKET, confirmed.getOutcome());
@@ -318,13 +379,33 @@ public class DqRulesTest {
 	}
 
 	@Test
+	public void grpt02_shouldOnlyCompareTheReportsSentToKhis() {
+		DqConfig config = FakeRuleContext.monthly(MOH_705A, march).getConfig();
+
+		Assert.assertFalse(rule("G-RPT-02").getReports(config).contains("MOH 643"));
+		Assert.assertTrue(rule("G-RPT-02").getReports(config).contains(MOH_743));
+		Assert.assertFalse(rule("G-RPT-02").appliesTo(FakeRuleContext.monthly("MOH 643", march)));
+		Assert.assertTrue(rule("G-RPT-02").appliesTo(FakeRuleContext.monthly(MOH_743, march)));
+		Assert.assertTrue(rule("G-RPT-02").appliesTo(FakeRuleContext.monthly("MOH 711", march)));
+	}
+
+	@Test
 	public void grpt02_shouldCountAValueKhisDoesNotHoldAsZero() {
 		FakeRuleContext context = FakeRuleContext.monthly(MOH_705A, march).value("MOH705A", "CMC-32", "deCMC", 10.0, null);
 
-		DqResult confirmed = result(rule("G-RPT-02").evaluate(context), CONFIRMED);
+		DqResult confirmed = result(rule("G-RPT-02").evaluate(context), "deCMC");
 
 		Assert.assertEquals(DqOutcome.TICKET, confirmed.getOutcome());
 		Assert.assertEquals(0.0, confirmed.getDenominator(), 0);
+	}
+
+	/**
+	 * G-RPT-02 comparing the malaria indicators only
+	 */
+	private static KhisParityRule indicatorParity(FakeRuleContext context) {
+		Map<String, Object> values = definition("G-RPT-02");
+		values.put("compare", KhisParityRule.COMPARE_INDICATORS);
+		return new KhisParityRule(new DqConfig.RuleDefinition(context.getConfig().getProgram("MALARIA"), values));
 	}
 
 	// Engine
@@ -388,8 +469,10 @@ public class DqRulesTest {
 		List<DqTicket> tickets = DqRuleEngine.ticketsFor(results, context.getConfig());
 
 		Assert.assertEquals(DqRunStatus.AWAITING_APPROVAL, DqRuleEngine.statusFor(results));
-		Assert.assertEquals(1, tickets.size());
+		// 705 against 706 is 20% low and 706 against 505 is 25% high; 705 against 505 matches
+		Assert.assertEquals(2, tickets.size());
 		Assert.assertEquals(-20.0, tickets.get(0).getVariancePct(), 1e-9);
+		Assert.assertEquals(25.0, tickets.get(1).getVariancePct(), 1e-9);
 		Assert.assertEquals(DqTicket.ROLE_HRIO, tickets.get(0).getAssigneeRole());
 		Assert.assertEquals("MALARIA", tickets.get(0).getProgramCode());
 	}

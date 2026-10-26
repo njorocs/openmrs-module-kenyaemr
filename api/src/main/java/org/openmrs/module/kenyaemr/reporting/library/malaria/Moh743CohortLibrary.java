@@ -236,6 +236,29 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setDescription("Total patients Given Artesunate Injection");
         return cd;
     }
+    /**
+     * Patients given any malaria treatment drug in the period, each counted once
+     */
+    public CohortDefinition totalPatientsTreatedForMalaria() {
+        SqlCohortDefinition cd = new SqlCohortDefinition();
+        String sqlQuery = "SELECT DISTINCT o.patient_id " +
+                "FROM drug_order do " +
+                "INNER JOIN orders o ON do.order_id = o.order_id " +
+                "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
+                "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
+                "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
+                "WHERE do.drug_inventory_id IN " + MalariaDrugs.sql(MalariaDrugs.TREATMENT) + " " +
+                "  AND o.voided = 0 " +
+                "  AND e.voided = 0 " +
+                "  AND DATE(e.encounter_datetime) BETWEEN DATE(:startDate) AND DATE(:endDate)";
+        cd.setName("totalPatientsTreatedForMalaria");
+        cd.setQuery(sqlQuery);
+        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
+        cd.setDescription("Patients given an ACT, artesunate injection or primaquine");
+        return cd;
+    }
+
     public CohortDefinition totalPatientsGivenArtesunateInjectionAgeWeightRange(double minWeight, double maxWeight, String comparisonOperator, int age) {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));

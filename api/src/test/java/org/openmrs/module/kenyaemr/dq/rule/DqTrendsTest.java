@@ -102,9 +102,10 @@ public class DqTrendsTest {
 				.indicator("MAL_BST_706", march, 100.0).indicator("MAL_MICRO_TESTED_505", march, 50.0);
 		IndicatorRatioRule rule = DqTrends.ratioRule(context.getConfig(), DqRuleEngine.X_RPT_01);
 
-		Assert.assertEquals(2, rule.pairs().size());
+		Assert.assertEquals(3, rule.pairs().size());
 		Assert.assertEquals(DqOutcome.PASS, DqTrends.ratioTrend(context, rule, 0, march, march).get(0).getOutcome());
 		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 1, march, march).get(0).getOutcome());
+		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 2, march, march).get(0).getOutcome());
 	}
 
 	@Test

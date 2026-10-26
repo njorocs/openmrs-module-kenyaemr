@@ -92,7 +92,8 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 				ReportUtils.map(totalPatientsByAgeSuspectedMalaria(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(patientsTreatedWithAntiMalarials(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(patientsGivenArtesunateInjection(), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(totalPatientsSuspectedMalariaByAge(), "startDate=${startDate},endDate=${endDate}")
+				ReportUtils.map(totalPatientsSuspectedMalariaByAge(), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(patientsTreatedForMalaria(), "startDate=${startDate},endDate=${endDate}")
 
 		);
 	}
@@ -105,6 +106,20 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
 		dsd.addColumn("TOTAL_LESS_FIVE", "Total Patient less than 5", ReportUtils.map(moh743IndicatorLibrary.totalPatientsByAgeSuspectedMalaria(COMPARATIVE_OPERATION_LESS,AGE_FIVE), indParams), "");
 		dsd.addColumn("TOTAL_PLUS_FIVE", "Total Patient greater less 5", ReportUtils.map(moh743IndicatorLibrary.totalPatientsByAgeSuspectedMalaria(COMPARATIVE_OPERATION_GREATER,AGE_FIVE), indParams), "");
+		return dsd;
+	}
+
+	/**
+	 * Patients given any malaria treatment, counted once however many drugs they had, for the
+	 * data quality check T22-04. Not on the paper form and not mapped to KHIS, so it is not sent.
+	 */
+	private DataSetDefinition patientsTreatedForMalaria() {
+		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
+		dsd.setName("DQ_MALARIA_TREATMENT");
+		dsd.setDescription("Patients treated for malaria (data quality)");
+		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
+		dsd.addColumn("PATIENTS_TREATED", "Patients given an ACT, artesunate injection or primaquine", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedForMalaria(), indParams), "");
 		return dsd;
 	}
 

@@ -114,6 +114,25 @@ public class DqRuleSettings {
 	}
 
 	/**
+	 * @return the reports a rule names: "report", and each entry of "reports", which is a report name
+	 *         or an object with a "report" (e.g. a report with its age band)
+	 */
+	public List<String> getReportNames() {
+		List<String> reports = new ArrayList<String>();
+		String report = getString("report", null);
+		if (report != null && !report.trim().isEmpty()) {
+			reports.add(report.trim());
+		}
+		for (Object item : getList("reports")) {
+			Object name = item instanceof Map ? ((Map<?, ?>) item).get("report") : item;
+			if (name != null && !name.toString().trim().isEmpty()) {
+				reports.add(name.toString().trim());
+			}
+		}
+		return reports;
+	}
+
+	/**
 	 * @return a list of objects, such as indicator pairs, or an empty list
 	 */
 	@SuppressWarnings("unchecked")

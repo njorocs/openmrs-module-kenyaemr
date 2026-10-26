@@ -61,9 +61,24 @@
         "id": "T22-07",
         "source": "TR-26-110 Table 22 (Duplicate detection)",
         "type": "REPEAT_EPISODE",
-        "report": "MOH-743 Report",
+        "reports": [
+          {
+            "report": "MOH 705A Outpatient summary",
+            "maxAgeYears": 5
+          },
+          {
+            "report": "MOH 705B Outpatient summary",
+            "minAgeYears": 5
+          }
+        ],
         "windowDays": 14,
         "crossPeriodOnly": true,
+        "severeConcepts": [
+          152295,
+          2002634,
+          158379,
+          2002639
+        ],
         "severity": "WARN"
       },
       {
@@ -95,6 +110,15 @@
         "id": "G-RPT-02",
         "source": "TR-26-110 Annex D.5",
         "type": "KHIS_PARITY",
+        "compare": "ALL_VALUES",
+        "reports": [
+          "MOH 705A Outpatient summary",
+          "MOH 705B Outpatient summary",
+          "MOH 706",
+          "MOH 711",
+          "MOH-743 Report",
+          "MOH 505 IDSR Epidemic Case Monitoring"
+        ],
         "tolerance": 0.05,
         "severity": "TICKET"
       },
@@ -109,6 +133,10 @@
           },
           {
             "numerator": "MAL_SUSPECTED_705",
+            "denominator": "MAL_MICRO_TESTED_505"
+          },
+          {
+            "numerator": "MAL_BST_706",
             "denominator": "MAL_MICRO_TESTED_505"
           }
         ],
@@ -331,55 +359,26 @@
     },
     {
       "code": "MAL_TREATED_743",
-      "name": "Patients treated for malaria: given an ACT or artesunate injection (MOH 743)",
+      "name": "Patients treated for malaria: given an ACT, artesunate injection or primaquine, each counted once (MOH 743)",
       "parts": [
         {
           "report": "MOH-743 Report",
-          "dataset": "Patients Given an ACT by Weight Band Category",
+          "dataset": "DQ_MALARIA_TREATMENT",
           "columns": [
-            "under_5_years_5_to_under_10_kg",
-            "aged_5_years_and_above_5_to_under_10_kg",
-            "under_5_years_10_to_under_15_kg",
-            "aged_5_years_and_above_10_to_under_15_kg",
-            "under_5_years_15_to_under_20_kg",
-            "aged_5_years_and_above_15_to_under_20_kg",
-            "under_5_years_20_to_under_25_kg",
-            "aged_5_years_and_above_20_to_under_25_kg",
-            "under_5_years_25_to_under_30_kg",
-            "aged_5_years_and_above_25_to_under_30_kg",
-            "under_5_years_30_to_under_35_kg",
-            "aged_5_years_and_above_30_to_under_35_kg",
-            "under_5_years_35_to_under_60_kg",
-            "aged_5_years_and_above_35_to_under_60_kg",
-            "under_5_years_60_to_under_80_kg",
-            "aged_5_years_and_above_60_to_under_80_kg",
-            "under_5_years_80_and_above_kg",
-            "aged_5_years_and_above_80_and_above_kg"
-          ]
-        },
-        {
-          "report": "MOH-743 Report",
-          "dataset": "INJ_ARTESUNATE",
-          "columns": [
-            "20_Under_5",
-            "20_Over_5",
-            "20_50_Under_5",
-            "20_50_Over_5",
-            "50_Under_5",
-            "50_Over_5"
+            "PATIENTS_TREATED"
           ]
         }
       ]
     },
     {
       "code": "MAL_ACT_DISPENSED_643",
-      "name": "Artemether-lumefantrine dispensed (MOH 643)",
+      "name": "ACT treatment courses dispensed, all ACTs (MOH 643)",
       "parts": [
         {
           "report": "MOH 643",
-          "dataset": "Artemether-Lumefantrine 20/120 Tabs",
+          "dataset": "DQ_ACT_COURSES",
           "columns": [
-            "quantity_used"
+            "courses_dispensed"
           ],
           "zeroWhenEmpty": true
         }

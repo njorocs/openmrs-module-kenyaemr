@@ -151,7 +151,7 @@ public class DqConfig {
 					reports.addAll(indicator.getReports());
 				}
 			}
-			reports.addAll(definition.getSettings().getStrings("reports"));
+			reports.addAll(definition.getSettings().getReportNames());
 		}
 		return reports;
 	}
