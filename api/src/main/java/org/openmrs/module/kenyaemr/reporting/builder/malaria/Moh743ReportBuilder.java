@@ -119,7 +119,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		dsd.setDescription("Patients treated for malaria (data quality)");
 		dsd.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		dsd.addParameter(new Parameter("endDate", "End Date", Date.class));
-		dsd.addColumn("PATIENTS_TREATED", "Patients given an ACT, artesunate injection or primaquine", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedForMalaria(), indParams), "");
+		dsd.addColumn("PATIENTS_TREATED", "Patients given any malaria treatment: an ACT, artesunate, artemether, quinine or primaquine", ReportUtils.map(moh743IndicatorLibrary.totalPatientsTreatedForMalaria(), indParams), "");
 		return dsd;
 	}
 

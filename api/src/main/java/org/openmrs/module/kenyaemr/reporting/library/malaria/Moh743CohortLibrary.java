@@ -255,7 +255,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Patients given an ACT, artesunate injection or primaquine");
+        cd.setDescription("Patients given any malaria treatment");
         return cd;
     }
 

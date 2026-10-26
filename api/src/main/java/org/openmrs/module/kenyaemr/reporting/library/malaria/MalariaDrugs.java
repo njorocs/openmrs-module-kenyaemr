@@ -73,6 +73,20 @@ public final class MalariaDrugs {
 	public static final List<Integer> SULPHADOXINE_PYRIMETHAMINE_500_25MG_TAB = Arrays.asList(2070, 14145, 14147, 14148,
 			14149, 14150, 14151, 17699, 17700, 17841);
 
+	/** Artemether injection 80mg/ml, and retired entries of artemether injection and oral suspension */
+	public static final List<Integer> ARTEMETHER = Arrays.asList(8006, 1404, 9552, 9554, 9555, 9557, 9558, 9560, 9561, 9563,
+			9564, 9566, 9568, 9569, 9571, 9572, 16243, 16244, 16245, 16246, 16247, 16248, 16249, 16250, 16251, 16252, 16253,
+			16254, 16255, 16256, 16257, 16258, 16268, 16270, 16280, 18071, 20114, 20235, 20237, 20239, 20251);
+
+	/** Rectal artesunate 100mg (pre-referral), and retired entries of 50, 100 and 200mg */
+	public static final List<Integer> ARTESUNATE_SUPPOSITORY = Arrays.asList(8046, 1407, 1412, 9586, 9587, 9589, 9590, 16299,
+			20268, 21209);
+
+	/** Quinine tablet 300mg and injection 300mg/ml, and retired entries of tablets, syrup and injection */
+	public static final List<Integer> QUININE = Arrays.asList(2072, 2074, 2073, 6807, 6808, 6809, 6810, 6811, 6812, 6813, 8841,
+			8842, 8858, 8860, 8868, 8871, 8878, 8879, 8885, 8888, 9550, 9551, 9615, 17575, 17576, 17577, 17578, 17579, 17580,
+			17581, 17582, 17583, 17584, 17585, 17586, 17587, 18984, 18986, 18987, 20657, 20660);
+
 	public static final List<Integer> PRIMAQUINE_7_5MG_TAB = Collections.singletonList(2048);
 
 	public static final List<Integer> PRIMAQUINE_15MG_TAB = Collections.singletonList(2047);
@@ -90,9 +104,11 @@ public final class MalariaDrugs {
 
 	/**
 	 * Drugs that treat malaria, for "treated for malaria" (T22-04): the MOH 743 drugs except the RDT,
-	 * sulphadoxine-pyrimethamine (prevention in pregnancy, IPTp) and nets
+	 * sulphadoxine-pyrimethamine (prevention in pregnancy, IPTp) and nets, and the treatments MOH 743
+	 * does not list: artemether, rectal artesunate and quinine
 	 */
-	public static final List<Integer> TREATMENT = union(ACTS, ARTESUNATE_INJECTION, PRIMAQUINE_7_5MG_TAB, PRIMAQUINE_15MG_TAB);
+	public static final List<Integer> TREATMENT = union(ACTS, ARTESUNATE_INJECTION, PRIMAQUINE_7_5MG_TAB, PRIMAQUINE_15MG_TAB,
+			ARTEMETHER, ARTESUNATE_SUPPOSITORY, QUININE);
 
 	private MalariaDrugs() {
 	}

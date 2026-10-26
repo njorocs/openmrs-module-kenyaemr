@@ -244,6 +244,14 @@ public final class DqConfigStore {
 						problems.add(ruleName + " checks " + report + ", which is not an expected report");
 					}
 				}
+				Object tolerance = rule.getValues().get("tolerance");
+				if (tolerance != null) {
+					Double value = rule.getSettings().getDouble("tolerance", null);
+					if (value == null || value < 0 || value >= 1) {
+						problems.add(ruleName + " has tolerance " + tolerance
+								+ "; write it as a fraction from 0 to below 1, e.g. 0.05 for 5%");
+					}
+				}
 				if (rule.getGates() != null && !program.getOwns().contains(rule.getGates())) {
 					problems.add(ruleName + " gates " + rule.getGates() + ", which " + name
 							+ " does not own, so it is shown as a warning");

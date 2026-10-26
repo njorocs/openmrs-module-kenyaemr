@@ -359,7 +359,7 @@
     },
     {
       "code": "MAL_TREATED_743",
-      "name": "Patients treated for malaria: given an ACT, artesunate injection or primaquine, each counted once (MOH 743)",
+      "name": "Patients treated for malaria: given an ACT, artesunate (injection or rectal), artemether, quinine or primaquine, each counted once (MOH 743)",
       "parts": [
         {
           "report": "MOH-743 Report",

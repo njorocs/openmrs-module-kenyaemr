@@ -16,6 +16,7 @@ import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -101,6 +102,25 @@ public class DqConfigStoreTest {
 		Assert.assertTrue(problems, problems.contains("watches unknown indicator MAL_OTHER_TYPO"));
 		Assert.assertTrue(problems, problems.contains("gates MOH 706, which program MALARIA does not own"));
 		Assert.assertTrue(problems, problems.contains("still has a \"rules\" section"));
+	}
+
+	@Test
+	public void validate_shouldFindToleranceThatIsNotAFraction() {
+		DqConfig config = DqConfigStore.getDefaultConfig();
+		List<Map<String, Object>> rules = config.getProgram("MALARIA").getRules();
+		for (Map<String, Object> rule : rules) {
+			if ("G-RPT-02".equals(rule.get("id"))) {
+				rule.put("tolerance", 5);
+			} else if ("T22-05".equals(rule.get("id"))) {
+				rule.put("tolerance", "10%");
+			}
+		}
+
+		String problems = DqConfigStore.validate(config).toString();
+
+		Assert.assertTrue(problems, problems.contains("G-RPT-02 of program MALARIA has tolerance 5; write it as a fraction"));
+		Assert.assertTrue(problems, problems.contains("T22-05 of program MALARIA has tolerance 10%"));
+		Assert.assertFalse(problems, problems.contains("X-RPT-01"));
 	}
 
 	@Test
