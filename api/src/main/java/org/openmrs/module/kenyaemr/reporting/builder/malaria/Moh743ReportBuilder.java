@@ -13,6 +13,7 @@ import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
+import org.openmrs.module.kenyaemr.reporting.library.malaria.MalariaDrugs;
 import org.openmrs.module.kenyaemr.reporting.library.malaria.Moh743IndicatorLibrary;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
@@ -54,24 +55,6 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 	private static final Double WEIGHT_1000 = 1000.0;
 
 
-	static final List<Integer> RAPID_DIAGNOSTIC_TEST = Arrays.asList(4908);
-	static final List<Integer> ARTEMETHER_LUMEFANTRINE_20_120MG_BLISTER = Arrays.asList(8580, 14009, 14010, 14011, 14018, 14019, 14020, 14021, 14022, 14023, 14024,
-			14025, 14026, 14027, 14028, 14029, 14030, 14031, 14032, 14033, 14034, 14035,
-			14036, 14037, 14038, 14039, 14040, 14041, 14042, 14043, 14044, 14049, 14050,
-			15092, 16260, 16266, 16267, 16269, 16272, 16273, 16274, 16275, 16276, 16281,
-			16282, 16284, 16303);
-	static final List<Integer> ARTEMETHER_PYRONARIDINE_20_60MG_SACHET = Arrays.asList(2241);
-	static final List<Integer> ARTEMETHER_PYRONARIDINE_60_180MG_TABLET = Arrays.asList(2221);
-	static final List<Integer> DIHYDROARTEMESININ_PIPERAQUINE_20_160MG_DISPERSIBLE_TAB = Arrays.asList(2250);
-	static final List<Integer> DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_DISPERSIBLE_TAB = Arrays.asList(2225);
-	static final List<Integer> DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_TAB = Arrays.asList(1819);
-	static final List<Integer> ARTESUNATE_AMODIAQUINE_67_25MG_TAB = Arrays.asList(14490,14491,14492,14493,15095,16297,16301);
-	static final List<Integer> ARTESUNATE_AMODIAQUINE_135_50MG_TAB = Arrays.asList(14494,14495,14496,14497,15096,16293,16296,16300);
-	static final List<Integer> ARTESUNATE_AMODIAQUINE_270_100MG_TAB = Arrays.asList(14486,14487,14488,14489,14497,16291,16295);
-	static final List<Integer> INJECTABLE_ARTESUNATE_60MG = Arrays.asList(9580,9581,9583,9584,9593,9595,9596,9598,9604,9605,9607,9608,15620,16288,16289,16298);
-	static final List<Integer> SULPHADOXINE_PYRIMETHAMINE_500_25MG_TAB = Arrays.asList(14145,14147,14148,14149,14150,14151,14931,14932,17699,17700,17713,17841);
-	static final List<Integer> LONG_LASTING_INSECTICIDAL_NET = Arrays.asList(2105);
-	static final List<Integer> PRIMAGUINE_75MG_TAB = Arrays.asList(2153);
 
 	static final int FACTOR_1 = 1;
 	static final int TABLET = 1513,TEST = 1513,BLISTER = 1513, SACHETS = 1608, VITAL = 162382, PIECES = 2000635;
@@ -83,43 +66,29 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 				new Parameter("endDate", "End Date", Date.class)
 		);
 	}
-	String labTest = String.valueOf(ARTEMETHER_LUMEFANTRINE_20_120MG_BLISTER).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String ARTEMETHER_PYRONARIDINE_20_60MG = String.valueOf(ARTEMETHER_PYRONARIDINE_20_60MG_SACHET).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String ARTEMETHER_PYRONARIDINE_60_180MG = String.valueOf(ARTEMETHER_PYRONARIDINE_60_180MG_TABLET).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String DIHYDROARTEMESININ_PIPERAQUINE_20_160MG_DISPERSIBLE = String.valueOf(DIHYDROARTEMESININ_PIPERAQUINE_20_160MG_DISPERSIBLE_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_DISPERSIBLE = String.valueOf(DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_DISPERSIBLE_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String DIHYDROARTEMESININ_PIPERAQUINE_40_320MG = String.valueOf(DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String ARTESUNATE_AMODIAQUINE_67_25MG = String.valueOf(ARTESUNATE_AMODIAQUINE_67_25MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String ARTESUNATE_AMODIAQUINE_135_50MG = String.valueOf(ARTESUNATE_AMODIAQUINE_135_50MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String ARTESUNATE_AMODIAQUINE_270_100MG = String.valueOf(ARTESUNATE_AMODIAQUINE_270_100MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String INJECTABLE_ARTESUNATE = String.valueOf(INJECTABLE_ARTESUNATE_60MG).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String SULPHADOXINE_PYRIMETHAMINE_500_25MG = String.valueOf(SULPHADOXINE_PYRIMETHAMINE_500_25MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String LONG_LASTING_INSECTICIDAL = String.valueOf(LONG_LASTING_INSECTICIDAL_NET).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String PRIMAGUINE_75MG = String.valueOf(PRIMAGUINE_75MG_TAB).replaceAll("\\[", "(").replaceAll("\\]",")");
-	String RAPID_DIAGNOSTIC = String.valueOf(RAPID_DIAGNOSTIC_TEST).replaceAll("\\[", "(").replaceAll("\\]",")");
 
 	@Override
 	protected List<Mapped<DataSetDefinition>> buildDataSets(ReportDescriptor reportDescriptor,
 															ReportDefinition reportDefinition) {
 		return Arrays.asList(
 
-				ReportUtils.map(getDataSetDefinition("Rapid Diagnostic Tests", RAPID_DIAGNOSTIC, FACTOR_1, TEST), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 6s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 12s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 18s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 24s", labTest, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate-Pyronaridine 20/60", ARTEMETHER_PYRONARIDINE_20_60MG, FACTOR_1, SACHETS), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate-Pyronaridine 60/180", ARTEMETHER_PYRONARIDINE_60_180MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 160mg Tabs", DIHYDROARTEMESININ_PIPERAQUINE_20_160MG_DISPERSIBLE, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 320mg Tabs", DIHYDROARTEMESININ_PIPERAQUINE_40_320MG_DISPERSIBLE, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 320mg Tabs", DIHYDROARTEMESININ_PIPERAQUINE_40_320MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 67/25", ARTESUNATE_AMODIAQUINE_67_25MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 135/50", ARTESUNATE_AMODIAQUINE_135_50MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 270/100", ARTESUNATE_AMODIAQUINE_270_100MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Artesunate Injection", INJECTABLE_ARTESUNATE, FACTOR_1, VITAL), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Sulphadoxine Pyrimethamine Tabs", SULPHADOXINE_PYRIMETHAMINE_500_25MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("LLINs", LONG_LASTING_INSECTICIDAL, FACTOR_1, PIECES), "startDate=${startDate},endDate=${endDate}"),
-				ReportUtils.map(getDataSetDefinition("Primaguine 75mg", PRIMAGUINE_75MG, FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Rapid Diagnostic Tests", byConcept(MalariaDrugs.RAPID_DIAGNOSTIC_TEST_CONCEPT), FACTOR_1, TEST), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 6s", byDrug(MalariaDrugs.ARTEMETHER_LUMEFANTRINE_20_120MG_6S), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 12s", byDrug(MalariaDrugs.ARTEMETHER_LUMEFANTRINE_20_120MG_12S), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 18s", byDrug(MalariaDrugs.ARTEMETHER_LUMEFANTRINE_20_120MG_18S), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artemether-Lumefantrine 20/120 Tabs 24s", byDrug(MalariaDrugs.ARTEMETHER_LUMEFANTRINE_20_120MG_24S), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate-Pyronaridine 20/60", byDrug(MalariaDrugs.ARTESUNATE_PYRONARIDINE_20_60MG_GRANULES), FACTOR_1, SACHETS), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate-Pyronaridine 60/180", byDrug(MalariaDrugs.ARTESUNATE_PYRONARIDINE_60_180MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 160mg Tabs", byDrug(MalariaDrugs.DIHYDROARTEMISININ_PIPERAQUINE_20_160MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 320mg Tabs", byDrug(MalariaDrugs.DIHYDROARTEMISININ_PIPERAQUINE_40_320MG_DISPERSIBLE_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Dihydroartemesinin/piperaquine 320mg Tabs", byDrug(MalariaDrugs.DIHYDROARTEMISININ_PIPERAQUINE_40_320MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 67/25", byDrug(MalariaDrugs.ARTESUNATE_AMODIAQUINE_67_25MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 135/50", byDrug(MalariaDrugs.ARTESUNATE_AMODIAQUINE_135_50MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate-Amodiaquine 270/100", byDrug(MalariaDrugs.ARTESUNATE_AMODIAQUINE_270_100MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Artesunate Injection", byDrug(MalariaDrugs.ARTESUNATE_INJECTION), FACTOR_1, VITAL), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Sulphadoxine Pyrimethamine Tabs", byDrug(MalariaDrugs.SULPHADOXINE_PYRIMETHAMINE_500_25MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("LLINs", byConcept(MalariaDrugs.LONG_LASTING_INSECTICIDAL_NET_CONCEPT), FACTOR_1, PIECES), "startDate=${startDate},endDate=${endDate}"),
+				ReportUtils.map(getDataSetDefinition("Primaguine 75mg", byDrug(MalariaDrugs.PRIMAQUINE_7_5MG_TAB), FACTOR_1, TABLET), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(totalPatientsByAgeSuspectedMalaria(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(patientsTreatedWithAntiMalarials(), "startDate=${startDate},endDate=${endDate}"),
 				ReportUtils.map(patientsGivenArtesunateInjection(), "startDate=${startDate},endDate=${endDate}"),
@@ -139,12 +108,26 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		return dsd;
 	}
 
-	private DataSetDefinition getDataSetDefinition(String label, String drugIds, int factor, int unit) {
+	/**
+	 * @return a condition on the stock item's drug, for {@link #getMoh743DrugSummary}
+	 */
+	private static String byDrug(List<Integer> drugIds) {
+		return "drug_id IN " + MalariaDrugs.sql(drugIds);
+	}
+
+	/**
+	 * @return a condition on the stock item's concept, for commodities that are not drugs
+	 */
+	private static String byConcept(int conceptId) {
+		return "concept_id = " + conceptId;
+	}
+
+	private DataSetDefinition getDataSetDefinition(String label, String stockItems, int factor, int unit) {
 		SqlDataSetDefinition sqlDataSetDefinition = new SqlDataSetDefinition();
 		sqlDataSetDefinition.setName(label);
 		sqlDataSetDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
 		sqlDataSetDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
-		sqlDataSetDefinition.setSqlQuery(getMoh743DrugSummary(drugIds, factor, unit));
+		sqlDataSetDefinition.setSqlQuery(getMoh743DrugSummary(stockItems, factor, unit));
 		return sqlDataSetDefinition;
 	}
 
@@ -217,9 +200,13 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 		return dsd;
 	}
 
-	private String getMoh743DrugSummary(String drugIds, int factor, int unit) {
-		if (drugIds == null || drugIds.isEmpty()) {
-			throw new IllegalArgumentException("Drug IDs array cannot be empty");
+	/**
+	 * @param stockItems which stock items the row covers, a condition on stockmgmt_stock_item such as
+	 *            "drug_id IN (1, 2)"
+	 */
+	private String getMoh743DrugSummary(String stockItems, int factor, int unit) {
+		if (stockItems == null || stockItems.isEmpty()) {
+			throw new IllegalArgumentException("The stock item condition cannot be empty");
 		}
 		String query =
 				"SELECT\n" +
@@ -250,7 +237,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    COALESCE(days_out_of_stock.days, 0) AS days_out_of_stock\n" +
 						"FROM (SELECT %d AS dispensing_unit_id) AS params\n" +
 						"LEFT JOIN stockmgmt_stock_item ssi\n" +
-						"    ON ssi.drug_id IN " + drugIds + "\n" +
+						"    ON ssi." + stockItems + "\n" +
 						"    AND ssi.dispensing_unit_id = params.dispensing_unit_id\n" +
 						"LEFT JOIN stockmgmt_stock_item_packaging_uom sspu\n" +
 						"    ON sspu.stock_item_id = ssi.stock_item_id\n" +
@@ -272,7 +259,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    LEFT JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND stit.date_created < :startDate\n" +
 						"      AND (ssto.status = 'COMPLETED' OR ssto.stock_operation_id IS NULL)\n" +
 						"    GROUP BY si.dispensing_unit_id\n" +
@@ -285,7 +272,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (4)\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND ssto.status = 'COMPLETED'\n" +
@@ -299,7 +286,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (9)\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND ssto.status = 'COMPLETED'\n" +
@@ -312,7 +299,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    FROM stockmgmt_stock_item_transaction stit\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND stit.stock_operation_id IS NULL AND stit.quantity < 0\n" +
 						"    GROUP BY si.dispensing_unit_id\n" +
@@ -325,7 +312,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (2)\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND ssto.status = 'COMPLETED'\n" +
@@ -339,7 +326,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (1)\n" +
 						"      AND stit.quantity > 0\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
@@ -354,7 +341,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
 						"    INNER JOIN stockmgmt_stock_item_packaging_uom uom ON stit.stock_item_packaging_uom_id = uom.stock_item_packaging_uom_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (1)\n" +
 						"      AND stit.quantity < 0\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
@@ -369,7 +356,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"        COUNT(ssbt.stock_batch_id) AS quantity\n" +
 						"    FROM stockmgmt_stock_batch ssbt\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON ssbt.stock_item_id = si.stock_item_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssbt.voided = 0\n" +
 						"      AND DATE(ssbt.expiration) BETWEEN :startDate AND DATE_ADD(:endDate, INTERVAL 6 MONTH)\n" +
 						"    GROUP BY si.dispensing_unit_id\n" +
@@ -381,7 +368,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"        COUNT(ssbt.stock_batch_id) AS quantity\n" +
 						"    FROM stockmgmt_stock_batch ssbt\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON ssbt.stock_item_id = si.stock_item_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssbt.voided = 0\n" +
 						"      AND DATE(ssbt.expiration) < :startDate\n" +
 						"    GROUP BY si.dispensing_unit_id\n" +
@@ -393,7 +380,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    FROM stockmgmt_stock_item_transaction stit\n" +
 						"    INNER JOIN stockmgmt_stock_operation ssto ON stit.stock_operation_id = ssto.stock_operation_id\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND ssto.operation_type_id IN (7)\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND ssto.status = 'COMPLETED'\n" +
@@ -406,7 +393,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"        COUNT(DISTINCT DATE(stit.date_created)) AS days\n" +
 						"    FROM stockmgmt_stock_item_transaction stit\n" +
 						"    INNER JOIN stockmgmt_stock_item si ON stit.stock_item_id = si.stock_item_id\n" +
-						"    WHERE si.drug_id IN " + drugIds + " AND si.dispensing_unit_id = %d\n" +
+						"    WHERE si." + stockItems + " AND si.dispensing_unit_id = %d\n" +
 						"      AND stit.date_created BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
 						"      AND stit.quantity <= 0\n" +
 						"    GROUP BY si.dispensing_unit_id\n" +

@@ -205,18 +205,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
                 "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
-                "WHERE do.drug_inventory_id IN (\n" +
-                "  -- Artemether-Lumefantrine (AL) drug IDs\n" +
-                "  8580, 14009, 14010, 14011, 14018, 14019, 14020, 14021, 14022, 14023, 14024,\n" +
-                "  14025, 14026, 14027, 14028, 14029, 14030, 14031, 14032, 14033, 14034, 14035,\n" +
-                "  14036, 14037, 14038, 14039, 14040, 14041, 14042, 14043, 14044, 14049, 14050,\n" +
-                "  15092, 16260, 16266, 16267, 16269, 16272, 16273, 16274, 16275, 16276, 16281,\n" +
-                "  16282, 16284, 16303,\n" +
-                "  -- DHAP drug IDs\n" +
-                "  5600, 5601,\n" +
-                "  -- ASPY drug IDs\n" +
-                "  14494, 14495, 14496, 14497, 15096, 16293, 16296, 16300\n" +
-                ")\n" +
+                "WHERE do.drug_inventory_id IN " + MalariaDrugs.sql(MalariaDrugs.ACTS) + "\n" +
                 "  AND o.voided = 0 " +
                 "  AND e.voided = 0 " +
                 "  AND DATE(e.encounter_datetime) BETWEEN DATE(:startDate) AND DATE(:endDate)";
@@ -224,7 +213,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Total patients treated with AL, DHAP, or ASPY antimalarials");
+        cd.setDescription("Total patients given an ACT");
         return cd;
     }
 
@@ -236,9 +225,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
                 "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
-                "WHERE do.drug_inventory_id IN (\n" +
-                " 9580,9581,9583,9584,9593,9595,9596,9598,9604,9605,9607,9608,15620,16288,16289,16298\n" +
-                ")\n" +
+                "WHERE do.drug_inventory_id IN " + MalariaDrugs.sql(MalariaDrugs.ARTESUNATE_INJECTION) + "\n" +
                 "  AND o.voided = 0 " +
                 "  AND e.voided = 0 " +
                 "  AND DATE(e.encounter_datetime) BETWEEN DATE(:startDate) AND DATE(:endDate)";

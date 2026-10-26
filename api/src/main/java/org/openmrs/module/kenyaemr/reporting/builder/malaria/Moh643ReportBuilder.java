@@ -13,6 +13,7 @@ import org.openmrs.module.kenyacore.report.ReportDescriptor;
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyacore.report.builder.AbstractReportBuilder;
 import org.openmrs.module.kenyacore.report.builder.Builds;
+import org.openmrs.module.kenyaemr.reporting.library.malaria.MalariaDrugs;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
@@ -31,8 +32,7 @@ public class Moh643ReportBuilder extends AbstractReportBuilder {
 	static final int mRDT = 161465;
 
 	/** Stock items of artemether-lumefantrine 20/120mg, as in MOH 743, for the T22-05 reconciliation */
-	static final String ARTEMETHER_LUMEFANTRINE_DRUGS = String.valueOf(Moh743ReportBuilder.ARTEMETHER_LUMEFANTRINE_20_120MG_BLISTER)
-			.replace('[', '(').replace(']', ')');
+	static final String ARTEMETHER_LUMEFANTRINE_DRUGS = MalariaDrugs.sql(MalariaDrugs.ARTEMETHER_LUMEFANTRINE);
 
 	String indParams = "startDate=${startDate},endDate=${endDate}";
 
