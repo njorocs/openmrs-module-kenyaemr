@@ -1,0 +1,27 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  # Weekly re-scan picks up newly published CVEs in unchanged dependencies
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    uses: Palladium-hub/platform-ci/.github/workflows/security-scan.yaml@main
+    permissions:
+      contents: read
+    with:
+      project_type: backend
+      sonar_project_key: Palladium-hub_openmrs-module-kenyaemr
+      java_version: "8"
+      report_bucket: ${{ vars.SECURITY_REPORT_BUCKET }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
