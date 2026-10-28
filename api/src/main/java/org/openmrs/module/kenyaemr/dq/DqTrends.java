@@ -27,8 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Month-by-month series for the trend charts. Each month is checked with the rule itself, as of
- * the values stored now, so the expected range drawn is exactly the range the rule applies.
+ * Series for the trend charts. Each month is checked with the rule itself, as of the values stored
+ * now, so the expected range drawn is exactly the range the rule applies. Weekly series (T22-08)
+ * are read from the saved weekly results instead, since counting a week runs the reports again.
  */
 public final class DqTrends {
 
@@ -89,6 +90,41 @@ public final class DqTrends {
 			points.add(new RatioPoint(month, result));
 		}
 		return points;
+	}
+
+	/**
+	 * A weekly rule's results for each Monday-to-Sunday week, oldest first. A week with no saved
+	 * result has a point with no outcome: it was not checked, e.g. it is older than the daily
+	 * task's catch-up.
+	 *
+	 * @param results the rule's saved results, in any order; of another program's rule, ignored
+	 * @param program the rule's program, or null to take every result
+	 * @param firstWeek any date in the first week
+	 * @param lastWeek any date in the last week
+	 */
+	public static List<WeekPoint> weeklyTrend(List<DqResult> results, String program, Date firstWeek, Date lastWeek) {
+		Map<Date, DqResult> byWeek = new LinkedHashMap<Date, DqResult>();
+		for (DqResult result : results) {
+			if (program != null && result.getProgramCode() != null && !program.equals(result.getProgramCode())) {
+				continue;
+			}
+			Date week = DqPeriods.weekStart(result.getPeriodStart());
+			DqResult saved = byWeek.get(week);
+			if (saved == null || isLater(result, saved)) {
+				byWeek.put(week, result);
+			}
+		}
+		List<WeekPoint> points = new ArrayList<WeekPoint>();
+		Date last = DqPeriods.weekStart(lastWeek);
+		for (Date week = DqPeriods.weekStart(firstWeek); !week.after(last); week = DqPeriods.addDays(week, 7)) {
+			points.add(new WeekPoint(week, byWeek.get(week)));
+		}
+		return points;
+	}
+
+	private static boolean isLater(DqResult result, DqResult than) {
+		return result.getEvaluatedAt() != null
+				&& (than.getEvaluatedAt() == null || result.getEvaluatedAt().after(than.getEvaluatedAt()));
 	}
 
 	/**
@@ -248,6 +284,94 @@ public final class DqTrends {
 
 		public Double getExpectedMax() {
 			return expectedMax;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+	}
+
+	/**
+	 * One week of a weekly rule (T22-08)
+	 */
+	public static class WeekPoint {
+
+		private final Date week;
+
+		private final Double numerator;
+
+		private final Double denominator;
+
+		private final Double previousNumerator;
+
+		private final Double previousDenominator;
+
+		private final Double change;
+
+		private final DqOutcome outcome;
+
+		private final String message;
+
+		WeekPoint(Date week, DqResult result) {
+			this.week = week;
+			Map<String, Object> detail = result != null ? detail(result) : Collections.<String, Object> emptyMap();
+			this.numerator = result != null ? result.getNumerator() : null;
+			this.denominator = result != null ? result.getDenominator() : null;
+			this.previousNumerator = number(detail.get("previousPositive"));
+			this.previousDenominator = number(detail.get("previousTested"));
+			this.change = result != null ? result.getMeasureValue() : null;
+			this.outcome = result != null ? result.getOutcome() : null;
+			this.message = result != null ? result.getMessage() : null;
+		}
+
+		/**
+		 * @return the Monday the week starts on
+		 */
+		public Date getWeek() {
+			return week;
+		}
+
+		/**
+		 * @return e.g. tested positive in the week, or null when the week was not checked
+		 */
+		public Double getNumerator() {
+			return numerator;
+		}
+
+		/**
+		 * @return e.g. tested in the week, or null when the week was not checked
+		 */
+		public Double getDenominator() {
+			return denominator;
+		}
+
+		/**
+		 * @return numerator ÷ denominator, or null when the week was not checked or nothing was counted
+		 */
+		public Double getRate() {
+			return numerator != null && denominator != null && denominator > 0 ? numerator / denominator : null;
+		}
+
+		public Double getPreviousNumerator() {
+			return previousNumerator;
+		}
+
+		public Double getPreviousDenominator() {
+			return previousDenominator;
+		}
+
+		/**
+		 * @return the relative change from the week before, or null when the weeks were not compared
+		 */
+		public Double getChange() {
+			return change;
+		}
+
+		/**
+		 * @return the result, or null when the week was not checked
+		 */
+		public DqOutcome getOutcome() {
+			return outcome;
 		}
 
 		public String getMessage() {

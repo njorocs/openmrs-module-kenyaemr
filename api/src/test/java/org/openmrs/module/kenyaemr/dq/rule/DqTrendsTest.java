@@ -17,7 +17,9 @@ import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.dq.DqTrends;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
+import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +33,10 @@ public class DqTrendsTest {
 	private static final String TREATED = "MAL_TREATED_ACT_743";
 
 	private static final String CONFIRMED = "MAL_CONFIRMED_743";
+
+	private static final String CONFIRMED_705 = "MAL_CONFIRMED_705";
+
+	private static final String TESTED_705 = "MAL_TESTED_705";
 
 	private final Date march = TestUtils.date(2026, 3, 1);
 
@@ -106,6 +112,35 @@ public class DqTrendsTest {
 		Assert.assertEquals(DqOutcome.PASS, DqTrends.ratioTrend(context, rule, 0, march, march).get(0).getOutcome());
 		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 1, march, march).get(0).getOutcome());
 		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 2, march, march).get(0).getOutcome());
+	}
+
+	@Test
+	public void weeklyTrend_shouldGiveEachWeeksSavedResultAndLeaveUncheckedWeeksEmpty() {
+		Date monday = TestUtils.date(2026, 10, 12);
+		Date previous = TestUtils.date(2026, 10, 5);
+		Date twoBefore = TestUtils.date(2026, 9, 28);
+		DqRule rule = DqRuleTypes.rule(DqConfigStore.getDefaultConfig(), "T22-08");
+		// 16 of 40 positive against 10 of 40 the week before: a 60% rise
+		DqResult result = rule.evaluate(FakeRuleContext.weekly(monday).indicator(CONFIRMED_705, monday, 16.0)
+				.indicator(TESTED_705, monday, 40.0).indicator(CONFIRMED_705, previous, 10.0)
+				.indicator(TESTED_705, previous, 40.0)).get(0);
+		DqResult otherProgram = rule.evaluate(FakeRuleContext.weekly(previous)).get(0);
+		otherProgram.setProgramCode("HIV");
+
+		List<DqTrends.WeekPoint> points = DqTrends.weeklyTrend(Arrays.asList(result, otherProgram), "MALARIA",
+				TestUtils.date(2026, 10, 1), TestUtils.date(2026, 10, 18));
+
+		Assert.assertEquals(3, points.size());
+		Assert.assertEquals(twoBefore, points.get(0).getWeek());
+		Assert.assertNull(points.get(0).getOutcome());
+		Assert.assertNull(points.get(1).getOutcome());
+		DqTrends.WeekPoint week = points.get(2);
+		Assert.assertEquals(monday, week.getWeek());
+		Assert.assertEquals(DqOutcome.TICKET, week.getOutcome());
+		Assert.assertEquals(0.4, week.getRate(), 1e-12);
+		Assert.assertEquals(10.0, week.getPreviousNumerator(), 0);
+		Assert.assertEquals(40.0, week.getPreviousDenominator(), 0);
+		Assert.assertEquals(0.6, week.getChange(), 1e-12);
 	}
 
 	@Test

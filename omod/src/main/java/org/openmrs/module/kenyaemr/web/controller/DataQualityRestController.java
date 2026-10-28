@@ -382,6 +382,56 @@ public class DataQualityRestController extends BaseRestController {
 				.add("results", firstPair.get("results")).add("pairs", pairTrends));
 	}
 
+	/**
+	 * A weekly rule's (T22-08) results week by week, for the trend chart. Only weeks the daily task
+	 * has checked have values; the others come back with no outcome.
+	 *
+	 * @param to a month (yyyy-MM, its last week) or a day (yyyy-MM-dd, its week); default, and at
+	 * most, last week
+	 * @param weeks how many weeks, 1 to 52
+	 */
+	@GetMapping("/rules/{ruleId}/weekly-trend")
+	public ResponseEntity<Object> getWeeklyTrend(@PathVariable("ruleId") String ruleId,
+	                                             @RequestParam(value = "to", required = false) String to,
+	                                             @RequestParam(value = "weeks", defaultValue = "12") int weeks) {
+		requireAuthentication();
+		DqConfig config = DqConfigStore.getConfig();
+		DqRule rule = DqRuleTypes.rule(config, ruleId);
+		if (rule == null || rule.getSchedule() != DqRule.Schedule.WEEK) {
+			return notFound("No weekly rule " + ruleId);
+		}
+		Date lastChecked = DqPeriods.addDays(DqPeriods.weekStart(new Date()), -7);
+		Date last = lastChecked;
+		if (to != null) {
+			Date requested = to.length() == MONTH.length() ? DqPeriods.lastDayOfMonth(parse(to, MONTH)) : parse(to, DAY);
+			last = DqPeriods.weekStart(requested);
+			if (last.after(lastChecked)) {
+				last = lastChecked;
+			}
+		}
+		Date first = DqPeriods.addDays(last, -7 * (Math.max(1, Math.min(weeks, 52)) - 1));
+		List<DqResult> results = service().getResults(ruleId, first, last);
+
+		List<SimpleObject> points = new ArrayList<SimpleObject>();
+		for (DqTrends.WeekPoint point : DqTrends.weeklyTrend(results, rule.getProgram(), first, last)) {
+			points.add(new SimpleObject().add("week", format(point.getWeek(), DAY))
+					.add("weekEnd", format(DqPeriods.weekEnd(point.getWeek()), DAY))
+					.add("numerator", point.getNumerator()).add("denominator", point.getDenominator())
+					.add("rate", point.getRate()).add("previousNumerator", point.getPreviousNumerator())
+					.add("previousDenominator", point.getPreviousDenominator()).add("change", point.getChange())
+					.add("outcome", point.getOutcome() != null ? point.getOutcome().name() : null)
+					.add("message", point.getMessage()));
+		}
+		DqRuleSettings settings = config.getRuleSettings(ruleId, null);
+		return ok(new SimpleObject().add("ruleId", ruleId).add("program", rule.getProgram())
+				.add("enabled", settings.isEnabled())
+				.add("numerator", indicatorRef(config.getIndicator(settings.getString("numerator", null))))
+				.add("denominator", indicatorRef(config.getIndicator(settings.getString("denominator", null))))
+				.add("changeThreshold", settings.getDouble("changeThreshold", 0.5))
+				.add("minDenominator", settings.getInteger("minDenominator", settings.getInteger("minTests", 20)))
+				.add("results", points));
+	}
+
 	@GetMapping("/tickets")
 	public ResponseEntity<Object> getTickets(@RequestParam(value = "status", required = false) String status,
 	                                         @RequestParam(value = "program", required = false) String programCode) {
