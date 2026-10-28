@@ -1629,6 +1629,9 @@ public class DiagnosisConcepts {
 		public static final Integer COA_4 = 2002641;
 		public static final Integer COA_5 = 2002646;
 
+		//Confirmed malaria under 5 CMC: COA and congenital falciparum malaria
+		public static final Integer CMC_1 = 155686;
+
 		//Malaria in pregnancy positive  MPA
 		public static final Integer MPA_1 = 135361;
 		public static final Integer MPA_2 = 2009200;
