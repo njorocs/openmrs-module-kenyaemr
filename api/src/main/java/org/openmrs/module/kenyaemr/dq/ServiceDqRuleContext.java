@@ -19,8 +19,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Rule context that reads stored report values through {@link DqService}
@@ -39,7 +43,7 @@ public class ServiceDqRuleContext implements DqRuleContext {
 
 	private final Map<String, DqIndicatorCalculator.IndicatorValue> indicators;
 
-	/** Values of reports run for a period other than a month, by report and period */
+	/** Values of report columns counted for a period other than a month, by report, columns and period */
 	private final Map<String, List<DqValue>> liveValues = new HashMap<String, List<DqValue>>();
 
 	private Boolean khisSubmissionTracked;
@@ -138,11 +142,24 @@ public class ServiceDqRuleContext implements DqRuleContext {
 				return new DqIndicatorCalculator.IndicatorValue(code, null, Collections.singletonList("indicator " + code
 						+ " is not configured"));
 			}
+			// Only the indicator's own columns are counted, not the whole report
+			Map<String, Map<String, Set<String>>> columnsByReport = new LinkedHashMap<String, Map<String, Set<String>>>();
+			for (DqConfig.Part part : indicator.getParts()) {
+				Map<String, Set<String>> columns = columnsByReport.get(part.getReport());
+				if (columns == null) {
+					columns = new TreeMap<String, Set<String>>();
+					columnsByReport.put(part.getReport(), columns);
+				}
+				if (!columns.containsKey(part.getDataset())) {
+					columns.put(part.getDataset(), new TreeSet<String>());
+				}
+				columns.get(part.getDataset()).addAll(part.getColumns());
+			}
 			List<DqValue> values = new ArrayList<DqValue>();
-			for (String report : indicator.getReports()) {
-				String reportKey = report + "@" + start.getTime() + "-" + end.getTime();
+			for (Map.Entry<String, Map<String, Set<String>>> entry : columnsByReport.entrySet()) {
+				String reportKey = entry.getKey() + entry.getValue() + "@" + start.getTime() + "-" + end.getTime();
 				if (!liveValues.containsKey(reportKey)) {
-					liveValues.put(reportKey, new DqReportGenerator().evaluateValues(report, start, end));
+					liveValues.put(reportKey, new DqReportGenerator().evaluateValues(entry.getKey(), entry.getValue(), start, end));
 				}
 				values.addAll(liveValues.get(reportKey));
 			}

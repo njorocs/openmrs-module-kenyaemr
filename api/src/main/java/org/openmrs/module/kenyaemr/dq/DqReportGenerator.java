@@ -26,8 +26,11 @@ import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableJsonReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.air.ReportCellValue;
 import org.openmrs.module.kenyaemr.reporting.air.ReportValueExtractor;
+import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
+import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
@@ -38,8 +41,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Evaluates a report for a month and turns it into a new {@link DqReportRun} version with one
@@ -80,14 +85,18 @@ public class DqReportGenerator {
 	}
 
 	/**
-	 * Evaluates a report for any period, e.g. a week, for checks that are not monthly. Nothing is
-	 * saved, and there is no payload.
+	 * Evaluates some columns of a report for any period, e.g. a week, for checks that are not
+	 * monthly. Only those columns are counted, so a weekly check of two indicators does not run
+	 * every row of the report. Nothing is saved, and there is no payload.
 	 *
+	 * @param columns column names by dataset name; datasets not listed are not evaluated
 	 * @return the cell values, attached to an unsaved run that names the report and period
 	 */
-	public List<DqValue> evaluateValues(String reportName, Date start, Date end) {
+	public List<DqValue> evaluateValues(String reportName, Map<String, ? extends Collection<String>> columns, Date start,
+	                                    Date end) {
 		ReportDescriptor descriptor = getDescriptor(reportName);
-		ReportData reportData = evaluate(descriptor, start, end);
+		ReportDefinition definition = subset(getOrBuildDefinition(descriptor), columns);
+		ReportData reportData = evaluate(definition, descriptor, start, end);
 		AdxConfiguration config = new ConfigurableAdxGenerationStrategy().getConfigurationForReport(reportName);
 		DqReportRun run = new DqReportRun();
 		run.setReportName(reportName);
@@ -97,8 +106,51 @@ public class DqReportGenerator {
 		return toValues(run, ReportValueExtractor.extractAll(reportData, config));
 	}
 
+	/**
+	 * An unsaved copy of a report definition with only the given datasets and, in cohort indicator
+	 * datasets, only the given columns. Any other kind of dataset that is listed is kept whole.
+	 *
+	 * @param columns column names by dataset name (the dataset definition's name, or failing that
+	 * its key in the report, as the stored values name it)
+	 */
+	static ReportDefinition subset(ReportDefinition definition, Map<String, ? extends Collection<String>> columns) {
+		ReportDefinition subset = new ReportDefinition();
+		subset.setName(definition.getName());
+		subset.setUuid(definition.getUuid());
+		subset.setParameters(definition.getParameters());
+		subset.setBaseCohortDefinition(definition.getBaseCohortDefinition());
+		for (Map.Entry<String, Mapped<? extends DataSetDefinition>> entry : definition.getDataSetDefinitions().entrySet()) {
+			DataSetDefinition dataset = entry.getValue().getParameterizable();
+			String name = dataset != null && dataset.getName() != null ? dataset.getName() : entry.getKey();
+			Collection<String> wanted = columns.get(name);
+			if (wanted == null) {
+				continue;
+			}
+			if (dataset instanceof CohortIndicatorDataSetDefinition) {
+				CohortIndicatorDataSetDefinition source = (CohortIndicatorDataSetDefinition) dataset;
+				CohortIndicatorDataSetDefinition copy = new CohortIndicatorDataSetDefinition();
+				copy.setName(source.getName());
+				copy.setDescription(source.getDescription());
+				copy.setParameters(source.getParameters());
+				copy.setDimensions(source.getDimensions());
+				for (CohortIndicatorDataSetDefinition.CohortIndicatorAndDimensionColumn column : source.getColumns()) {
+					if (wanted.contains(column.getName())) {
+						copy.addColumn(column.getName(), column.getLabel(), column.getIndicator(), column.getDimensionOptions());
+					}
+				}
+				dataset = copy;
+			}
+			subset.addDataSetDefinition(entry.getKey(),
+					new Mapped<DataSetDefinition>(dataset, entry.getValue().getParameterMappings()));
+		}
+		return subset;
+	}
+
 	private ReportData evaluate(ReportDescriptor descriptor, Date start, Date end) {
-		ReportDefinition definition = getOrBuildDefinition(descriptor);
+		return evaluate(getOrBuildDefinition(descriptor), descriptor, start, end);
+	}
+
+	private ReportData evaluate(ReportDefinition definition, ReportDescriptor descriptor, Date start, Date end) {
 		EvaluationContext context = new EvaluationContext();
 		context.addParameterValue("startDate", start);
 		context.addParameterValue("endDate", end);

@@ -29,7 +29,8 @@ import java.util.List;
  * <ul>
  * <li>every expected monthly report not yet generated for last month is generated, then all newly
  * generated reports are checked together, so rules that compare reports (X-RPT-01) see both;</li>
- * <li>last week's weekly checks (T22-08 test positivity) run once;</li>
+ * <li>the weekly checks (T22-08 test positivity) run once for each of the last 8 weeks not yet
+ * checked, so weeks missed while the server was down are caught up;</li>
  * <li>once last month's deadlines are over, its month-level checks (G-RPT-01 timeliness) run once.</li>
  * </ul>
  * So on the 1st the HRIO finds last month's reports waiting for approval, and a server that was
@@ -38,6 +39,9 @@ import java.util.List;
 public class DataQualityTask extends AbstractTask {
 
 	private static final Logger log = LoggerFactory.getLogger(DataQualityTask.class);
+
+	/** How many weeks back the weekly checks (T22-08) catch up */
+	static final int WEEKS_TO_CATCH_UP = 8;
 
 	@Override
 	public void execute() {
@@ -49,12 +53,7 @@ public class DataQualityTask extends AbstractTask {
 			DqService service = Context.getService(DqService.class);
 			Date today = new Date();
 			generateLastMonth(service, DqPeriods.previousMonth(today));
-			try {
-				service.evaluateWeek(DqPeriods.addDays(DqPeriods.weekStart(today), -7));
-			}
-			catch (RuntimeException e) {
-				log.error("Data quality: weekly check failed", e);
-			}
+			checkRecentWeeks(service, today);
 			try {
 				service.evaluateMonth(DqPeriods.previousMonth(today), today);
 			}
@@ -64,6 +63,24 @@ public class DataQualityTask extends AbstractTask {
 		}
 		finally {
 			stopExecuting();
+		}
+	}
+
+	/**
+	 * Runs the weekly checks for each of the last {@link #WEEKS_TO_CATCH_UP} weeks not yet checked,
+	 * oldest first, so weeks missed while the server was down are checked too. A week that fails is
+	 * left for the next run.
+	 */
+	private void checkRecentWeeks(DqService service, Date today) {
+		Date lastWeek = DqPeriods.addDays(DqPeriods.weekStart(today), -7);
+		for (int i = WEEKS_TO_CATCH_UP - 1; i >= 0; i--) {
+			Date week = DqPeriods.addDays(lastWeek, -7 * i);
+			try {
+				service.evaluateWeek(week);
+			}
+			catch (RuntimeException e) {
+				log.error("Data quality: weekly check failed for the week of " + week, e);
+			}
 		}
 	}
 
