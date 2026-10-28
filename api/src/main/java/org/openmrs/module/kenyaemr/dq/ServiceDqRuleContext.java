@@ -48,6 +48,8 @@ public class ServiceDqRuleContext implements DqRuleContext {
 
 	private Boolean khisSubmissionTracked;
 
+	private Boolean completionReadBackTracked;
+
 	/**
 	 * @param run the run being checked, or null for a weekly check
 	 */
@@ -185,14 +187,28 @@ public class ServiceDqRuleContext implements DqRuleContext {
 	}
 
 	@Override
-	public Date getFirstSentToKhis(String reportName, Date monthStart) {
+	public KhisSubmissionState getKhisSubmission(String reportName, Date monthStart) {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("reportName", reportName);
 		parameters.put("periodStart", monthStart);
-		List<Object[]> rows = service.executeSqlQuery("select min(s.sent_at), 0 from il_report_submission s "
-				+ "where s.report_name = :reportName and s.period_start = :periodStart and s.target_system = 'KHIS' "
-				+ "and s.sent_at is not null", parameters);
-		return rows.isEmpty() || !(rows.get(0)[0] instanceof Date) ? null : (Date) rows.get(0)[0];
+		// Ledgers from before the completion read-back have no columns for it
+		String completion = isCompletionReadBackTracked() ? "s.completion_read_at, s.khis_completed_at" : "null, null";
+		List<Object[]> rows = service.executeSqlQuery("select s.status, s.sent_at, s.completed_at, s.last_error, "
+				+ completion + " from il_report_submission s where s.report_name = :reportName "
+				+ "and s.period_start = :periodStart and s.target_system = 'KHIS' order by s.version desc, s.submission_id desc",
+				parameters);
+		return KhisSubmissionState.fromLedger(rows);
+	}
+
+	private boolean isCompletionReadBackTracked() {
+		if (completionReadBackTracked == null) {
+			List<Object[]> rows = service.executeSqlQuery("select count(*), 0 from information_schema.columns "
+					+ "where table_schema = database() and table_name = 'il_report_submission' "
+					+ "and column_name = 'completion_read_at'", new HashMap<String, Object>());
+			completionReadBackTracked = !rows.isEmpty() && rows.get(0)[0] instanceof Number
+					&& ((Number) rows.get(0)[0]).intValue() > 0;
+		}
+		return completionReadBackTracked;
 	}
 
 	@Override

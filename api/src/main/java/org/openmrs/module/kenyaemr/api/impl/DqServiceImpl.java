@@ -251,7 +251,7 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		DqConfig config = DqConfigStore.getConfig();
 		List<DqRule> due = new ArrayList<DqRule>();
 		for (DqRule rule : DqRuleTypes.rules(config, DqRule.Schedule.MONTH)) {
-			Date deadline = rule instanceof TimelinessRule ? ((TimelinessRule) rule).lastDeadline(config, monthStart) : null;
+			Date deadline = rule instanceof TimelinessRule ? ((TimelinessRule) rule).checkAfter(config, monthStart) : null;
 			if (deadline != null && now.before(deadline)) {
 				continue;
 			}

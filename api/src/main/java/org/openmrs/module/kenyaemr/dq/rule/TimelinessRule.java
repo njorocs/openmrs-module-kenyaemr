@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.kenyaemr.dq.rule;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
+import org.openmrs.module.kenyaemr.dq.KhisSubmissionState;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
@@ -25,19 +27,29 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Rule type TIMELINESS (malaria G-RPT-01, T22-01): each report in "reports" must reach KHIS by its
- * deadline, the 5th of the following month unless the expected report says otherwise. Checked once
- * the deadline day is over; a late or missing report is a warning, shown red on the dashboard.
+ * Rule type TIMELINESS (malaria G-RPT-01, T22-01): each report in "reports" must be complete in
+ * KHIS by its deadline, the 5th of the following month unless the expected report says otherwise.
+ * KHIS counts a report as reported only once it is marked complete, so values saved without the
+ * completion count as missing. A late, incomplete or missing report is a warning, shown red on the
+ * dashboard.
+ * <p>
+ * The completion date is KHIS's own, read back from the 10th (khisAggregate.readBackDay), so the
+ * rule is checked once that day is over; when KHIS could not be asked, the EMR's record of
+ * registering the completion is used. A report whose values were all zero is not sent, and says
+ * so.
  * <p>
  * One result per report, with the report name as the indicator code and the days late as the
- * measure. Settings: reports, deadlineDay (overrides the expected reports' own), severity (default
- * WARN).
+ * measure. Settings: reports, deadlineDay (overrides the expected reports' own), checkAfterDay
+ * (default 10, the read-back day), severity (default WARN).
  */
 public class TimelinessRule extends AbstractDqRule {
 
 	public static final String ID = "G-RPT-01";
 
 	static final int DEFAULT_DEADLINE_DAY = 5;
+
+	/** The day KHIS is read back (khisAggregate.readBackDay's default) */
+	static final int DEFAULT_CHECK_AFTER_DAY = 10;
 
 	private static final long DAY_MS = 24L * 60 * 60 * 1000;
 
@@ -75,6 +87,17 @@ public class TimelinessRule extends AbstractDqRule {
 		return last;
 	}
 
+	/**
+	 * @return when the rule can be checked for the month: once the last deadline and the KHIS
+	 * read-back day (checkAfterDay) are both over
+	 */
+	public Date checkAfter(DqConfig config, Date month) {
+		Date readBack = DqPeriods.addDays(DqPeriods.deadline(month, settings().getInteger("checkAfterDay",
+				DEFAULT_CHECK_AFTER_DAY)), 1);
+		Date last = lastDeadline(config, month);
+		return last == null || readBack.after(last) ? readBack : last;
+	}
+
 	@Override
 	public List<DqResult> evaluate(DqRuleContext context) {
 		DqRuleSettings settings = settings();
@@ -95,30 +118,60 @@ public class TimelinessRule extends AbstractDqRule {
 				result = result(context, report, DqOutcome.NOT_APPLICABLE, "Sending to KHIS is not tracked on this "
 						+ "server (the KenyaEMR IL module is not installed), so the timeliness of " + report + " cannot be checked.");
 			} else {
-				Date sentAt = context.getFirstSentToKhis(report, context.getPeriodStart());
-				if (sentAt != null) {
-					detail.put("sentAt", sentAt.getTime());
-				}
-				if (sentAt != null && sentAt.before(deadlineEnd)) {
-					result = result(context, report, DqOutcome.PASS, report + " for " + month + " reached KHIS on "
-							+ day.format(sentAt) + ", by the deadline of " + deadline + ".");
-					result.setMeasureValue(0.0);
-				} else if (sentAt != null) {
-					long late = (sentAt.getTime() - deadlineEnd.getTime()) / DAY_MS + 1;
-					result = result(context, report, severity, report + " for " + month + " reached KHIS on "
-							+ day.format(sentAt) + ", " + late + (late == 1 ? " day" : " days") + " after the deadline of "
-							+ deadline + ".");
-					result.setMeasureValue((double) late);
-				} else {
-					result = result(context, report, severity, report + " for " + month + " had not reached KHIS by the "
-							+ "deadline of " + deadline + ".");
-				}
+				result = check(context, report, month, deadline, deadlineEnd, severity, day, detail);
 			}
-			result.setThreshold("in KHIS by " + deadline);
+			result.setThreshold("complete in KHIS by " + deadline);
 			result.setDetail(json(detail));
 			results.add(result);
 		}
 		return results;
+	}
+
+	private DqResult check(DqRuleContext context, String report, String month, String deadline, Date deadlineEnd,
+	                       DqOutcome severity, SimpleDateFormat day, Map<String, Object> detail) {
+		KhisSubmissionState state = context.getKhisSubmission(report, context.getPeriodStart());
+		String name = report + " for " + month;
+		if (state == null) {
+			return result(context, report, severity, name + " had not been sent to KHIS by the deadline of " + deadline
+					+ ", so KHIS counts it as missing.");
+		}
+		detail.put("status", state.getLatestStatus());
+		if (state.getFirstSentAt() != null) {
+			detail.put("sentAt", state.getFirstSentAt().getTime());
+		}
+		Date completedAt = state.getCompletedAt();
+		if (completedAt != null) {
+			detail.put("completedAt", completedAt.getTime());
+			detail.put("completionSource", state.isCompletionReadFromKhis() ? "KHIS" : "EMR");
+			DqResult result;
+			if (completedAt.before(deadlineEnd)) {
+				result = result(context, report, DqOutcome.PASS, name + " was complete in KHIS on " + day.format(completedAt)
+						+ ", by the deadline of " + deadline + ".");
+				result.setMeasureValue(0.0);
+			} else {
+				long late = (completedAt.getTime() - deadlineEnd.getTime()) / DAY_MS + 1;
+				result = result(context, report, severity, name + " was complete in KHIS on " + day.format(completedAt) + ", "
+						+ late + (late == 1 ? " day" : " days") + " after the deadline of " + deadline + ".");
+				result.setMeasureValue((double) late);
+			}
+			return result;
+		}
+		String reason = state.getLatestError() != null ? " " + StringUtils.removeEnd(state.getLatestError().trim(), ".") + "." : "";
+		if (state.getFirstSentAt() != null) {
+			return result(context, report, severity, name + " reached KHIS on " + day.format(state.getFirstSentAt())
+					+ " but is not marked complete there, so KHIS counts it as missing." + reason);
+		}
+		if (KhisSubmissionState.STATUS_NO_VALUES.equals(state.getLatestStatus())) {
+			return result(context, report, severity, name + " was not sent to KHIS because every value in it is zero, "
+					+ "so KHIS counts it as missing. A functioning facility should not have an empty report: check that "
+					+ "the month's data was captured.");
+		}
+		return result(context, report, severity, name + " had not reached KHIS by the deadline of " + deadline
+				+ " (sending is " + humanise(state.getLatestStatus()) + "), so KHIS counts it as missing." + reason);
+	}
+
+	private static String humanise(String status) {
+		return status == null ? "unknown" : status.toLowerCase().replace('_', ' ');
 	}
 
 	private Date deadlineEnd(DqConfig config, String report, Date month) {

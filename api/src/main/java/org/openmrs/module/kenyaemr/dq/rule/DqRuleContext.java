@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.dq.rule;
 
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
+import org.openmrs.module.kenyaemr.dq.KhisSubmissionState;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
 
@@ -66,9 +67,10 @@ public interface DqRuleContext {
 	boolean isKhisSubmissionTracked();
 
 	/**
-	 * @return when any version of the report for the month first reached KHIS, or null if none has
+	 * @return where the report for the month stands in KHIS, or null when no version was ever
+	 * queued for KHIS
 	 */
-	Date getFirstSentToKhis(String reportName, Date monthStart);
+	KhisSubmissionState getKhisSubmission(String reportName, Date monthStart);
 
 	/**
 	 * @return true when the report has been generated for the month

@@ -15,6 +15,7 @@ import org.openmrs.module.kenyacore.test.TestUtils;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.dq.KhisSubmissionState;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
@@ -308,7 +309,59 @@ public class DqRulesTest {
 		Assert.assertTrue(late.getMessage(), late.getMessage().contains("2 days after the deadline of 5 Apr 2026"));
 		DqResult missing = result(results, MOH_743);
 		Assert.assertEquals(DqOutcome.WARN, missing.getOutcome());
-		Assert.assertTrue(missing.getMessage(), missing.getMessage().contains("had not reached KHIS"));
+		Assert.assertTrue(missing.getMessage(), missing.getMessage().contains("had not been sent to KHIS"));
+	}
+
+	@Test
+	public void grpt01_shouldCountAReportKhisDoesNotHoldAsCompleteAsMissing() {
+		Date sent = TestUtils.date(2026, 4, 3, 10, 0, 0);
+		FakeRuleContext context = FakeRuleContext.month(march)
+				// Values saved on time, but completing it failed
+				.khis(MOH_705A, march, new KhisSubmissionState(sent, null, false, "SENT",
+						"Values saved, but KHIS did not register the dataset as complete (HTTP 409): missing compulsory fields"))
+				// The EMR completed it on time, but KHIS read back says it is not complete
+				.khis(MOH_706, march, new KhisSubmissionState(sent, null, true, "COMPLETED_IN_KHIS", null))
+				// Every value zero, so never sent
+				.khis(MOH_743, march, new KhisSubmissionState(null, null, false, KhisSubmissionState.STATUS_NO_VALUES,
+						"Every value in this report is zero"))
+				// Completed in KHIS by hand two days late
+				.khis(MOH_705B, march, new KhisSubmissionState(sent, TestUtils.date(2026, 4, 7, 9, 0, 0), true, "COMPLETED_IN_KHIS", null));
+
+		List<DqResult> results = rule("G-RPT-01").evaluate(context);
+
+		DqResult notComplete = result(results, MOH_705A);
+		Assert.assertEquals(DqOutcome.WARN, notComplete.getOutcome());
+		Assert.assertTrue(notComplete.getMessage(), notComplete.getMessage().contains("reached KHIS on 3 Apr 2026 but is not "
+				+ "marked complete there, so KHIS counts it as missing. Values saved, but KHIS did not register"));
+		Assert.assertNull(notComplete.getMeasureValue());
+		Assert.assertEquals(DqOutcome.WARN, result(results, MOH_706).getOutcome());
+		DqResult empty = result(results, MOH_743);
+		Assert.assertEquals(DqOutcome.WARN, empty.getOutcome());
+		Assert.assertTrue(empty.getMessage(), empty.getMessage().contains("was not sent to KHIS because every value in it is zero"));
+		DqResult late = result(results, MOH_705B);
+		Assert.assertEquals(2.0, late.getMeasureValue(), 0);
+		Assert.assertTrue(late.getDetail(), late.getDetail().contains("\"completionSource\":\"KHIS\""));
+	}
+
+	@Test
+	public void grpt01_shouldTakeTheLatestKhisAnswerOverTheEmrsRecord() {
+		Date sent = TestUtils.date(2026, 4, 3);
+		Date read = TestUtils.date(2026, 4, 10);
+		// Version 2 is latest; version 1 was completed by the EMR, and KHIS read back says not complete
+		KhisSubmissionState state = KhisSubmissionState.fromLedger(Arrays.asList(
+				new Object[] { "QUEUED", null, null, "will retry", null, null },
+				new Object[] { "COMPLETED_IN_KHIS", sent, sent, null, read, null }));
+		Assert.assertEquals(sent, state.getFirstSentAt());
+		Assert.assertNull(state.getCompletedAt());
+		Assert.assertTrue(state.isCompletionReadFromKhis());
+		Assert.assertEquals("QUEUED", state.getLatestStatus());
+		Assert.assertEquals("will retry", state.getLatestError());
+
+		// Not read back: the EMR's record stands
+		state = KhisSubmissionState.fromLedger(Collections.singletonList(new Object[] { "COMPLETED_IN_KHIS", sent, sent, null, null, null }));
+		Assert.assertEquals(sent, state.getCompletedAt());
+		Assert.assertFalse(state.isCompletionReadFromKhis());
+		Assert.assertNull(KhisSubmissionState.fromLedger(Collections.<Object[]>emptyList()));
 	}
 
 	@Test
@@ -316,6 +369,8 @@ public class DqRulesTest {
 		TimelinessRule rule = (TimelinessRule) rule("G-RPT-01");
 		Assert.assertEquals(DqRule.Schedule.MONTH, rule.getSchedule());
 		Assert.assertEquals(TestUtils.date(2026, 4, 6), rule.lastDeadline(DqConfigStore.getDefaultConfig(), march));
+		// Checked once the KHIS read-back day is over too
+		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule.checkAfter(DqConfigStore.getDefaultConfig(), march));
 
 		FakeRuleContext context = FakeRuleContext.month(march);
 		context.khisTracked = false;

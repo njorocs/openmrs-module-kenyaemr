@@ -13,6 +13,7 @@ import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.dq.KhisSubmissionState;
 import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
 
@@ -46,7 +47,7 @@ class FakeRuleContext implements DqRuleContext {
 
 	private final LinkedList<List<Object[]>> queryResults;
 
-	private final Map<String, Date> sentToKhis;
+	private final Map<String, KhisSubmissionState> sentToKhis;
 
 	private final List<DqValue> values = new ArrayList<DqValue>();
 
@@ -80,7 +81,7 @@ class FakeRuleContext implements DqRuleContext {
 		this.indicators = new HashMap<String, DqIndicatorCalculator.IndicatorValue>();
 		this.generated = new HashSet<String>();
 		this.queryResults = new LinkedList<List<Object[]>>();
-		this.sentToKhis = new HashMap<String, Date>();
+		this.sentToKhis = new HashMap<String, KhisSubmissionState>();
 	}
 
 	private FakeRuleContext(FakeRuleContext parent, Date monthStart) {
@@ -101,8 +102,15 @@ class FakeRuleContext implements DqRuleContext {
 		return new FakeRuleContext(null, month, DqPeriods.lastDayOfMonth(month));
 	}
 
+	/**
+	 * The report was sent and completed in KHIS at the same moment, as KHIS read back says
+	 */
 	FakeRuleContext sent(String report, Date month, Date sentAt) {
-		sentToKhis.put(report + "@" + month.getTime(), sentAt);
+		return khis(report, month, new KhisSubmissionState(sentAt, sentAt, true, "COMPLETED_IN_KHIS", null));
+	}
+
+	FakeRuleContext khis(String report, Date month, KhisSubmissionState state) {
+		sentToKhis.put(report + "@" + month.getTime(), state);
 		return this;
 	}
 
@@ -208,7 +216,7 @@ class FakeRuleContext implements DqRuleContext {
 	}
 
 	@Override
-	public Date getFirstSentToKhis(String reportName, Date monthStart) {
+	public KhisSubmissionState getKhisSubmission(String reportName, Date monthStart) {
 		return sentToKhis.get(reportName + "@" + monthStart.getTime());
 	}
 
