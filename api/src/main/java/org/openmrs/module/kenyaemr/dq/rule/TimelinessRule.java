@@ -91,6 +91,7 @@ public class TimelinessRule extends AbstractDqRule {
 	 * @return when the rule can be checked for the month: once the last deadline and the KHIS
 	 * read-back day (checkAfterDay) are both over
 	 */
+	@Override
 	public Date checkAfter(DqConfig config, Date month) {
 		Date readBack = DqPeriods.addDays(DqPeriods.deadline(month, settings().getInteger("checkAfterDay",
 				DEFAULT_CHECK_AFTER_DAY)), 1);

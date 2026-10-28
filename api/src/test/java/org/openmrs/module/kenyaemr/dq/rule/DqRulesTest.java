@@ -377,6 +377,88 @@ public class DqRulesTest {
 		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, rule.evaluate(context).get(0).getOutcome());
 	}
 
+	// SRC-01, SRC-02: the malaria register's entries complete and up to date
+
+	@Test
+	public void src01_shouldWarnBelowNinetyPercentAndCountEachMissingColumn() {
+		// 20 entries, 4 missing something: 3 without temperature, 1 positive without treatment
+		FakeRuleContext context = FakeRuleContext.month(march).queryReturns(new Object[] { 20L, 4L, 0L, 3L, 0L, 0L, 0L, 1L });
+
+		DqResult result = single(rule("SRC-01"), context);
+
+		Assert.assertEquals(DqOutcome.WARN, result.getOutcome());
+		Assert.assertEquals(0.8, result.getMeasureValue(), 1e-12);
+		Assert.assertEquals(16.0, result.getNumerator(), 0);
+		Assert.assertEquals(20.0, result.getDenominator(), 0);
+		Assert.assertTrue(result.getMessage(), result.getMessage().contains("missing: temperature 3, treatment 1"));
+		Assert.assertTrue(result.getDetail(), result.getDetail().contains("\"temperature\":3"));
+		Assert.assertEquals(3, context.queryParameters.get(0).get("treatmentDays"));
+
+		Assert.assertEquals(DqOutcome.PASS, single(rule("SRC-01"), FakeRuleContext.month(march)
+				.queryReturns(new Object[] { 20L, 2L, 0L, 2L, 0L, 0L, 0L, 0L })).getOutcome());
+		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, single(rule("SRC-01"), FakeRuleContext.month(march)
+				.queryReturns(new Object[] { 0L, null, null, null, null, null, null, null })).getOutcome());
+	}
+
+	@Test
+	public void src01_shouldAskForTheRegistersSixColumns() {
+		String sql = RecordCompletenessRule.sql(FakeRuleContext.month(march), RecordCompletenessRule.FIELDS);
+		for (String field : RecordCompletenessRule.FIELDS) {
+			Assert.assertTrue(field, sql.contains("as has_" + field));
+		}
+		Assert.assertTrue(sql, sql.contains("etl_laboratory_extract"));
+	}
+
+	@Test
+	public void src02_shouldCountEntriesEnteredWithinSevenDays() {
+		DqResult result = single(rule("SRC-02"), FakeRuleContext.month(march).queryReturns(new Object[] { 50L, 44L, 1L }));
+
+		Assert.assertEquals(DqOutcome.WARN, result.getOutcome());
+		Assert.assertEquals(0.88, result.getMeasureValue(), 1e-12);
+		Assert.assertTrue(result.getMessage(), result.getMessage().contains("44 of 50"));
+	}
+
+	@Test
+	public void sourceDocumentRules_shouldBeCheckedOnceTheMonthHasSettled() {
+		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule("SRC-01").checkAfter(DqConfigStore.getDefaultConfig(), march));
+		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule("SRC-02").checkAfter(DqConfigStore.getDefaultConfig(), march));
+		Assert.assertEquals(DqRule.Schedule.MONTH, rule("SRC-01").getSchedule());
+		// Other monthly rules wait only for the month to end
+		Assert.assertEquals(TestUtils.date(2026, 4, 1), rule("T22-03").checkAfter(DqConfigStore.getDefaultConfig(), march));
+	}
+
+	// VF-01: verification factors, recount against the report and against KHIS
+
+	@Test
+	public void vf01_shouldDivideTheRecountByTheReportAndByKhis() {
+		FakeRuleContext context = FakeRuleContext.month(march)
+				.indicator(CONFIRMED, march, 100.0).recount(CONFIRMED, march, 104.0).khisIndicator(CONFIRMED, march, 80.0)
+				.indicator(TESTED, march, 200.0).recount(TESTED, march, 200.0).khisIndicator(TESTED, march, 200.0)
+				.indicator("MAL_SUSPECTED_705", march, 0.0).recount("MAL_SUSPECTED_705", march, 3.0);
+
+		List<DqResult> results = rule("VF-01").evaluate(context);
+
+		Assert.assertEquals(10, results.size());
+		DqResult confirmed = result(results, CONFIRMED);
+		Assert.assertEquals(DqOutcome.WARN, confirmed.getOutcome());
+		Assert.assertEquals(1.04, confirmed.getMeasureValue(), 1e-12);
+		Assert.assertTrue(confirmed.getDetail(), confirmed.getDetail().contains("\"vfKhis\":1.3"));
+		Assert.assertEquals(DqOutcome.PASS, result(results, TESTED).getOutcome());
+		// Recounted 3 where the report had 0: no ratio, but a discrepancy
+		Assert.assertEquals(DqOutcome.WARN, result(results, "MAL_SUSPECTED_705").getOutcome());
+		// Not generated for the month
+		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, result(results, "MAL_LLIN_U1_711").getOutcome());
+		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule("VF-01").checkAfter(DqConfigStore.getDefaultConfig(), march));
+	}
+
+	@Test
+	public void vf01_shouldTakeEqualZerosAsAgreement() {
+		Assert.assertEquals(1.0, VerificationRule.vf(0.0, 0.0), 0);
+		Assert.assertNull(VerificationRule.vf(3.0, 0.0));
+		Assert.assertNull(VerificationRule.vf(null, 4.0));
+		Assert.assertEquals(0.5, VerificationRule.vf(2.0, 4.0), 0);
+	}
+
 	// G-RPT-02: EMR against KHIS, within 5%
 
 	@Test

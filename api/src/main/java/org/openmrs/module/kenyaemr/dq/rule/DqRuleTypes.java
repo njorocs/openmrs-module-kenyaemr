@@ -24,7 +24,9 @@ public final class DqRuleTypes {
 	public static final List<String> TYPES = Arrays.asList(DqConfig.RuleDefinition.TYPE_RATIO,
 			DqConfig.RuleDefinition.TYPE_EXPECTED_RANGE, DqConfig.RuleDefinition.TYPE_RECONCILIATION,
 			DqConfig.RuleDefinition.TYPE_REPEAT_EPISODE, DqConfig.RuleDefinition.TYPE_CHANGE,
-			DqConfig.RuleDefinition.TYPE_TIMELINESS, DqConfig.RuleDefinition.TYPE_KHIS_PARITY);
+			DqConfig.RuleDefinition.TYPE_TIMELINESS, DqConfig.RuleDefinition.TYPE_KHIS_PARITY,
+			DqConfig.RuleDefinition.TYPE_RECORD_COMPLETENESS, DqConfig.RuleDefinition.TYPE_RECORD_ENTRY,
+			DqConfig.RuleDefinition.TYPE_VERIFICATION);
 
 	private DqRuleTypes() {
 	}
@@ -58,6 +60,15 @@ public final class DqRuleTypes {
 		}
 		if (DqConfig.RuleDefinition.TYPE_KHIS_PARITY.equals(type)) {
 			return new KhisParityRule(definition);
+		}
+		if (DqConfig.RuleDefinition.TYPE_RECORD_COMPLETENESS.equals(type)) {
+			return new RecordCompletenessRule(definition);
+		}
+		if (DqConfig.RuleDefinition.TYPE_RECORD_ENTRY.equals(type)) {
+			return new RecordEntryRule(definition);
+		}
+		if (DqConfig.RuleDefinition.TYPE_VERIFICATION.equals(type)) {
+			return new VerificationRule(definition);
 		}
 		return null;
 	}

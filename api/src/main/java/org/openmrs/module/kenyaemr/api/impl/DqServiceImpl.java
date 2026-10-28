@@ -25,7 +25,6 @@ import org.openmrs.module.kenyaemr.dq.rule.DqRule;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleContext;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleEngine;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleTypes;
-import org.openmrs.module.kenyaemr.dq.rule.TimelinessRule;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqOverride;
 import org.openmrs.module.kenyaemr.model.dq.DqReportPayload;
@@ -251,7 +250,7 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		DqConfig config = DqConfigStore.getConfig();
 		List<DqRule> due = new ArrayList<DqRule>();
 		for (DqRule rule : DqRuleTypes.rules(config, DqRule.Schedule.MONTH)) {
-			Date deadline = rule instanceof TimelinessRule ? ((TimelinessRule) rule).checkAfter(config, monthStart) : null;
+			Date deadline = rule.checkAfter(config, monthStart);
 			if (deadline != null && now.before(deadline)) {
 				continue;
 			}

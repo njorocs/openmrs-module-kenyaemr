@@ -163,6 +163,24 @@ class FakeRuleContext implements DqRuleContext {
 	/**
 	 * Queues the rows returned by the next query
 	 */
+	/**
+	 * The month's value counted again from the EMR, for VERIFICATION
+	 */
+	FakeRuleContext recount(String code, Date month, Double value) {
+		indicators.put("recount:" + code + "@" + month.getTime(), new DqIndicatorCalculator.IndicatorValue(code, value,
+				Collections.<String>emptyList()));
+		return this;
+	}
+
+	/**
+	 * The month's value as KHIS holds it, for VERIFICATION
+	 */
+	FakeRuleContext khisIndicator(String code, Date month, Double value) {
+		indicators.put("khis:" + code + "@" + month.getTime(), new DqIndicatorCalculator.IndicatorValue(code, value,
+				Collections.<String>emptyList()));
+		return this;
+	}
+
 	FakeRuleContext queryReturns(Object[]... rows) {
 		List<Object[]> list = new ArrayList<Object[]>();
 		Collections.addAll(list, rows);
@@ -188,6 +206,21 @@ class FakeRuleContext implements DqRuleContext {
 	@Override
 	public Date getPeriodEnd() {
 		return periodEnd;
+	}
+
+	@Override
+	public DqIndicatorCalculator.IndicatorValue recountIndicator(String code, Date monthStart) {
+		return stored("recount:" + code + "@" + monthStart.getTime(), code);
+	}
+
+	@Override
+	public DqIndicatorCalculator.IndicatorValue getKhisIndicator(String code, Date monthStart) {
+		return stored("khis:" + code + "@" + monthStart.getTime(), code);
+	}
+
+	private DqIndicatorCalculator.IndicatorValue stored(String key, String code) {
+		DqIndicatorCalculator.IndicatorValue value = indicators.get(key);
+		return value != null ? value : new DqIndicatorCalculator.IndicatorValue(code, null, Collections.singletonList(key));
 	}
 
 	@Override

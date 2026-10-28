@@ -39,7 +39,7 @@ public class DqConfigStoreTest {
 
 		DqConfig.Program malaria = config.getProgram("malaria");
 		Assert.assertEquals("Malaria", malaria.getName());
-		Assert.assertEquals(8, malaria.getRules().size());
+		Assert.assertEquals(11, malaria.getRules().size());
 		Assert.assertTrue(config.getReports(malaria).contains("MOH 711"));
 		Assert.assertTrue(config.isTracked(config.getIndicator("MAL_CONFIRMED_705")));
 		Assert.assertFalse(config.isTracked(config.getIndicator("MAL_TESTS_706")));

@@ -57,6 +57,18 @@ public interface DqRuleContext {
 	DqIndicatorCalculator.IndicatorValue getIndicator(String code, Date start, Date end);
 
 	/**
+	 * @return the indicator for a month counted again from the EMR now, with the reports' own
+	 * queries, rather than from the stored version (the recount of a verification factor)
+	 */
+	DqIndicatorCalculator.IndicatorValue recountIndicator(String code, Date monthStart);
+
+	/**
+	 * @return the indicator for a month as KHIS holds it, from the values read back; incomplete
+	 * while a cell is not mapped to KHIS or not read back
+	 */
+	DqIndicatorCalculator.IndicatorValue getKhisIndicator(String code, Date monthStart);
+
+	/**
 	 * @return the stored values of a report version, with the KHIS values read back
 	 */
 	List<DqValue> getValues(DqReportRun run);

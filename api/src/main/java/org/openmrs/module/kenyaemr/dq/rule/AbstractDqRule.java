@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.dq.rule;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
+import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
 import org.openmrs.module.kenyaemr.model.dq.DqOutcome;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
@@ -52,6 +53,11 @@ public abstract class AbstractDqRule implements DqRule {
 	@Override
 	public DqConfig.RuleDefinition getDefinition() {
 		return definition;
+	}
+
+	@Override
+	public Date checkAfter(DqConfig config, Date month) {
+		return DqPeriods.addMonths(DqPeriods.monthStart(month), 1);
 	}
 
 	@Override

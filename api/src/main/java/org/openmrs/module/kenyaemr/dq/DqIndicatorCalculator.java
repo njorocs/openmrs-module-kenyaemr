@@ -93,6 +93,46 @@ public final class DqIndicatorCalculator {
 	}
 
 	/**
+	 * The indicator as KHIS holds it: the sum of the values read back from KHIS for its cells. A
+	 * cell with no KHIS mapping, or not read back yet, leaves the value incomplete; a mapped cell
+	 * KHIS holds nothing for counts as zero, as the EMR sends no zeros.
+	 *
+	 * @param values the stored cells of the reports, with the KHIS values read back
+	 */
+	public static IndicatorValue calculateKhis(DqConfig.Indicator indicator, Collection<DqValue> values) {
+		Map<String, List<DqValue>> byKey = new HashMap<String, List<DqValue>>();
+		for (DqValue value : values) {
+			String key = key(value.getReportRun().getReportName(), value.getDatasetName(), value.getColumnName());
+			if (!byKey.containsKey(key)) {
+				byKey.put(key, new ArrayList<DqValue>());
+			}
+			byKey.get(key).add(value);
+		}
+		double sum = 0;
+		List<String> missing = new ArrayList<String>();
+		for (DqConfig.Part part : indicator.getParts()) {
+			for (String column : part.getColumns()) {
+				String name = part.getReport() + " / " + part.getDataset() + " / " + column;
+				List<DqValue> cells = byKey.get(key(part.getReport(), part.getDataset(), column));
+				if (cells == null) {
+					missing.add(name);
+					continue;
+				}
+				for (DqValue value : cells) {
+					if (value.getDataElement() == null) {
+						missing.add(name + " (not mapped to KHIS)");
+					} else if (value.getKhisLastUpdated() == null) {
+						missing.add(name + " (not read back from KHIS)");
+					} else if (value.getKhisValue() != null) {
+						sum += value.getKhisValue();
+					}
+				}
+			}
+		}
+		return new IndicatorValue(indicator.getCode(), missing.isEmpty() ? Double.valueOf(sum) : null, missing);
+	}
+
+	/**
 	 * The value of one indicator for one period
 	 */
 	public static class IndicatorValue {

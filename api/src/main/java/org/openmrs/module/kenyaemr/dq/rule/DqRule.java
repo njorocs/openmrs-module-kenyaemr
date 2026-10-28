@@ -12,6 +12,7 @@ package org.openmrs.module.kenyaemr.dq.rule;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -58,6 +59,11 @@ public interface DqRule {
 	 * @return true when the rule checks the report of the run in the context
 	 */
 	boolean appliesTo(DqRuleContext context);
+
+	/**
+	 * @return for a MONTH rule, when the month can be checked; by default once the month is over
+	 */
+	Date checkAfter(DqConfig config, Date month);
 
 	/**
 	 * Evaluates the rule. The results are not saved.

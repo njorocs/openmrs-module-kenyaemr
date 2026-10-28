@@ -144,6 +144,41 @@
         "max": 1.1,
         "severity": "WARN",
         "ticket": true
+      },
+      {
+        "id": "SRC-01",
+        "source": "mRDQA I.C, data element completeness",
+        "type": "RECORD_COMPLETENESS",
+        "min": 0.9,
+        "treatmentDays": 3,
+        "severity": "WARN"
+      },
+      {
+        "id": "SRC-02",
+        "source": "mRDQA I.D, source documents up to date",
+        "type": "RECORD_ENTRY",
+        "maxDays": 7,
+        "min": 0.9,
+        "severity": "WARN"
+      },
+      {
+        "id": "VF-01",
+        "source": "mRDQA II, verification factors",
+        "type": "VERIFICATION",
+        "indicators": [
+          "MAL_LLIN_U1_711",
+          "MAL_OPD_VISITS_U5_705",
+          "MAL_CONFIRMED_RDT_U5_743",
+          "MAL_ACT_U5_743",
+          "MAL_AL_DAYS_OUT_743",
+          "MAL_SUSPECTED_705",
+          "MAL_TESTED_705",
+          "MAL_CONFIRMED_705",
+          "MAL_TESTS_706",
+          "MAL_TREATED_743"
+        ],
+        "margin": 0.1,
+        "severity": "WARN"
       }
     ]
   },
@@ -381,6 +416,101 @@
             "courses_dispensed"
           ],
           "zeroWhenEmpty": true
+        }
+      ]
+    },
+    {
+      "code": "MAL_LLIN_U1_711",
+      "name": "LLINs given to children under 1 (MOH 711); the nearest to mRDQA 1.1, ITNs to children under 5",
+      "parts": [
+        {
+          "report": "MOH 711",
+          "dataset": "ANC_PMTCT",
+          "columns": [
+            "LLINs distributed to under 1 year"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MAL_OPD_VISITS_U5_705",
+      "name": "OPD visits by children under 5: first attendances and re-attendances (MOH 705A)",
+      "parts": [
+        {
+          "report": "MOH 705A Outpatient summary",
+          "dataset": "MOH705A",
+          "columns": [
+            "NFAC-32",
+            "RAC-32"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MAL_CONFIRMED_RDT_U5_743",
+      "name": "Children under 5 with malaria confirmed by RDT (MOH 743)",
+      "parts": [
+        {
+          "report": "MOH-743 Report",
+          "dataset": "SUSPECTED_MALARIA_AGE",
+          "columns": [
+            "RTD_LESS_5_POS"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MAL_ACT_U5_743",
+      "name": "Children under 5 given an ACT (MOH 743)",
+      "parts": [
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Patients Given an ACT by Weight Band Category",
+          "columns": [
+            "under_5_years_5_to_under_10_kg",
+            "under_5_years_10_to_under_15_kg",
+            "under_5_years_15_to_under_20_kg",
+            "under_5_years_20_to_under_25_kg",
+            "under_5_years_25_to_under_30_kg",
+            "under_5_years_30_to_under_35_kg",
+            "under_5_years_35_to_under_60_kg",
+            "under_5_years_60_to_under_80_kg",
+            "under_5_years_80_and_above_kg"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MAL_AL_DAYS_OUT_743",
+      "name": "Days out of stock of artemether-lumefantrine, all four packs added (MOH 743); stands in for mRDQA 5.1, ACT stock-out of 7 days",
+      "parts": [
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Artemether-Lumefantrine 20/120 Tabs 6s",
+          "columns": [
+            "days_out_of_stock"
+          ]
+        },
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Artemether-Lumefantrine 20/120 Tabs 12s",
+          "columns": [
+            "days_out_of_stock"
+          ]
+        },
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Artemether-Lumefantrine 20/120 Tabs 18s",
+          "columns": [
+            "days_out_of_stock"
+          ]
+        },
+        {
+          "report": "MOH-743 Report",
+          "dataset": "Artemether-Lumefantrine 20/120 Tabs 24s",
+          "columns": [
+            "days_out_of_stock"
+          ]
         }
       ]
     }

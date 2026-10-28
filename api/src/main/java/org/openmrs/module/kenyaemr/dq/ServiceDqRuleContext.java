@@ -136,7 +136,31 @@ public class ServiceDqRuleContext implements DqRuleContext {
 		if (start.equals(DqPeriods.monthStart(start)) && DqPeriods.lastDayOfMonth(start).equals(end)) {
 			return getIndicator(code, start);
 		}
-		String key = code + "@" + start.getTime() + "-" + end.getTime();
+		return liveIndicator(code, start, end);
+	}
+
+	@Override
+	public DqIndicatorCalculator.IndicatorValue recountIndicator(String code, Date monthStart) {
+		Date start = DqPeriods.monthStart(monthStart);
+		return liveIndicator(code, start, DqPeriods.lastDayOfMonth(start));
+	}
+
+	@Override
+	public DqIndicatorCalculator.IndicatorValue getKhisIndicator(String code, Date monthStart) {
+		DqConfig.Indicator indicator = config.getIndicator(code);
+		if (indicator == null) {
+			return new DqIndicatorCalculator.IndicatorValue(code, null, Collections.singletonList("indicator " + code
+					+ " is not configured"));
+		}
+		return DqIndicatorCalculator.calculateKhis(indicator, service.getLatestValues(indicator.getReports(), monthStart,
+				monthStart));
+	}
+
+	/**
+	 * Counts the indicator's own columns from the EMR now, for any period
+	 */
+	private DqIndicatorCalculator.IndicatorValue liveIndicator(String code, Date start, Date end) {
+		String key = "live:" + code + "@" + start.getTime() + "-" + end.getTime();
 		DqIndicatorCalculator.IndicatorValue value = indicators.get(key);
 		if (value == null) {
 			DqConfig.Indicator indicator = config.getIndicator(code);

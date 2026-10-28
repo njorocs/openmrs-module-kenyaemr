@@ -313,6 +313,12 @@ public class DqConfig {
 
 		public static final String TYPE_KHIS_PARITY = "KHIS_PARITY";
 
+		public static final String TYPE_RECORD_COMPLETENESS = "RECORD_COMPLETENESS";
+
+		public static final String TYPE_RECORD_ENTRY = "RECORD_ENTRY";
+
+		public static final String TYPE_VERIFICATION = "VERIFICATION";
+
 		/** Settings that hold indicator codes, alone or in a list of pairs */
 		private static final String[] INDICATOR_KEYS = { "numerator", "denominator", "consumed", "treated" };
 
