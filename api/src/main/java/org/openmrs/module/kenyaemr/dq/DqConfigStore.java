@@ -226,6 +226,21 @@ public final class DqConfigStore {
 					problems.add(name + " owns " + report + ", which is not an expected report");
 				}
 			}
+			if (program.getDashboard() != null) {
+				List<String> dashboardCodes = new ArrayList<String>();
+				for (DqConfig.CrossCheck check : program.getDashboard().getCrossChecks()) {
+					dashboardCodes.add(check.getNumerator());
+					dashboardCodes.add(check.getDenominator());
+				}
+				if (program.getDashboard().getConsistency() != null) {
+					dashboardCodes.add(program.getDashboard().getConsistency().getIndicator());
+				}
+				for (String code : dashboardCodes) {
+					if (code == null || !codes.contains(code)) {
+						problems.add(name + "'s dashboard refers to unknown indicator " + code);
+					}
+				}
+			}
 			for (Map<String, Object> values : program.getRules()) {
 				DqConfig.RuleDefinition rule = new DqConfig.RuleDefinition(program, values);
 				String ruleName = "rule " + (rule.getId() != null ? rule.getId() : "(no id)") + " of " + name;

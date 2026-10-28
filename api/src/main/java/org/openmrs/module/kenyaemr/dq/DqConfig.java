@@ -229,6 +229,9 @@ public class DqConfig {
 		/** Rule instances: id, type and the type's settings */
 		private List<Map<String, Object>> rules = new ArrayList<Map<String, Object>>();
 
+		/** What the program's data quality dashboard draws; none when it has no dashboard */
+		private Dashboard dashboard;
+
 		public String getCode() {
 			return code;
 		}
@@ -291,6 +294,170 @@ public class DqConfig {
 
 		public void setRules(List<Map<String, Object>> rules) {
 			this.rules = rules != null ? rules : new ArrayList<Map<String, Object>>();
+		}
+
+		public Dashboard getDashboard() {
+			return dashboard;
+		}
+
+		public void setDashboard(Dashboard dashboard) {
+			this.dashboard = dashboard;
+		}
+	}
+
+	/**
+	 * A program's mRDQA-style dashboard for one facility: the target for completeness, timeliness
+	 * and source documents, the cross checks drawn month by month, and the indicator whose
+	 * consistency over time is drawn. The verification factors and source-document shares come from
+	 * the program's VERIFICATION, RECORD_COMPLETENESS and RECORD_ENTRY rules.
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Dashboard {
+
+		/** For completeness, timeliness and the source documents, e.g. 0.9 */
+		private Double target;
+
+		private List<CrossCheck> crossChecks = new ArrayList<CrossCheck>();
+
+		private Consistency consistency;
+
+		public Double getTarget() {
+			return target;
+		}
+
+		public void setTarget(Double target) {
+			this.target = target;
+		}
+
+		public List<CrossCheck> getCrossChecks() {
+			return crossChecks;
+		}
+
+		public void setCrossChecks(List<CrossCheck> crossChecks) {
+			this.crossChecks = crossChecks != null ? crossChecks : new ArrayList<CrossCheck>();
+		}
+
+		public Consistency getConsistency() {
+			return consistency;
+		}
+
+		public void setConsistency(Consistency consistency) {
+			this.consistency = consistency;
+		}
+	}
+
+	/**
+	 * A cross check between two data sources: numerator ÷ denominator for each month, within min
+	 * and max
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class CrossCheck {
+
+		private String id;
+
+		private String name;
+
+		private String description;
+
+		private String numerator;
+
+		private String denominator;
+
+		private Double min;
+
+		private Double max;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		public String getNumerator() {
+			return numerator;
+		}
+
+		public void setNumerator(String numerator) {
+			this.numerator = numerator;
+		}
+
+		public String getDenominator() {
+			return denominator;
+		}
+
+		public void setDenominator(String denominator) {
+			this.denominator = denominator;
+		}
+
+		public Double getMin() {
+			return min;
+		}
+
+		public void setMin(Double min) {
+			this.min = min;
+		}
+
+		public Double getMax() {
+			return max;
+		}
+
+		public void setMax(Double max) {
+			this.max = max;
+		}
+	}
+
+	/**
+	 * The indicator drawn for consistency over time, with the band its ratios should fall in
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Consistency {
+
+		private String indicator;
+
+		private Double min;
+
+		private Double max;
+
+		public String getIndicator() {
+			return indicator;
+		}
+
+		public void setIndicator(String indicator) {
+			this.indicator = indicator;
+		}
+
+		public Double getMin() {
+			return min;
+		}
+
+		public void setMin(Double min) {
+			this.min = min;
+		}
+
+		public Double getMax() {
+			return max;
+		}
+
+		public void setMax(Double max) {
+			this.max = max;
 		}
 	}
 

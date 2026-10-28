@@ -180,7 +180,42 @@
         "margin": 0.1,
         "severity": "WARN"
       }
-    ]
+    ],
+    "dashboard": {
+      "target": 0.9,
+      "crossChecks": [
+        {
+          "id": "A",
+          "name": "OPD register : laboratory register",
+          "description": "Malaria tests in the laboratory (MOH 706) for every suspected case in the OPD (SMC in MOH 705A, SUA in MOH 705B)",
+          "numerator": "MAL_TESTS_706",
+          "denominator": "MAL_SUSPECTED_705",
+          "min": 0.9
+        },
+        {
+          "id": "B",
+          "name": "OPD register : pharmacy dispensing",
+          "description": "Patients treated with malaria drugs (MOH 743) for every confirmed case in the OPD (CMC in MOH 705A, COA in MOH 705B)",
+          "numerator": "MAL_TREATED_743",
+          "denominator": "MAL_CONFIRMED_705",
+          "min": 0.9
+        },
+        {
+          "id": "C",
+          "name": "ACT stock log : pharmacy dispensing",
+          "description": "Patients given an ACT (MOH 743) for every ACT course used by stock (MOH 643)",
+          "numerator": "MAL_TREATED_ACT_743",
+          "denominator": "MAL_ACT_DISPENSED_643",
+          "min": 0.85,
+          "max": 1.15
+        }
+      ],
+      "consistency": {
+        "indicator": "MAL_CONFIRMED_705",
+        "min": 0.8,
+        "max": 1.2
+      }
+    }
   },
   "expectedReports": [
     {

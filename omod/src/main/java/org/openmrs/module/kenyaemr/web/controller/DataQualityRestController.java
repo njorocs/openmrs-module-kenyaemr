@@ -18,6 +18,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.DqService;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqConfigStore;
+import org.openmrs.module.kenyaemr.dq.DqDashboard;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
 import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
@@ -430,6 +431,142 @@ public class DataQualityRestController extends BaseRestController {
 				.add("changeThreshold", settings.getDouble("changeThreshold", 0.5))
 				.add("minDenominator", settings.getInteger("minDenominator", settings.getInteger("minTests", 20)))
 				.add("results", points));
+	}
+
+	/**
+	 * A program's mRDQA-style dashboard for this facility, month by month up to "to": completeness
+	 * and timeliness of the key reports, source documents with no missing data and up to date, the
+	 * cross checks and consistency over time, and the verification factors of the latest month
+	 * checked. A month not yet checked has no values.
+	 *
+	 * @param program the program; default the first enabled program with a dashboard
+	 * @param to the last month, default last month
+	 * @param months how many months, 1 to 36
+	 */
+	@GetMapping("/dashboard")
+	public ResponseEntity<Object> getDashboard(@RequestParam(value = "program", required = false) String programCode,
+	                                           @RequestParam(value = "to", required = false) String to,
+	                                           @RequestParam(value = "months", defaultValue = "12") int months) {
+		requireAuthentication();
+		DqConfig config = DqConfigStore.getConfig();
+		DqConfig.Program program = program(config, programCode);
+		if (program == null) {
+			for (DqConfig.Program candidate : config.getPrograms()) {
+				if (candidate.isEnabled() && candidate.getDashboard() != null) {
+					program = candidate;
+					break;
+				}
+			}
+		}
+		if (program == null || program.getDashboard() == null) {
+			return notFound("No program has a dashboard; add a \"dashboard\" section to its file in kenyaemr/khis/dq_programs");
+		}
+		DqConfig.Dashboard dashboard = program.getDashboard();
+		Date last = to != null ? parse(to, MONTH) : DqPeriods.previousMonth(new Date());
+		Date first = firstMonth(last, months);
+		DqService service = service();
+
+		List<SimpleObject> reporting = new ArrayList<SimpleObject>();
+		for (DqDashboard.ReportingPoint point : DqDashboard.reporting(results(service, config, program,
+				DqConfig.RuleDefinition.TYPE_TIMELINESS, first, last), first, last)) {
+			reporting.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("checked", point.isChecked())
+					.add("expected", point.getExpected()).add("sent", point.getSent()).add("onTime", point.getOnTime())
+					.add("completeness", point.getCompleteness()).add("timeliness", point.getTimeliness()));
+		}
+
+		final ServiceDqRuleContext context = new ServiceDqRuleContext(service, config, null, first, last);
+		List<SimpleObject> crossChecks = new ArrayList<SimpleObject>();
+		DqDashboard.Values values = new DqDashboard.Values() {
+
+			@Override
+			public DqIndicatorCalculator.IndicatorValue get(String code, Date month) {
+				return context.getIndicator(code, month);
+			}
+		};
+		for (DqConfig.CrossCheck check : dashboard.getCrossChecks()) {
+			context.preload(check.getNumerator(), first, last);
+			context.preload(check.getDenominator(), first, last);
+			List<SimpleObject> points = new ArrayList<SimpleObject>();
+			for (DqDashboard.RatioPoint point : DqDashboard.crossCheck(values, check, first, last)) {
+				points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("numerator", point.getNumerator())
+						.add("denominator", point.getDenominator()).add("ratio", point.getRatio()));
+			}
+			crossChecks.add(new SimpleObject().add("id", check.getId()).add("name", check.getName())
+					.add("description", check.getDescription())
+					.add("numerator", indicatorRef(config.getIndicator(check.getNumerator())))
+					.add("denominator", indicatorRef(config.getIndicator(check.getDenominator())))
+					.add("min", check.getMin()).add("max", check.getMax()).add("results", points));
+		}
+
+		SimpleObject consistency = null;
+		if (dashboard.getConsistency() != null) {
+			String code = dashboard.getConsistency().getIndicator();
+			// The annual ratio of the first month reaches back a year
+			context.preload(code, DqPeriods.addMonths(first, -12), last);
+			List<SimpleObject> points = new ArrayList<SimpleObject>();
+			for (DqDashboard.ConsistencyPoint point : DqDashboard.consistency(values, code, first, last)) {
+				points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("value", point.getValue())
+						.add("threeMonthAverage", point.getThreeMonthAverage())
+						.add("sameMonthLastYear", point.getSameMonthLastYear())
+						.add("monthToMonth", point.getMonthToMonth()).add("annual", point.getAnnual()));
+			}
+			consistency = new SimpleObject().add("indicator", indicatorRef(config.getIndicator(code)))
+					.add("min", dashboard.getConsistency().getMin()).add("max", dashboard.getConsistency().getMax())
+					.add("results", points);
+		}
+
+		List<SimpleObject> verification = new ArrayList<SimpleObject>();
+		String verifiedPeriod = null;
+		for (DqResult result : DqDashboard.latestMonth(results(service, config, program,
+				DqConfig.RuleDefinition.TYPE_VERIFICATION, first, last))) {
+			Map<String, Object> detail = DqDashboard.detail(result);
+			verifiedPeriod = format(result.getPeriodStart(), MONTH);
+			verification.add(new SimpleObject().add("indicator", indicatorRef(config.getIndicator(result.getIndicatorCode())))
+					.add("code", result.getIndicatorCode()).add("reported", detail.get("reported"))
+					.add("recount", detail.get("recount")).add("khis", detail.get("khis"))
+					.add("vfReport", detail.get("vfReport")).add("vfKhis", detail.get("vfKhis"))
+					.add("outcome", result.getOutcome().name()).add("message", result.getMessage()));
+		}
+
+		return ok(new SimpleObject().add("program", program.getCode()).add("from", format(first, MONTH))
+				.add("to", format(last, MONTH)).add("target", dashboard.getTarget() != null ? dashboard.getTarget() : 0.9)
+				.add("reporting", reporting)
+				.add("noMissingData", shares(results(service, config, program, DqConfig.RuleDefinition.TYPE_RECORD_COMPLETENESS,
+						first, last), first, last))
+				.add("upToDate", shares(results(service, config, program, DqConfig.RuleDefinition.TYPE_RECORD_ENTRY, first, last),
+						first, last))
+				.add("crossChecks", crossChecks).add("consistency", consistency)
+				.add("verification", new SimpleObject().add("period", verifiedPeriod).add("results", verification)));
+	}
+
+	/**
+	 * @return the saved results, for the months, of the program's rules of the type
+	 */
+	private static List<DqResult> results(DqService service, DqConfig config, DqConfig.Program program, String type,
+	                                      Date first, Date last) {
+		List<DqResult> results = new ArrayList<DqResult>();
+		for (DqConfig.RuleDefinition definition : config.getRuleDefinitions()) {
+			if (type.equals(definition.getType()) && program.getCode().equals(definition.getProgramCode())
+					&& definition.getSettings().isEnabled()) {
+				for (DqResult result : service.getResults(definition.getId(), first, DqPeriods.lastDayOfMonth(last))) {
+					if (result.getReportRun() == null) {
+						results.add(result);
+					}
+				}
+			}
+		}
+		return results;
+	}
+
+	private static List<SimpleObject> shares(List<DqResult> results, Date first, Date last) {
+		List<SimpleObject> points = new ArrayList<SimpleObject>();
+		for (DqDashboard.SharePoint point : DqDashboard.shares(results, first, last)) {
+			points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("numerator", point.getNumerator())
+					.add("denominator", point.getDenominator()).add("share", point.getShare())
+					.add("outcome", point.getOutcome() != null ? point.getOutcome().name() : null)
+					.add("message", point.getMessage()));
+		}
+		return points;
 	}
 
 	@GetMapping("/tickets")
