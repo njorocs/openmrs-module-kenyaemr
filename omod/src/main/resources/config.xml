@@ -621,4 +621,8 @@
 		<url-pattern>/kenyaemr/*</url-pattern>
 	</filter-mapping>
 
+	<mappingFiles>
+		DataQuality.hbm.xml
+	</mappingFiles>
+
 </module>
