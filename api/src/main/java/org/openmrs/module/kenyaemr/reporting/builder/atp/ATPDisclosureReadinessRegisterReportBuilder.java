@@ -18,8 +18,6 @@ import org.openmrs.module.kenyacore.report.builder.Builds;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.atp.ATPReadinessRegisterCohortDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.*;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.*;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.BringsChildClinicDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.BringsChildClinicOtherNonRelaDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.BringsChildClinicOtherRelaDataDefinition;
@@ -60,10 +58,8 @@ import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.Lives
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.MemberTakingArvsDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.OtherPointOfEntryDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.OtherQuestionDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.OtherReasonDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.DiscussionOutComeDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.PointOfEntryDataDefinition;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.ReasonTakeMedicationDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.atp.TakeMedicationDataDefinition;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.common.SortCriteria;
@@ -136,14 +132,14 @@ public class ATPDisclosureReadinessRegisterReportBuilder extends AbstractReportB
         PatientIdentifierType nationalId = MetadataUtils.existing(PatientIdentifierType.class, CommonMetadata._PatientIdentifierType.NATIONAL_ID);
         DataDefinition nationalIdDef = new ConvertedPatientDataDefinition("identifier", new PatientIdentifierDataDefinition(nationalId.getName(), nationalId), identifierFormatter);
 
-        dsd.addColumn("Name", nameDef, "");
+        //dsd.addColumn("Name", nameDef, "");
         dsd.addColumn("id", new PatientIdDataDefinition(), "");
         dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), "", new BirthdateConverter(DATE_FORMAT));
         dsd.addColumn("Age", new AgeDataDefinition(), "");
         dsd.addColumn("Sex", new GenderDataDefinition(), "");
         dsd.addColumn("Telephone No", new PersonAttributeDataDefinition(phoneNumber), "");
         dsd.addColumn("National Id", nationalIdDef, null);
-        dsd.addColumn("Unique Patient Number", identifierDef, null);
+        dsd.addColumn("CCC No", identifierDef, null);
         dsd.addColumn("National Unique Patient Identifier", nupiDef, null);
 
         dsd.addColumn("Visit Date", new EncounterDatetimeDataDefinition(),"", new DateConverter(ENC_DATE_FORMAT));
