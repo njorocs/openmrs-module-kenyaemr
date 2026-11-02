@@ -35,6 +35,14 @@ public class SecurityMetadata extends AbstractMetadataBundle {
 	@Qualifier("userService")
 	private UserService userService;
 
+	/**
+	 * Prefix reserved for privileges that must never be swept into the catch-all API roles
+	 * ({@link _Role#API_PRIVILEGES} / {@link _Role#API_PRIVILEGES_VIEW_AND_EDIT}). Privileges
+	 * carrying this prefix guard restricted data (e.g. credentials stored in global properties)
+	 * and are only ever granted by being listed explicitly on a role.
+	 */
+	public static final String RESTRICTED_PRIVILEGE_PREFIX = "Restricted: ";
+
 	public static final class _Privilege {
 		public static final String VIEW_LEGACY_INTERFACE = "Emr: View Legacy Interface";
 		public static final String MANAGE_DRUG_ORDERS = "Can service drug prescriptions";
@@ -347,7 +355,8 @@ public class SecurityMetadata extends AbstractMetadataBundle {
 		Set<String> privileges = new HashSet<String>();
 
 		for (Privilege privilege : userService.getAllPrivileges()) {
-			if (privilege.getPrivilege().startsWith("App: ") || privilege.getPrivilege().startsWith("Emr: ") || privilege.getPrivilege().startsWith("o3: ")) {
+			if (privilege.getPrivilege().startsWith("App: ") || privilege.getPrivilege().startsWith("Emr: ") || privilege.getPrivilege().startsWith("o3: ")
+					|| privilege.getPrivilege().startsWith(RESTRICTED_PRIVILEGE_PREFIX)) {
 				continue;
 			}
 
