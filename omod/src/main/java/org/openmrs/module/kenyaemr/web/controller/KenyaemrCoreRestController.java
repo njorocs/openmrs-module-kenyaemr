@@ -168,6 +168,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -3416,8 +3417,30 @@ public class KenyaemrCoreRestController extends BaseRestController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/send-kenyaemr-sms")
 	public Object sendKenyaEmrSms(@RequestParam("message") String message, @RequestParam("phone") String phone,
-			@RequestParam(required = false) String nationalId) {
-		return Context.getService(KenyaEmrService.class).sendKenyaEmrSms(phone, message, nationalId);
+			@RequestParam(required = false) String nationalId,
+			@RequestParam(required = false) String identifierType,
+			@RequestParam(required = false) String identifierNumber) {
+		nationalId = decodeIfDoubleEncoded(nationalId);
+		identifierType = decodeIfDoubleEncoded(identifierType);
+		identifierNumber = decodeIfDoubleEncoded(identifierNumber);
+		return Context.getService(KenyaEmrService.class).sendKenyaEmrSms(phone, message, nationalId, identifierType, identifierNumber);
+	}
+
+	/**
+	 * Some callers percent-encode the "%" in an already-encoded value (e.g. send "National%2520ID"
+	 * instead of "National%20ID"), so after Spring/Tomcat's single decode pass the value still has a
+	 * literal "%XX" sequence in it (e.g. "National%20ID") instead of the real character (a space).
+	 * Detects that case and decodes once more so the real value reaches downstream HIE calls.
+	 */
+	private static String decodeIfDoubleEncoded(String value) {
+		if (value == null || !value.matches(".*%[0-9A-Fa-f]{2}.*")) {
+			return value;
+		}
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		} catch (Exception e) {
+			return value;
+		}
 	}
 
 	/**
