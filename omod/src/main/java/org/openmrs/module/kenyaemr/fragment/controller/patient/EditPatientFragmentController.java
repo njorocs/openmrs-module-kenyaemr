@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.fragment.controller.patient;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.Location;
@@ -73,7 +74,6 @@ public class EditPatientFragmentController {
 	final String clientNumberFieldEnabled = (administrationService.getGlobalProperty("clientNumber.enabled"));
 	final String clientNumberPreferredLabel = (administrationService.getGlobalProperty("client_number_label"));
 	final String clientRegistryClientVerificationApi = (administrationService.getGlobalProperty(CommonMetadata.GP_CLIENT_VERIFICATION_GET_END_POINT));
-	final String clientRegistryApiToken = (administrationService.getGlobalProperty(CommonMetadata.GP_CLIENT_VERIFICATION_API_TOKEN));
 
 	/**
 	 * Gets the facility name given the facility code

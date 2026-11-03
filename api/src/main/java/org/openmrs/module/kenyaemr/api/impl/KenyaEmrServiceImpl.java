@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.api.impl;
 
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -359,7 +361,7 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 		try {
 			AdministrationService administrationService = Context.getAdministrationService();
 			HttpPost postRequest = new HttpPost(administrationService.getGlobalProperty("kenyaemr.sms.url"));
-			postRequest.setHeader("api-token", administrationService.getGlobalProperty("kenyaemr.sms.apiToken"));
+			postRequest.setHeader("api-token", SensitiveGlobalProperties.get("kenyaemr.sms.apiToken"));
 			JSONObject json = new JSONObject();
 			json.put("destination", recipient);
 			json.put("msg", message);
@@ -453,14 +455,12 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 		if (hieILMedTokenUrl == null || hieILMedTokenUrl.trim().isEmpty()) {
 			System.out.println("HIE IL Mediator token url configs not updated: ");
 		}
-		GlobalProperty globalGetHieILMediatorClientID = Context.getAdministrationService()
-			.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID);
+		GlobalProperty globalGetHieILMediatorClientID = SensitiveGlobalProperties.getPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID);
 		String globalHieILMediatorClientID = globalGetHieILMediatorClientID.getPropertyValue();
 		if (globalHieILMediatorClientID == null || globalHieILMediatorClientID.trim().isEmpty()) {
 			System.out.println("HIE IL Mediator client ID not updated: ");
 		}
-		GlobalProperty globalGetHieILMediatorClientSecret = Context.getAdministrationService()
-			.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET);
+		GlobalProperty globalGetHieILMediatorClientSecret = SensitiveGlobalProperties.getPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET);
 		String globalHieILMediatorClientSecret = globalGetHieILMediatorClientSecret.getPropertyValue();
 		if (globalHieILMediatorClientSecret == null || globalHieILMediatorClientSecret.trim().isEmpty()) {
 			System.out.println("HIE IL Mediator client secret not updated: ");
@@ -514,7 +514,7 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 		try {
 			AdministrationService administrationService = Context.getAdministrationService();
 			HttpPost postRequest = new HttpPost(administrationService.getGlobalProperty("kenyaemr.pal.kehmis.sms.url"));
-			postRequest.setHeader("api-token", administrationService.getGlobalProperty("kenyaemr.sms.apiToken"));
+			postRequest.setHeader("api-token", SensitiveGlobalProperties.get("kenyaemr.sms.apiToken"));
 			JSONObject json = new JSONObject();
 			json.put("destination", recipient);
 			json.put("msg", message);

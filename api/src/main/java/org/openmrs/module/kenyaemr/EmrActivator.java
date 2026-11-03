@@ -19,6 +19,9 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.ModuleActivator;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
 import org.openmrs.module.kenyacore.CoreContext;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.util.ServerInformation;
@@ -32,7 +35,22 @@ import java.util.Map;
  * This class contains the logic that is run every time this module is either
  * started or stopped.
  */
-public class EmrActivator implements ModuleActivator {
+public class EmrActivator implements ModuleActivator, DaemonTokenAware {
+
+	private static DaemonToken daemonToken;
+
+	@Override
+	public void setDaemonToken(DaemonToken token) {
+		assignDaemonToken(token);
+	}
+
+	private static void assignDaemonToken(DaemonToken token) {
+		daemonToken = token;
+	}
+
+	public static DaemonToken getDaemonToken() {
+		return daemonToken;
+	}
 
 	protected static final Log log = LogFactory.getLog(EmrActivator.class);
 
@@ -84,6 +102,7 @@ public class EmrActivator implements ModuleActivator {
 	 */
 	public void started() {
 		log.info("KenyaEMR started");
+		SensitiveGlobalProperties.protectProperties();
 		AdministrationService administrationService = Context.getAdministrationService();
 		administrationService.executeSQL("UPDATE form SET published = 1 WHERE retired = 0", false);
 

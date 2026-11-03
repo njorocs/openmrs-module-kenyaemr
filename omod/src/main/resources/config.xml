@@ -75,6 +75,11 @@
 		<file>messages.properties</file>
 	</messages>
 
+    <privilege>
+        <name>Restricted: Manage KenyaEMR Credentials</name>
+        <description>View and maintain credentials used by KenyaEMR integrations</description>
+    </privilege>
+
 	<globalProperty>
 		<property>kenyaemr.autoUpdateReleaseUrl</property>
 		<defaultValue>https://api.github.com/repos/palladiumkenya/KenyaHMIS-KenyaEMR-Ver2.x/releases/latest</defaultValue>
@@ -131,6 +136,9 @@
 
 	<globalProperty>
 		<property>kenyaemr.ndwh.nupi.client.id</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue>test</defaultValue>
 		<description>
 			IIT ML - The oauth2 client-id of the data warehouse backend
@@ -139,6 +147,9 @@
 
 	<globalProperty>
 		<property>kenyaemr.ndwh.nupi.client.secret</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue>7f11e148-5741-11ec-bf63-0242ac130002</defaultValue>
 		<description>
 			The oauth2 client-secret of the data warehouse backend
@@ -217,6 +228,9 @@
 	</globalProperty>
 	<globalProperty>
 		<property>kenyaemr.sms.apiToken</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue>test-api-token</defaultValue>
 		<description>
 			The API token of the SMS gateway
@@ -490,6 +504,9 @@
 	</globalProperty>
 	<globalProperty>
 		<property>mail.smtp.username</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue></defaultValue>
 		<description>
 			Defines the SMTP username for sending emails
@@ -497,6 +514,9 @@
 	</globalProperty>
 	<globalProperty>
 		<property>mail.smtp.password</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue></defaultValue>
 		<description>
 			Defines the SMTP password for sending emails
@@ -551,6 +571,9 @@
 	</globalProperty>
 	<globalProperty>
 		<property>nlmis.oauth.token</property>
+		<viewPrivilege>Restricted: Manage KenyaEMR Credentials</viewPrivilege>
+		<editPrivilege>Restricted: Manage KenyaEMR Credentials</editPrivilege>
+		<deletePrivilege>Restricted: Manage KenyaEMR Credentials</deletePrivilege>
 		<defaultValue></defaultValue>
 		<description>
 			OAuth token for NLIMS integration

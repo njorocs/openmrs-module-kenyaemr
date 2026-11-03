@@ -10,6 +10,8 @@
 
 package org.openmrs.module.kenyaemr.nmlis;
 
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
+
 import org.openmrs.api.context.Context;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,8 +33,7 @@ public class NlmisHttpClientService {
 	}
 
 	private String getToken() {
-		return Context.getAdministrationService()
-				.getGlobalProperty("nlmis.oauth.token");
+		return SensitiveGlobalProperties.get("nlmis.oauth.token");
 	}
 
 	private String buildUrl(String endpoint) {

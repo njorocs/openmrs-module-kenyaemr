@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.api.impl;
 
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -96,8 +98,8 @@ public class AdverseDrugReactionEmailServiceImpl extends BaseOpenmrsService
             Session session = Session.getInstance(props, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(
-                            Context.getAdministrationService().getGlobalProperty("mail.smtp.username"),
-                            Context.getAdministrationService().getGlobalProperty("mail.smtp.password"));
+                            SensitiveGlobalProperties.get("mail.smtp.username"),
+                            SensitiveGlobalProperties.get("mail.smtp.password"));
                 }
             });
 

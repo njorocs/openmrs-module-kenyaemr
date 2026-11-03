@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.web.controller;
 
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -3498,14 +3500,12 @@ public class KenyaemrCoreRestController extends BaseRestController {
 		if (shaJwtTokenUrl == null || shaJwtTokenUrl.trim().isEmpty()) {
 			System.out.println("Jwt token url configs not updated: ");
 		}
-		GlobalProperty globalGetJwtUsername = Context.getAdministrationService()
-				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME);
+		GlobalProperty globalGetJwtUsername = SensitiveGlobalProperties.getPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME);
 		String shaJwtUsername = globalGetJwtUsername.getPropertyValue();
 		if (shaJwtUsername == null || shaJwtUsername.trim().isEmpty()) {
 			System.out.println("Jwt token username not updated: ");
 		}
-		GlobalProperty globalGetJwtPassword = Context.getAdministrationService()
-				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD);
+		GlobalProperty globalGetJwtPassword = SensitiveGlobalProperties.getPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD);
 		String shaJwtPassword = globalGetJwtPassword.getPropertyValue();
 		if (shaJwtPassword == null || shaJwtPassword.trim().isEmpty()) {
 			System.out.println("Jwt token password not updated: ");
