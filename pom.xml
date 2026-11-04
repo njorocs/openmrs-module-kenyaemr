@@ -46,7 +46,7 @@
     </modules>
 
     <properties>
-        <openMRSVersion>2.6.8</openMRSVersion>
+        <openMRSVersion>2.8.6</openMRSVersion>
         <openMRSMinorVersion>2.0</openMRSMinorVersion>
         <cielVersion>20150123</cielVersion>
 
@@ -488,6 +488,13 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.14.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

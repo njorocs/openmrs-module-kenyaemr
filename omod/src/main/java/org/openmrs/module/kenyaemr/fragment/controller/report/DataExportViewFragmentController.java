@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.kenyaemr.fragment.controller.report;
 
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -274,8 +276,8 @@ public class DataExportViewFragmentController {
             out.write(adxContent.getBytes("UTF-8"));
 
             administrationService = Context.getAdministrationService();
-            String clientId = administrationService.getGlobalProperty("dhis.username");
-            String clientSecret = administrationService.getGlobalProperty("dhis.password");
+            String clientId = SensitiveGlobalProperties.get("dhis.username");
+            String clientSecret = SensitiveGlobalProperties.get("dhis.password");
 
             if (StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)) {
                 return SimpleObject.create(
@@ -461,8 +463,8 @@ public class DataExportViewFragmentController {
             out.write(jsonContent.getBytes("UTF-8"));
 
             administrationService = Context.getAdministrationService();
-            String clientId = administrationService.getGlobalProperty("dhis.username");
-            String clientSecret = administrationService.getGlobalProperty("dhis.password");
+            String clientId = SensitiveGlobalProperties.get("dhis.username");
+            String clientSecret = SensitiveGlobalProperties.get("dhis.password");
 
             if (StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)) {
                 return SimpleObject.create(

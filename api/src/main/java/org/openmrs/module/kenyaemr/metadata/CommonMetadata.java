@@ -19,6 +19,7 @@ import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.kenyaemr.Dictionary;
 import org.openmrs.module.kenyaemr.EmrConstants;
 import org.openmrs.module.kenyaemr.Metadata;
+import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
 import org.openmrs.module.kenyaemr.datatype.FormDatatype;
 import org.openmrs.module.kenyaemr.datatype.LocationDatatype;
 import static org.openmrs.module.kenyaemr.metadata.MetadataUtils.shouldInstallForms;
@@ -649,10 +650,10 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		AdministrationService administrationService = Context.getAdministrationService();
 
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_USERNAME) == null) {
-    		install(globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
+			install(SensitiveGlobalProperties.globalProperty(EmrConstants.GP_DHIS_USERNAME, "Username for DHIS server", ""));
 		}
 		if (administrationService.getGlobalPropertyObject(EmrConstants.GP_DHIS_PASSWORD) == null) {
-    		install(globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
+			install(SensitiveGlobalProperties.globalProperty(EmrConstants.GP_DHIS_PASSWORD, "Password for DHIS server","" ));
 		}
         if (administrationService.getGlobalPropertyObject("kenyaemr.ebola.flag.concept.uuid") == null) {
             install(globalProperty("kenyaemr.ebola.flag.concept.uuid", "Concept UUID for storing Ebola flag obs", "e5d9f5f1-8a2b-4c6f-9c3b-123456789abc"));
@@ -688,31 +689,31 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER,
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_USER,
 					"API user for for connecting to the SHA provider registry", ""));
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET,
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_HEALTH_WORKER_VERIFICATION_GET_API_SECRET,
 					"API secret token for for connecting to the SHA provider registry", ""));
 		}
 
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_USER) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_USER,
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_USER,
 					"API user for for connecting to the SHA client registry", ""));
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET,
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_CLIENT_VERIFICATION_GET_API_SECRET,
 					"API secret token for for connecting to the SHA client registry", ""));
 		}
 		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_HIE_API_USER) == null) {
-			install(globalProperty(GP_HIE_API_USER, "API user for for connecting to the SHA Facility registry", ""));
+			install(SensitiveGlobalProperties.globalProperty(GP_HIE_API_USER, "API user for for connecting to the SHA Facility registry", ""));
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET) == null) {
-			install(globalProperty(GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET,
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_FACILITY_VERIFICATION_GET_API_SECRET,
 					"API secret token for for connecting to the SHA facility registry", ""));
 		}
 		if (administrationService
@@ -722,7 +723,7 @@ public class CommonMetadata extends AbstractMetadataBundle {
 					"https://afyakenyaapi.health.go.ke/partners/registry"));
 		}
 		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_API_TOKEN) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_API_TOKEN, "API token for connecting to the client registry",
+			install(SensitiveGlobalProperties.globalProperty(GP_CLIENT_VERIFICATION_API_TOKEN, "API token for connecting to the client registry",
 					""));
 		}
 		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_TOKEN_URL) == null) {
@@ -731,12 +732,12 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID, "client registry authorization client ID",
+			install(SensitiveGlobalProperties.globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_ID, "client registry authorization client ID",
 					"palladium.partner.client"));
 		}
 		if (administrationService
 				.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET) == null) {
-			install(globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET,
+			install(SensitiveGlobalProperties.globalProperty(GP_CLIENT_VERIFICATION_OAUTH2_CLIENT_SECRET,
 					"client registry authorization client secret", "28f95b2a"));
 		}
 		if (administrationService.getGlobalPropertyObject(CommonMetadata.GP_CLIENT_VERIFICATION_OAUTH2_SCOPE) == null) {
@@ -782,11 +783,11 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		}
 		if (Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_USERNAME) == null) {
-			install(globalProperty(GP_SHA_JWT_TOKEN_USERNAME, "SHA JWT Authentication token username", ""));
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_JWT_TOKEN_USERNAME, "SHA JWT Authentication token username", ""));
 		}
 		if (Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_JWT_TOKEN_PASSWORD) == null) {
-			install(globalProperty(GP_SHA_JWT_TOKEN_PASSWORD, "SHA JWT Authentication token password", ""));
+			install(SensitiveGlobalProperties.globalProperty(GP_SHA_JWT_TOKEN_PASSWORD, "SHA JWT Authentication token password", ""));
 		}
 		if (Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_SHA_INTERVENTIONS) == null) {
 			install(globalProperty(GP_SHA_INTERVENTIONS, "SHA Interventions url", ""));
@@ -819,12 +820,12 @@ public class CommonMetadata extends AbstractMetadataBundle {
 		}
 		if (Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID) == null) {
-			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID, "HIE IL Mediator Authentication token client id",
+			install(SensitiveGlobalProperties.globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_ID, "HIE IL Mediator Authentication token client id",
 					""));
 		}
 		if (Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET) == null) {
-			install(globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET,
+			install(SensitiveGlobalProperties.globalProperty(GP_HEI_IL_MEDIATOR_TOKEN_CLIENT_SECRET,
 					"HIE IL Mediator Authentication client secret", ""));
 		}
 
