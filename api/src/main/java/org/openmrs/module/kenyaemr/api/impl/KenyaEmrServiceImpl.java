@@ -14,6 +14,7 @@ import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -332,13 +333,13 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 	}
 
 	@Override
-	public SimpleObject sendKenyaEmrSms(String recipient, String message, String nationalId) {
+	public SimpleObject sendKenyaEmrSms(String recipient, String message, String nationalId, String identifierType, String identifierNumber) {
 		SimpleObject response = new SimpleObject();
 		GlobalProperty gpOTPSource = Context.getAdministrationService().getGlobalPropertyObject(CommonMetadata.GP_HEI_OPT_SOURCE);
 		if (gpOTPSource != null) {
 			if (gpOTPSource.getPropertyValue().equalsIgnoreCase("hie")) {
 				try {
-					response.add("response", _HIEILMediatorSms(recipient, nationalId));
+					response.add("response", _HIEILMediatorSms(recipient, nationalId, identifierType, identifierNumber));
 				} catch (Exception e) {
 					response.add("response", "Failed to send SMS " + e.getMessage());
 					throw new RuntimeException(e);
@@ -396,7 +397,7 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 	 * @throws IOException
 	 */
 
-	public static String _HIEILMediatorSms(String recipient, String nationalId) throws Exception {
+	public static String _HIEILMediatorSms(String recipient, String nationalId, String identifierType, String identifierNumber) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		String bearerToken = getHIEILMediatorAuthToken();
 		String responseMsg = null;
@@ -406,18 +407,20 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 			GlobalProperty globalGetUrl = Context.getAdministrationService()
 				.getGlobalPropertyObject(CommonMetadata.GP_SHA_FACILITY_REGISTRY_CODE);
 			String fid = globalGetUrl.getPropertyValue();
+			String smsUrl = administrationService.getGlobalProperty("kenyaemr.sms.url");
 
-			HttpPost postRequest = new HttpPost(administrationService.getGlobalProperty("kenyaemr.sms.url"));
+			HttpPost postRequest = new HttpPost(smsUrl);
 			postRequest.setHeader("Authorization", "Bearer " + bearerToken);
 
 			// Create the JSON using ObjectMapper with proper handling
 			ObjectMapper mapper = new ObjectMapper();
 			Map<String, Object> jsonMap = new HashMap<>();
-			jsonMap.put("identifierType", "National ID");
-			jsonMap.put("identifierNumber", nationalId);
+
+			jsonMap.put("identifierType", StringUtils.isNotBlank(identifierType) ? identifierType : "National ID");
+			jsonMap.put("identifierNumber", StringUtils.isNotBlank(identifierNumber) ? identifierNumber : nationalId);
 			jsonMap.put("phoneNumber", recipient);
 			jsonMap.put("facility", fid);
-			jsonMap.put("scope", Arrays.asList("CLIENT_REGISTRY"));
+			jsonMap.put("scope", Arrays.asList("CLIENT_REGISTRY", "SHARED_HEALTH_RECORD"));
 
 			String jsonPayload = mapper.writeValueAsString(jsonMap);
 			StringEntity entity = new StringEntity(jsonPayload, "UTF-8");
@@ -426,12 +429,11 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 
 			try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
 				int statusCode = response.getStatusLine().getStatusCode();
-				System.out.println("SMS Payload Status Code ==>" + statusCode);
 				String responseBody = EntityUtils.toString(response.getEntity());
 				if (statusCode == 200) {
 					responseMsg = "SMS sent successfully" + responseBody;
 					System.out.println("SMS sent successfully \n" + responseBody);
-					} else {
+				} else {
 					responseMsg = "Failed to send SMS " + responseBody;
 					System.err.println("Failed to send SMS \n" + responseBody);
 				}
@@ -474,7 +476,7 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 				.method("POST", body)
 				.addHeader("Content-Type", "application/x-www-form-urlencoded")
 				.build();
-			Response response = client.newCall(request).execute();		
+			Response response = client.newCall(request).execute();
 			if (!response.isSuccessful()) {
 				System.err.println("Get HIE IL Mediator Auth: ERROR: Request failed: " + response.code() + " - " + response.message());
 			} else {
@@ -482,7 +484,7 @@ public class KenyaEmrServiceImpl extends BaseOpenmrsService implements KenyaEmrS
 				//Extract token
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode node = mapper.readTree(response.body().string());
-				 ret = node.get("access_token").asText();			
+				 ret = node.get("access_token").asText();
 			}
 		} catch (Exception ex) {
 			System.err.println("Get HIE IL Mediator HIE Auth: ERROR: Request failed: " + ex.getMessage());
