@@ -36,7 +36,7 @@ import org.openmrs.module.kenyaemr.reporting.calculation.converter.*;
 import org.openmrs.module.kenyaemr.reporting.cohort.definition.ARTRegisterCohortDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.BirthdateConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.IdentifierConverter;
-import org.openmrs.module.kenyaemr.reporting.data.converter.ObsMonthYearConverter;
+import org.openmrs.module.kenyaemr.reporting.data.converter.DateMonthYearConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.TBScreeningConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.TBScreeningAtLastVisitDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.anc.EDCandANCNumberPreg1DataDefinition;
@@ -153,7 +153,7 @@ public class ArtRegisterReportBuilder extends AbstractHybridReportBuilder {
         dsd.addColumn("Weight at Art Start", new CalculationDataDefinition("Weight at Art Start", new WeightAtArtStartDateCalculation()), "", new WeightConverter());
         dsd.addColumn("CTX Start Date", new CalculationDataDefinition("Weight at Art Start", new DateOfFirstCTXCalculation()), "", new ArtCohortStartMonthYearDateConverter());
         dsd.addColumn("IPT Start Date", new CalculationDataDefinition("IPT Start Date", new IPTStartDateCalculation()), "", new DateArtStartDateConverter());
-        dsd.addColumn("TBRx Start Date", new TbStartDateArtDataDefinition(), "", new ObsMonthYearConverter());
+        dsd.addColumn("TBRx Start Date", new TbStartDateArtDataDefinition(), "", new DateMonthYearConverter());
         dsd.addColumn("TB Reg", identifierDef_tb, "");
         dsd.addColumn("Pregnancy_1", new EDCandANCNumberPreg1DataDefinition(),"");
         dsd.addColumn("Pregnancy_2", new EDCandANCNumberPreg2DataDefinition(),"");

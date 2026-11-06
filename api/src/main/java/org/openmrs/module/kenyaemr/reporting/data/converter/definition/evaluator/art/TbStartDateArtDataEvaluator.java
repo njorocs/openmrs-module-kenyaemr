@@ -21,6 +21,8 @@ import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,14 +37,15 @@ public class TbStartDateArtDataEvaluator implements PersonDataEvaluator {
     public EvaluatedPersonData evaluate(PersonDataDefinition definition, EvaluationContext context) throws EvaluationException {
         EvaluatedPersonData c = new EvaluatedPersonData(definition, context);
 
+        // The treatment start date of the earliest TB enrollment, as a date: the cohort converts it to MM/yyyy
         String qry = "select patient_id,\n" +
-                "  mid(min(concat(visit_date,date_treatment_started)),11)  as tb_start_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment\n" +
+                "  cast(mid(min(concat(visit_date,date_treatment_started)),11) as date) as tb_start_date from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_tb_enrollment\n" +
                 "GROUP BY patient_id;";
 
         SqlQueryBuilder queryBuilder = new SqlQueryBuilder();
         queryBuilder.append(qry);
-        Map<Integer, Object> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Object.class, context);
-        c.setData(data);
+        Map<Integer, Date> data = evaluationService.evaluateToMap(queryBuilder, Integer.class, Date.class, context);
+        c.setData(new HashMap<Integer, Object>(data));
         return c;
     }
 }
