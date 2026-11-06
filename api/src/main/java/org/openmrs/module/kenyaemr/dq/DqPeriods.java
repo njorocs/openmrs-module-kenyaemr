@@ -51,6 +51,30 @@ public final class DqPeriods {
 	}
 
 	/**
+	 * @return true when the dates cover exactly one calendar month: its first day to its last, at any
+	 * time of day
+	 */
+	public static boolean isWholeMonth(Date start, Date end) {
+		return start != null && end != null && start.getTime() == monthStart(start).getTime()
+				&& startOfDay(end).getTimeInMillis() == lastDayOfMonth(start).getTime();
+	}
+
+	/**
+	 * @return true when the dates are one whole week, Monday to Sunday
+	 */
+	public static boolean isWholeWeek(Date start, Date end) {
+		return start != null && end != null && start.getTime() == weekStart(start).getTime()
+				&& startOfDay(end).getTimeInMillis() == addDays(start, 6).getTime();
+	}
+
+	/**
+	 * @return the date at midnight
+	 */
+	public static Date dayOf(Date date) {
+		return startOfDay(date).getTime();
+	}
+
+	/**
 	 * @return the first day of the month before the one containing the date
 	 */
 	public static Date previousMonth(Date date) {

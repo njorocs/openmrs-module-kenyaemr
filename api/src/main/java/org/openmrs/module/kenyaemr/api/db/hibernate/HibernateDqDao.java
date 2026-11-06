@@ -37,7 +37,15 @@ public class HibernateDqDao implements DqDao {
 
 	/** Restricts a run alias "r" to the highest version of its report and period */
 	private static final String LATEST_VERSION = "r.version = (select max(r2.version) from DqReportRun r2 "
-			+ "where r2.reportName = r.reportName and r2.periodStart = r.periodStart)";
+			+ "where r2.reportName = r.reportName and r2.periodStart = r.periodStart and r2.periodEnd = r.periodEnd)";
+
+	/**
+	 * @return a condition true for a run of a whole month; the month queries leave out the weekly
+	 * versions of a report sent a week at a time (MOH 505), even one starting on the 1st
+	 */
+	static String monthRun(String alias) {
+		return "(day(" + alias + ".periodStart) = 1 and day(" + alias + ".periodEnd) >= 28)";
+	}
 
 	private SessionFactory sessionFactory;
 
@@ -65,8 +73,8 @@ public class HibernateDqDao implements DqDao {
 	@Override
 	public DqReportRun getLatestReportRun(String reportName, Date periodStart) {
 		return (DqReportRun) session()
-				.createQuery("from DqReportRun r where r.reportName = :reportName and r.periodStart = :periodStart "
-						+ "order by r.version desc")
+				.createQuery("from DqReportRun r where r.reportName = :reportName and r.periodStart = :periodStart and "
+						+ monthRun("r") + " order by r.version desc")
 				.setParameter("reportName", reportName)
 				.setParameter("periodStart", periodStart)
 				.setMaxResults(1)
@@ -74,11 +82,34 @@ public class HibernateDqDao implements DqDao {
 	}
 
 	@Override
+	public DqReportRun getLatestReportRun(String reportName, Date periodStart, Date periodEnd) {
+		return (DqReportRun) session()
+				.createQuery("from DqReportRun r where r.reportName = :reportName and r.periodStart = :periodStart "
+						+ "and r.periodEnd = :periodEnd order by r.version desc")
+				.setParameter("reportName", reportName)
+				.setParameter("periodStart", periodStart)
+				.setParameter("periodEnd", periodEnd)
+				.setMaxResults(1)
+				.uniqueResult();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DqReportRun> getLatestWeeklyRuns(Date fromPeriod, Date toPeriod) {
+		return session()
+				.createQuery("from DqReportRun r where r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and not "
+						+ monthRun("r") + " and " + LATEST_VERSION + " order by r.periodStart, r.reportName")
+				.setParameter("fromPeriod", fromPeriod)
+				.setParameter("toPeriod", toPeriod)
+				.list();
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<DqReportRun> getLatestReportRuns(Date periodStart) {
 		return session()
-				.createQuery("from DqReportRun r where r.periodStart = :periodStart and " + LATEST_VERSION
-						+ " order by r.reportName")
+				.createQuery("from DqReportRun r where r.periodStart = :periodStart and " + monthRun("r") + " and "
+						+ LATEST_VERSION + " order by r.reportName")
 				.setParameter("periodStart", periodStart)
 				.list();
 	}
@@ -88,8 +119,8 @@ public class HibernateDqDao implements DqDao {
 	public List<DqReportRun> getLatestReportRuns(String reportName, Date fromPeriod, Date toPeriod) {
 		return session()
 				.createQuery("from DqReportRun r where r.reportName = :reportName "
-						+ "and r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and " + LATEST_VERSION
-						+ " order by r.periodStart")
+						+ "and r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and " + monthRun("r") + " and "
+						+ LATEST_VERSION + " order by r.periodStart")
 				.setParameter("reportName", reportName)
 				.setParameter("fromPeriod", fromPeriod)
 				.setParameter("toPeriod", toPeriod)
@@ -139,7 +170,8 @@ public class HibernateDqDao implements DqDao {
 		}
 		return session()
 				.createQuery("select v from DqValue v join v.reportRun r where r.reportName in (:reportNames) "
-						+ "and r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and " + LATEST_VERSION)
+						+ "and r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and " + monthRun("r") + " and "
+						+ LATEST_VERSION)
 				.setParameterList("reportNames", reportNames)
 				.setParameter("fromPeriod", fromPeriod)
 				.setParameter("toPeriod", toPeriod)
@@ -171,8 +203,9 @@ public class HibernateDqDao implements DqDao {
 	@SuppressWarnings("unchecked")
 	public List<DqResult> getResults(String ruleId, Date fromPeriod, Date toPeriod) {
 		return session()
-				.createQuery("from DqResult r where r.ruleId = :ruleId and r.periodStart >= :fromPeriod "
-						+ "and r.periodStart <= :toPeriod order by r.periodStart, r.evaluatedAt")
+				.createQuery("select r from DqResult r left join r.reportRun run where r.ruleId = :ruleId "
+						+ "and r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod and (run is null or "
+						+ monthRun("run") + ") order by r.periodStart, r.evaluatedAt")
 				.setParameter("ruleId", ruleId)
 				.setParameter("fromPeriod", fromPeriod)
 				.setParameter("toPeriod", toPeriod)
@@ -184,7 +217,7 @@ public class HibernateDqDao implements DqDao {
 	public List<DqResult> getProgramResults(String programCode, String ruleId, Date fromPeriod, Date toPeriod) {
 		Query query = session().createQuery("from DqResult r left join fetch r.reportRun run "
 				+ "where r.periodStart >= :fromPeriod and r.periodStart <= :toPeriod "
-				+ "and (run is null or run.status <> :superseded)"
+				+ "and (run is null or (run.status <> :superseded and " + monthRun("run") + "))"
 				+ (programCode != null ? " and r.programCode = :programCode" : "")
 				+ (ruleId != null ? " and r.ruleId = :ruleId" : "")
 				+ " order by r.periodStart, r.ruleId, r.indicatorCode");
@@ -237,6 +270,26 @@ public class HibernateDqDao implements DqDao {
 					.setParameter("status", status);
 		}
 		return query.list();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DqTicket> getUnresolvedTickets(String ruleId, Date periodStart) {
+		return session().createQuery("from DqTicket t where t.ruleId = :ruleId and t.periodStart = :periodStart "
+				+ "and t.status <> :resolved order by t.id")
+				.setParameter("ruleId", ruleId)
+				.setParameter("periodStart", periodStart)
+				.setParameter("resolved", DqTicketStatus.RESOLVED)
+				.list();
+	}
+
+	@Override
+	public int executeSqlUpdate(String sql, Map<String, Object> parameters) {
+		SQLQuery query = session().createSQLQuery(sql);
+		for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+			query.setParameter(parameter.getKey(), parameter.getValue());
+		}
+		return query.executeUpdate();
 	}
 
 	@Override

@@ -47,7 +47,7 @@ import java.util.Set;
  * <p>
  * Patient-level detail is not stored: the list is rebuilt with {@link #listPairs(DqRuleContext)}
  * when someone opens it. Settings: reports or report, windowDays, crossPeriodOnly, severeConcepts,
- * severeNamePatterns, severity, labTests, positiveResults.
+ * severeNamePatterns, severity, labTests, negativeResults.
  */
 public class DuplicateEpisodeRule extends AbstractDqRule {
 
@@ -149,7 +149,7 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 		detail.put("windowDays", windowDays);
 		detail.put("crossPeriodOnly", crossPeriodOnly);
 		detail.put("labTests", MalariaLabSettings.labTests(settings));
-		detail.put("positiveResults", MalariaLabSettings.positiveResults(settings));
+		detail.put("negativeResults", MalariaLabSettings.negativeResults(settings));
 		detail.put("severeConcepts", severeConcepts(settings));
 		detail.put("severeNamePatterns", severeNamePatterns(settings));
 		result.setDetail(json(detail));
@@ -179,7 +179,7 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 				+ "and b.date_test_requested <= date_add(a.date_test_requested, interval :windowDays day) "
 				+ (byAge ? "join " + context.getEtlDatabase() + ".etl_patient_demographics dem on dem.patient_id = b.patient_id " : "")
 				+ "where a.lab_test in (:labTests) and b.lab_test in (:labTests) "
-				+ "and lower(a.result_name) in (:positiveResults) and lower(b.result_name) in (:positiveResults) "
+				+ "and (a.result_name is not null and trim(a.result_name) <> '' and lower(trim(a.result_name)) not in (:negativeResults)) and (b.result_name is not null and trim(b.result_name) <> '' and lower(trim(b.result_name)) not in (:negativeResults)) "
 				+ "and b.date_test_requested between :startDate and :endDate "
 				+ (age(band, "minAgeYears") != null ? "and " + ageAtTest + " >= :minAgeYears " : "")
 				+ (age(band, "maxAgeYears") != null ? "and " + ageAtTest + " < :maxAgeYears " : "")
@@ -205,7 +205,7 @@ public class DuplicateEpisodeRule extends AbstractDqRule {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("windowDays", settings.getInteger("windowDays", 14));
 		parameters.put("labTests", MalariaLabSettings.labTests(settings));
-		parameters.put("positiveResults", MalariaLabSettings.positiveResults(settings));
+		parameters.put("negativeResults", MalariaLabSettings.negativeResults(settings));
 		parameters.put("startDate", context.getPeriodStart());
 		parameters.put("endDate", context.getPeriodEnd());
 		Map<String, Object> band = band(context, settings);

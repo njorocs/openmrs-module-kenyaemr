@@ -112,7 +112,8 @@ public class ReportingUtils {
 		dim.addParameter(new Parameter("effectiveDate", "Effective Date", Date.class));
 		dim.setName("Patient age - dim");
 		dim.addCohortDefinition("<5", map(createXtoYAgeCohort(0, 4), "effectiveDate=${effectiveDate}"));
-		dim.addCohortDefinition(">5", map(createXtoYAgeCohort(5, 59), "effectiveDate=${effectiveDate}"));
+		// Over 5 is everyone 5 and older: MOH 706 has no 60+ column, so those patients were in no column
+		dim.addCohortDefinition(">5", map(createXtoYAgeCohort(5, null), "effectiveDate=${effectiveDate}"));
 		dim.addCohortDefinition(">60", map(createXtoYAgeCohort(60, 600), "effectiveDate=${effectiveDate}"));
 		return dim;
 	}

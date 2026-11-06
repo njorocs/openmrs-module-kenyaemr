@@ -18,6 +18,8 @@ import org.openmrs.module.kenyaemr.model.dq.DqResult;
 import org.openmrs.module.kenyaemr.model.dq.DqTicket;
 import org.openmrs.module.kenyaemr.model.dq.DqTicketStatus;
 import org.openmrs.module.kenyaemr.model.dq.DqValue;
+import org.openmrs.module.reporting.report.ReportData;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -34,6 +36,9 @@ public interface DqService extends OpenmrsService {
 
 	/** Held by the HRIO who approves reports for submission */
 	String PRIVILEGE_APPROVE = "Approve Data Quality Reports";
+
+	/** Held by whoever sets the thresholds of the data quality rules for the facility */
+	String PRIVILEGE_MANAGE_SETTINGS = "Manage Data Quality Settings";
 
 	/**
 	 * Evaluates a report for a month, saves it as a new version and runs its data quality rules.
@@ -58,6 +63,35 @@ public interface DqService extends OpenmrsService {
 	 * @return the saved results
 	 */
 	List<DqResult> evaluateReportRun(DqReportRun run);
+
+	/**
+	 * Stores a report the HRIO ran on the reports page, so the data quality pages read it without
+	 * regenerating. Only an expected monthly report, run for a whole month that has ended, is kept;
+	 * it is saved as a new version and checked when its values differ from the latest version.
+	 * Runs in its own transaction so a failure here never fails the report run.
+	 *
+	 * @param reportDefinitionUuid the evaluated report definition
+	 * @return the saved run, or null when the report was not kept
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	DqReportRun captureReportRun(String reportDefinitionUuid, ReportData reportData, Date start, Date end);
+
+	/**
+	 * Whether a report generated on the reports page may be sent to KHIS: only once the version
+	 * with the same figures has been checked, nothing blocks it and its warnings are reviewed
+	 * (approved). A version with nothing to review may be sent without approval.
+	 *
+	 * A report sent a week at a time (MOH 505) is held for any period but a whole week or month.
+	 *
+	 * @param reportName the report, e.g. "MOH 705A Outpatient summary"
+	 * @param periodStart the report's start date
+	 * @param periodEnd the report's end date
+	 * @param valuesHash the hash of the figures to send, see {@link org.openmrs.module.kenyaemr.dq.DqSendGates}
+	 * @param completedAt when the report finished; its checks start just after
+	 */
+	@Transactional(readOnly = true)
+	org.openmrs.module.kenyaemr.dq.DqSendGate getSendGate(String reportName, Date periodStart, Date periodEnd,
+	                                                      String valuesHash, Date completedAt);
 
 	/**
 	 * Approves a run on behalf of the authenticated user (the HRIO). Refused while a hard block is
@@ -89,6 +123,16 @@ public interface DqService extends OpenmrsService {
 	 * @return the results for the week
 	 */
 	List<DqResult> evaluateWeek(Date anyDateInWeek);
+
+	/**
+	 * Checks again, with the latest values, the finding of every ticket not resolved, so that its
+	 * figures are those the trends show: a ticket whose finding still fails takes the new figures and
+	 * message, and one whose finding now passes is closed. Run nightly, it catches tickets a new
+	 * version did not reach, e.g. one generated before the re-check on generation was installed.
+	 *
+	 * @return how many tickets were checked again
+	 */
+	int refreshOpenTickets();
 
 	/**
 	 * Runs the month-level rules (G-RPT-01 timeliness) for a month, once each rule's deadlines are
@@ -127,6 +171,18 @@ public interface DqService extends OpenmrsService {
 
 	@Transactional(readOnly = true)
 	DqReportRun getLatestReportRun(String reportName, Date periodStart);
+
+	/**
+	 * @return the latest version for exactly these dates, e.g. a week of MOH 505
+	 */
+	@Transactional(readOnly = true)
+	DqReportRun getLatestReportRun(String reportName, Date periodStart, Date periodEnd);
+
+	/**
+	 * @return the latest weekly versions of reports, for weeks starting in the range
+	 */
+	@Transactional(readOnly = true)
+	List<DqReportRun> getLatestWeeklyRuns(Date fromPeriod, Date toPeriod);
 
 	@Transactional(readOnly = true)
 	List<DqReportRun> getLatestReportRuns(Date periodStart);
@@ -184,4 +240,16 @@ public interface DqService extends OpenmrsService {
 
 	@Transactional(readOnly = true)
 	List<Object[]> executeSqlQuery(String sql, Map<String, Object> parameters);
+
+	/**
+	 * Records a version sent straight to KHIS from the reports page, in kenyaemrIL's submission
+	 * ledger, so its timeliness is known as for a version the IL sends. A version sent again keeps
+	 * its first send time. Nothing is recorded where the ledger does not exist.
+	 *
+	 * @param payloadFormat ADX or JSON
+	 * @param counts KHIS's import counts: imported, updated, ignored, deleted; each may be null
+	 * @param importSummary KHIS's response
+	 * @return true when recorded
+	 */
+	boolean recordKhisSend(DqReportRun run, String payloadFormat, int httpCode, Integer[] counts, String importSummary);
 }

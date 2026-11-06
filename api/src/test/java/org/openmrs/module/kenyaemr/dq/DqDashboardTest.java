@@ -111,17 +111,6 @@ public class DqDashboardTest {
 		Assert.assertTrue(DqDashboard.latestMonth(Collections.<DqResult>emptyList()).isEmpty());
 	}
 
-	@Test
-	public void shares_shouldLeaveMonthsNotCheckedEmpty() {
-		DqResult checked = result("SRC-01", null, march, DqOutcome.WARN, "{}", 1);
-		checked.setMeasureValue(0.8);
-
-		List<DqDashboard.SharePoint> points = DqDashboard.shares(Collections.singletonList(checked), march, april);
-
-		Assert.assertEquals(0.8, points.get(0).getShare(), 0);
-		Assert.assertNull(points.get(1).getOutcome());
-	}
-
 	private static DqResult result(String ruleId, String code, Date month, DqOutcome outcome, String detail, long evaluated) {
 		DqResult result = new DqResult();
 		result.setRuleId(ruleId);

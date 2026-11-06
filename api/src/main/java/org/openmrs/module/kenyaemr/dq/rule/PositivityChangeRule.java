@@ -47,9 +47,23 @@ public class PositivityChangeRule extends AbstractDqRule {
 		return Schedule.WEEK;
 	}
 
+	/**
+	 * The week's and the week before's values of the reports of its indicators, so a week already
+	 * checked is checked again once a newer version of one of them is stored
+	 */
+	@Override
+	public boolean readsReportValues() {
+		return true;
+	}
+
+	/**
+	 * Checked for each week by the daily task, and for a weekly version of a report (MOH 505) so
+	 * that the week is held from KHIS until it is reviewed
+	 */
 	@Override
 	public boolean appliesTo(DqRuleContext context) {
-		return context.getRun() == null;
+		return context.getRun() == null
+				|| DqPeriods.isWholeWeek(context.getRun().getPeriodStart(), context.getRun().getPeriodEnd());
 	}
 
 	@Override

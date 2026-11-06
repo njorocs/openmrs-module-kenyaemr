@@ -86,21 +86,19 @@ public class DqRulesTest {
 		Assert.assertFalse(rule("T22-04").appliesTo(FakeRuleContext.monthly(MOH_706, march)));
 	}
 
-	// X-RPT-01: suspected (MOH 705A/B) against blood smears (MOH 706) and microscopy (MOH 505)
+	// X-RPT-01: suspected (MOH 705A/B) against all malaria tests (MOH 706)
 
 	@Test
-	public void xrpt01_shouldCheckEachComparison() {
+	public void xrpt01_shouldCheckSuspectedAgainstTests() {
 		List<DqResult> results = rule("X-RPT-01").evaluate(FakeRuleContext.monthly(MOH_705A, march)
-				.indicator(SUSPECTED, march, 90.0).indicator("MAL_BST_706", march, 100.0)
-				.indicator("MAL_MICRO_TESTED_505", march, 70.0));
+				.indicator(SUSPECTED, march, 90.0).indicator("MAL_TESTS_706", march, 100.0));
+		List<DqResult> low = rule("X-RPT-01").evaluate(FakeRuleContext.monthly(MOH_705A, march)
+				.indicator(SUSPECTED, march, 70.0).indicator("MAL_TESTS_706", march, 100.0));
 
-		Assert.assertEquals(3, results.size());
-		Assert.assertEquals(SUSPECTED + "/MAL_BST_706", results.get(0).getIndicatorCode());
+		Assert.assertEquals(1, results.size());
+		Assert.assertEquals(SUSPECTED + "/MAL_TESTS_706", results.get(0).getIndicatorCode());
 		Assert.assertEquals(DqOutcome.PASS, results.get(0).getOutcome());
-		Assert.assertEquals(SUSPECTED + "/MAL_MICRO_TESTED_505", results.get(1).getIndicatorCode());
-		Assert.assertEquals(DqOutcome.WARN, results.get(1).getOutcome());
-		Assert.assertEquals("MAL_BST_706/MAL_MICRO_TESTED_505", results.get(2).getIndicatorCode());
-		Assert.assertEquals(DqOutcome.WARN, results.get(2).getOutcome());
+		Assert.assertEquals(DqOutcome.WARN, low.get(0).getOutcome());
 	}
 
 	@Test
@@ -118,37 +116,66 @@ public class DqRulesTest {
 	public void xrpt01_shouldApplyToEachReportItCompares() {
 		Assert.assertTrue(rule("X-RPT-01").appliesTo(FakeRuleContext.monthly(MOH_705A, march)));
 		Assert.assertTrue(rule("X-RPT-01").appliesTo(FakeRuleContext.monthly(MOH_706, march)));
-		Assert.assertTrue(rule("X-RPT-01").appliesTo(FakeRuleContext.monthly(MOH_505, march)));
+		// MOH 505 is not compared
+		Assert.assertFalse(rule("X-RPT-01").appliesTo(FakeRuleContext.monthly(MOH_505, march)));
 		Assert.assertFalse(rule("X-RPT-01").appliesTo(FakeRuleContext.monthly(MOH_743, march)));
+	}
+
+	@Test
+	public void recheck_shouldFindTheReportsEachValueReadingRuleReads() {
+		DqConfig config = DqConfigStore.getDefaultConfig();
+		// Checked with each version: the re-checks take the rules whose indicators' reports changed
+		Assert.assertTrue(rule("T22-03").getReports(config).containsAll(Arrays.asList(MOH_705A, MOH_705B)));
+		Assert.assertTrue(rule("T22-04").getReports(config).contains(MOH_743));
+		Assert.assertTrue(rule("X-RPT-01").getReports(config).contains(MOH_706));
+		// Checked each week: checked again once a newer version of its reports is stored
+		Assert.assertTrue(rule("T22-08").readsReportValues());
 	}
 
 	// T22-03: consistency over time of confirmed cases (MOH 705A/B)
 
 	@Test
-	public void t2203_shouldPassAtExactlyTwentyPercent() {
+	public void t2203_shouldPassAtExactlyTwentyPercentOfTheSameMonthLastYear() {
 		FakeRuleContext context = withHistory(FakeRuleContext.monthly(MOH_705A, march), CONFIRMED, 100.0, 12)
 				.indicator(CONFIRMED, march, 120.0);
 
-		DqResult rolling = baseline(rule("T22-03").evaluate(context), CONFIRMED, ConsistencyOverTimeRule.BASELINE_ROLLING);
+		DqResult lastYear = single(rule("T22-03"), context);
 
-		Assert.assertEquals(DqOutcome.PASS, rolling.getOutcome());
-		Assert.assertEquals(0.2, rolling.getMeasureValue(), 1e-12);
+		Assert.assertEquals(ConsistencyOverTimeRule.BASELINE_LAST_YEAR, baselineOf(lastYear));
+		Assert.assertEquals(DqOutcome.PASS, lastYear.getOutcome());
+		Assert.assertEquals(1.2, lastYear.getMeasureValue(), 1e-12);
 	}
 
 	@Test
-	public void t2203_shouldWarnAboveTwentyPercentAndCheckOnlyItsIndicators() {
+	public void t2203_shouldTicketBeyondTwentyPercentOfTheSameMonthLastYearAndCheckOnlyItsIndicators() {
 		FakeRuleContext context = withHistory(FakeRuleContext.monthly(MOH_705A, march), CONFIRMED, 100.0, 12)
-				.indicator(CONFIRMED, march, 121.0);
+				.indicator(CONFIRMED, march, 79.0);
 
 		List<DqResult> results = rule("T22-03").evaluate(context);
 
-		Assert.assertEquals(DqOutcome.WARN, baseline(results, CONFIRMED, ConsistencyOverTimeRule.BASELINE_ROLLING).getOutcome());
-		DqResult lastYear = baseline(results, CONFIRMED, ConsistencyOverTimeRule.BASELINE_LAST_YEAR);
-		Assert.assertEquals(DqOutcome.WARN, lastYear.getOutcome());
-		Assert.assertEquals(1.21, lastYear.getMeasureValue(), 1e-12);
-		// Only confirmed cases, against both baselines
-		Assert.assertEquals(2, results.size());
+		// Only confirmed cases, and only against the same month last year
+		Assert.assertEquals(1, results.size());
+		DqResult lastYear = results.get(0);
+		Assert.assertEquals(ConsistencyOverTimeRule.BASELINE_LAST_YEAR, baselineOf(lastYear));
+		Assert.assertEquals(DqOutcome.TICKET, lastYear.getOutcome());
+		Assert.assertEquals(0.79, lastYear.getMeasureValue(), 1e-12);
+		Assert.assertEquals("79 against 100 in Mar 2025, 21% less; allowed ±20%.", lastYear.getMessage());
 		Assert.assertFalse(rule("T22-03").appliesTo(FakeRuleContext.monthly(MOH_743, march)));
+	}
+
+	@Test
+	public void t2203_shouldShowTheTwelveMonthAverageWithoutFlagging() {
+		// Far above the 12-month average, but within 20% of the same month last year
+		FakeRuleContext context = withHistory(FakeRuleContext.monthly(MOH_705A, march), CONFIRMED, 100.0, 12)
+				.indicator(CONFIRMED, DqPeriods.addMonths(march, -12), 150.0).indicator(CONFIRMED, march, 160.0);
+		ConsistencyOverTimeRule rule = (ConsistencyOverTimeRule) rule("T22-03");
+
+		Assert.assertEquals(DqOutcome.PASS, single(rule, context).getOutcome());
+		DqResult rolling = baseline(rule.evaluateIndicator(context, context.getConfig().getIndicator(CONFIRMED)), CONFIRMED,
+				ConsistencyOverTimeRule.BASELINE_ROLLING);
+		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, rolling.getOutcome());
+		// The average takes in last year's 150: (11 × 100 + 150) ÷ 12
+		Assert.assertEquals("160 is 53.6% above the 12-month average of 104.17; allowed ±20%.", rolling.getMessage());
 	}
 
 	@Test
@@ -156,23 +183,29 @@ public class DqRulesTest {
 		FakeRuleContext context = withHistory(FakeRuleContext.monthly(MOH_705A, march), CONFIRMED, 100.0, 2)
 				.incompleteIndicator(CONFIRMED, DqPeriods.addMonths(march, -3), 100.0)
 				.indicator(CONFIRMED, march, 500.0);
+		ConsistencyOverTimeRule rule = (ConsistencyOverTimeRule) rule("T22-03");
 
-		DqResult rolling = baseline(rule("T22-03").evaluate(context), CONFIRMED, ConsistencyOverTimeRule.BASELINE_ROLLING);
+		DqResult rolling = baseline(rule.evaluateIndicator(context, context.getConfig().getIndicator(CONFIRMED)), CONFIRMED,
+				ConsistencyOverTimeRule.BASELINE_ROLLING);
 
 		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, rolling.getOutcome());
-		Assert.assertTrue(rolling.getMessage(), rolling.getMessage().contains("only 2 earlier month(s)"));
+		Assert.assertTrue(rolling.getMessage(), rolling.getMessage().startsWith("Only 2 earlier month(s)"));
 	}
 
 	@Test
-	public void t2203_shouldUseAnIndicatorsOwnBand() {
+	public void t2203_shouldJudgeBothBaselinesWithAnIndicatorsOwnBandWhenConfigured() {
 		FakeRuleContext context = withHistory(FakeRuleContext.monthly(MOH_705A, march), CONFIRMED, 100.0, 12)
 				.indicator(CONFIRMED, march, 130.0);
 		Map<String, Object> own = new HashMap<String, Object>();
+		own.put("baseline", ConsistencyOverTimeRule.BASELINE_BOTH);
 		own.put("band", 0.35);
 		context.getConfig().getIndicator(CONFIRMED).getRules().put(ConsistencyOverTimeRule.ID, own);
 
-		Assert.assertEquals(DqOutcome.PASS, baseline(new ConsistencyOverTimeRule(context.getConfig().getRuleDefinition("T22-03"))
-				.evaluate(context), CONFIRMED, ConsistencyOverTimeRule.BASELINE_ROLLING).getOutcome());
+		List<DqResult> results = new ConsistencyOverTimeRule(context.getConfig().getRuleDefinition("T22-03")).evaluate(context);
+
+		Assert.assertEquals(2, results.size());
+		Assert.assertEquals(DqOutcome.PASS, baseline(results, CONFIRMED, ConsistencyOverTimeRule.BASELINE_ROLLING).getOutcome());
+		Assert.assertEquals(DqOutcome.TICKET, baseline(results, CONFIRMED, ConsistencyOverTimeRule.BASELINE_LAST_YEAR).getOutcome());
 	}
 
 	// T22-05: ACT dispensed (MOH 643) against patients given an ACT (MOH 743), within 10%
@@ -300,7 +333,11 @@ public class DqRulesTest {
 
 		List<DqResult> results = rule("G-RPT-01").evaluate(context);
 
-		Assert.assertEquals(6, results.size());
+		// MOH 705A, 705B, 706, 711 and 743; not MOH 505
+		Assert.assertEquals(5, results.size());
+		for (DqResult result : results) {
+			Assert.assertNotEquals(MOH_505, result.getIndicatorCode());
+		}
 		DqResult onTime = result(results, MOH_705A);
 		Assert.assertEquals(DqOutcome.PASS, onTime.getOutcome());
 		DqResult late = result(results, MOH_706);
@@ -375,56 +412,6 @@ public class DqRulesTest {
 		FakeRuleContext context = FakeRuleContext.month(march);
 		context.khisTracked = false;
 		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, rule.evaluate(context).get(0).getOutcome());
-	}
-
-	// SRC-01, SRC-02: the malaria register's entries complete and up to date
-
-	@Test
-	public void src01_shouldWarnBelowNinetyPercentAndCountEachMissingColumn() {
-		// 20 entries, 4 missing something: 3 without temperature, 1 positive without treatment
-		FakeRuleContext context = FakeRuleContext.month(march).queryReturns(new Object[] { 20L, 4L, 0L, 3L, 0L, 0L, 0L, 1L });
-
-		DqResult result = single(rule("SRC-01"), context);
-
-		Assert.assertEquals(DqOutcome.WARN, result.getOutcome());
-		Assert.assertEquals(0.8, result.getMeasureValue(), 1e-12);
-		Assert.assertEquals(16.0, result.getNumerator(), 0);
-		Assert.assertEquals(20.0, result.getDenominator(), 0);
-		Assert.assertTrue(result.getMessage(), result.getMessage().contains("missing: temperature 3, treatment 1"));
-		Assert.assertTrue(result.getDetail(), result.getDetail().contains("\"temperature\":3"));
-		Assert.assertEquals(3, context.queryParameters.get(0).get("treatmentDays"));
-
-		Assert.assertEquals(DqOutcome.PASS, single(rule("SRC-01"), FakeRuleContext.month(march)
-				.queryReturns(new Object[] { 20L, 2L, 0L, 2L, 0L, 0L, 0L, 0L })).getOutcome());
-		Assert.assertEquals(DqOutcome.NOT_APPLICABLE, single(rule("SRC-01"), FakeRuleContext.month(march)
-				.queryReturns(new Object[] { 0L, null, null, null, null, null, null, null })).getOutcome());
-	}
-
-	@Test
-	public void src01_shouldAskForTheRegistersSixColumns() {
-		String sql = RecordCompletenessRule.sql(FakeRuleContext.month(march), RecordCompletenessRule.FIELDS);
-		for (String field : RecordCompletenessRule.FIELDS) {
-			Assert.assertTrue(field, sql.contains("as has_" + field));
-		}
-		Assert.assertTrue(sql, sql.contains("etl_laboratory_extract"));
-	}
-
-	@Test
-	public void src02_shouldCountEntriesEnteredWithinSevenDays() {
-		DqResult result = single(rule("SRC-02"), FakeRuleContext.month(march).queryReturns(new Object[] { 50L, 44L, 1L }));
-
-		Assert.assertEquals(DqOutcome.WARN, result.getOutcome());
-		Assert.assertEquals(0.88, result.getMeasureValue(), 1e-12);
-		Assert.assertTrue(result.getMessage(), result.getMessage().contains("44 of 50"));
-	}
-
-	@Test
-	public void sourceDocumentRules_shouldBeCheckedOnceTheMonthHasSettled() {
-		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule("SRC-01").checkAfter(DqConfigStore.getDefaultConfig(), march));
-		Assert.assertEquals(TestUtils.date(2026, 4, 11), rule("SRC-02").checkAfter(DqConfigStore.getDefaultConfig(), march));
-		Assert.assertEquals(DqRule.Schedule.MONTH, rule("SRC-01").getSchedule());
-		// Other monthly rules wait only for the month to end
-		Assert.assertEquals(TestUtils.date(2026, 4, 1), rule("T22-03").checkAfter(DqConfigStore.getDefaultConfig(), march));
 	}
 
 	// VF-01: verification factors, recount against the report and against KHIS
@@ -600,16 +587,15 @@ public class DqRulesTest {
 	@Test
 	public void engine_shouldTicketCrossReportWarningsToTheProgramOwner() {
 		FakeRuleContext context = FakeRuleContext.monthly(MOH_706, march).indicator(SUSPECTED, march, 80.0)
-				.indicator("MAL_BST_706", march, 100.0).indicator("MAL_MICRO_TESTED_505", march, 80.0);
+				.indicator("MAL_TESTS_706", march, 100.0);
 
 		List<DqResult> results = DqRuleEngine.evaluate(context, Collections.singletonList(rule("X-RPT-01")));
 		List<DqTicket> tickets = DqRuleEngine.ticketsFor(results, context.getConfig());
 
 		Assert.assertEquals(DqRunStatus.AWAITING_APPROVAL, DqRuleEngine.statusFor(results));
-		// 705 against 706 is 20% low and 706 against 505 is 25% high; 705 against 505 matches
-		Assert.assertEquals(2, tickets.size());
+		// 705 against all tests in 706 is 20% low
+		Assert.assertEquals(1, tickets.size());
 		Assert.assertEquals(-20.0, tickets.get(0).getVariancePct(), 1e-9);
-		Assert.assertEquals(25.0, tickets.get(1).getVariancePct(), 1e-9);
 		Assert.assertEquals(DqTicket.ROLE_HRIO, tickets.get(0).getAssigneeRole());
 		Assert.assertEquals("MALARIA", tickets.get(0).getProgramCode());
 	}
@@ -642,6 +628,7 @@ public class DqRulesTest {
 	@Test
 	public void types_shouldBuildEveryMalariaRuleOnItsSchedule() {
 		DqConfig config = DqConfigStore.getDefaultConfig();
+		// T22-03, T22-04, T22-05, T22-07 and X-RPT-01
 		Assert.assertEquals(5, DqRuleTypes.rules(config, DqRule.Schedule.REPORT).size());
 		Assert.assertEquals("T22-08", DqRuleTypes.rules(config, DqRule.Schedule.WEEK).get(0).getId());
 		Assert.assertEquals("G-RPT-01", DqRuleTypes.rules(config, DqRule.Schedule.MONTH).get(0).getId());
@@ -687,5 +674,10 @@ public class DqRulesTest {
 			}
 		}
 		throw new AssertionError("No " + baseline + " result for " + indicator);
+	}
+
+	private static String baselineOf(DqResult result) {
+		return result.getDetail().contains("\"" + ConsistencyOverTimeRule.BASELINE_ROLLING + "\"")
+				? ConsistencyOverTimeRule.BASELINE_ROLLING : ConsistencyOverTimeRule.BASELINE_LAST_YEAR;
 	}
 }

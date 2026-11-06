@@ -232,6 +232,9 @@ public class DqConfig {
 		/** What the program's data quality dashboard draws; none when it has no dashboard */
 		private Dashboard dashboard;
 
+		/** Report cells the reviewer can compare, patient by patient, with their source records */
+		private List<Reconciliation> reconciliations = new ArrayList<Reconciliation>();
+
 		public String getCode() {
 			return code;
 		}
@@ -303,23 +306,153 @@ public class DqConfig {
 		public void setDashboard(Dashboard dashboard) {
 			this.dashboard = dashboard;
 		}
+
+		public List<Reconciliation> getReconciliations() {
+			return reconciliations;
+		}
+
+		public void setReconciliations(List<Reconciliation> reconciliations) {
+			this.reconciliations = reconciliations != null ? reconciliations : new ArrayList<Reconciliation>();
+		}
 	}
 
 	/**
-	 * A program's mRDQA-style dashboard for one facility: the target for completeness, timeliness
-	 * and source documents, the cross checks drawn month by month, and the indicator whose
-	 * consistency over time is drawn. The verification factors and source-document shares come from
-	 * the program's VERIFICATION, RECORD_COMPLETENESS and RECORD_ENTRY rules.
+	 * A report cell and the source records it should agree with, patient by patient: e.g. the
+	 * confirmed malaria in MOH 705B against the positive malaria tests of patients aged 5 and over.
+	 * The patients in only one of the two are the ones to check.
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Reconciliation {
+
+		public static final String SOURCE_TESTED = "MALARIA_TESTED";
+
+		public static final String SOURCE_POSITIVE = "MALARIA_POSITIVE";
+
+		/** Unique within the program, e.g. 705B-CONFIRMED */
+		private String id;
+
+		private String name;
+
+		private String report;
+
+		private String dataset;
+
+		/** The month's total column, e.g. COA-32 */
+		private String column;
+
+		/** MALARIA_TESTED (a malaria test with a result) or MALARIA_POSITIVE (a positive one) */
+		private String source;
+
+		/** Age on the last day of the month, as the report computes it; null for no limit */
+		private Integer minAgeYears;
+
+		/** Exclusive */
+		private Integer maxAgeYears;
+
+		/** The malaria test concepts the report counts */
+		private List<Integer> labTests = new ArrayList<Integer>();
+
+		/** For MALARIA_POSITIVE: the diagnoses the report counts as confirmed, to explain mismatches */
+		private List<Integer> diagnoses = new ArrayList<Integer>();
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getReport() {
+			return report;
+		}
+
+		public void setReport(String report) {
+			this.report = report;
+		}
+
+		public String getDataset() {
+			return dataset;
+		}
+
+		public void setDataset(String dataset) {
+			this.dataset = dataset;
+		}
+
+		public String getColumn() {
+			return column;
+		}
+
+		public void setColumn(String column) {
+			this.column = column;
+		}
+
+		public String getSource() {
+			return source;
+		}
+
+		public void setSource(String source) {
+			this.source = source;
+		}
+
+		public Integer getMinAgeYears() {
+			return minAgeYears;
+		}
+
+		public void setMinAgeYears(Integer minAgeYears) {
+			this.minAgeYears = minAgeYears;
+		}
+
+		public Integer getMaxAgeYears() {
+			return maxAgeYears;
+		}
+
+		public void setMaxAgeYears(Integer maxAgeYears) {
+			this.maxAgeYears = maxAgeYears;
+		}
+
+		public List<Integer> getLabTests() {
+			return labTests;
+		}
+
+		public void setLabTests(List<Integer> labTests) {
+			this.labTests = labTests != null ? labTests : new ArrayList<Integer>();
+		}
+
+		public List<Integer> getDiagnoses() {
+			return diagnoses;
+		}
+
+		public void setDiagnoses(List<Integer> diagnoses) {
+			this.diagnoses = diagnoses != null ? diagnoses : new ArrayList<Integer>();
+		}
+	}
+
+	/**
+	 * A program's mRDQA-style dashboard for one facility: the target for completeness and
+	 * timeliness, the cascade and cross checks drawn month by month, and the indicator whose
+	 * consistency over time is drawn. The verification factors come from the program's VERIFICATION
+	 * rules.
 	 */
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Dashboard {
 
-		/** For completeness, timeliness and the source documents, e.g. 0.9 */
+		/** For completeness and timeliness, e.g. 0.9 */
 		private Double target;
 
 		private List<CrossCheck> crossChecks = new ArrayList<CrossCheck>();
 
 		private Consistency consistency;
+
+		private Cascade cascade;
 
 		public Double getTarget() {
 			return target;
@@ -343,6 +476,79 @@ public class DqConfig {
 
 		public void setConsistency(Consistency consistency) {
 			this.consistency = consistency;
+		}
+
+		public Cascade getCascade() {
+			return cascade;
+		}
+
+		public void setCascade(Cascade cascade) {
+			this.cascade = cascade;
+		}
+	}
+
+	/**
+	 * The steps of care month by month, each an indicator of its own report, drawn as one chart of
+	 * absolute numbers: for malaria suspected (MOH 705A and 705B), tested and confirmed (MOH 706) and
+	 * treated (MOH 743)
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Cascade {
+
+		/** The rule that judges the steps, shown with the chart */
+		private String ruleId;
+
+		private String name;
+
+		private List<CascadeStep> steps = new ArrayList<CascadeStep>();
+
+		public String getRuleId() {
+			return ruleId;
+		}
+
+		public void setRuleId(String ruleId) {
+			this.ruleId = ruleId;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<CascadeStep> getSteps() {
+			return steps;
+		}
+
+		public void setSteps(List<CascadeStep> steps) {
+			this.steps = steps != null ? steps : new ArrayList<CascadeStep>();
+		}
+	}
+
+	/** One step of a cascade: an indicator, and its short name in the chart */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class CascadeStep {
+
+		private String indicator;
+
+		private String label;
+
+		public String getIndicator() {
+			return indicator;
+		}
+
+		public void setIndicator(String indicator) {
+			this.indicator = indicator;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
 		}
 	}
 
@@ -480,10 +686,6 @@ public class DqConfig {
 
 		public static final String TYPE_KHIS_PARITY = "KHIS_PARITY";
 
-		public static final String TYPE_RECORD_COMPLETENESS = "RECORD_COMPLETENESS";
-
-		public static final String TYPE_RECORD_ENTRY = "RECORD_ENTRY";
-
 		public static final String TYPE_VERIFICATION = "VERIFICATION";
 
 		/** Settings that hold indicator codes, alone or in a list of pairs */
@@ -587,6 +789,13 @@ public class DqConfig {
 		/** False to stop generating the report on the 1st without removing it from the list */
 		private boolean generate = true;
 
+		/**
+		 * True for a report also sent to KHIS a week at a time (Monday to Sunday), e.g. MOH 505: each
+		 * week generated on the reports page is stored as its own version, checked by the week's
+		 * checks (T22-08) and held from KHIS like a month
+		 */
+		private boolean weekly;
+
 		public String getReport() {
 			return report;
 		}
@@ -625,6 +834,14 @@ public class DqConfig {
 
 		public void setGenerate(boolean generate) {
 			this.generate = generate;
+		}
+
+		public boolean isWeekly() {
+			return weekly;
+		}
+
+		public void setWeekly(boolean weekly) {
+			this.weekly = weekly;
 		}
 	}
 

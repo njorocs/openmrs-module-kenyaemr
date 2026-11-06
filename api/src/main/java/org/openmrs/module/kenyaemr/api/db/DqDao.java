@@ -32,9 +32,19 @@ public interface DqDao {
 	DqReportRun getReportRunByUuid(String uuid);
 
 	/**
-	 * @return the highest version for the report and period, or null when none exists
+	 * @return the highest version for the report and month, or null when none exists
 	 */
 	DqReportRun getLatestReportRun(String reportName, Date periodStart);
+
+	/**
+	 * @return the latest version of the report for exactly this period, e.g. a week
+	 */
+	DqReportRun getLatestReportRun(String reportName, Date periodStart, Date periodEnd);
+
+	/**
+	 * @return the latest versions of reports stored a week at a time, for weeks starting in the range
+	 */
+	List<DqReportRun> getLatestWeeklyRuns(Date fromPeriod, Date toPeriod);
 
 	/**
 	 * @return the latest version of every report generated for the period
@@ -83,7 +93,19 @@ public interface DqDao {
 	List<DqTicket> getTickets(DqTicketStatus status);
 
 	/**
+	 * @return the tickets of a rule for a period (a month or a week) that are not resolved
+	 */
+	List<DqTicket> getUnresolvedTickets(String ruleId, Date periodStart);
+
+	/**
 	 * Runs a read-only SQL query, used by rules that work on patient-level ETL tables
 	 */
 	List<Object[]> executeSqlQuery(String sql, Map<String, Object> parameters);
+
+	/**
+	 * Runs an SQL insert or update
+	 *
+	 * @return the rows changed
+	 */
+	int executeSqlUpdate(String sql, Map<String, Object> parameters);
 }

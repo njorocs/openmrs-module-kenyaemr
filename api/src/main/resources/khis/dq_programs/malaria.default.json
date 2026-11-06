@@ -14,7 +14,6 @@
       "MAL_BST_706",
       "MAL_TESTS_706",
       "MAL_POSITIVE_706",
-      "MAL_MICRO_TESTED_505",
       "MAL_CONFIRMED_743",
       "MAL_TREATED_ACT_743",
       "MAL_TREATED_743",
@@ -28,11 +27,12 @@
         "indicators": [
           "MAL_CONFIRMED_705"
         ],
+        "baseline": "SAME_MONTH_LAST_YEAR",
         "band": 0.2,
         "ratioMin": 0.8,
         "ratioMax": 1.2,
         "minHistoryMonths": 3,
-        "severity": "WARN"
+        "severity": "TICKET"
       },
       {
         "id": "T22-04",
@@ -55,7 +55,8 @@
         ],
         "tolerance": 0.1,
         "severity": "WARN",
-        "ticket": true
+        "ticket": true,
+        "patients": "ACT_DISPENSING"
       },
       {
         "id": "T22-07",
@@ -101,8 +102,7 @@
           "MOH 705B Outpatient summary",
           "MOH 706",
           "MOH 711",
-          "MOH-743 Report",
-          "MOH 505 IDSR Epidemic Case Monitoring"
+          "MOH-743 Report"
         ],
         "severity": "WARN"
       },
@@ -116,8 +116,7 @@
           "MOH 705B Outpatient summary",
           "MOH 706",
           "MOH 711",
-          "MOH-743 Report",
-          "MOH 505 IDSR Epidemic Case Monitoring"
+          "MOH-743 Report"
         ],
         "tolerance": 0.05,
         "severity": "TICKET"
@@ -129,37 +128,13 @@
         "pairs": [
           {
             "numerator": "MAL_SUSPECTED_705",
-            "denominator": "MAL_BST_706"
-          },
-          {
-            "numerator": "MAL_SUSPECTED_705",
-            "denominator": "MAL_MICRO_TESTED_505"
-          },
-          {
-            "numerator": "MAL_BST_706",
-            "denominator": "MAL_MICRO_TESTED_505"
+            "denominator": "MAL_TESTS_706"
           }
         ],
         "min": 0.9,
         "max": 1.1,
         "severity": "WARN",
         "ticket": true
-      },
-      {
-        "id": "SRC-01",
-        "source": "mRDQA I.C, data element completeness",
-        "type": "RECORD_COMPLETENESS",
-        "min": 0.9,
-        "treatmentDays": 3,
-        "severity": "WARN"
-      },
-      {
-        "id": "SRC-02",
-        "source": "mRDQA I.D, source documents up to date",
-        "type": "RECORD_ENTRY",
-        "maxDays": 7,
-        "min": 0.9,
-        "severity": "WARN"
       },
       {
         "id": "VF-01",
@@ -183,39 +158,66 @@
     ],
     "dashboard": {
       "target": 0.9,
-      "crossChecks": [
-        {
-          "id": "A",
-          "name": "OPD register : laboratory register",
-          "description": "Malaria tests in the laboratory (MOH 706) for every suspected case in the OPD (SMC in MOH 705A, SUA in MOH 705B)",
-          "numerator": "MAL_TESTS_706",
-          "denominator": "MAL_SUSPECTED_705",
-          "min": 0.9
-        },
-        {
-          "id": "B",
-          "name": "OPD register : pharmacy dispensing",
-          "description": "Patients treated with malaria drugs (MOH 743) for every confirmed case in the OPD (CMC in MOH 705A, COA in MOH 705B)",
-          "numerator": "MAL_TREATED_743",
-          "denominator": "MAL_CONFIRMED_705",
-          "min": 0.9
-        },
-        {
-          "id": "C",
-          "name": "ACT stock log : pharmacy dispensing",
-          "description": "Patients given an ACT (MOH 743) for every ACT course used by stock (MOH 643)",
-          "numerator": "MAL_TREATED_ACT_743",
-          "denominator": "MAL_ACT_DISPENSED_643",
-          "min": 0.85,
-          "max": 1.15
-        }
-      ],
+      "cascade": {
+        "ruleId": "X-RPT-01",
+        "name": "Malaria cascade",
+        "steps": [
+          { "indicator": "MAL_SUSPECTED_705", "label": "Suspected" },
+          { "indicator": "MAL_TESTS_706", "label": "Tested" },
+          { "indicator": "MAL_POSITIVE_706", "label": "Confirmed (positive)" },
+          { "indicator": "MAL_TREATED_743", "label": "Treated" }
+        ]
+      },
       "consistency": {
         "indicator": "MAL_CONFIRMED_705",
         "min": 0.8,
         "max": 1.2
       }
-    }
+    },
+    "reconciliations": [
+      {
+        "id": "705A-TESTED",
+        "name": "Tested for malaria, under 5",
+        "report": "MOH 705A Outpatient summary",
+        "dataset": "MOH705A",
+        "column": "TMC-32",
+        "source": "MALARIA_TESTED",
+        "maxAgeYears": 5,
+        "labTests": [2017917, 1643, 2032282]
+      },
+      {
+        "id": "705A-CONFIRMED",
+        "name": "Confirmed malaria, under 5",
+        "report": "MOH 705A Outpatient summary",
+        "dataset": "MOH705A",
+        "column": "CMC-32",
+        "source": "MALARIA_POSITIVE",
+        "maxAgeYears": 5,
+        "labTests": [2017917, 1643, 2032282],
+        "diagnoses": [2002649, 2002650, 2002636, 2002641, 2002646, 116128, 2002631, 2002642, 2002634, 160155, 152295, 152296, 159950, 2018114, 160148, 131377, 145851, 2002644, 155686]
+      },
+      {
+        "id": "705B-TESTED",
+        "name": "Tested for malaria, 5 and over",
+        "report": "MOH 705B Outpatient summary",
+        "dataset": "MOH705B",
+        "column": "TMC-32",
+        "source": "MALARIA_TESTED",
+        "minAgeYears": 5,
+        "labTests": [2017917, 1643, 2032282]
+      },
+      {
+        "id": "705B-CONFIRMED",
+        "name": "Confirmed malaria, 5 and over",
+        "report": "MOH 705B Outpatient summary",
+        "dataset": "MOH705B",
+        "column": "COA-32",
+        "source": "MALARIA_POSITIVE",
+        "minAgeYears": 5,
+        "labTests": [2017917, 1643, 2032282],
+        "diagnoses": [2002649, 2002650, 2002636, 2002641, 2002646, 116128, 2002631, 2002642, 2002634, 160155, 152295, 152296, 159950, 2018114, 160148, 131377, 145851, 2002644]
+      }
+    ]
   },
   "expectedReports": [
     {
@@ -249,12 +251,6 @@
       "target": "KHIS"
     },
     {
-      "report": "MOH 505 IDSR Epidemic Case Monitoring",
-      "frequency": "MONTHLY",
-      "deadlineDay": 5,
-      "target": "KHIS"
-    },
-    {
       "report": "MOH 643",
       "frequency": "MONTHLY",
       "deadlineDay": 5,
@@ -264,7 +260,7 @@
   "indicators": [
     {
       "code": "MAL_SUSPECTED_705",
-      "name": "Suspected malaria (SMC in MOH 705A, SUA in MOH 705B)",
+      "name": "Suspected malaria",
       "parts": [
         {
           "report": "MOH 705A Outpatient summary",
@@ -284,7 +280,7 @@
     },
     {
       "code": "MAL_TESTED_705",
-      "name": "Tested for malaria (TMC in MOH 705A and 705B)",
+      "name": "Tested for malaria",
       "parts": [
         {
           "report": "MOH 705A Outpatient summary",
@@ -304,7 +300,7 @@
     },
     {
       "code": "MAL_CONFIRMED_705",
-      "name": "Tested positive for malaria (CMC in MOH 705A, COA in MOH 705B)",
+      "name": "Confirmed Malaria Cases",
       "parts": [
         {
           "report": "MOH 705A Outpatient summary",
@@ -324,7 +320,7 @@
     },
     {
       "code": "MAL_BST_706",
-      "name": "Malaria blood smear tests (BST in MOH 706)",
+      "name": "Malaria blood smear tests",
       "parts": [
         {
           "report": "MOH 706",
@@ -338,7 +334,7 @@
     },
     {
       "code": "MAL_TESTS_706",
-      "name": "Malaria tests performed, all methods (MOH 706)",
+      "name": "Malaria tests performed, all methods",
       "parts": [
         {
           "report": "MOH 706",
@@ -354,7 +350,7 @@
     },
     {
       "code": "MAL_POSITIVE_706",
-      "name": "Malaria tests positive, all methods (MOH 706)",
+      "name": "Malaria tests positive, all methods",
       "parts": [
         {
           "report": "MOH 706",
@@ -369,21 +365,8 @@
       ]
     },
     {
-      "code": "MAL_MICRO_TESTED_505",
-      "name": "Malaria tested by microscopy (MOH 505)",
-      "parts": [
-        {
-          "report": "MOH 505 IDSR Epidemic Case Monitoring",
-          "dataset": "MOH505",
-          "columns": [
-            "Microscopy Tested-03"
-          ]
-        }
-      ]
-    },
-    {
       "code": "MAL_CONFIRMED_743",
-      "name": "Confirmed malaria, microscopy and RDT (MOH 743)",
+      "name": "Confirmed malaria, microscopy and RDT",
       "parts": [
         {
           "report": "MOH-743 Report",
@@ -399,7 +382,7 @@
     },
     {
       "code": "MAL_TREATED_ACT_743",
-      "name": "Patients given an ACT (MOH 743)",
+      "name": "Patients given an ACT",
       "parts": [
         {
           "report": "MOH-743 Report",
@@ -429,7 +412,7 @@
     },
     {
       "code": "MAL_TREATED_743",
-      "name": "Patients treated for malaria: given an ACT, artesunate (injection or rectal), artemether, quinine or primaquine, each counted once (MOH 743)",
+      "name": "Patients treated for malaria: given an ACT, artesunate (injection or rectal), artemether, quinine or primaquine, each counted once",
       "parts": [
         {
           "report": "MOH-743 Report",
@@ -442,7 +425,7 @@
     },
     {
       "code": "MAL_ACT_DISPENSED_643",
-      "name": "ACT treatment courses dispensed, all ACTs (MOH 643)",
+      "name": "ACT treatment courses dispensed, all ACTs",
       "parts": [
         {
           "report": "MOH 643",
@@ -456,7 +439,7 @@
     },
     {
       "code": "MAL_LLIN_U1_711",
-      "name": "LLINs given to children under 1 (MOH 711); the nearest to mRDQA 1.1, ITNs to children under 5",
+      "name": "LLINs given to children under 1; the nearest to mRDQA 1.1, ITNs to children under 5",
       "parts": [
         {
           "report": "MOH 711",
@@ -469,7 +452,7 @@
     },
     {
       "code": "MAL_OPD_VISITS_U5_705",
-      "name": "OPD visits by children under 5: first attendances and re-attendances (MOH 705A)",
+      "name": "OPD visits by children under 5: first attendances and re-attendances",
       "parts": [
         {
           "report": "MOH 705A Outpatient summary",
@@ -483,7 +466,7 @@
     },
     {
       "code": "MAL_CONFIRMED_RDT_U5_743",
-      "name": "Children under 5 with malaria confirmed by RDT (MOH 743)",
+      "name": "Children under 5 with malaria confirmed by RDT",
       "parts": [
         {
           "report": "MOH-743 Report",
@@ -496,7 +479,7 @@
     },
     {
       "code": "MAL_ACT_U5_743",
-      "name": "Children under 5 given an ACT (MOH 743)",
+      "name": "Children under 5 given an ACT",
       "parts": [
         {
           "report": "MOH-743 Report",
@@ -517,7 +500,7 @@
     },
     {
       "code": "MAL_AL_DAYS_OUT_743",
-      "name": "Days out of stock of artemether-lumefantrine, all four packs added (MOH 743); stands in for mRDQA 5.1, ACT stock-out of 7 days",
+      "name": "Days out of stock of artemether-lumefantrine, all four packs added; stands in for mRDQA 5.1, ACT stock-out of 7 days",
       "parts": [
         {
           "report": "MOH-743 Report",

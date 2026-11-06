@@ -26,11 +26,15 @@ import org.openmrs.module.kenyaemr.reporting.air.ConfigurableAdxReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.air.ConfigurableJsonReportRenderer;
 import org.openmrs.module.kenyaemr.reporting.air.ReportCellValue;
 import org.openmrs.module.kenyaemr.reporting.air.ReportValueExtractor;
+import org.openmrs.Cohort;
+import org.openmrs.module.reporting.dataset.DataSet;
+import org.openmrs.module.reporting.dataset.DataSetRow;
 import org.openmrs.module.reporting.dataset.definition.CohortIndicatorDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
+import org.openmrs.module.reporting.indicator.dimension.CohortIndicatorAndDimensionResult;
 import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
@@ -42,9 +46,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Evaluates a report for a month and turns it into a new {@link DqReportRun} version with one
@@ -66,8 +75,29 @@ public class DqReportGenerator {
 
 		Date start = DqPeriods.monthStart(periodStart);
 		Date end = DqPeriods.lastDayOfMonth(periodStart);
-		ReportData reportData = evaluate(descriptor, start, end);
+		return fromReportData(descriptor, evaluate(descriptor, start, end), start, end);
+	}
 
+	/**
+	 * A run from a report already evaluated elsewhere, e.g. by the HRIO on the reports page. Nothing
+	 * is saved.
+	 *
+	 * @param reportDefinitionUuid the uuid of the evaluated report definition
+	 * @param reportData the evaluated report, for a whole month
+	 * @return the run, or null when the definition is not a KenyaEMR report
+	 */
+	public GeneratedRun fromReportData(String reportDefinitionUuid, ReportData reportData, Date start, Date end) {
+		ReportManager reportManager = Context.getRegisteredComponents(ReportManager.class).get(0);
+		for (ReportDescriptor descriptor : reportManager.getAllReportDescriptors()) {
+			if (reportDefinitionUuid.equals(descriptor.getTargetUuid())) {
+				return fromReportData(descriptor, reportData, start, end);
+			}
+		}
+		return null;
+	}
+
+	private GeneratedRun fromReportData(ReportDescriptor descriptor, ReportData reportData, Date start, Date end) {
+		String reportName = descriptor.getName();
 		AdxConfiguration config = new ConfigurableAdxGenerationStrategy().getConfigurationForReport(reportName);
 		List<ReportCellValue> cells = ReportValueExtractor.extractAll(reportData, config);
 
@@ -104,6 +134,58 @@ public class DqReportGenerator {
 		run.setPeriodStart(start);
 		run.setPeriodEnd(end);
 		return toValues(run, ReportValueExtractor.extractAll(reportData, config));
+	}
+
+	/**
+	 * The patients counted in one cell of a report, evaluated now. Only that column is counted.
+	 *
+	 * @return the patient ids, or null when the cell is not a cohort indicator
+	 */
+	public Set<Integer> evaluateCohort(String reportName, String dataset, String column, Date start, Date end) {
+		ReportDescriptor descriptor = getDescriptor(reportName);
+		ReportDefinition definition = subset(getOrBuildDefinition(descriptor),
+				Collections.singletonMap(dataset, Collections.singletonList(column)));
+		ReportData reportData = evaluate(definition, descriptor, start, end);
+		for (DataSet data : reportData.getDataSets().values()) {
+			for (DataSetRow row : data) {
+				Object value = row.getColumnValue(column);
+				if (value instanceof CohortIndicatorAndDimensionResult) {
+					Cohort cohort = ((CohortIndicatorAndDimensionResult) value).getCohortIndicatorAndDimensionCohort();
+					return cohort != null ? new TreeSet<Integer>(cohort.getMemberIds()) : new TreeSet<Integer>();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The patients counted in any of several cells of one dataset, evaluated now in one pass, e.g. a
+	 * count split by weight band
+	 *
+	 * @return the patient ids, or null when none of the cells is a cohort indicator
+	 */
+	public Set<Integer> evaluateCohorts(String reportName, String dataset, List<String> columns, Date start, Date end) {
+		ReportDescriptor descriptor = getDescriptor(reportName);
+		ReportDefinition definition = subset(getOrBuildDefinition(descriptor), Collections.singletonMap(dataset, columns));
+		ReportData reportData = evaluate(definition, descriptor, start, end);
+		Set<Integer> patients = null;
+		for (DataSet data : reportData.getDataSets().values()) {
+			for (DataSetRow row : data) {
+				for (String column : columns) {
+					Object value = row.getColumnValue(column);
+					if (value instanceof CohortIndicatorAndDimensionResult) {
+						Cohort cohort = ((CohortIndicatorAndDimensionResult) value).getCohortIndicatorAndDimensionCohort();
+						if (patients == null) {
+							patients = new TreeSet<Integer>();
+						}
+						if (cohort != null) {
+							patients.addAll(cohort.getMemberIds());
+						}
+					}
+				}
+			}
+		}
+		return patients;
 	}
 
 	/**
@@ -249,6 +331,41 @@ public class DqReportGenerator {
 		catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	/** Column labels by report and dataset; a report's columns do not change while the server runs */
+	private static final Map<String, Map<String, String>> LABELS = new ConcurrentHashMap<String, Map<String, String>>();
+
+	/**
+	 * @param dataset the dataset definition's name, or its key in the report
+	 * @return each column's label in the report builder, e.g. CMC-32 → "Confirmed Malaria (Total)";
+	 * empty for a dataset with no labelled columns, or a report that cannot be built
+	 */
+	public Map<String, String> columnLabels(String reportName, String dataset) {
+		String key = reportName + "|" + dataset;
+		Map<String, String> labels = LABELS.get(key);
+		if (labels != null) {
+			return labels;
+		}
+		labels = new LinkedHashMap<String, String>();
+		try {
+			ReportDefinition definition = getOrBuildDefinition(getDescriptor(reportName));
+			for (Map.Entry<String, Mapped<? extends DataSetDefinition>> entry : definition.getDataSetDefinitions().entrySet()) {
+				DataSetDefinition dsd = entry.getValue().getParameterizable();
+				boolean named = dataset.equals(entry.getKey()) || (dsd != null && dataset.equals(dsd.getName()));
+				if (named && dsd instanceof CohortIndicatorDataSetDefinition) {
+					for (CohortIndicatorDataSetDefinition.CohortIndicatorAndDimensionColumn column
+							: ((CohortIndicatorDataSetDefinition) dsd).getColumns()) {
+						labels.put(column.getName(), column.getLabel());
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			log.warn("Could not read the column labels of " + reportName, e);
+		}
+		LABELS.put(key, labels);
+		return labels;
 	}
 
 	private ReportDescriptor getDescriptor(String reportName) {

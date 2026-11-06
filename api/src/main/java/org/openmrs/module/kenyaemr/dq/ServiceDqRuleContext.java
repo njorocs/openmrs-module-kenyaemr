@@ -218,8 +218,10 @@ public class ServiceDqRuleContext implements DqRuleContext {
 		// Ledgers from before the completion read-back have no columns for it
 		String completion = isCompletionReadBackTracked() ? "s.completion_read_at, s.khis_completed_at" : "null, null";
 		List<Object[]> rows = service.executeSqlQuery("select s.status, s.sent_at, s.completed_at, s.last_error, "
-				+ completion + " from il_report_submission s where s.report_name = :reportName "
-				+ "and s.period_start = :periodStart and s.target_system = 'KHIS' order by s.version desc, s.submission_id desc",
+				+ completion + " from il_report_submission s join kenyaemr_dq_report_run r on r.report_run_id = s.report_run_id "
+				+ "where s.report_name = :reportName and s.period_start = :periodStart and s.target_system = 'KHIS' "
+				// A month's sends only, not those of a week of MOH 505 starting on the 1st
+				+ "and day(r.period_end) >= 28 order by s.version desc, s.submission_id desc",
 				parameters);
 		return KhisSubmissionState.fromLedger(rows);
 	}

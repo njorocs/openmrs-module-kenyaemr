@@ -28,6 +28,27 @@ public class DqPeriodsTest {
 	}
 
 	@Test
+	public void isWholeWeek_shouldAcceptMondayToSundayAtAnyTime() {
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 11, 1)));
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 11, 1, 23, 59, 59)));
+		// A week starting on the 1st is a week, not the month
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 6, 1), TestUtils.date(2026, 6, 7)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 27), TestUtils.date(2026, 11, 2)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 10, 31)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 1), TestUtils.date(2026, 10, 31)));
+	}
+
+	@Test
+	public void isWholeMonth_shouldAcceptTheFirstToTheLastDayAtAnyTime() {
+		Assert.assertTrue(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 10, 31)));
+		Assert.assertTrue(DqPeriods.isWholeMonth(TestUtils.date(2026, 2, 1), TestUtils.date(2026, 2, 28, 23, 59, 59)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 2), TestUtils.date(2025, 10, 31)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 10, 30)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 11, 30)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), null));
+	}
+
+	@Test
 	public void weekStart_shouldReturnMonday() {
 		// 2026-10-21 is a Wednesday, 2026-10-25 a Sunday
 		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 21)));

@@ -33,7 +33,8 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 	@Autowired
 	private Moh743IndicatorLibrary moh743IndicatorLibrary;
 	private static final Integer BLOOD_SMEAR = 2017917;
-	private static final Integer RDT = 1642;
+	/** Malaria Rapid Test */
+	private static final Integer RDT = 1643;
 	private static final String COMPARATIVE_OPERATION_GREATER= ">=";
 	private static final String COMPARATIVE_GREATER= ">";
 	private static final String COMPARATIVE_OPERATION_LESS = "<";
@@ -414,6 +415,7 @@ public class Moh743ReportBuilder extends AbstractReportBuilder {
 						"    GROUP BY si.dispensing_unit_id\n" +
 						") days_out_of_stock ON days_out_of_stock.dispensing_unit_id = params.dispensing_unit_id\n" +
 						"GROUP BY concept_id;";
+
 
 		return String.format(query, factor, unit, factor, unit, unit, unit, unit, unit, unit, unit, unit, unit, unit, unit);
 	}

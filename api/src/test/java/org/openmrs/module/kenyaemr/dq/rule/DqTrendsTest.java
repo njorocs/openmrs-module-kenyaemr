@@ -21,7 +21,9 @@ import org.openmrs.module.kenyaemr.model.dq.DqResult;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for the trend chart series
@@ -105,13 +107,20 @@ public class DqTrendsTest {
 	@Test
 	public void ratioTrend_shouldGiveEachPairOfARule() {
 		FakeRuleContext context = FakeRuleContext.monthly(MOH_743, march).indicator("MAL_SUSPECTED_705", march, 100.0)
-				.indicator("MAL_BST_706", march, 100.0).indicator("MAL_MICRO_TESTED_505", march, 50.0);
+				.indicator("MAL_TESTS_706", march, 100.0).indicator("MAL_TREATED_743", march, 50.0)
+				.indicator("MAL_POSITIVE_706", march, 100.0);
+		// A second pair, as a facility could add
+		Map<String, Object> pair = new HashMap<String, Object>();
+		pair.put("numerator", "MAL_TREATED_743");
+		pair.put("denominator", "MAL_POSITIVE_706");
+		@SuppressWarnings("unchecked")
+		List<Object> pairs = (List<Object>) context.getConfig().getRuleDefinition(DqRuleEngine.X_RPT_01).getValues().get("pairs");
+		pairs.add(pair);
 		IndicatorRatioRule rule = DqTrends.ratioRule(context.getConfig(), DqRuleEngine.X_RPT_01);
 
-		Assert.assertEquals(3, rule.pairs().size());
+		Assert.assertEquals(2, rule.pairs().size());
 		Assert.assertEquals(DqOutcome.PASS, DqTrends.ratioTrend(context, rule, 0, march, march).get(0).getOutcome());
 		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 1, march, march).get(0).getOutcome());
-		Assert.assertEquals(DqOutcome.WARN, DqTrends.ratioTrend(context, rule, 2, march, march).get(0).getOutcome());
 	}
 
 	@Test

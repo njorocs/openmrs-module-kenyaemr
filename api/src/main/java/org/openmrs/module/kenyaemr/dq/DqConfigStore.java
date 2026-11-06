@@ -10,7 +10,9 @@
 package org.openmrs.module.kenyaemr.dq;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,9 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +237,11 @@ public final class DqConfigStore {
 					dashboardCodes.add(check.getNumerator());
 					dashboardCodes.add(check.getDenominator());
 				}
+				if (program.getDashboard().getCascade() != null) {
+					for (DqConfig.CascadeStep step : program.getDashboard().getCascade().getSteps()) {
+						dashboardCodes.add(step.getIndicator());
+					}
+				}
 				if (program.getDashboard().getConsistency() != null) {
 					dashboardCodes.add(program.getDashboard().getConsistency().getIndicator());
 				}
@@ -299,6 +309,55 @@ public final class DqConfigStore {
 			}
 		}
 		return problems;
+	}
+
+	/**
+	 * Sets thresholds of a rule in the program file that holds it, as the settings screen does. The
+	 * file is backed up first, and the configuration is read again at once. The facility's values
+	 * are kept when a new module version brings a different default ({@link DqConfigUpgrade}).
+	 *
+	 * @param ruleId the rule
+	 * @param changes threshold to value, see {@link DqRuleThresholds#apply}
+	 * @return a description of each problem; when not empty, nothing was changed
+	 * @throws IllegalArgumentException when no program file holds the rule
+	 */
+	public static synchronized List<String> updateRuleThresholds(String ruleId, Map<String, Object> changes)
+			throws IOException {
+		getConfig();
+		for (File file : programFiles()) {
+			JsonNode tree = objectMapper.readTree(file);
+			ObjectNode rule = findRule(tree, ruleId);
+			if (rule == null) {
+				continue;
+			}
+			List<String> problems = DqRuleThresholds.apply(rule, changes);
+			if (!problems.isEmpty()) {
+				return problems;
+			}
+			File backup = new File(file.getParentFile(), file.getName() + ".bak-"
+					+ new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+			Files.copy(file.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			File written = new File(file.getParentFile(), "." + file.getName() + ".tmp");
+			Files.write(written.toPath(), objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(tree));
+			Files.move(written.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			cached = null;
+			log.info("Data quality: thresholds of " + ruleId + " set to " + changes + " in " + file.getAbsolutePath()
+					+ "; the previous file is " + backup.getName());
+			return problems;
+		}
+		throw new IllegalArgumentException("No program file in " + getProgramsDirectory() + " has rule " + ruleId);
+	}
+
+	/**
+	 * @return the rule's entry in a program file, or null when the file does not have it
+	 */
+	static ObjectNode findRule(JsonNode programFile, String ruleId) {
+		for (JsonNode rule : programFile.path("program").path("rules")) {
+			if (rule instanceof ObjectNode && ruleId.equals(rule.path("id").asText(null))) {
+				return (ObjectNode) rule;
+			}
+		}
+		return null;
 	}
 
 	static File getFile() {

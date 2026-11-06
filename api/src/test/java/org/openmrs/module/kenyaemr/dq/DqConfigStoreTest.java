@@ -33,14 +33,23 @@ public class DqConfigStoreTest {
 		Assert.assertNotNull(config.getExpectedReport("MOH-743 Report"));
 		Assert.assertFalse(config.getOverrideReasons().isEmpty());
 		Assert.assertEquals(DqOutcome.BLOCK, config.getRuleSettings("T22-04", null).getOutcome("severity", DqOutcome.WARN));
+		// MOH 505 is left out of the checks; MOH 643 is checked only for T22-05
+		Assert.assertNull(config.getExpectedReport("MOH 505 IDSR Epidemic Case Monitoring"));
 		Assert.assertEquals(Double.valueOf(0.10), config.getRuleSettings("T22-05", null).getDouble("tolerance", null));
 		Assert.assertEquals("KHIS", config.getExpectedReport("MOH 643").getTarget());
-		Assert.assertNotNull(config.getExpectedReport("MOH 505 IDSR Epidemic Case Monitoring"));
+		Assert.assertFalse(config.getRuleSettings("G-RPT-01", null).getReportNames().contains("MOH 643"));
 
 		DqConfig.Program malaria = config.getProgram("malaria");
 		Assert.assertEquals("Malaria", malaria.getName());
-		Assert.assertEquals(11, malaria.getRules().size());
-		Assert.assertEquals(3, malaria.getDashboard().getCrossChecks().size());
+		Assert.assertEquals(9, malaria.getRules().size());
+		Assert.assertTrue(malaria.getDashboard().getCrossChecks().isEmpty());
+		DqConfig.Cascade cascade = malaria.getDashboard().getCascade();
+		List<String> steps = new java.util.ArrayList<String>();
+		for (DqConfig.CascadeStep step : cascade.getSteps()) {
+			steps.add(step.getIndicator());
+		}
+		Assert.assertEquals(Arrays.asList("MAL_SUSPECTED_705", "MAL_TESTS_706", "MAL_POSITIVE_706", "MAL_TREATED_743"), steps);
+		Assert.assertEquals("X-RPT-01", cascade.getRuleId());
 		Assert.assertEquals("MAL_CONFIRMED_705", malaria.getDashboard().getConsistency().getIndicator());
 		Assert.assertTrue(config.getReports(malaria).contains("MOH 711"));
 		Assert.assertTrue(config.isTracked(config.getIndicator("MAL_CONFIRMED_705")));
@@ -113,7 +122,7 @@ public class DqConfigStoreTest {
 		for (Map<String, Object> rule : rules) {
 			if ("G-RPT-02".equals(rule.get("id"))) {
 				rule.put("tolerance", 5);
-			} else if ("T22-05".equals(rule.get("id"))) {
+			} else if ("VF-01".equals(rule.get("id"))) {
 				rule.put("tolerance", "10%");
 			}
 		}
@@ -121,7 +130,7 @@ public class DqConfigStoreTest {
 		String problems = DqConfigStore.validate(config).toString();
 
 		Assert.assertTrue(problems, problems.contains("G-RPT-02 of program MALARIA has tolerance 5; write it as a fraction"));
-		Assert.assertTrue(problems, problems.contains("T22-05 of program MALARIA has tolerance 10%"));
+		Assert.assertTrue(problems, problems.contains("VF-01 of program MALARIA has tolerance 10%"));
 		Assert.assertFalse(problems, problems.contains("X-RPT-01"));
 	}
 

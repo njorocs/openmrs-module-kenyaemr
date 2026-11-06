@@ -24,9 +24,8 @@ import java.util.Map;
 /**
  * The series of a program's mRDQA-style dashboard for one facility. With one facility there are
  * no sites to compare, so each panel is drawn month by month: completeness and timeliness of the
- * key reports (from G-RPT-01), source documents with no missing data and up to date (SRC-01,
- * SRC-02), the cross checks and consistency over time (from the stored indicator values), and the
- * verification factors of one month (VF-01).
+ * key reports (from G-RPT-01), the cascade, cross checks and consistency over time (from the
+ * stored indicator values), and the verification factors of one month (VF-01).
  */
 public final class DqDashboard {
 
@@ -73,21 +72,6 @@ public final class DqDashboard {
 				}
 			}
 			points.add(new ReportingPoint(month, reports != null, expected, sent, onTime));
-		}
-		return points;
-	}
-
-	/**
-	 * A monthly share rule (SRC-01, SRC-02) each month: numerator ÷ denominator, or no value for a
-	 * month not checked or with nothing to count
-	 */
-	public static List<SharePoint> shares(List<DqResult> results, Date first, Date last) {
-		Map<Long, Map<String, DqResult>> byMonth = latestByMonthAndCode(results);
-		List<SharePoint> points = new ArrayList<SharePoint>();
-		for (Date month = DqPeriods.monthStart(first); !month.after(last); month = DqPeriods.addMonths(month, 1)) {
-			Map<String, DqResult> checked = byMonth.get(month.getTime());
-			DqResult result = checked != null && !checked.isEmpty() ? checked.values().iterator().next() : null;
-			points.add(new SharePoint(month, result));
 		}
 		return points;
 	}
@@ -236,63 +220,6 @@ public final class DqDashboard {
 
 		public Double getTimeliness() {
 			return expected == 0 ? null : (double) onTime / expected;
-		}
-	}
-
-	/**
-	 * One month of a share rule
-	 */
-	public static class SharePoint {
-
-		private final Date month;
-
-		private final Double numerator;
-
-		private final Double denominator;
-
-		private final Double share;
-
-		private final DqOutcome outcome;
-
-		private final String message;
-
-		SharePoint(Date month, DqResult result) {
-			this.month = month;
-			this.numerator = result != null ? result.getNumerator() : null;
-			this.denominator = result != null ? result.getDenominator() : null;
-			this.share = result != null ? result.getMeasureValue() : null;
-			this.outcome = result != null ? result.getOutcome() : null;
-			this.message = result != null ? result.getMessage() : null;
-		}
-
-		public Date getMonth() {
-			return month;
-		}
-
-		public Double getNumerator() {
-			return numerator;
-		}
-
-		public Double getDenominator() {
-			return denominator;
-		}
-
-		/**
-		 * @return the share, or null when the month was not checked or had nothing to count
-		 */
-		public Double getShare() {
-			return share;
-		}
-
-		/**
-		 * @return the result, or null when the month was not checked
-		 */
-		public DqOutcome getOutcome() {
-			return outcome;
-		}
-
-		public String getMessage() {
-			return message;
 		}
 	}
 

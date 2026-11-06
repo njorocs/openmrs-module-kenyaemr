@@ -65,6 +65,11 @@ public abstract class AbstractDqRule implements DqRule {
 		return Schedule.REPORT;
 	}
 
+	@Override
+	public boolean readsReportValues() {
+		return false;
+	}
+
 	/**
 	 * @return the reports of the indicators the rule names
 	 */

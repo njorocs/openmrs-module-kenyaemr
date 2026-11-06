@@ -10,6 +10,8 @@
 package org.openmrs.module.kenyaemr.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.api.APIAuthenticationException;
@@ -19,12 +21,18 @@ import org.openmrs.module.kenyaemr.api.DqService;
 import org.openmrs.module.kenyaemr.dq.DqConfig;
 import org.openmrs.module.kenyaemr.dq.DqConfigStore;
 import org.openmrs.module.kenyaemr.dq.DqDashboard;
+import org.openmrs.module.kenyaemr.dq.DqDispensingReconciliation;
 import org.openmrs.module.kenyaemr.dq.DqIndicatorCalculator;
+import org.openmrs.module.kenyaemr.dq.DqKhisTimeliness;
 import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.dq.DqReconciliation;
+import org.openmrs.module.kenyaemr.dq.DqReportGenerator;
 import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
+import org.openmrs.module.kenyaemr.dq.DqRuleThresholds;
 import org.openmrs.module.kenyaemr.dq.DqTrends;
 import org.openmrs.module.kenyaemr.dq.ServiceDqRuleContext;
 import org.openmrs.module.kenyaemr.dq.rule.ConsistencyOverTimeRule;
+import org.openmrs.module.kenyaemr.task.DataQualityTask;
 import org.openmrs.module.kenyaemr.dq.rule.DqRule;
 import org.openmrs.module.kenyaemr.dq.rule.DqRuleTypes;
 import org.openmrs.module.kenyaemr.dq.rule.DuplicateEpisodeRule;
@@ -51,13 +59,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * REST API for the data quality approval screen, dashboard and tickets, under
@@ -67,7 +80,14 @@ import java.util.Map;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/kenyaemr/dq")
 public class DataQualityRestController extends BaseRestController {
 
+	private static final Log log = LogFactory.getLog(DataQualityRestController.class);
+
 	private static final String MONTH = "yyyy-MM";
+
+	/** Needed to see the patients behind a reconciliation, as on the reports page */
+	private static final String PRIVILEGE_VIEW_PATIENTS = "View Patients";
+
+	private static final String PRIVILEGE_MANAGE_SCHEDULER = "Manage Scheduler";
 
 	private static final String DAY = "yyyy-MM-dd";
 
@@ -79,9 +99,21 @@ public class DataQualityRestController extends BaseRestController {
 		requireAuthentication();
 		DqConfig config = DqConfigStore.getConfig();
 		List<SimpleObject> indicators = new ArrayList<SimpleObject>();
+		DqReportGenerator generator = new DqReportGenerator();
 		for (DqConfig.Indicator indicator : config.getIndicators()) {
+			// Each part's columns with their labels in the report builder, to describe the indicator
+			List<SimpleObject> parts = new ArrayList<SimpleObject>();
+			for (DqConfig.Part part : indicator.getParts()) {
+				Map<String, String> labels = generator.columnLabels(part.getReport(), part.getDataset());
+				List<SimpleObject> columns = new ArrayList<SimpleObject>();
+				for (String column : part.getColumns()) {
+					columns.add(new SimpleObject().add("column", column).add("label", labels.get(column)));
+				}
+				parts.add(new SimpleObject().add("report", part.getReport()).add("columns", columns));
+			}
 			indicators.add(new SimpleObject().add("code", indicator.getCode()).add("name", indicator.getName())
-					.add("tracked", config.isTracked(indicator)).add("reports", new ArrayList<String>(indicator.getReports())));
+					.add("tracked", config.isTracked(indicator)).add("reports", new ArrayList<String>(indicator.getReports()))
+					.add("parts", parts));
 		}
 		List<SimpleObject> reports = new ArrayList<SimpleObject>();
 		for (DqConfig.ExpectedReport report : config.getExpectedReports()) {
@@ -109,6 +141,96 @@ public class DataQualityRestController extends BaseRestController {
 		return ok(new SimpleObject().add("expectedReports", reports).add("indicators", indicators)
 				.add("programs", programs).add("overrideReasons", config.getOverrideReasons())
 				.add("problems", problems(config)));
+	}
+
+	/**
+	 * The thresholds of each program's rules that the settings screen sets: the value in the
+	 * facility's file (null when the file leaves it to the rule), the program's default, and what
+	 * values it may take; and whether the user may change them
+	 */
+	@GetMapping("/thresholds")
+	public ResponseEntity<Object> getThresholds() {
+		requireAuthentication();
+		DqConfig config = DqConfigStore.getConfig();
+		DqConfig defaults = DqConfigStore.getDefaultConfig();
+		List<SimpleObject> programs = new ArrayList<SimpleObject>();
+		for (DqConfig.Program program : config.getPrograms()) {
+			DqConfig.Program defaultProgram = defaults.getProgram(program.getCode());
+			List<SimpleObject> rules = new ArrayList<SimpleObject>();
+			for (Map<String, Object> values : program.getRules()) {
+				DqConfig.RuleDefinition rule = new DqConfig.RuleDefinition(program, values);
+				Map<String, Object> defaultValues = defaultRule(defaultProgram, rule.getId());
+				rules.add(new SimpleObject().add("id", rule.getId()).add("type", rule.getType())
+						.add("enabled", rule.getSettings().isEnabled())
+						.add("fields", thresholdFields(rule.getType(), values, defaultValues)));
+			}
+			programs.add(new SimpleObject().add("code", program.getCode()).add("name", program.getName()).add("rules", rules));
+		}
+		return ok(new SimpleObject().add("canEdit", Context.hasPrivilege(DqService.PRIVILEGE_MANAGE_SETTINGS))
+				.add("programs", programs));
+	}
+
+	/**
+	 * Sets thresholds of a rule. Body: {changes: {key: value}}, a null value removing an optional
+	 * threshold. They apply to the checks run from then on; the open tickets are checked again in
+	 * the night. Needs the "Manage Data Quality Settings" privilege.
+	 */
+	@PostMapping("/rules/{ruleId}/thresholds")
+	@SuppressWarnings("unchecked")
+	public ResponseEntity<Object> setThresholds(@PathVariable("ruleId") String ruleId, @RequestBody Map<String, Object> body)
+			throws IOException {
+		requireAuthentication();
+		if (!Context.hasPrivilege(DqService.PRIVILEGE_MANAGE_SETTINGS)) {
+			return new ResponseEntity<Object>(new SimpleObject().add("error", "Setting the thresholds needs the \""
+					+ DqService.PRIVILEGE_MANAGE_SETTINGS + "\" privilege."), HttpStatus.FORBIDDEN);
+		}
+		Object changes = body != null ? body.get("changes") : null;
+		if (!(changes instanceof Map) || ((Map<String, Object>) changes).isEmpty()) {
+			throw new IllegalArgumentException("No changes");
+		}
+		List<String> problems;
+		try {
+			problems = DqConfigStore.updateRuleThresholds(ruleId, (Map<String, Object>) changes);
+		}
+		catch (IllegalArgumentException e) {
+			return notFound(e.getMessage());
+		}
+		if (!problems.isEmpty()) {
+			return new ResponseEntity<Object>(new SimpleObject().add("error", StringUtils.join(problems, "; "))
+					.add("problems", problems), HttpStatus.BAD_REQUEST);
+		}
+		log.info("Data quality thresholds of " + ruleId + " changed by " + Context.getAuthenticatedUser().getUsername()
+				+ ": " + changes);
+		return getThresholds();
+	}
+
+	private static Map<String, Object> defaultRule(DqConfig.Program program, String ruleId) {
+		if (program != null && ruleId != null) {
+			for (Map<String, Object> values : program.getRules()) {
+				if (ruleId.equals(values.get("id"))) {
+					return values;
+				}
+			}
+		}
+		return Collections.emptyMap();
+	}
+
+	private static List<SimpleObject> thresholdFields(String type, Map<String, Object> values, Map<String, Object> defaults) {
+		List<SimpleObject> fields = new ArrayList<SimpleObject>();
+		for (DqRuleThresholds.Field field : DqRuleThresholds.fields(type)) {
+			Object programDefault = defaults.containsKey(field.getKey()) ? defaults.get(field.getKey())
+					: defaults.isEmpty() ? null : field.getFallback();
+			SimpleObject object = new SimpleObject().add("key", field.getKey()).add("kind", field.getKind().name())
+					.add("value", values.get(field.getKey())).add("default", programDefault)
+					.add("fallback", field.getFallback()).add("optional", field.isOptional());
+			if (field.getKind() == DqRuleThresholds.Kind.CHOICE) {
+				object.add("options", field.getOptions());
+			} else {
+				object.add("min", field.getMin()).add("max", field.getMax());
+			}
+			fields.add(object);
+		}
+		return fields;
 	}
 
 	/**
@@ -146,18 +268,28 @@ public class DataQualityRestController extends BaseRestController {
 				cards.add(summary(run, service.getResults(run)));
 			}
 		}
-		return ok(new SimpleObject().add("period", format(month, MONTH)).add("results", cards));
+		// The weeks of reports sent a week at a time (MOH 505), each a version of its own
+		List<SimpleObject> weeks = new ArrayList<SimpleObject>();
+		for (DqReportRun run : service.getLatestWeeklyRuns(month, DqPeriods.lastDayOfMonth(month))) {
+			if (program == null || config.getReports(program).contains(run.getReportName())) {
+				weeks.add(summary(run, forProgram(service.getResults(run), program)));
+			}
+		}
+		return ok(new SimpleObject().add("period", format(month, MONTH)).add("results", cards).add("weeks", weeks));
 	}
 
 	/**
-	 * Generates (or regenerates) one report for a month and checks it. Body: {report, period}
+	 * Generates (or regenerates) one report for a month and checks it. Body: {report, period,
+	 * check?}; with check false the run is stored unchecked, as backfilled history is, e.g. to
+	 * regenerate past months after a report definition changes without raising their tickets
 	 */
 	@PostMapping("/runs")
 	public ResponseEntity<Object> generate(@RequestBody Map<String, Object> body) {
 		requireAuthentication();
 		String report = string(body, "report");
 		Date month = parse(string(body, "period"), MONTH);
-		DqReportRun run = service().generateReportRun(report, month);
+		boolean check = !Boolean.FALSE.equals(body.get("check")) && !"false".equals(String.valueOf(body.get("check")));
+		DqReportRun run = service().generateReportRun(report, month, check);
 		return new ResponseEntity<Object>(detail(run, null), HttpStatus.CREATED);
 	}
 
@@ -267,6 +399,92 @@ public class DataQualityRestController extends BaseRestController {
 	}
 
 	/**
+	 * The cells of a report version that can be compared, patient by patient, with their source
+	 * records, with the value stored in the version
+	 */
+	@GetMapping("/runs/{uuid}/reconciliations")
+	public ResponseEntity<Object> getReconciliations(@PathVariable("uuid") String uuid) {
+		requireAuthentication();
+		DqReportRun run = run(uuid);
+		Map<String, String> stored = new HashMap<String, String>();
+		for (DqValue value : service().getValues(run)) {
+			stored.put(value.getDatasetName() + "\u0000" + value.getColumnName(), value.getValueText());
+		}
+		List<SimpleObject> cells = new ArrayList<SimpleObject>();
+		for (DqConfig.Reconciliation reconciliation : reconciliations(run)) {
+			cells.add(cell(reconciliation).add("storedValue",
+					DqIndicatorCalculator.parseNumber(stored.get(reconciliation.getDataset() + "\u0000" + reconciliation.getColumn()))));
+		}
+		return ok(new SimpleObject().add("results", cells));
+	}
+
+	/**
+	 * Compares one cell of a report version with its source records, both counted now: the
+	 * patients possibly missed and those possibly counted wrongly, each with the reasons found
+	 */
+	@GetMapping("/runs/{uuid}/reconciliations/{id}")
+	public ResponseEntity<Object> reconcile(@PathVariable("uuid") String uuid, @PathVariable("id") String id) {
+		requireAuthentication();
+		Context.requirePrivilege(PRIVILEGE_VIEW_PATIENTS);
+		DqReportRun run = run(uuid);
+		DqConfig.Reconciliation reconciliation = null;
+		for (DqConfig.Reconciliation candidate : reconciliations(run)) {
+			if (candidate.getId().equals(id)) {
+				reconciliation = candidate;
+			}
+		}
+		if (reconciliation == null) {
+			return notFound("No reconciliation " + id + " for " + run.getReportName());
+		}
+		DqReconciliation.Result result = new DqReconciliation(service()).reconcile(reconciliation, run.getPeriodStart());
+		return ok(cell(reconciliation).add("period", format(run.getPeriodStart(), MONTH))
+				.add("reportedCount", result.getReportedCount()).add("sourceCount", result.getSourceCount())
+				.add("inBoth", result.getInBoth()).add("missed", findings(result.getMissed(), run.getPeriodEnd()))
+				.add("extra", findings(result.getExtra(), run.getPeriodEnd())));
+	}
+
+	/**
+	 * The reconciliations of the enabled programs for the run's report
+	 */
+	private static List<DqConfig.Reconciliation> reconciliations(DqReportRun run) {
+		List<DqConfig.Reconciliation> found = new ArrayList<DqConfig.Reconciliation>();
+		for (DqConfig.Program program : DqConfigStore.getConfig().getPrograms()) {
+			if (!program.isEnabled()) {
+				continue;
+			}
+			for (DqConfig.Reconciliation reconciliation : program.getReconciliations()) {
+				if (run.getReportName().equals(reconciliation.getReport())) {
+					found.add(reconciliation);
+				}
+			}
+		}
+		return found;
+	}
+
+	private static SimpleObject cell(DqConfig.Reconciliation reconciliation) {
+		return new SimpleObject().add("id", reconciliation.getId()).add("name", reconciliation.getName())
+				.add("dataset", reconciliation.getDataset()).add("column", reconciliation.getColumn())
+				.add("source", reconciliation.getSource());
+	}
+
+	private static List<SimpleObject> findings(List<DqReconciliation.Finding> findings, Date monthEnd) {
+		List<SimpleObject> rows = new ArrayList<SimpleObject>();
+		for (DqReconciliation.Finding finding : findings) {
+			List<Map<String, Object>> tests = new ArrayList<Map<String, Object>>();
+			for (DqReconciliation.TestRecord test : finding.getTests()) {
+				tests.add(test.toMap());
+			}
+			List<Map<String, Object>> diagnoses = new ArrayList<Map<String, Object>>();
+			for (DqReconciliation.DiagnosisRecord diagnosis : finding.getDiagnoses()) {
+				diagnoses.add(diagnosis.toMap());
+			}
+			rows.add(patientFields(new SimpleObject().add("patientId", finding.getPatientId()).add("reasons", finding.getReasons())
+					.add("tests", tests).add("diagnoses", diagnoses), finding.getPatientId(), monthEnd));
+		}
+		return rows;
+	}
+
+	/**
 	 * The patients behind a T22-07 result: each repeat positive and the earlier positive it follows
 	 */
 	@GetMapping("/results/{uuid}/patients")
@@ -295,6 +513,67 @@ public class DataQualityRestController extends BaseRestController {
 					.add("firstPositive", row[1]).add("repeatPositive", row[2]));
 		}
 		return ok(new SimpleObject().add("results", patients));
+	}
+
+	/**
+	 * The patients behind a T22-05 result: prescribed an ACT (MOH 743) with nothing dispensed,
+	 * dispensed (MOH 643) but not counted as prescribed, and dispensed more than one course, each with why. Both
+	 * sides are counted now.
+	 */
+	@GetMapping("/results/{uuid}/dispensing")
+	public ResponseEntity<Object> getDispensing(@PathVariable("uuid") String uuid) {
+		requireAuthentication();
+		Context.requirePrivilege(PRIVILEGE_VIEW_PATIENTS);
+		DqService service = service();
+		DqResult result = service.getResultByUuid(uuid);
+		if (result == null) {
+			return notFound("No result " + uuid);
+		}
+		if (!DqDispensingReconciliation.ACT_DISPENSING.equals(patientList(result.getRuleId()))
+				|| result.getIndicatorCode() == null || !result.getIndicatorCode().contains("/")) {
+			throw new APIException("No dispensing list is available for " + result.getRuleId());
+		}
+		// The result is about the pair consumed/treated
+		DqConfig config = DqConfigStore.getConfig();
+		String[] pair = result.getIndicatorCode().split("/", 2);
+		DqConfig.Indicator consumed = config.getIndicator(pair[0]);
+		DqConfig.Indicator treated = config.getIndicator(pair[1]);
+		if (treated == null) {
+			return notFound("No indicator " + pair[1]);
+		}
+		DqDispensingReconciliation.Result found = new DqDispensingReconciliation(service).reconcile(treated,
+				result.getPeriodStart());
+		Date monthEnd = DqPeriods.lastDayOfMonth(result.getPeriodStart());
+		return ok(new SimpleObject().add("period", format(result.getPeriodStart(), MONTH))
+				.add("consumed", indicatorRef(consumed)).add("treated", indicatorRef(treated))
+				.add("dispensedCourses", found.getDispensedCourses()).add("givenPatients", found.getGivenPatients())
+				.add("notDispensed", dispensingFindings(found.getNotDispensed(), monthEnd))
+				.add("notCounted", dispensingFindings(found.getNotCounted(), monthEnd))
+				.add("moreThanOneCourse", dispensingFindings(found.getMoreThanOneCourse(), monthEnd)));
+	}
+
+	private static List<SimpleObject> dispensingFindings(List<DqDispensingReconciliation.Finding> findings, Date monthEnd) {
+		List<SimpleObject> rows = new ArrayList<SimpleObject>();
+		for (DqDispensingReconciliation.Finding finding : findings) {
+			rows.add(patientFields(new SimpleObject().add("patientId", finding.getPatientId())
+					.add("reasons", finding.getReasons()).add("records", finding.getRecords()), finding.getPatientId(), monthEnd));
+		}
+		return rows;
+	}
+
+	/**
+	 * Adds who the patient is, for a link to their chart
+	 */
+	private static SimpleObject patientFields(SimpleObject row, Integer patientId, Date monthEnd) {
+		Patient patient = Context.getPatientService().getPatient(patientId);
+		if (patient != null) {
+			row.add("patientUuid", patient.getUuid())
+					.add("name", patient.getPersonName() != null ? patient.getPersonName().getFullName() : null)
+					.add("identifier", patient.getPatientIdentifier() != null
+							? patient.getPatientIdentifier().getIdentifier() : null)
+					.add("gender", patient.getGender()).add("age", patient.getAge(monthEnd));
+		}
+		return row;
 	}
 
 	/**
@@ -435,14 +714,73 @@ public class DataQualityRestController extends BaseRestController {
 
 	/**
 	 * A program's mRDQA-style dashboard for this facility, month by month up to "to": completeness
-	 * and timeliness of the key reports, source documents with no missing data and up to date, the
-	 * cross checks and consistency over time, and the verification factors of the latest month
+	 * and timeliness of the key reports, the cascade, cross checks and consistency over time, and the verification factors of the latest month
 	 * checked. A month not yet checked has no values.
 	 *
 	 * @param program the program; default the first enabled program with a dashboard
 	 * @param to the last month, default last month
 	 * @param months how many months, 1 to 36
 	 */
+	/**
+	 * Whether each monthly KHIS report reached KHIS by its deadline (the 5th), month by month up to
+	 * "to", worked out now from the submission ledger, with the days late of those that did not
+	 *
+	 * @param program only this program's reports; all expected KHIS reports when undefined
+	 */
+	@GetMapping("/khis-timeliness")
+	public ResponseEntity<Object> getKhisTimeliness(@RequestParam(value = "program", required = false) String programCode,
+	                                                @RequestParam(value = "to", required = false) String to,
+	                                                @RequestParam(value = "months", defaultValue = "12") int months) {
+		requireAuthentication();
+		DqConfig config = DqConfigStore.getConfig();
+		DqConfig.Program program = program(config, programCode);
+		Date last = to != null ? parse(to, MONTH) : DqPeriods.previousMonth(new Date());
+		Date first = firstMonth(last, months);
+		ServiceDqRuleContext context = new ServiceDqRuleContext(service(), config, null, first, last);
+		boolean tracked = context.isKhisSubmissionTracked();
+		Date now = new Date();
+
+		// The reports the timeliness rule (G-RPT-01) judges, so that a report checked only for another
+		// rule, such as MOH 643 for T22-05, is not counted here
+		Set<String> judged = new HashSet<String>();
+		for (DqConfig.RuleDefinition definition : config.getRuleDefinitions()) {
+			if (DqConfig.RuleDefinition.TYPE_TIMELINESS.equals(definition.getType()) && definition.getSettings().isEnabled()
+					&& (program == null || program.getCode().equals(definition.getProgramCode()))) {
+				judged.addAll(definition.getSettings().getReportNames());
+			}
+		}
+		List<DqConfig.ExpectedReport> reports = new ArrayList<DqConfig.ExpectedReport>();
+		for (DqConfig.ExpectedReport report : config.getExpectedReports()) {
+			if ("KHIS".equalsIgnoreCase(report.getTarget())
+					&& DqConfig.ExpectedReport.FREQUENCY_MONTHLY.equals(report.getFrequency())
+					&& (program == null || config.getReports(program).contains(report.getReport()))
+					&& (judged.isEmpty() || judged.contains(report.getReport()))) {
+				reports.add(report);
+			}
+		}
+		List<SimpleObject> points = new ArrayList<SimpleObject>();
+		for (Date month = first; !month.after(last); month = DqPeriods.addMonths(month, 1)) {
+			List<SimpleObject> entries = new ArrayList<SimpleObject>();
+			Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
+			for (DqKhisTimeliness.Status status : DqKhisTimeliness.Status.values()) {
+				counts.put(status.name(), 0);
+			}
+			for (DqConfig.ExpectedReport report : reports) {
+				Date deadline = DqPeriods.deadline(month, report.getDeadlineDay() != null ? report.getDeadlineDay() : 5);
+				DqKhisTimeliness.Entry entry = DqKhisTimeliness.judge(report.getReport(), deadline,
+						tracked ? context.getKhisSubmission(report.getReport(), month) : null, now);
+				counts.put(entry.getStatus().name(), counts.get(entry.getStatus().name()) + 1);
+				entries.add(new SimpleObject().add("report", report.getReport()).add("deadline", format(deadline, DAY))
+						.add("status", entry.getStatus().name()).add("submittedAt", entry.getSubmittedAt())
+						.add("completedAt", entry.getCompletedAt()).add("daysLate", entry.getDaysLate())
+						.add("note", entry.getNote()));
+			}
+			points.add(new SimpleObject().add("period", format(month, MONTH)).add("reports", entries).add("counts", counts));
+		}
+		return ok(new SimpleObject().add("tracked", tracked).add("from", format(first, MONTH)).add("to", format(last, MONTH))
+				.add("results", points));
+	}
+
 	@GetMapping("/dashboard")
 	public ResponseEntity<Object> getDashboard(@RequestParam(value = "program", required = false) String programCode,
 	                                           @RequestParam(value = "to", required = false) String to,
@@ -498,6 +836,28 @@ public class DataQualityRestController extends BaseRestController {
 					.add("min", check.getMin()).add("max", check.getMax()).add("results", points));
 		}
 
+		SimpleObject cascade = null;
+		if (dashboard.getCascade() != null) {
+			List<SimpleObject> steps = new ArrayList<SimpleObject>();
+			for (DqConfig.CascadeStep step : dashboard.getCascade().getSteps()) {
+				context.preload(step.getIndicator(), first, last);
+				DqConfig.Indicator indicator = config.getIndicator(step.getIndicator());
+				steps.add(new SimpleObject().add("code", step.getIndicator()).add("label", step.getLabel())
+						.add("name", indicator != null ? indicator.getName() : null)
+						.add("reports", indicator != null ? new ArrayList<String>(indicator.getReports()) : Collections.emptyList()));
+			}
+			List<SimpleObject> points = new ArrayList<SimpleObject>();
+			for (Date month = first; !month.after(last); month = DqPeriods.addMonths(month, 1)) {
+				Map<String, Double> monthValues = new LinkedHashMap<String, Double>();
+				for (DqConfig.CascadeStep step : dashboard.getCascade().getSteps()) {
+					monthValues.put(step.getIndicator(), values.get(step.getIndicator(), month).getValue());
+				}
+				points.add(new SimpleObject().add("period", format(month, MONTH)).add("values", monthValues));
+			}
+			cascade = new SimpleObject().add("ruleId", dashboard.getCascade().getRuleId())
+					.add("name", dashboard.getCascade().getName()).add("steps", steps).add("results", points);
+		}
+
 		SimpleObject consistency = null;
 		if (dashboard.getConsistency() != null) {
 			String code = dashboard.getConsistency().getIndicator();
@@ -531,11 +891,7 @@ public class DataQualityRestController extends BaseRestController {
 		return ok(new SimpleObject().add("program", program.getCode()).add("from", format(first, MONTH))
 				.add("to", format(last, MONTH)).add("target", dashboard.getTarget() != null ? dashboard.getTarget() : 0.9)
 				.add("reporting", reporting)
-				.add("noMissingData", shares(results(service, config, program, DqConfig.RuleDefinition.TYPE_RECORD_COMPLETENESS,
-						first, last), first, last))
-				.add("upToDate", shares(results(service, config, program, DqConfig.RuleDefinition.TYPE_RECORD_ENTRY, first, last),
-						first, last))
-				.add("crossChecks", crossChecks).add("consistency", consistency)
+				.add("crossChecks", crossChecks).add("cascade", cascade).add("consistency", consistency)
 				.add("verification", new SimpleObject().add("period", verifiedPeriod).add("results", verification)));
 	}
 
@@ -556,17 +912,6 @@ public class DataQualityRestController extends BaseRestController {
 			}
 		}
 		return results;
-	}
-
-	private static List<SimpleObject> shares(List<DqResult> results, Date first, Date last) {
-		List<SimpleObject> points = new ArrayList<SimpleObject>();
-		for (DqDashboard.SharePoint point : DqDashboard.shares(results, first, last)) {
-			points.add(new SimpleObject().add("period", format(point.getMonth(), MONTH)).add("numerator", point.getNumerator())
-					.add("denominator", point.getDenominator()).add("share", point.getShare())
-					.add("outcome", point.getOutcome() != null ? point.getOutcome().name() : null)
-					.add("message", point.getMessage()));
-		}
-		return points;
 	}
 
 	@GetMapping("/tickets")
@@ -636,8 +981,29 @@ public class DataQualityRestController extends BaseRestController {
 	}
 
 	/**
+	 * Runs the daily data quality task now, as at 01:00: last month's reports, the weeks' checks,
+	 * the month-level checks and any missing history. It runs in the request and can take some
+	 * minutes. Needs the "Manage Scheduler" privilege.
+	 */
+	@PostMapping("/task/run")
+	public ResponseEntity<Object> runTask() {
+		requireAuthentication();
+		if (!Context.hasPrivilege(PRIVILEGE_MANAGE_SCHEDULER)) {
+			return new ResponseEntity<Object>(new SimpleObject().add("error", "Running the data quality task needs the \""
+					+ PRIVILEGE_MANAGE_SCHEDULER + "\" privilege."), HttpStatus.FORBIDDEN);
+		}
+		long started = System.currentTimeMillis();
+		if (!DataQualityTask.runNow()) {
+			return new ResponseEntity<Object>(new SimpleObject().add("error", "The data quality task is already running."),
+					HttpStatus.CONFLICT);
+		}
+		return ok(new SimpleObject().add("ran", true).add("seconds", (System.currentTimeMillis() - started) / 1000));
+	}
+
+	/**
 	 * Runs the month-level checks (G-RPT-01 timeliness) for a month whose deadlines are over, if not
-	 * run already. Body: {period: yyyy-MM}
+	 * run already, and runs again those (VF-01) whose reports have a newer version since. Body:
+	 * {period: yyyy-MM}
 	 */
 	@PostMapping("/months")
 	public ResponseEntity<Object> evaluateMonth(@RequestBody Map<String, Object> body) {
@@ -694,6 +1060,8 @@ public class DataQualityRestController extends BaseRestController {
 		DqConfig.ExpectedReport expected = DqConfigStore.getConfig().getExpectedReport(run.getReportName());
 		return new SimpleObject().add("uuid", run.getUuid()).add("reportName", run.getReportName())
 				.add("period", format(run.getPeriodStart(), MONTH)).add("version", run.getVersion())
+				.add("weekly", DqPeriods.isWholeWeek(run.getPeriodStart(), run.getPeriodEnd()))
+				.add("periodStart", format(run.getPeriodStart(), DAY)).add("periodEnd", format(run.getPeriodEnd(), DAY))
 				.add("status", run.getStatus().name()).add("generatedAt", run.getGeneratedAt())
 				.add("generatedBy", userName(run.getGeneratedBy())).add("approvedAt", run.getApprovedAt())
 				.add("approvedBy", userName(run.getApprovedBy()))
@@ -731,11 +1099,13 @@ public class DataQualityRestController extends BaseRestController {
 			}
 		}
 
-		// Tracked indicators this report feeds: this month, last month and the 12-month average
+		// Tracked indicators this report feeds: this month, last month and the 12-month average; a
+		// weekly version has no months to compare
 		DqConfig config = DqConfigStore.getConfig();
+		boolean weekly = DqPeriods.isWholeWeek(run.getPeriodStart(), run.getPeriodEnd());
 		ServiceDqRuleContext context = new ServiceDqRuleContext(service, config, run, run.getPeriodStart(), run.getPeriodEnd());
 		List<SimpleObject> indicators = new ArrayList<SimpleObject>();
-		for (DqConfig.Indicator indicator : config.getIndicators()) {
+		for (DqConfig.Indicator indicator : weekly ? Collections.<DqConfig.Indicator>emptyList() : config.getIndicators()) {
 			if (!config.isTracked(indicator) || !indicator.getReports().contains(run.getReportName())
 					|| (program != null && !program.getIndicators().contains(indicator.getCode()))) {
 				continue;
@@ -773,7 +1143,31 @@ public class DataQualityRestController extends BaseRestController {
 				.add("message", result.getMessage()).add("measureValue", result.getMeasureValue())
 				.add("numerator", result.getNumerator()).add("denominator", result.getDenominator())
 				.add("threshold", result.getThreshold()).add("detail", result.getDetail())
-				.add("period", result.getPeriodStart()).add("evaluatedAt", result.getEvaluatedAt());
+				.add("period", result.getPeriodStart()).add("evaluatedAt", result.getEvaluatedAt())
+				.add("patients", patientList(result.getRuleId()));
+	}
+
+	/** The patient list of a T22-07 result: each repeat positive and the earlier one */
+	static final String PATIENTS_REPEAT_POSITIVES = "REPEAT_POSITIVES";
+
+	/**
+	 * @return which list of patients the rule's results have, from /results/{uuid}/patients or
+	 * /results/{uuid}/dispensing; null when they have none
+	 */
+	private static String patientList(String ruleId) {
+		DqConfig config = DqConfigStore.getConfig();
+		DqConfig.RuleDefinition definition = config.getRuleDefinition(ruleId);
+		if (definition == null) {
+			return null;
+		}
+		if (DqConfig.RuleDefinition.TYPE_REPEAT_EPISODE.equals(definition.getType())) {
+			return PATIENTS_REPEAT_POSITIVES;
+		}
+		if (DqConfig.RuleDefinition.TYPE_RECONCILIATION.equals(definition.getType())
+				&& DqDispensingReconciliation.ACT_DISPENSING.equals(config.getRuleSettings(ruleId, null).getString("patients", null))) {
+			return DqDispensingReconciliation.ACT_DISPENSING;
+		}
+		return null;
 	}
 
 	private static SimpleObject baseline(DqTrends.Baseline baseline) {
@@ -798,11 +1192,14 @@ public class DataQualityRestController extends BaseRestController {
 				.add("program", ticket.getProgramCode())
 				.add("indicatorCode", ticket.getIndicatorCode()).add("period", ticket.getPeriodStart())
 				.add("message", ticket.getResult() != null ? ticket.getResult().getMessage() : null)
+				.add("checkedAt", ticket.getResult() != null ? ticket.getResult().getEvaluatedAt() : null)
 				.add("emrValue", ticket.getEmrValue()).add("khisValue", ticket.getKhisValue())
 				.add("variancePct", ticket.getVariancePct()).add("suggestedCause", ticket.getSuggestedCause())
 				.add("assigneeRole", ticket.getAssigneeRole()).add("status", ticket.getStatus().name())
 				.add("resolutionNote", ticket.getResolutionNote()).add("openedAt", ticket.getOpenedAt())
-				.add("resolvedAt", ticket.getResolvedAt()).add("resolvedBy", userName(ticket.getResolvedBy()));
+				.add("resolvedAt", ticket.getResolvedAt()).add("resolvedBy", userName(ticket.getResolvedBy()))
+				.add("resultUuid", ticket.getResult() != null ? ticket.getResult().getUuid() : null)
+				.add("patients", ticket.getResult() != null ? patientList(ticket.getRuleId()) : null);
 	}
 
 	/**

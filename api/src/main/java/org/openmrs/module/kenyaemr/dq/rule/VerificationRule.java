@@ -27,7 +27,8 @@ import java.util.Map;
  * counted again from the EMR (the recount) and divided by the value in the report as generated
  * (VF monthly report) and by the value KHIS holds, read back (VF HMIS). In an EMR the recount
  * differs from the report mostly through records entered or changed after the report was made.
- * Checked once KHIS has been read back, after checkAfterDay (default 10).
+ * Checked once KHIS has been read back, after checkAfterDay (default 10), and again whenever a
+ * newer version of one of the indicators' reports is stored for the month.
  * <p>
  * One result per indicator: numerator the recount, denominator the reported value, measure the VF
  * monthly report, with the KHIS value and VF HMIS in the detail. A VF outside 1 ± margin (default
@@ -51,6 +52,14 @@ public class VerificationRule extends AbstractDqRule {
 	@Override
 	public Date checkAfter(DqConfig config, Date month) {
 		return DqPeriods.addDays(DqPeriods.deadline(month, settings().getInteger("checkAfterDay", DEFAULT_CHECK_AFTER_DAY)), 1);
+	}
+
+	/**
+	 * The VF monthly report divides by the report as stored, so a newer version means a new VF
+	 */
+	@Override
+	public boolean readsReportValues() {
+		return true;
 	}
 
 	@Override

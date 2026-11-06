@@ -1067,7 +1067,20 @@ public class DiagnosisLists {
 				DiagnosisConcepts._DiagnosisConcepts.COA_2,
 				DiagnosisConcepts._DiagnosisConcepts.COA_3,
 				DiagnosisConcepts._DiagnosisConcepts.COA_4,
-				DiagnosisConcepts._DiagnosisConcepts.COA_5
+				DiagnosisConcepts._DiagnosisConcepts.COA_5,
+				DiagnosisConcepts._DiagnosisConcepts.COA_6,
+				DiagnosisConcepts._DiagnosisConcepts.COA_7,
+				DiagnosisConcepts._DiagnosisConcepts.COA_8,
+				DiagnosisConcepts._DiagnosisConcepts.COA_9,
+				DiagnosisConcepts._DiagnosisConcepts.COA_10,
+				DiagnosisConcepts._DiagnosisConcepts.COA_11,
+				DiagnosisConcepts._DiagnosisConcepts.COA_12,
+				DiagnosisConcepts._DiagnosisConcepts.COA_13,
+				DiagnosisConcepts._DiagnosisConcepts.COA_14,
+				DiagnosisConcepts._DiagnosisConcepts.COA_15,
+				DiagnosisConcepts._DiagnosisConcepts.COA_16,
+				DiagnosisConcepts._DiagnosisConcepts.COA_17,
+				DiagnosisConcepts._DiagnosisConcepts.COA_18
 		);
 	}
 

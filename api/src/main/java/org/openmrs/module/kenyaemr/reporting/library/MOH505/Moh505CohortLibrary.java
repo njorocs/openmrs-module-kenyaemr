@@ -11,16 +11,29 @@ package org.openmrs.module.kenyaemr.reporting.library.MOH505;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.MohReportUtils.DiagnosisLists;
+import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH705.MOH705CohortLibrary;
+import org.openmrs.module.kenyaemr.reporting.library.MOH706.Moh706LabCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
+import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class Moh505CohortLibrary {
+
+    @Autowired
+    private MOH705CohortLibrary moh705Cohorts;
+
+    @Autowired
+    private Moh706LabCohortLibrary moh706Cohorts;
 
     protected static final Log log = LogFactory.getLog(Moh505CohortLibrary.class);
 
@@ -155,32 +168,37 @@ public class Moh505CohortLibrary {
         return cd;
     }
 
-    public CohortDefinition malariaTest(int diagnosis, int mRDT) {
-        String sqlQuery = "select ed.patient_id FROM  encounter_diagnosis ed\n" +
-                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le on ed.patient_id = le.patient_id\n" +
-                "where ed.diagnosis_coded = " + diagnosis + " and ed.dx_rank = '2' and le.lab_test = " + mRDT + "\n" +
-                "and date(le.date_test_requested) between date(:startDate) and date(:endDate);";
-        SqlCohortDefinition cd = new SqlCohortDefinition();
-        cd.setName("mRDT Test");
-        cd.setQuery(sqlQuery);
+    /**
+     * Suspected malaria as MOH 705A and 705B count it (SMC, SUA): patients on a new visit with
+     * suspected malaria diagnosed, or with a malaria test (RDT, blood smear or PCR)
+     */
+    public CohortDefinition suspectedMalaria() {
+        CompositionCohortDefinition cd = new CompositionCohortDefinition();
+        cd.setName("suspectedMalaria");
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Malaria Test");
+        cd.addSearch("suspectedMalariaByDiagnosis", ReportUtils.map(moh705Cohorts.suspectedMalariaByDiagnosis(),
+                "startDate=${startDate},endDate=${endDate}"));
+        cd.addSearch("patientLabTests", ReportUtils.map(moh705Cohorts.patientLabTests(DiagnosisLists.getTestedMalariaConcepts()),
+                "startDate=${startDate},endDate=${endDate}"));
+        cd.setCompositionString("suspectedMalariaByDiagnosis OR patientLabTests");
+        cd.setDescription("Suspected malaria, as in MOH 705A and 705B");
         return cd;
     }
 
-    public CohortDefinition malariaTestPositive(int diagnosis, int mRDT) {
-        String sqlQuery = "select ed.patient_id FROM  encounter_diagnosis ed\n" +
-                "inner join "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract le on ed.patient_id = le.patient_id\n" +
-                "where ed.diagnosis_coded = " + diagnosis + " and ed.dx_rank = '2' and le.lab_test = " + mRDT + " and le.result_name = 'POSITIVE'\n" +
-                "and date(le.date_test_requested) between date(:startDate) and date(:endDate);";
-        SqlCohortDefinition cd = new SqlCohortDefinition();
-        cd.setName("mRDT Test Positive");
-        cd.setQuery(sqlQuery);
-        cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Malaria Test Positive");
-        return cd;
+    /**
+     * Malaria tests of one kind as MOH 706 counts them: patients with the test in the month, by the
+     * test's concept, with no diagnosis needed
+     */
+    public CohortDefinition malariaTested(int testConcept) {
+        return moh706Cohorts.getTotalTestsByConcept(testConcept);
+    }
+
+    /**
+     * Malaria tests of one kind with a positive result, as MOH 706 counts them
+     */
+    public CohortDefinition malariaTestedPositive(int testConcept, List<Integer> positiveAnswers) {
+        return moh706Cohorts.getTotalCodedLabsByConceptAndPositiveAnswer(testConcept, positiveAnswers);
     }
 
     public CohortDefinition typhoidTest(int typhoidTest) {

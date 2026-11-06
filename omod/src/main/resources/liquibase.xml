@@ -581,6 +581,7 @@
 		<createIndex indexName="kenyaemr_dq_report_run_version_uq" tableName="kenyaemr_dq_report_run" unique="true">
 			<column name="report_name" />
 			<column name="period_start" />
+			<column name="period_end" />
 			<column name="version" />
 		</createIndex>
 		<addForeignKeyConstraint constraintName="kenyaemr_dq_report_run_generated_by_fk" baseTableName="kenyaemr_dq_report_run" baseColumnNames="generated_by"
@@ -867,6 +868,58 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261104-0900">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="kenyaemr_dq_ticket" />
+		</preConditions>
+		<comment>Data quality tickets: one ticket not resolved per finding (program, rule, indicator and period). The ticket kept is the one in progress, else the first opened; it takes the figures of the latest check and any note, and the copies are removed. A ticket whose finding passed its latest check is closed.</comment>
+		<sql>
+			UPDATE kenyaemr_dq_ticket k
+			JOIN (SELECT program_code, rule_id, indicator_code, period_start,
+					COALESCE(MIN(CASE WHEN status = 'IN_PROGRESS' THEN ticket_id END), MIN(ticket_id)) AS keep_id,
+					MAX(ticket_id) AS newest_id, MAX(resolution_note) AS note
+				FROM kenyaemr_dq_ticket WHERE status &lt;&gt; 'RESOLVED'
+				GROUP BY program_code, rule_id, indicator_code, period_start HAVING COUNT(*) > 1) g ON g.keep_id = k.ticket_id
+			JOIN kenyaemr_dq_ticket n ON n.ticket_id = g.newest_id
+			SET k.result_id = n.result_id, k.emr_value = n.emr_value, k.khis_value = n.khis_value,
+				k.variance_pct = n.variance_pct, k.suggested_cause = n.suggested_cause,
+				k.resolution_note = COALESCE(k.resolution_note, g.note)
+		</sql>
+		<sql>
+			DELETE t FROM kenyaemr_dq_ticket t
+			JOIN (SELECT program_code, rule_id, indicator_code, period_start,
+					COALESCE(MIN(CASE WHEN status = 'IN_PROGRESS' THEN ticket_id END), MIN(ticket_id)) AS keep_id,
+					MAX(ticket_id) AS newest_id, MAX(resolution_note) AS note
+				FROM kenyaemr_dq_ticket WHERE status &lt;&gt; 'RESOLVED'
+				GROUP BY program_code, rule_id, indicator_code, period_start HAVING COUNT(*) > 1) g ON t.program_code &lt;=&gt; g.program_code AND t.rule_id = g.rule_id
+				AND t.indicator_code &lt;=&gt; g.indicator_code AND t.period_start = g.period_start
+			WHERE t.status &lt;&gt; 'RESOLVED' AND t.ticket_id &lt;&gt; g.keep_id
+		</sql>
+		<sql>
+			UPDATE kenyaemr_dq_ticket t
+			SET t.status = 'RESOLVED', t.resolved_at = NOW(), t.resolved_by = NULL,
+				t.resolution_note = LEFT(CONCAT_WS('\n', NULLIF(TRIM(t.resolution_note), ''),
+					'Closed automatically: the check passed when it was run again'), 1000)
+			WHERE t.status &lt;&gt; 'RESOLVED' AND 'PASS' = (SELECT r.outcome FROM kenyaemr_dq_result r
+				WHERE r.program_code &lt;=&gt; t.program_code AND r.rule_id = t.rule_id
+					AND r.indicator_code &lt;=&gt; t.indicator_code AND r.period_start = t.period_start
+				ORDER BY r.evaluated_at DESC, r.result_id DESC LIMIT 1)
+		</sql>
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261104-1500">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="kenyaemr_dq_ticket" />
+		</preConditions>
+		<comment>Data quality tickets: X-RPT-01 now compares suspected malaria with all malaria tests in MOH 706 and MOH 505, not microscopy alone, so the open tickets of the comparisons it no longer makes are closed.</comment>
+		<sql>
+			UPDATE kenyaemr_dq_ticket t
+			SET t.status = 'RESOLVED', t.resolved_at = NOW(), t.resolved_by = NULL,
+				t.resolution_note = LEFT(CONCAT_WS('\n', NULLIF(TRIM(t.resolution_note), ''),
+					'Closed automatically: X-RPT-01 now compares suspected malaria with all malaria tests, not microscopy alone'), 1000)
+			WHERE t.status &lt;&gt; 'RESOLVED' AND t.rule_id = 'X-RPT-01'
+				AND t.indicator_code IN ('MAL_SUSPECTED_705/MAL_BST_706', 'MAL_SUSPECTED_705/MAL_MICRO_TESTED_505')
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
-
-

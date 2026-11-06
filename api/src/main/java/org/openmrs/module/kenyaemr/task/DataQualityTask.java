@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Daily data quality task. It catches up rather than relying on running on an exact day:
@@ -31,10 +32,14 @@ import java.util.List;
  * generated reports are checked together, so rules that compare reports (X-RPT-01) see both;</li>
  * <li>the weekly checks (T22-08 test positivity) run once for each of the last 8 weeks not yet
  * checked, so weeks missed while the server was down are caught up;</li>
- * <li>once last month's deadlines are over, its month-level checks (G-RPT-01 timeliness) run once.</li>
+ * <li>once last month's deadlines are over, its month-level checks (G-RPT-01 timeliness) run once;</li>
+ * <li>any of the {@link #MONTHS_OF_HISTORY} months before last month not yet stored are generated
+ * without being checked, so from the first run after deployment T22-03 and the trends have two
+ * years of history: a year to show, each month with the same month the year before.</li>
  * </ul>
  * So on the 1st the HRIO finds last month's reports waiting for approval, and a server that was
- * down on the 1st catches up when it comes back.
+ * down on the 1st catches up at its next run. It never runs at startup, which it would slow; to run
+ * it at another time, POST /ws/rest/v1/kenyaemr/dq/task/run.
  */
 public class DataQualityTask extends AbstractTask {
 
@@ -43,9 +48,33 @@ public class DataQualityTask extends AbstractTask {
 	/** How many weeks back the weekly checks (T22-08) catch up */
 	static final int WEEKS_TO_CATCH_UP = 8;
 
+	/**
+	 * How many months before last month are kept generated: a year of trend, and the year before it
+	 * to compare each of those months with the same month last year
+	 */
+	static final int MONTHS_OF_HISTORY = 24;
+
+	/** One run at a time */
+	private static final AtomicBoolean RUNNING = new AtomicBoolean();
+
+	/**
+	 * Runs the task now, in the caller's thread, for a manual run; the scheduled run is at 01:00
+	 *
+	 * @return false when a run is already in progress
+	 */
+	public static boolean runNow() {
+		if (RUNNING.get()) {
+			return false;
+		}
+		log.info("Data quality: run by hand");
+		new DataQualityTask().execute();
+		return true;
+	}
+
 	@Override
 	public void execute() {
-		if (isExecuting) {
+		if (!RUNNING.compareAndSet(false, true)) {
+			log.info("Data quality: a run is already in progress, so this one is skipped");
 			return;
 		}
 		startExecuting();
@@ -60,9 +89,19 @@ public class DataQualityTask extends AbstractTask {
 			catch (RuntimeException e) {
 				log.error("Data quality: monthly timeliness check failed", e);
 			}
+			generateHistory(service, DqPeriods.previousMonth(today));
+			// Last, so that the tickets take the figures of everything generated above
+			try {
+				int refreshed = service.refreshOpenTickets();
+				log.info("Data quality: checked " + refreshed + " open tickets again");
+			}
+			catch (RuntimeException e) {
+				log.error("Data quality: could not check the open tickets again", e);
+			}
 		}
 		finally {
 			stopExecuting();
+			RUNNING.set(false);
 		}
 	}
 
@@ -113,6 +152,30 @@ public class DataQualityTask extends AbstractTask {
 			}
 			catch (RuntimeException e) {
 				log.error("Data quality: could not check " + run.getReportName() + " for " + month, e);
+			}
+		}
+	}
+
+	/**
+	 * Generates, without checking, each expected monthly report missing for the
+	 * {@link #MONTHS_OF_HISTORY} months before last month, newest first. Months already stored are
+	 * left as they are; a report that fails is tried again the next night.
+	 */
+	private void generateHistory(DqService service, Date lastMonth) {
+		for (int i = 1; i <= MONTHS_OF_HISTORY; i++) {
+			Date month = DqPeriods.addMonths(lastMonth, -i);
+			for (DqConfig.ExpectedReport report : DqConfigStore.getConfig().getExpectedReports()) {
+				if (!report.isGenerate() || !DqConfig.ExpectedReport.FREQUENCY_MONTHLY.equals(report.getFrequency())
+						|| service.getLatestReportRun(report.getReport(), month) != null) {
+					continue;
+				}
+				try {
+					service.generateReportRun(report.getReport(), month, false);
+					log.info("Data quality: generated " + report.getReport() + " for " + month + " as history");
+				}
+				catch (RuntimeException e) {
+					log.error("Data quality: could not generate " + report.getReport() + " for " + month, e);
+				}
 			}
 		}
 	}

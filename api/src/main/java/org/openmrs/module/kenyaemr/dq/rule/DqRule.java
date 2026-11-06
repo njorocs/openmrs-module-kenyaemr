@@ -66,6 +66,13 @@ public interface DqRule {
 	Date checkAfter(DqConfig config, Date month);
 
 	/**
+	 * @return for a MONTH rule, true when its results are worked out from the values of the
+	 * reports in {@link #getReports(DqConfig)}, so a month already checked is checked again once
+	 * a newer version of one of those reports is stored
+	 */
+	boolean readsReportValues();
+
+	/**
 	 * Evaluates the rule. The results are not saved.
 	 *
 	 * @return one result per indicator, indicator pair or report checked

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemr.dq.rule;
 
+import org.openmrs.module.kenyaemr.reporting.MohReportUtils.MalariaLabResults;
 import org.openmrs.module.kenyaemr.dq.DqRuleSettings;
 
 import java.util.ArrayList;
@@ -16,9 +17,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Which lab tests count as malaria tests, and which results count as positive, for the rules that
- * read etl_laboratory_extract. The MOH 743 and MOH 706 queries use different smear concepts, so the
- * default takes both; settings "labTests" and "positiveResults" override them.
+ * Which lab tests count as malaria tests, and which results count as negative, for the rules that
+ * read etl_laboratory_extract. Any other recorded result is positive ({@link MalariaLabResults}). The
+ * MOH 743 and MOH 706 queries use different smear concepts, so the default takes both; settings
+ * "labTests" and "negativeResults" override them.
  */
 final class MalariaLabSettings {
 
@@ -26,7 +28,7 @@ final class MalariaLabSettings {
 	static final List<Integer> DEFAULT_LAB_TESTS = Arrays.asList(1643, 2017901, 2017917, 2032282);
 
 	/** Compared in lower case with etl_laboratory_extract.result_name */
-	static final List<String> DEFAULT_POSITIVE_RESULTS = Arrays.asList("positive", "detected", "mps seen");
+	static final List<String> DEFAULT_NEGATIVE_RESULTS = MalariaLabResults.NEGATIVE;
 
 	private MalariaLabSettings() {
 	}
@@ -43,13 +45,13 @@ final class MalariaLabSettings {
 		return tests.isEmpty() ? DEFAULT_LAB_TESTS : tests;
 	}
 
-	static List<String> positiveResults(DqRuleSettings settings) {
+	static List<String> negativeResults(DqRuleSettings settings) {
 		List<String> results = new ArrayList<String>();
-		for (Object item : settings.getList("positiveResults")) {
+		for (Object item : settings.getList("negativeResults")) {
 			if (item != null) {
 				results.add(item.toString().trim().toLowerCase());
 			}
 		}
-		return results.isEmpty() ? DEFAULT_POSITIVE_RESULTS : results;
+		return results.isEmpty() ? DEFAULT_NEGATIVE_RESULTS : results;
 	}
 }

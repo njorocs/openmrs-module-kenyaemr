@@ -70,9 +70,19 @@
 		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.OutpatientToInpatientCheckinOnAdmission</class>
 	</advice>
 
+	<advice>
+		<point>org.openmrs.module.reporting.report.service.ReportService</point>
+		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.ReportRunCaptureAdvice</class>
+	</advice>
+
 	<privilege>
 		<name>Approve Data Quality Reports</name>
 		<description>Allows an HRIO to approve a report for submission after its data quality checks</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Data Quality Settings</name>
+		<description>Allows setting the thresholds of the data quality rules for the facility, within the national guidelines</description>
 	</privilege>
 
 	<messages>
