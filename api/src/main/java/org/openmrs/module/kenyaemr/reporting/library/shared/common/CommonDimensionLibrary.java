@@ -212,7 +212,8 @@ public class CommonDimensionLibrary {
         CohortDefinitionDimension dim = new CohortDefinitionDimension();
         dim.setName("fine age between(<0,>=5");
         dim.addParameter(new Parameter("onDate", "Date", Date.class));
-        dim.addCohortDefinition("0-5", map(commonCohortLibrary.agedAtLeastAgedAtMost(0, 5), "effectiveDate=${onDate}"));
+        // Under 5, ages 0 to 4: 5-year-olds are in 5+, so no one is counted in both
+        dim.addCohortDefinition("0-5", map(commonCohortLibrary.agedAtLeastAgedAtMost(0, 4), "effectiveDate=${onDate}"));
         dim.addCohortDefinition("5+", map(commonCohortLibrary.agedAtLeast(5), "effectiveDate=${onDate}"));
         return dim;
     }

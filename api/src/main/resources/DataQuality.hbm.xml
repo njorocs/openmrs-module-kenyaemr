@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.openmrs.module.kenyaemr.model.dq">
+
+    <class name="DqReportRun" table="kenyaemr_dq_report_run">
+        <id name="id" column="report_run_id">
+            <generator class="native"/>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="38" not-null="true" unique="true"/>
+        <property name="reportName" column="report_name" type="string" length="255" not-null="true"/>
+        <property name="reportUuid" column="report_uuid" type="string" length="38"/>
+        <property name="periodStart" column="period_start" type="date" not-null="true"/>
+        <property name="periodEnd" column="period_end" type="date" not-null="true"/>
+        <property name="version" column="version" type="integer" not-null="true"/>
+        <property name="status" column="status" length="30" not-null="true">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.kenyaemr.model.dq.DqRunStatus</param>
+                <param name="type">12</param>
+            </type>
+        </property>
+        <property name="valuesHash" column="values_hash" type="string" length="64"/>
+        <property name="generatedAt" column="generated_at" type="timestamp" not-null="true"/>
+        <many-to-one name="generatedBy" class="org.openmrs.User" column="generated_by"/>
+        <many-to-one name="approvedBy" class="org.openmrs.User" column="approved_by"/>
+        <property name="approvedAt" column="approved_at" type="timestamp"/>
+        <property name="approvalMode" column="approval_mode" type="string" length="20"/>
+    </class>
+
+    <class name="DqValue" table="kenyaemr_dq_value">
+        <id name="id" column="value_id">
+            <generator class="native"/>
+        </id>
+        <many-to-one name="reportRun" class="DqReportRun" column="report_run_id" not-null="true"/>
+        <property name="datasetName" column="dataset_name" type="string" length="255" not-null="true"/>
+        <property name="columnName" column="column_name" type="string" length="255" not-null="true"/>
+        <property name="mappingKey" column="mapping_key" type="string" length="255"/>
+        <property name="dataElement" column="data_element" type="string" length="50"/>
+        <property name="categoryOptionCombo" column="category_option_combo" type="string" length="50"/>
+        <property name="valueText" column="value_text" type="string" length="255"/>
+        <property name="valueNumeric" column="value_numeric" type="double"/>
+        <property name="source" column="source" type="string" length="30" not-null="true"/>
+        <property name="emrValueNow" column="emr_value_now" type="double"/>
+        <property name="khisValue" column="khis_value" type="double"/>
+        <property name="khisLastUpdated" column="khis_last_updated" type="timestamp"/>
+        <property name="importOutcome" column="import_outcome" type="string" length="20"/>
+        <property name="conflictText" column="conflict_text" type="string" length="1000"/>
+    </class>
+
+    <class name="DqResult" table="kenyaemr_dq_result">
+        <id name="id" column="result_id">
+            <generator class="native"/>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="38" not-null="true" unique="true"/>
+        <property name="ruleId" column="rule_id" type="string" length="30" not-null="true"/>
+        <property name="indicatorCode" column="indicator_code" type="string" length="100"/>
+        <many-to-one name="reportRun" class="DqReportRun" column="report_run_id"/>
+        <property name="periodStart" column="period_start" type="date" not-null="true"/>
+        <property name="periodEnd" column="period_end" type="date" not-null="true"/>
+        <property name="measureValue" column="measure_value" type="double"/>
+        <property name="numerator" column="numerator" type="double"/>
+        <property name="denominator" column="denominator" type="double"/>
+        <property name="threshold" column="threshold" type="string" length="255"/>
+        <property name="outcome" column="outcome" length="20" not-null="true">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.kenyaemr.model.dq.DqOutcome</param>
+                <param name="type">12</param>
+            </type>
+        </property>
+        <property name="message" column="message" type="string" length="1000"/>
+        <property name="detail" column="detail" type="text"/>
+        <property name="evaluatedAt" column="evaluated_at" type="timestamp" not-null="true"/>
+        <property name="programCode" column="program_code" type="string" length="50"/>
+        <property name="params" column="params" type="text"/>
+    </class>
+
+    <class name="DqOverride" table="kenyaemr_dq_override">
+        <id name="id" column="override_id">
+            <generator class="native"/>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="38" not-null="true" unique="true"/>
+        <many-to-one name="result" class="DqResult" column="result_id" not-null="true"/>
+        <property name="reasonCode" column="reason_code" type="string" length="50" not-null="true"/>
+        <property name="note" column="note" type="string" length="1000"/>
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
+        <property name="dateCreated" column="date_created" type="timestamp" not-null="true"/>
+    </class>
+
+    <class name="DqTicket" table="kenyaemr_dq_ticket">
+        <id name="id" column="ticket_id">
+            <generator class="native"/>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="38" not-null="true" unique="true"/>
+        <many-to-one name="result" class="DqResult" column="result_id"/>
+        <property name="ruleId" column="rule_id" type="string" length="30" not-null="true"/>
+        <property name="indicatorCode" column="indicator_code" type="string" length="100"/>
+        <property name="periodStart" column="period_start" type="date" not-null="true"/>
+        <property name="emrValue" column="emr_value" type="double"/>
+        <property name="khisValue" column="khis_value" type="double"/>
+        <property name="variancePct" column="variance_pct" type="double"/>
+        <property name="suggestedCause" column="suggested_cause" type="string" length="255"/>
+        <property name="assigneeRole" column="assignee_role" type="string" length="50"/>
+        <property name="programCode" column="program_code" type="string" length="50"/>
+        <property name="status" column="status" length="20" not-null="true">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.kenyaemr.model.dq.DqTicketStatus</param>
+                <param name="type">12</param>
+            </type>
+        </property>
+        <property name="resolutionNote" column="resolution_note" type="string" length="1000"/>
+        <property name="openedAt" column="opened_at" type="timestamp" not-null="true"/>
+        <property name="resolvedAt" column="resolved_at" type="timestamp"/>
+        <many-to-one name="resolvedBy" class="org.openmrs.User" column="resolved_by"/>
+    </class>
+
+    <class name="DqReportPayload" table="kenyaemr_dq_report_payload">
+        <id name="id" column="payload_id">
+            <generator class="native"/>
+        </id>
+        <many-to-one name="reportRun" class="DqReportRun" column="report_run_id" not-null="true" unique="true"/>
+        <property name="format" column="format" type="string" length="10" not-null="true"/>
+        <property name="endpointPath" column="endpoint_path" type="string" length="500"/>
+        <property name="content" column="content" type="text" not-null="true"/>
+        <property name="contentHash" column="content_hash" type="string" length="64" not-null="true"/>
+        <property name="createdAt" column="created_at" type="timestamp" not-null="true"/>
+    </class>
+
+</hibernate-mapping>

@@ -1067,8 +1067,27 @@ public class DiagnosisLists {
 				DiagnosisConcepts._DiagnosisConcepts.COA_2,
 				DiagnosisConcepts._DiagnosisConcepts.COA_3,
 				DiagnosisConcepts._DiagnosisConcepts.COA_4,
-				DiagnosisConcepts._DiagnosisConcepts.COA_5
+				DiagnosisConcepts._DiagnosisConcepts.COA_5,
+				DiagnosisConcepts._DiagnosisConcepts.COA_6,
+				DiagnosisConcepts._DiagnosisConcepts.COA_7,
+				DiagnosisConcepts._DiagnosisConcepts.COA_8,
+				DiagnosisConcepts._DiagnosisConcepts.COA_9,
+				DiagnosisConcepts._DiagnosisConcepts.COA_10,
+				DiagnosisConcepts._DiagnosisConcepts.COA_11,
+				DiagnosisConcepts._DiagnosisConcepts.COA_12,
+				DiagnosisConcepts._DiagnosisConcepts.COA_13,
+				DiagnosisConcepts._DiagnosisConcepts.COA_14,
+				DiagnosisConcepts._DiagnosisConcepts.COA_15,
+				DiagnosisConcepts._DiagnosisConcepts.COA_16,
+				DiagnosisConcepts._DiagnosisConcepts.COA_17,
+				DiagnosisConcepts._DiagnosisConcepts.COA_18
 		);
+	}
+
+	public static List<Integer> getConfirmedMalariaListUnderFive() {
+		List<Integer> confirmedMalaria = new ArrayList<>(getConfirmedMalariaList());
+		confirmedMalaria.add(DiagnosisConcepts._DiagnosisConcepts.CMC_1);
+		return confirmedMalaria;
 	}
 
 	//Malaria in pregnancy
@@ -2431,7 +2450,7 @@ public class DiagnosisLists {
 		allListedDiagnosisForUnder5.addAll(getOtherDisOfRespiratorySystemList());
 		allListedDiagnosisForUnder5.addAll(getPresumedTuberculosisList());
 		allListedDiagnosisForUnder5.addAll(getAsthmaList());
-		allListedDiagnosisForUnder5.addAll(getConfirmedMalariaList());
+		allListedDiagnosisForUnder5.addAll(getConfirmedMalariaListUnderFive());
 		allListedDiagnosisForUnder5.addAll(getMalnutritionList());
 		allListedDiagnosisForUnder5.addAll(getOtherMenigitisList());
 		allListedDiagnosisForUnder5.addAll(getPoliomyelitisList());

@@ -24,6 +24,7 @@ import org.openmrs.module.DaemonTokenAware;
 import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
 import org.openmrs.module.kenyacore.CoreContext;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.task.DataQualityTask;
 import org.openmrs.module.kenyaemr.util.ServerInformation;
 import org.openmrs.serialization.OpenmrsSerializer;
 
@@ -115,6 +116,14 @@ public class EmrActivator implements ModuleActivator, DaemonTokenAware {
 		}
 		gp.setPropertyValue(moduleVersion);
 		administrationService.saveGlobalProperty(gp);
+
+		// A new or restored database has no data quality data until the task runs at 01:00
+		try {
+			DataQualityTask.runFirstTimeInBackground();
+		}
+		catch (RuntimeException e) {
+			log.error("Data quality: could not schedule the first run", e);
+		}
 	}
 
 	/**

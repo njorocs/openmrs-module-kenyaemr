@@ -250,7 +250,20 @@
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 
+	<bean id="dqDao" class="org.openmrs.module.kenyaemr.api.db.hibernate.HibernateDqDao">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
 
+	<bean id="dqService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.kenyaemr.api.impl.DqServiceImpl">
+				<property name="dqDao" ref="dqDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
 
 	<!-- Register service with OpenMRS -->
 
@@ -267,6 +280,14 @@
 			<list merge="true">
 				<value>org.openmrs.module.kenyaemr.api.AdverseDrugReactionEmailService</value>
 				<ref bean="adverseDrugReactionEmailService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.kenyaemr.api.DqService</value>
+				<ref bean="dqService"/>
 			</list>
 		</property>
 	</bean>

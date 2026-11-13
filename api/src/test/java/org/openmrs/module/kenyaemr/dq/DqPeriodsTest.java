@@ -1,0 +1,66 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.kenyaemr.dq;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.openmrs.module.kenyacore.test.TestUtils;
+
+/**
+ * Tests for {@link DqPeriods}
+ */
+public class DqPeriodsTest {
+
+	@Test
+	public void monthBoundaries_shouldCoverTheWholeMonth() {
+		Assert.assertEquals(TestUtils.date(2026, 2, 1), DqPeriods.monthStart(TestUtils.date(2026, 2, 17, 13, 5, 0)));
+		Assert.assertEquals(TestUtils.date(2026, 2, 28), DqPeriods.lastDayOfMonth(TestUtils.date(2026, 2, 17)));
+		Assert.assertEquals(TestUtils.date(2026, 2, 28, 23, 59, 59).getTime() + 999,
+				DqPeriods.monthEnd(TestUtils.date(2026, 2, 17)).getTime());
+		Assert.assertEquals(TestUtils.date(2025, 12, 1), DqPeriods.previousMonth(TestUtils.date(2026, 1, 1)));
+	}
+
+	@Test
+	public void isWholeWeek_shouldAcceptMondayToSundayAtAnyTime() {
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 11, 1)));
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 11, 1, 23, 59, 59)));
+		// A week starting on the 1st is a week, not the month
+		Assert.assertTrue(DqPeriods.isWholeWeek(TestUtils.date(2026, 6, 1), TestUtils.date(2026, 6, 7)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 27), TestUtils.date(2026, 11, 2)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 26), TestUtils.date(2026, 10, 31)));
+		Assert.assertFalse(DqPeriods.isWholeWeek(TestUtils.date(2026, 10, 1), TestUtils.date(2026, 10, 31)));
+	}
+
+	@Test
+	public void isWholeMonth_shouldAcceptTheFirstToTheLastDayAtAnyTime() {
+		Assert.assertTrue(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 10, 31)));
+		Assert.assertTrue(DqPeriods.isWholeMonth(TestUtils.date(2026, 2, 1), TestUtils.date(2026, 2, 28, 23, 59, 59)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 2), TestUtils.date(2025, 10, 31)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 10, 30)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), TestUtils.date(2025, 11, 30)));
+		Assert.assertFalse(DqPeriods.isWholeMonth(TestUtils.date(2025, 10, 1), null));
+	}
+
+	@Test
+	public void weekStart_shouldReturnMonday() {
+		// 2026-10-21 is a Wednesday, 2026-10-25 a Sunday
+		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 21)));
+		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 25)));
+		Assert.assertEquals(TestUtils.date(2026, 10, 19), DqPeriods.weekStart(TestUtils.date(2026, 10, 19)));
+	}
+
+	@Test
+	public void deadline_shouldFallInTheFollowingMonth() {
+		Assert.assertEquals(TestUtils.date(2026, 10, 5), DqPeriods.deadline(TestUtils.date(2026, 9, 1), 5));
+		Assert.assertEquals(TestUtils.date(2027, 1, 7), DqPeriods.deadline(TestUtils.date(2026, 12, 15), 7));
+		// Day 31 of February is its last day
+		Assert.assertEquals(TestUtils.date(2026, 2, 28), DqPeriods.deadline(TestUtils.date(2026, 1, 1), 31));
+	}
+}

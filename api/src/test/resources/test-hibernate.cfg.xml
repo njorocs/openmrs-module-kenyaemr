@@ -24,5 +24,6 @@
 		<mapping resource="HtmlFormEntryHtmlForm.hbm.xml" />
 		<mapping resource="ReportDesign.hbm.xml" />
 		<mapping resource="ReportRequest.hbm.xml" />
+		<mapping resource="DataQuality.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

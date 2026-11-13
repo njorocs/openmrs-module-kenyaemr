@@ -14,6 +14,8 @@ import org.openmrs.module.reporting.indicator.CohortIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static org.openmrs.module.kenyacore.report.ReportUtils.map;
 import static org.openmrs.module.kenyaemr.reporting.EmrReportingUtils.cohortIndicator;
 
@@ -47,11 +49,17 @@ public class Moh505IndicatorLibrary {
     public CohortIndicator sariPatientDeceased(int patientOutcome) {
         return cohortIndicator("SARI (Cluster ≥3 deaths)", map(Moh505Cohorts.sariDeceased(patientOutcome), "startDate=${startDate},endDate=${endDate}"));
     }
-    public CohortIndicator malariaTested(int diagnosis, int mRDT) {
-        return cohortIndicator("Malaria Test", ReportUtils.map(Moh505Cohorts.malariaTest(diagnosis, mRDT), "startDate=${startDate},endDate=${endDate}"));
+    /** Suspected malaria as MOH 705A and 705B count it */
+    public CohortIndicator suspectedMalaria() {
+        return cohortIndicator("Suspected Malaria", ReportUtils.map(Moh505Cohorts.suspectedMalaria(), "startDate=${startDate},endDate=${endDate}"));
     }
-    public CohortIndicator malariaTestedPositive(int diagnosis, int mRDT) {
-        return cohortIndicator("Malaria Test Positive", ReportUtils.map(Moh505Cohorts.malariaTestPositive(diagnosis, mRDT), "startDate=${startDate},endDate=${endDate}"));
+    /** Malaria tests of one kind (blood smear, RDT) as MOH 706 counts them */
+    public CohortIndicator malariaTested(int testConcept) {
+        return cohortIndicator("Malaria Test", ReportUtils.map(Moh505Cohorts.malariaTested(testConcept), "startDate=${startDate},endDate=${endDate}"));
+    }
+    /** Malaria tests of one kind with a positive result, as MOH 706 counts them */
+    public CohortIndicator malariaTestedPositive(int testConcept, List<Integer> positiveAnswers) {
+        return cohortIndicator("Malaria Test Positive", ReportUtils.map(Moh505Cohorts.malariaTestedPositive(testConcept, positiveAnswers), "startDate=${startDate},endDate=${endDate}"));
     }
     public CohortIndicator typhoidTested(int typhoidTest) {
         return cohortIndicator("Typhoid Test", ReportUtils.map(Moh505Cohorts.typhoidTest(typhoidTest), "startDate=${startDate},endDate=${endDate}"));

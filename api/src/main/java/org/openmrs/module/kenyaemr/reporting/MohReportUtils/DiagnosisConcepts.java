@@ -1629,6 +1629,24 @@ public class DiagnosisConcepts {
 		public static final Integer COA_4 = 2002641;
 		public static final Integer COA_5 = 2002646;
 
+		//Malaria diagnoses clinicians record that also count as confirmed malaria (CMC and COA)
+		public static final Integer COA_6 = 116128; // Malaria, unspecified
+		public static final Integer COA_7 = 2002631; // Malaria due to Plasmodium falciparum
+		public static final Integer COA_8 = 2002642; // Malaria due to Plasmodium malariae
+		public static final Integer COA_9 = 2002634; // Other severe and complicated Plasmodium falciparum malaria
+		public static final Integer COA_10 = 160155; // Severe malaria
+		public static final Integer COA_11 = 152295; // Plasmodium falciparum malaria with cerebral complications
+		public static final Integer COA_12 = 152296; // Plasmodium malariae malaria with nephropathy
+		public static final Integer COA_13 = 159950; // Uncomplicated malaria
+		public static final Integer COA_14 = 2018114; // Plasmodium falciparum
+		public static final Integer COA_15 = 160148; // Malaria, confirmed
+		public static final Integer COA_16 = 131377; // Other malaria
+		public static final Integer COA_17 = 145851; // Cerebral malaria
+		public static final Integer COA_18 = 2002644; // Malaria due to Plasmodium malariae with other complications
+
+		//Confirmed malaria under 5 CMC: COA and congenital falciparum malaria
+		public static final Integer CMC_1 = 155686;
+
 		//Malaria in pregnancy positive  MPA
 		public static final Integer MPA_1 = 135361;
 		public static final Integer MPA_2 = 2009200;

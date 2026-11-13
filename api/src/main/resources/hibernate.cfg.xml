@@ -17,5 +17,6 @@
 <hibernate-configuration>
     <session-factory>
         <mapping resource="AdverseDrugReactionEmailLog.hbm.xml"/>
+        <mapping resource="DataQuality.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

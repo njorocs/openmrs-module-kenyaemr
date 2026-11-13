@@ -1,0 +1,12 @@
+{
+  "expectedReports": [],
+  "indicators": [],
+  "overrideReasons": [
+    "SEASONAL_VARIATION",
+    "OUTBREAK",
+    "SERVICE_CHANGE",
+    "DATA_VERIFIED_CORRECT",
+    "STOCK_OR_SUPPLY_ISSUE",
+    "OTHER"
+  ]
+}

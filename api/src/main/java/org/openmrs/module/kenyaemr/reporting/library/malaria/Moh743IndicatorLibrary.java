@@ -30,7 +30,7 @@ public class Moh743IndicatorLibrary {
     }
 
     public CohortIndicator totalPatientsTreatedWithAntiMalarialAgeWeightRange(double minWeight, double maxWeight, String comparisonOperator, int age) {
-        return cohortIndicator("Total patients treated with AL, DHAP, or ASPY antimalarials", map(moh743CohortLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(minWeight, maxWeight, comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));
+        return cohortIndicator("Total patients given an ACT", map(moh743CohortLibrary.totalPatientsTreatedWithAntiMalarialAgeWeightRange(minWeight, maxWeight, comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));
     }
     public CohortIndicator totalPatientsGivenArtesunateInjectionAgeWeightRange(double minWeight, double maxWeight, String comparisonOperator, int age) {
         return cohortIndicator("Total patients treated with Artesunate Injection", map(moh743CohortLibrary.totalPatientsGivenArtesunateInjectionAgeWeightRange(minWeight, maxWeight, comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));

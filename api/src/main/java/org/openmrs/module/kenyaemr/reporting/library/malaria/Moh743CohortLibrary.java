@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemr.reporting.library.malaria;
 
 import org.openmrs.module.kenyacore.report.ReportUtils;
 import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.reporting.MohReportUtils.MalariaLabResults;
 import org.openmrs.module.kenyaemr.reporting.library.ETLReports.MOH731Greencard.ETLMoh731GreenCardCohortLibrary;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.CompositionCohortDefinition;
@@ -90,7 +91,17 @@ String sqlQuery = "select x.patient_id\n" +
         return cd;
     }
 
-    public CohortDefinition totalPatientsForMalariaResultName(String resultName) {
+    /** The malaria tests: blood smear, PCR and RDT */
+    static final String MALARIA_TESTS = "2017917, 2032282, 1643";
+
+    /**
+     * Patients with a malaria test of the given kind whose result is of the given kind. "Positive"
+     * is any result but a negative one and "NEGATIVE" any negative result (see
+     * {@link MalariaLabResults}); any other name is matched exactly.
+     *
+     * @param labTests the lab test concepts, comma separated
+     */
+    public CohortDefinition totalPatientsForMalariaResultName(String labTests, String resultName) {
         SqlCohortDefinition cd = new SqlCohortDefinition();
         String sqlQuery = "select x.patient_id\n" +
                 "from "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_laboratory_extract x\n" +
@@ -101,7 +112,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "            on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
                 "            where v.diagnosis_category = 'New') v\n" +
                 "on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
-                "where x.result_name = '"+ resultName +"'  and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
+                "where x.lab_test in (" + labTests + ") and " + resultCondition(resultName) + " and date(x.date_test_requested) between date(:startDate) and date(:endDate)\n" +
                 "group by x.patient_id, x.lab_test";
         cd.setName("totalPatientsForMalariaResultName");
         cd.setQuery(sqlQuery);
@@ -111,6 +122,16 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setDescription("Total patients who received malaria Diagnosis with specific result");
 
         return cd;
+    }
+
+    static String resultCondition(String resultName) {
+        if ("Positive".equalsIgnoreCase(resultName)) {
+            return MalariaLabResults.positiveSql("x.result_name");
+        }
+        if ("NEGATIVE".equalsIgnoreCase(resultName)) {
+            return MalariaLabResults.negativeSql("x.result_name");
+        }
+        return "x.result_name = '" + resultName + "'";
     }
 
 
@@ -140,7 +161,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "                                         on v.patient_id = ed.patient_id and v.encounter_id = ed.encounter_id and ed.dx_rank = 2\n" +
                 "                     where v.diagnosis_category = 'New') v\n" +
                 "                    on v.patient_id = x.patient_id and v.visit_date = x.date_test_requested\n" +
-                "where x.lab_test in (2017917, 2032282, 1643)  and date(x.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
+                "where x.lab_test in (" + MALARIA_TESTS + ")  and date(x.date_test_requested) BETWEEN DATE(:startDate) AND DATE(:endDate)\n" +
                 "group by x.patient_id,x.lab_test;";
         cd.setName("totalPatientsSuspectedMalaria");
         cd.setQuery(sqlQuery);
@@ -156,7 +177,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.addParameter(new Parameter("resultName", "Result Name", String.class));
         cd.addSearch("totalPatientsForMalariaDiagnosis", ReportUtils.map(totalPatientsForMalariaDiagnosis(labTest), "startDate=${startDate},endDate=${endDate}"));
-        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
+        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(String.valueOf(labTest), resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
         cd.addSearch("totalPatientByAge", ReportUtils.map(totalPatientByAge(comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));
         cd.setCompositionString("totalPatientByAge AND totalPatientsForMalariaDiagnosis and totalPatientsForMalariaResultName");
         return cd;
@@ -168,7 +189,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
         cd.addParameter(new Parameter("resultName", "Result Name", String.class));
         cd.addSearch("totalPatientsSuspectedMalaria", ReportUtils.map(totalPatientsSuspectedMalaria(), "startDate=${startDate},endDate=${endDate}"));
-        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
+        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(MALARIA_TESTS, resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
         cd.addSearch("totalPatientByAge", ReportUtils.map(totalPatientByAge(comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));
         cd.setCompositionString("totalPatientsSuspectedMalaria AND totalPatientByAge AND totalPatientsForMalariaResultName");
         return cd;
@@ -180,7 +201,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.addParameter(new Parameter("resultName", "Result Name", String.class));
         cd.addSearch("totalPatientsNotTestedMalaria", ReportUtils.map(totalPatientsNotTestedMalaria(), "startDate=${startDate},endDate=${endDate}"));
         cd.addSearch("totalPatientByAge", ReportUtils.map(totalPatientByAge(comparisonOperator, age), "startDate=${startDate},endDate=${endDate}"));
-        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
+        cd.addSearch("totalPatientsForMalariaResultName", ReportUtils.map(totalPatientsForMalariaResultName(MALARIA_TESTS, resultName), "startDate=${startDate},endDate=${endDate},resultName=${resultName}"));
         cd.setCompositionString("totalPatientsNotTestedMalaria AND totalPatientByAge AND totalPatientsForMalariaResultName");
         return cd;
     }
@@ -205,18 +226,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
                 "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
-                "WHERE do.drug_inventory_id IN (\n" +
-                "  -- Artemether-Lumefantrine (AL) drug IDs\n" +
-                "  8580, 14009, 14010, 14011, 14018, 14019, 14020, 14021, 14022, 14023, 14024,\n" +
-                "  14025, 14026, 14027, 14028, 14029, 14030, 14031, 14032, 14033, 14034, 14035,\n" +
-                "  14036, 14037, 14038, 14039, 14040, 14041, 14042, 14043, 14044, 14049, 14050,\n" +
-                "  15092, 16260, 16266, 16267, 16269, 16272, 16273, 16274, 16275, 16276, 16281,\n" +
-                "  16282, 16284, 16303,\n" +
-                "  -- DHAP drug IDs\n" +
-                "  5600, 5601,\n" +
-                "  -- ASPY drug IDs\n" +
-                "  14494, 14495, 14496, 14497, 15096, 16293, 16296, 16300\n" +
-                ")\n" +
+                "WHERE do.drug_inventory_id IN " + MalariaDrugs.sql(MalariaDrugs.ACTS) + "\n" +
                 "  AND o.voided = 0 " +
                 "  AND e.voided = 0 " +
                 "  AND DATE(e.encounter_datetime) BETWEEN DATE(:startDate) AND DATE(:endDate)";
@@ -224,7 +234,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setQuery(sqlQuery);
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
         cd.addParameter(new Parameter("endDate", "End Date", Date.class));
-        cd.setDescription("Total patients treated with AL, DHAP, or ASPY antimalarials");
+        cd.setDescription("Total patients given an ACT");
         return cd;
     }
 
@@ -236,9 +246,7 @@ String sqlQuery = "select x.patient_id\n" +
                 "INNER JOIN encounter e ON o.encounter_id = e.encounter_id " +
                 "INNER JOIN "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p " +
                 "  ON p.patient_id = o.patient_id AND p.voided = 0 " +
-                "WHERE do.drug_inventory_id IN (\n" +
-                " 9580,9581,9583,9584,9593,9595,9596,9598,9604,9605,9607,9608,15620,16288,16289,16298\n" +
-                ")\n" +
+                "WHERE do.drug_inventory_id IN " + MalariaDrugs.sql(MalariaDrugs.ARTESUNATE_INJECTION) + "\n" +
                 "  AND o.voided = 0 " +
                 "  AND e.voided = 0 " +
                 "  AND DATE(e.encounter_datetime) BETWEEN DATE(:startDate) AND DATE(:endDate)";
@@ -249,6 +257,7 @@ String sqlQuery = "select x.patient_id\n" +
         cd.setDescription("Total patients Given Artesunate Injection");
         return cd;
     }
+
     public CohortDefinition totalPatientsGivenArtesunateInjectionAgeWeightRange(double minWeight, double maxWeight, String comparisonOperator, int age) {
         CompositionCohortDefinition cd = new CompositionCohortDefinition();
         cd.addParameter(new Parameter("startDate", "Start Date", Date.class));

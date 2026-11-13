@@ -61,6 +61,11 @@ public class Moh505ReportBuilder extends AbstractReportBuilder {
     static final int TYPHOID = 141;
     static final int YELLOW_FEVER = 122759;
     static final int RAPID_TEST_FOR_MALARIA = 1643;
+    /** Malaria blood smear, the concept MOH 706 counts (BST) */
+    static final int MALARIA_BLOOD_SMEAR = 2017901;
+    /** Positive results as MOH 706 counts them: positive, and malaria parasites seen */
+    static final List<Integer> MALARIA_SMEAR_POSITIVE = Arrays.asList(703, 2032341);
+    static final List<Integer> MALARIA_RDT_POSITIVE = Arrays.asList(703);
     static final int TYPHOID_TEST = 165562;
     static final int TB_TEST = 5475;
     static final int STOOL_CULTURE = 163603;
@@ -131,7 +136,7 @@ public class Moh505ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd,"Guinea Worm Disease Deaths", "No of Guinea Worm Disease Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(GUINEA_WORM_DISEASE, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Measles", "No of Measles Cases", ReportUtils.map(Moh505Indicator.diagnosis(MEASLES), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Measles Deaths", "No of Measles Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(MEASLES, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd,"Suspected Malaria", "No of Suspected Malaria Cases", ReportUtils.map(Moh505Indicator.diagnosis(SUSPECTED_MALARIA), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd,"Suspected Malaria", "No of Suspected Malaria Cases", ReportUtils.map(Moh505Indicator.suspectedMalaria(), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Suspected Malaria Deaths", "No of Suspected Malaria Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(SUSPECTED_MALARIA, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Deaths due to Malaria", "No of Deaths due to Malaria Cases", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(MALARIA, DECEASED), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
         EmrReportingUtils.addRow(dsd,"Maternal deaths", "No of Maternal deaths", ReportUtils.map(Moh505Indicator.maternalDeathCase(), indParams), over5_epidemic, Arrays.asList("01","02"));
@@ -158,10 +163,10 @@ public class Moh505ReportBuilder extends AbstractReportBuilder {
         EmrReportingUtils.addRow(dsd,"Yellow Fever Deaths", "No of Yellow Fever Deaths", ReportUtils.map(Moh505Indicator.patientDiagnosedAndDeceased(YELLOW_FEVER, DECEASED), indParams), all_epidemic, Arrays.asList("01","02", "03"));
         EmrReportingUtils.addRow(dsd,"Others (Specify)", "No of Others (Specify) cases", ReportUtils.map(Moh505Indicator.acuteJaundiceCase(), indParams), all_epidemic, Arrays.asList("01","02", "03"));
 
-        EmrReportingUtils.addRow(dsd,"Microscopy Tested", "Malaria Tested (Microscopy)", ReportUtils.map(Moh505Indicator.malariaTested(SUSPECTED_MALARIA, CEREBROSPINAL_FLUID_MICROSCOPY), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd,"Microscopy Positive", "Malaria Positive (Microscopy)", ReportUtils.map(Moh505Indicator.malariaTestedPositive(SUSPECTED_MALARIA, CEREBROSPINAL_FLUID_MICROSCOPY), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
-        EmrReportingUtils.addRow(dsd,"mRDT Tested", "Malaria Tested (mRDT)", ReportUtils.map(Moh505Indicator.malariaTested(SUSPECTED_MALARIA, RAPID_TEST_FOR_MALARIA), indParams), all_epidemic, Arrays.asList("01","02", "03"));
-        EmrReportingUtils.addRow(dsd,"mRDT Positive", "Malaria Positive (mRDT)", ReportUtils.map(Moh505Indicator.malariaTestedPositive(SUSPECTED_MALARIA, RAPID_TEST_FOR_MALARIA), indParams), all_epidemic, Arrays.asList("01","02", "03"));
+        EmrReportingUtils.addRow(dsd,"Microscopy Tested", "Malaria Tested (Microscopy)", ReportUtils.map(Moh505Indicator.malariaTested(MALARIA_BLOOD_SMEAR), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd,"Microscopy Positive", "Malaria Positive (Microscopy)", ReportUtils.map(Moh505Indicator.malariaTestedPositive(MALARIA_BLOOD_SMEAR, MALARIA_SMEAR_POSITIVE), indParams), all_epidemic, Arrays.asList("01", "02", "03"));
+        EmrReportingUtils.addRow(dsd,"mRDT Tested", "Malaria Tested (mRDT)", ReportUtils.map(Moh505Indicator.malariaTested(RAPID_TEST_FOR_MALARIA), indParams), all_epidemic, Arrays.asList("01","02", "03"));
+        EmrReportingUtils.addRow(dsd,"mRDT Positive", "Malaria Positive (mRDT)", ReportUtils.map(Moh505Indicator.malariaTestedPositive(RAPID_TEST_FOR_MALARIA, MALARIA_RDT_POSITIVE), indParams), all_epidemic, Arrays.asList("01","02", "03"));
 
         EmrReportingUtils.addRow(dsd,"Tubercullosis Tested", "Tubercullosis Tested", ReportUtils.map(Moh505Indicator.tbTested(TB_TEST), indParams), all_epidemic, Arrays.asList("01","02", "03"));
         EmrReportingUtils.addRow(dsd,"Tubercullosis Positive", "Tubercullosis Positive", ReportUtils.map(Moh505Indicator.tbTestedPositive(TB_TEST), indParams), all_epidemic, Arrays.asList("01","02", "03"));

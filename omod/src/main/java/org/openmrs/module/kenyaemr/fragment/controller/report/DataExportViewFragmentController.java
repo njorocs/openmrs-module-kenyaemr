@@ -11,6 +11,12 @@ package org.openmrs.module.kenyaemr.fragment.controller.report;
 
 import org.openmrs.module.kenyaemr.util.SensitiveGlobalProperties;
 
+import org.openmrs.module.kenyaemr.api.DqService;
+import org.openmrs.module.kenyaemr.dq.DqAccess;
+import org.openmrs.module.kenyaemr.dq.DqPeriods;
+import org.openmrs.module.kenyaemr.dq.DqSendGate;
+import org.openmrs.module.kenyaemr.model.dq.DqReportRun;
+import org.openmrs.module.kenyaemr.model.dq.DqRunStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,6 +93,8 @@ public class DataExportViewFragmentController {
     DateFormat periodFormat = new SimpleDateFormat("yyyyMM");
     public static final String KPIF_MONTHLY_REPORT = "Monthly report";
     public static final String MOH_731 = "Revised MOH 731";
+    /** Owned by kenyaemrIL, which sends approved versions when it is true */
+    public static final String GP_KHIS_PIPELINE_ENABLED = "khisAggregate.enabled";
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     public void get(@RequestParam("request") ReportRequest reportRequest,
@@ -116,6 +124,10 @@ public class DataExportViewFragmentController {
         String payload = generatePayload(reportData, outputFormat);
 
         model.addAttribute("khis", payload);
+        // Viewing is never held back; sending waits for the data quality checks
+        // Written into a <script> block, and the gate's messages can carry KHIS's words: keep "</" from closing it
+        model.addAttribute("gateJson", jsonObjectMapper.writeValueAsString(KhisSendGates.simplify(
+                KhisSendGates.gateFor(reportRequest, definition.getUuid(), reportData, reportService))).replace("</", "<\\/"));
         model.addAttribute("reportName", definition.getName());
         model.addAttribute("returnUrl", returnUrl);
         model.addAttribute("outputFormat", outputFormat);
@@ -226,6 +238,36 @@ public class DataExportViewFragmentController {
     public String render(ReportData reportData) throws IOException {
         return generateAdxContent(reportData);
     }
+    /**
+     * @return whether the request may be sent to KHIS yet, for the page to poll while the checks run
+     */
+    public SimpleObject getSendGate(@RequestParam("request") ReportRequest reportRequest,
+                                    @SpringBean ReportService reportService) {
+        return KhisSendGates.simplify(gateOf(reportRequest, null, reportService));
+    }
+
+    /**
+     * Runs the data quality checks on the request's figures, when they have not been checked
+     */
+    public SimpleObject runChecks(@RequestParam("request") ReportRequest reportRequest,
+                                  @SpringBean ReportService reportService) {
+        ReportData reportData = reportService.loadReportData(reportRequest);
+        DqSendGate gate = gateOf(reportRequest, reportData, reportService);
+        if (gate.getState() == DqSendGate.State.NOT_CHECKED) {
+            Context.getService(DqService.class).captureReportRun(reportData.getDefinition().getUuid(), reportData,
+                    (Date) reportData.getContext().getParameterValue("startDate"),
+                    (Date) reportData.getContext().getParameterValue("endDate"));
+            gate = gateOf(reportRequest, reportData, reportService);
+        }
+        return KhisSendGates.simplify(gate);
+    }
+
+    private static DqSendGate gateOf(ReportRequest reportRequest, ReportData reportData, ReportService reportService) {
+        String definitionUuid = reportData != null ? reportData.getDefinition().getUuid()
+                : reportRequest.getReportDefinition().getParameterizable().getUuid();
+        return KhisSendGates.gateFor(reportRequest, definitionUuid, reportData, reportService);
+    }
+
     public SimpleObject buildDocument(@RequestParam("request") ReportRequest reportRequest,
                                       @SpringBean ReportService reportService) {
         try {
@@ -237,15 +279,22 @@ public class DataExportViewFragmentController {
             }
 
             ReportData reportData = reportService.loadReportData(reportRequest);
+            DqSendGate gate = gateOf(reportRequest, reportData, reportService);
+            if (!gate.isSendable()) {
+                return SimpleObject.create("statusCode", String.valueOf(HttpStatus.CONFLICT.value()),
+                        "statusMsg", "Not sent to KHIS. " + gate.getMessage(), "gate", KhisSendGates.simplify(gate));
+            }
+            if ("true".equalsIgnoreCase(StringUtils.trim(Context.getAdministrationService().getGlobalProperty(GP_KHIS_PIPELINE_ENABLED)))) {
+                return sendThroughApproval(reportData, gate);
+            }
             String outputFormat = detectOutputFormat(reportData);
 
             log.info("Building document for request " + reportRequest.getId() + " with format: " + outputFormat);
 
-            if ("json".equalsIgnoreCase(outputFormat)) {
-                return buildJsonDocument(reportRequest, reportService);
-            } else {
-                return buildXmlDocument(reportRequest, reportService);
-            }
+            SimpleObject sent = "json".equalsIgnoreCase(outputFormat) ? buildJsonDocument(reportRequest, reportService)
+                    : buildXmlDocument(reportRequest, reportService);
+            recordSend(gate, outputFormat, sent);
+            return sent;
         }
         catch (Exception e) {
             log.error("Error building document", e);
@@ -255,6 +304,107 @@ public class DataExportViewFragmentController {
                     "statusMsg", "Failed to build document: " + message
             );
         }
+    }
+
+    /**
+     * Records the send in the submission ledger: a version KHIS accepted, for the timeliness of
+     * reports sent from this page, and one it refused (or that did not reach it) as REJECTED with
+     * KHIS's response. Recording never fails the send.
+     */
+    private void recordSend(DqSendGate gate, String outputFormat, SimpleObject sent) {
+        if (gate.getRun() == null || sent == null) {
+            return;
+        }
+        String format = "json".equalsIgnoreCase(outputFormat) ? "JSON" : "ADX";
+        try {
+            Integer httpCode = parseCode(sent.get("statusCode"));
+            String statusMsg = sent.get("statusMsg") != null ? sent.get("statusMsg").toString() : null;
+            Integer[] counts = new Integer[4];
+            boolean accepted = httpCode != null && httpCode >= 200 && httpCode < 300;
+            if (statusMsg != null && statusMsg.trim().startsWith("{")) {
+                JsonNode response = readResponse(statusMsg);
+                if (response.has("status")) {
+                    accepted = accepted && "SUCCESS".equals(response.path("status").getTextValue());
+                }
+                JsonNode importCount = response.path("importCount");
+                String[] names = { "imported", "updated", "ignored", "deleted" };
+                for (int i = 0; i < names.length; i++) {
+                    counts[i] = importCount.has(names[i]) ? importCount.path(names[i]).getIntValue() : null;
+                }
+            }
+            DqService dq = Context.getService(DqService.class);
+            if (accepted && dq.recordKhisSend(gate.getRun(), format, httpCode, counts, statusMsg)) {
+                log.info("Recorded " + gate.getRun().getReportName() + " version " + gate.getRun().getVersion()
+                        + " as sent to KHIS from the reports page");
+            } else if (!accepted && dq.recordKhisSendFailure(gate.getRun(), format, httpCode, statusMsg)) {
+                log.warn("Recorded the failed KHIS send of " + gate.getRun().getReportName() + " version "
+                        + gate.getRun().getVersion() + " (HTTP " + httpCode + ")");
+            }
+        }
+        catch (Exception e) {
+            log.warn("Could not record the KHIS send of " + gate.getRun().getReportName(), e);
+        }
+    }
+
+    private static Integer parseCode(Object code) {
+        try {
+            return code != null ? Integer.valueOf(code.toString().trim()) : null;
+        }
+        catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** KHIS's response, or an empty node when it is not JSON */
+    private JsonNode readResponse(String statusMsg) {
+        try {
+            return jsonObjectMapper.readTree(statusMsg).path("response");
+        }
+        catch (Exception e) {
+            return jsonObjectMapper.createObjectNode();
+        }
+    }
+
+    /**
+     * With the KHIS pipeline on, a report reaches KHIS only as an approved data quality version, which
+     * kenyaemrIL queues and sends. The button then says where that version stands instead of posting.
+     */
+    private SimpleObject sendThroughApproval(ReportData reportData, DqSendGate gate) {
+        String reportName = reportData.getDefinition().getName();
+        // Checked with nothing to review: sending is the approval
+        if (gate.getState() == DqSendGate.State.READY && gate.getRun().getStatus() == DqRunStatus.AWAITING_APPROVAL) {
+            DqReportRun run = gate.getRun();
+            if (!DqAccess.mayApprove()) {
+                return SimpleObject.create("statusCode", String.valueOf(HttpStatus.FORBIDDEN.value()),
+                        "statusMsg", "Sending approves version " + run.getVersion() + " of " + reportName + ", which needs the \""
+                                + DqService.PRIVILEGE_APPROVE + "\" privilege or one of the roles "
+                                + java.util.Arrays.toString(DqService.RUN_ROLES) + ".");
+            }
+            Context.getService(DqService.class).approveReportRun(run, null);
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.ACCEPTED.value()),
+                    "statusMsg", reportName + " (version " + run.getVersion() + ") is approved and is sent to KHIS "
+                            + "automatically. Follow its status on the Data quality page.");
+        }
+        Date start = (Date) reportData.getContext().getParameterValue("startDate");
+        if (start == null) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                    "statusMsg", "This report has no start date, so it cannot be matched to a data quality version.");
+        }
+        String month = new SimpleDateFormat("MMMM yyyy").format(start);
+        DqReportRun run = Context.getService(DqService.class).getLatestReportRun(reportName, DqPeriods.monthStart(start));
+        if (run == null) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.CONFLICT.value()),
+                    "statusMsg", "Reports now reach KHIS after data quality approval. Generate and approve " + reportName
+                            + " for " + month + " on the Data quality page; it is sent automatically once approved.");
+        }
+        if (run.getStatus() == DqRunStatus.APPROVED) {
+            return SimpleObject.create("statusCode", String.valueOf(HttpStatus.ACCEPTED.value()),
+                    "statusMsg", reportName + " for " + month + " (version " + run.getVersion() + ") is approved and is "
+                            + "sent to KHIS automatically. Follow its status on the Data quality page.");
+        }
+        return SimpleObject.create("statusCode", String.valueOf(HttpStatus.CONFLICT.value()),
+                "statusMsg", reportName + " for " + month + " (version " + run.getVersion() + ") is " + run.getStatus()
+                        + ". Approve it on the Data quality page; it is sent to KHIS automatically once approved.");
     }
 
     public SimpleObject buildXmlDocument(@RequestParam("request") ReportRequest reportRequest,
@@ -387,9 +537,9 @@ public class DataExportViewFragmentController {
                             if (parts.length > 1 && StringUtils.isNotBlank(parts[1])) {
                                 categoryOptionCombo = parts[1];
                             }
-                        } else if (datasetMapping != null && datasetMapping.getFieldMappings() != null
-                                && !datasetMapping.getFieldMappings().containsKey(mappingKey)
-                                && !"Revised MOH 731".equals(reportData.getDefinition().getName())) {
+                        } else if (!"Revised MOH 731".equals(reportData.getDefinition().getName())) {
+                            // An unmapped column, or any column of a dataset with no KHIS mapping, e.g. MOH 743's
+                            // SUSPECTED_MALARIA, is not sent: KHIS would refuse its column name as a data element
                             continue;
                         }
                     }
@@ -435,7 +585,7 @@ public class DataExportViewFragmentController {
         if (config == null || config.getDatasets() == null) {
             return null;
         }
-        
+
         for (AdxConfiguration.AdxDatasetMapping mapping : config.getDatasets()) {
             if (mapping.getName() != null && mapping.getName().equals(datasetName)) {
                 return mapping;
@@ -728,7 +878,7 @@ public class DataExportViewFragmentController {
             try {
                 list = FacilityReporting.getReportDataForPeriod(reportID, startDate, endDate);
             } catch (ParseException e) {
-                e.printStackTrace();
+                log.error("Could not read the period " + startDate + " to " + endDate, e);
             }
 
         }

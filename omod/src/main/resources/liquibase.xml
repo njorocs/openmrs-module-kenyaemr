@@ -539,6 +539,304 @@
 			referencedTableName="encounter" referencedColumnNames="encounter_id" />
   </changeSet>
 
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1000">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_report_run" />
+			</not>
+		</preConditions>
+		<comment>Data quality: one generated version of a report for one period</comment>
+		<createTable tableName="kenyaemr_dq_report_run">
+			<column name="report_run_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="uuid" type="CHAR(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="report_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="report_uuid" type="VARCHAR(38)"></column>
+			<column name="period_start" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="period_end" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="values_hash" type="VARCHAR(64)"></column>
+			<column name="generated_at" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="generated_by" type="INT"></column>
+			<column name="approved_by" type="INT"></column>
+			<column name="approved_at" type="DATETIME"></column>
+			<column name="approval_mode" type="VARCHAR(20)"></column>
+		</createTable>
+		<createIndex indexName="kenyaemr_dq_report_run_version_uq" tableName="kenyaemr_dq_report_run" unique="true">
+			<column name="report_name" />
+			<column name="period_start" />
+			<column name="period_end" />
+			<column name="version" />
+		</createIndex>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_report_run_generated_by_fk" baseTableName="kenyaemr_dq_report_run" baseColumnNames="generated_by"
+			referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_report_run_approved_by_fk" baseTableName="kenyaemr_dq_report_run" baseColumnNames="approved_by"
+			referencedTableName="users" referencedColumnNames="user_id" />
+
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1010">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_value" />
+			</not>
+		</preConditions>
+		<comment>Data quality: one report cell per report run, with its KHIS mapping</comment>
+		<createTable tableName="kenyaemr_dq_value">
+			<column name="value_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="report_run_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="dataset_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="column_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="mapping_key" type="VARCHAR(255)"></column>
+			<column name="data_element" type="VARCHAR(50)"></column>
+			<column name="category_option_combo" type="VARCHAR(50)"></column>
+			<column name="value_text" type="VARCHAR(255)"></column>
+			<column name="value_numeric" type="DOUBLE"></column>
+			<column name="source" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="emr_value_now" type="DOUBLE"></column>
+			<column name="khis_value" type="DOUBLE"></column>
+			<column name="khis_last_updated" type="DATETIME"></column>
+			<column name="import_outcome" type="VARCHAR(20)"></column>
+			<column name="conflict_text" type="VARCHAR(1000)"></column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_value_report_run_fk" baseTableName="kenyaemr_dq_value" baseColumnNames="report_run_id"
+			referencedTableName="kenyaemr_dq_report_run" referencedColumnNames="report_run_id" />
+		<createIndex indexName="kenyaemr_dq_value_data_element_idx" tableName="kenyaemr_dq_value">
+			<column name="data_element" />
+			<column name="category_option_combo" />
+		</createIndex>
+
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1020">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_result" />
+			</not>
+		</preConditions>
+		<comment>Data quality: result of one rule for one period and indicator, with its program and the rule settings it was judged against</comment>
+		<createTable tableName="kenyaemr_dq_result">
+			<column name="result_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="uuid" type="CHAR(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="rule_id" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="indicator_code" type="VARCHAR(100)"></column>
+			<column name="report_run_id" type="INT"></column>
+			<column name="period_start" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="period_end" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="measure_value" type="DOUBLE"></column>
+			<column name="numerator" type="DOUBLE"></column>
+			<column name="denominator" type="DOUBLE"></column>
+			<column name="threshold" type="VARCHAR(255)"></column>
+			<column name="outcome" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="message" type="VARCHAR(1000)"></column>
+			<column name="detail" type="TEXT"></column>
+			<column name="evaluated_at" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="program_code" type="VARCHAR(50)"></column>
+			<column name="params" type="TEXT"></column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_result_report_run_fk" baseTableName="kenyaemr_dq_result" baseColumnNames="report_run_id"
+			referencedTableName="kenyaemr_dq_report_run" referencedColumnNames="report_run_id" />
+		<createIndex indexName="kenyaemr_dq_result_rule_period_idx" tableName="kenyaemr_dq_result">
+			<column name="rule_id" />
+			<column name="period_start" />
+		</createIndex>
+		<createIndex indexName="kenyaemr_dq_result_program_period_idx" tableName="kenyaemr_dq_result">
+			<column name="program_code" />
+			<column name="period_start" />
+		</createIndex>
+
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1030">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_override" />
+			</not>
+		</preConditions>
+		<comment>Data quality: warning accepted by an HRIO with a reason</comment>
+		<createTable tableName="kenyaemr_dq_override">
+			<column name="override_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="uuid" type="CHAR(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="result_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="reason_code" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="note" type="VARCHAR(1000)"></column>
+			<column name="creator" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_override_result_fk" baseTableName="kenyaemr_dq_override" baseColumnNames="result_id"
+			referencedTableName="kenyaemr_dq_result" referencedColumnNames="result_id" />
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_override_creator_fk" baseTableName="kenyaemr_dq_override" baseColumnNames="creator"
+			referencedTableName="users" referencedColumnNames="user_id" />
+
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1040">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_ticket" />
+			</not>
+		</preConditions>
+		<comment>Data quality: reconciliation or outlier ticket</comment>
+		<createTable tableName="kenyaemr_dq_ticket">
+			<column name="ticket_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="uuid" type="CHAR(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="result_id" type="INT"></column>
+			<column name="rule_id" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="indicator_code" type="VARCHAR(100)"></column>
+			<column name="period_start" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="emr_value" type="DOUBLE"></column>
+			<column name="khis_value" type="DOUBLE"></column>
+			<column name="variance_pct" type="DOUBLE"></column>
+			<column name="suggested_cause" type="VARCHAR(255)"></column>
+			<column name="assignee_role" type="VARCHAR(50)"></column>
+			<column name="program_code" type="VARCHAR(50)"></column>
+			<column name="status" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="resolution_note" type="VARCHAR(1000)"></column>
+			<column name="opened_at" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="resolved_at" type="DATETIME"></column>
+			<column name="resolved_by" type="INT"></column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_ticket_result_fk" baseTableName="kenyaemr_dq_ticket" baseColumnNames="result_id"
+			referencedTableName="kenyaemr_dq_result" referencedColumnNames="result_id" />
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_ticket_resolved_by_fk" baseTableName="kenyaemr_dq_ticket" baseColumnNames="resolved_by"
+			referencedTableName="users" referencedColumnNames="user_id" />
+		<createIndex indexName="kenyaemr_dq_ticket_status_idx" tableName="kenyaemr_dq_ticket">
+			<column name="status" />
+		</createIndex>
+
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261021-1050">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config
+				WHERE schedulable_class IN ('org.openmrs.module.kenyaemr.task.DataQualityTask',
+					'org.openmrs.module.kenyaemr.task.DataQualityAutoApprovalTask')
+			</sqlCheck>
+		</preConditions>
+		<comment>Data quality tasks: the daily task that generates and checks last month's reports and last week's test positivity; and the optional auto-send on the deadline, run late in the day, which does nothing unless kenyaemr.dq.autoApproveOnDeadline is true</comment>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Data Quality Checks Task" />
+			<column name="description" value="Generates last month's expected reports, runs the TR-26-110 data quality checks and the weekly test positivity check" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemr.task.DataQualityTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2026-10-01T01:00:00" />
+			<column name="repeat_interval" value="86400" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="1" />
+			<column name="started" value="1" />
+			<column name="uuid" value="2fe2e2a9-c39b-43ac-a870-f9be73cfa563" />
+		</insert>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Data Quality Auto Approval Task" />
+			<column name="description" value="On a report's deadline day, approves last month's reports still awaiting approval with no open block, so they are sent to KHIS on time" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemr.task.DataQualityAutoApprovalTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2026-10-01T18:00:00" />
+			<column name="repeat_interval" value="86400" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="1" />
+			<column name="started" value="1" />
+			<column name="uuid" value="dc459391-a806-42b8-8c5b-37d5cc370f06" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="njorocs" id="${project.parent.artifactId}-20261022-1000">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="kenyaemr_dq_report_payload" />
+			</not>
+		</preConditions>
+		<comment>Data quality: the KHIS payload of each report version, sent as is once approved</comment>
+		<createTable tableName="kenyaemr_dq_report_payload">
+			<column name="payload_id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="report_run_id" type="INT">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="format" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="endpoint_path" type="VARCHAR(500)"></column>
+			<column name="content" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="content_hash" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="kenyaemr_dq_report_payload_run_fk" baseTableName="kenyaemr_dq_report_payload"
+			baseColumnNames="report_run_id" referencedTableName="kenyaemr_dq_report_run" referencedColumnNames="report_run_id" />
+	</changeSet>
+
 </databaseChangeLog>
-
-

@@ -32,16 +32,8 @@ public class MOH705CohortLibrary {
 	 * @return
 	 */
 	public CohortDefinition patientDiagnosis(List<Integer> diagnosisList) {
-		String diagnosis = String.valueOf(diagnosisList).replaceAll("\\[", "(").replaceAll("\\]",")");
-		String sqlQuery = "SELECT ce.patient_id\n" +
-				"FROM "+ CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_clinical_encounter ce\n" +
-				"         INNER JOIN "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
-				"         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
-				"WHERE date(ce.visit_date) BETWEEN date(:startDate) AND date(:endDate)\n" +
-				"  AND ce.voided = 0\n" +
-				"  AND ed.dx_rank = 2\n" +
-				"  AND ed.diagnosis_coded in " + diagnosis + "\n" +
-				"  AND ce.diagnosis_category = 'New';";
+		String sqlQuery = "SELECT ce.patient_id\n" + diagnosisVisitsSql(CommonMetadata.EmrDatabaseEtl.ETL_DATABASE, diagnosisList,
+				"startDate", "endDate") + ";";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsDiagnosis");
 		cd.setQuery(sqlQuery);
@@ -51,13 +43,42 @@ public class MOH705CohortLibrary {
 		return cd;
 	}
 	/**
+	 * The visits {@link #patientDiagnosis(List)} counts, from FROM on: a final diagnosis from the list on
+	 * a new visit dated between the two parameters. Shared with data quality rule T22-07 so that both
+	 * count the same visits.
+	 *
+	 * @param startParameter the name of the start date parameter, e.g. startDate
+	 * @param endParameter the name of the end date parameter, e.g. endDate
+	 */
+	public static String diagnosisVisitsSql(String etlDatabase, List<Integer> diagnosisList, String startParameter,
+			String endParameter) {
+		String diagnosis = String.valueOf(diagnosisList).replaceAll("\\[", "(").replaceAll("\\]",")");
+		return "FROM "+ etlDatabase+".etl_clinical_encounter ce\n" +
+				"         INNER JOIN "+etlDatabase+".etl_patient_demographics p ON p.patient_id = ce.patient_id AND p.voided = 0\n" +
+				"         INNER JOIN encounter_diagnosis ed ON ed.patient_id = ce.patient_id AND ed.encounter_id = ce.encounter_id\n" +
+				"WHERE date(ce.visit_date) BETWEEN date(:" + startParameter + ") AND date(:" + endParameter + ")\n" +
+				"  AND ce.voided = 0\n" +
+				"  AND ed.dx_rank = 2\n" +
+				"  AND ed.diagnosis_coded in " + diagnosis + "\n" +
+				"  AND ce.diagnosis_category = 'New'";
+	}
+
+	/**
+	 * The patients {@link #patientAge(String)} selects: age on :endDate, e.g. age "&lt;5". Shared with
+	 * data quality rule T22-07.
+	 */
+	public static String patientAgeSql(String etlDatabase, String age) {
+		return "select d.patient_id from "+etlDatabase+".etl_patient_demographics d where timestampdiff(YEAR, date(d.dob),date(:endDate)) " + age;
+	}
+
+	/**
 	 * MOH705A
 	 * Age
 	 * For Composition
 	 * @return
 	 */
 	public CohortDefinition patientAge(String age) {
-		String sqlQuery = "select d.patient_id from "+CommonMetadata.EmrDatabaseEtl.ETL_DATABASE+".etl_patient_demographics d where timestampdiff(YEAR, date(d.dob),date(:endDate)) " + age + ";";
+		String sqlQuery = patientAgeSql(CommonMetadata.EmrDatabaseEtl.ETL_DATABASE, age) + ";";
 		SqlCohortDefinition cd = new SqlCohortDefinition();
 		cd.setName("patientsAge");
 		cd.setQuery(sqlQuery);
