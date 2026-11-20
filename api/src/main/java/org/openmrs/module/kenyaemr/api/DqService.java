@@ -140,6 +140,16 @@ public interface DqService extends OpenmrsService {
 	List<DqResult> evaluateWeek(Date anyDateInWeek);
 
 	/**
+	 * As {@link #evaluateWeek(Date)}, but a week already checked is checked again with the EMR's
+	 * figures now, so data entered late for the week (e.g. a test result backdated to it) is counted.
+	 * A result checked again is updated in place; its ticket is raised or closed if the outcome
+	 * changed.
+	 *
+	 * @return the results for the week
+	 */
+	List<DqResult> recheckWeek(Date anyDateInWeek);
+
+	/**
 	 * Checks again, with the latest values, the finding of every ticket not resolved, so that its
 	 * figures are those the trends show: a ticket whose finding still fails takes the new figures and
 	 * message, and one whose finding now passes is closed. Run nightly, it catches tickets a new

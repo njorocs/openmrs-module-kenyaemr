@@ -37,8 +37,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <ul>
  * <li>every expected monthly report not yet generated for last month is generated, then all newly
  * generated reports are checked together, so rules that compare reports (X-RPT-01) see both;</li>
- * <li>the weekly checks (T22-08 test positivity) run once for each of the last 8 weeks not yet
- * checked, so weeks missed while the server was down are caught up;</li>
+ * <li>the weekly checks (T22-08 test positivity) run for each of the last 8 weeks: weeks not yet
+ * checked, e.g. missed while the server was down, are caught up, and weeks already checked are
+ * checked again, so results entered late for a week are counted;</li>
  * <li>once last month's deadlines are over, its month-level checks (G-RPT-01 timeliness) run once;</li>
  * <li>any of the {@link #MONTHS_OF_HISTORY} months before last month not yet stored are generated
  * without being checked, so from the first run after deployment T22-03 and the trends have two
@@ -259,16 +260,18 @@ public class DataQualityTask extends AbstractTask {
 	}
 
 	/**
-	 * Runs the weekly checks for each of the last {@link #WEEKS_TO_CATCH_UP} weeks not yet checked,
-	 * oldest first, so weeks missed while the server was down are checked too. A week that fails is
-	 * left for the next run.
+	 * Runs the weekly checks for each of the last {@link #WEEKS_TO_CATCH_UP} weeks, oldest first:
+	 * weeks not yet checked, so weeks missed while the server was down are checked too, and weeks
+	 * already checked again, since a result entered late (backdated into the week) changes neither the
+	 * settings nor a report version, so would otherwise never be counted. A week that fails is left
+	 * for the next run.
 	 */
 	private void checkRecentWeeks(DqService service, Date today) {
 		Date lastWeek = DqPeriods.addDays(DqPeriods.weekStart(today), -7);
 		for (int i = WEEKS_TO_CATCH_UP - 1; i >= 0; i--) {
 			Date week = DqPeriods.addDays(lastWeek, -7 * i);
 			try {
-				service.evaluateWeek(week);
+				service.recheckWeek(week);
 			}
 			catch (RuntimeException e) {
 				failures++;

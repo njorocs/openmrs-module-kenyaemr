@@ -261,8 +261,8 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 		String report = generated.getReportName();
 		if (DqPeriods.isWholeWeek(generated.getPeriodStart(), generated.getPeriodEnd())) {
 			Date week = DqPeriods.weekStart(generated.getPeriodStart());
-			evaluateWeek(week, true);
-			evaluateWeek(DqPeriods.addDays(week, 7), true);
+			evaluateWeek(week, true, false);
+			evaluateWeek(DqPeriods.addDays(week, 7), true, false);
 			// The week's other versions, and the next week's, as their run reviews show them. A
 			// week's version raises no tickets, so none are raised or closed here.
 			for (DqReportRun run : dqDao.getLatestWeeklyRuns(week, DqPeriods.addDays(week, 7))) {
@@ -362,7 +362,7 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 				String key = ticket.getRuleId() + "@" + ticket.getPeriodStart().getTime();
 				if (monthsChecked.add(key)) {
 					if (weekRules.contains(ticket.getRuleId())) {
-						evaluateWeek(ticket.getPeriodStart(), true);
+						evaluateWeek(ticket.getPeriodStart(), true, false);
 					} else {
 						evaluateMonth(ticket.getPeriodStart(), now, true);
 					}
@@ -649,7 +649,12 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 
 	@Override
 	public List<DqResult> evaluateWeek(Date anyDateInWeek) {
-		return evaluateWeek(anyDateInWeek, false);
+		return evaluateWeek(anyDateInWeek, false, false);
+	}
+
+	@Override
+	public List<DqResult> recheckWeek(Date anyDateInWeek) {
+		return evaluateWeek(anyDateInWeek, false, true);
 	}
 
 	/**
@@ -658,8 +663,10 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 	 * again is updated in place, so its ticket stays with it.
 	 *
 	 * @param staleOnly true to check again only, leaving rules never checked to the scheduled task
+	 * @param recheckAll true to check again every rule already checked, stale or not, so data entered
+	 *            late for the week is counted
 	 */
-	private List<DqResult> evaluateWeek(Date anyDateInWeek, boolean staleOnly) {
+	private List<DqResult> evaluateWeek(Date anyDateInWeek, boolean staleOnly, boolean recheckAll) {
 		Date weekStart = DqPeriods.weekStart(anyDateInWeek);
 		DqConfig config = DqConfigStore.getConfig();
 		List<DqResult> existing = new ArrayList<DqResult>();
@@ -675,8 +682,9 @@ public class DqServiceImpl extends BaseOpenmrsService implements DqService {
 				}
 				continue;
 			}
-			// A week checked with other settings, e.g. other indicators, is checked again
-			if (settingsChanged(rule, results)) {
+			// A week checked with other settings, e.g. other indicators, is checked again; and every
+			// week when asked, as data entered late changes neither the settings nor the reports
+			if (recheckAll || settingsChanged(rule, results)) {
 				stale.add(rule);
 				previous.addAll(results);
 				continue;
